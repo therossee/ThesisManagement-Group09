@@ -1,0 +1,35 @@
+.content-style {
+  margin: 24px 16px 24px 16px;
+  background: blue;
+}
+
+.footer-style {
+  text-align: center;
+  background: white;
+}
+
+.home-title {
+  margin: 36px 32px;
+  background: white;
+}
+
+.header-style {
+  padding: 0;
+  background: white;
+}
+
+.logo-style {
+  height: 64px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sider-style {
+  height: 100vh;
+}
+
+.menu-style {
+  height: calc(100vh - 64px); /* 64px is header height */
+}
