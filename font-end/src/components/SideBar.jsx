@@ -17,15 +17,13 @@ function SideBar() {
 
   // Handle menu item clicks
   const handleMenuClick = ({ key }) => {
-    if (key) {
-      navigate(key);
-    }
+    key && navigate(key);
   };
 
   return (
     <Sider className="sider-style" breakpoint="lg" collapsedWidth="0">
       <div className="logo-style">
-        <FileTextOutlined style={{ fontSize: '32px', color: '#1890ff' }} onClick={() => { navigate('/') }} />
+        <FileTextOutlined style={{ fontSize: '32px', color: '#1677ff' }} onClick={() => { navigate('/') }} />
       </div>
       <Menu className="menu-style" mode="inline" items={navigation} selectedKeys={[window.location.pathname]} onClick={handleMenuClick} />
     </Sider>

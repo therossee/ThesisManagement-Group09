@@ -17,10 +17,10 @@ function MainLayout() {
                 <Layout >
                     <TopBar />
                     <Content className="content-style">
-                            <Routes>
-                                <Route path="/" element={<Home />} />
-                                <Route path="/*" element={<NotFound />} />
-                            </Routes>
+                        <Routes>
+                            <Route path="/" element={<Home />} />
+                            <Route path="/*" element={<NotFound />} />
+                        </Routes>
                     </Content>
                     <Footer className="footer-style">
                         SE2 - Group 9
