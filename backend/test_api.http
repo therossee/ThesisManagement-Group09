@@ -1,0 +1,28 @@
+# This file could be used for testing the API with Visual Studio Code's REST Client extension
+
+// 1. Insert a new thesis proposal
+// POST api/teacher/:id/thesis_proposals
+
+// 2. Search for thesis proposals
+// GET api/student/:id/thesis_proposals?title=...&supervisor=...&co-supervisor=...&tags=...&keywords=...&type=...
+
+// 3. Apply for a thesis proposal
+// POST api/student/:id/applications
+
+// 4. List all applications for a teacher's thesis proposals
+// GET api/teacher/:id/applications
+
+// 5. Accept an application
+// PATCH api/teacher/:id/applications/:id
+
+// 6. Reject an application
+// PATCH api/teacher/:id/applications/:id
+
+// 7. List student's application decisions
+// GET api/student/:id/applications
+
+// 8. List professor's active thesis proposala
+// GET api/teacher/:id/thesis_proposals
+
+// 9. Update a thesis proposal
+// PATCH api/teacher/:id/thesis_proposals/:id
