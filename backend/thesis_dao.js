@@ -4,9 +4,6 @@
 
 const {db} = require('./db');
 
-
-// This function retrieves the whole list of pages from the database.
-
 // 1. Function to create a new thesis proposal
 
 // 2. Function to search for thesis proposals

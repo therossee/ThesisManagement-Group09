@@ -20,7 +20,6 @@ const corsOptions = {
   };
 app.use(cors(corsOptions));
 
-
 /*** APIs ***/
 
 // 1. Insert a new thesis proposal
@@ -49,6 +48,8 @@ app.use(cors(corsOptions));
 
 // 9. Update a thesis proposal
 // PATCH api/teacher/:id/thesis_proposals/:id
+
+module.exports = app;
 
 const PORT = 3000;
 app.listen(PORT, () => { console.log(`Server started on http://localhost:${PORT}/`) });

@@ -1,10 +1,14 @@
-'use strict';
+const betterSqlite3 = require('better-sqlite3');
+const path = require("path");
 
-/** DB access module **/
+const PATH_DB = path.join(__dirname, "../database/database.sqlite");
+const options = {
+    fileMustExist: true,
+    verbose: console.log
+};
 
-const sqlite = require('sqlite3');
+const db = betterSqlite3(PATH_DB, options);
 
-// open the database
-exports.db = new sqlite.Database('../database/database.sqlite', (err) => {
-  if (err) throw err;
-});
+module.exports = {
+  db: db
+};
