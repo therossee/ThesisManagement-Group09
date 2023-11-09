@@ -1,6 +1,7 @@
 import { Layout } from 'antd';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './routes/Home';
+import InsertProposal from './routes/InsertProposal';
 import NotFound from './routes/NotFound'
 import SideBar from './components/SideBar';
 import TopBar from './components/TopBar';
@@ -19,6 +20,7 @@ function MainLayout() {
                     <Content className="content-style">
                         <Routes>
                             <Route path="/" element={<Home />} />
+                            <Route path="/insert-proposal" element={<InsertProposal />} />
                             <Route path="/*" element={<NotFound />} />
                         </Routes>
                     </Content>
