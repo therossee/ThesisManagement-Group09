@@ -65,8 +65,71 @@ const createTables = () => {
                     reject(err);
                 } else{
                     resolve();
-                }
+                }            
             });
+
+            db.run(`CREATE TABLE IF NOT EXISTS thesisProposal(
+                proposal_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                supervisor_id TEXT NOT NULL, 
+                type TEXT NOT NULL,
+                description TEXT NOT NULL,
+                required_knowledge TEXT NOT NULL,
+                notes TEXT NOT NULL,
+                expiration TEXT NOT NULL,
+                level TEXT NOT NULL,
+                cds TEXT NOT NULL,
+                FOREIGN KEY(supervisor_id) REFERENCES teacher(id)
+            )`, (err) => {
+                if (err){
+                    reject(err);
+                } else{
+                    resolve();
+                }            
+            });
+            
+
+            db.run(`CREATE TABLE IF NOT EXISTS coSupervisor(
+                proposal_id INTEGER NOT NULL,
+                co_supervisor_id TEXT NOT NULL,
+                FOREIGN KEY(proposal_id) REFERENCES thesisProposal(proposal_id),
+                FOREIGN KEY(co_supervisor_id) REFERENCES teacher(id),
+                PRIMARY KEY (proposal_id, co_supervisor_id)
+            )`, (err) => {
+                if (err){
+                    reject(err);
+                } else{
+                    resolve();
+                }            
+            });
+
+            db.run(`CREATE TABLE IF NOT EXISTS proposalKeyword(
+                proposal_id INTEGER NOT NULL,
+                keyword TEXT NOT NULL,
+                FOREIGN KEY(proposal_id) REFERENCES thesisProposal(proposal_id),
+                PRIMARY KEY (proposal_id, keyword)
+            )`, (err) => {
+                if (err){
+                    reject(err);
+                } else{
+                    resolve();
+                }            
+            });
+
+            db.run(`CREATE TABLE IF NOT EXISTS proposalGroup(
+                proposal_id INTEGER NOT NULL,
+                cod_group TEXT NOT NULL,
+                FOREIGN KEY(proposal_id) REFERENCES thesisProposal(proposal_id),
+                FOREIGN KEY(cod_group) REFERENCES teacher(cod_group),
+                PRIMARY KEY (proposal_id, cod_group)
+            )`, (err) => {
+                if (err){
+                    reject(err);
+                } else{
+                    resolve();
+                }            
+            });
+            
         })
     })
 }
@@ -92,7 +155,31 @@ const emptyTables = () => {
                                         if(err){
                                             reject(err);
                                         } else {
-                                            resolve();
+                                            db.run(`DELETE FROM thesisProposal`, (err) => {
+                                                if(err){
+                                                    reject(err);
+                                                } else{ //delete from coSupervisor
+                                                    db.run(`DELETE FROM coSupervisor`, (err) => {
+                                                        if(err){
+                                                            reject(err);
+                                                        } else{ //delete from proposalKeyword
+                                                            db.run(`DELETE FROM proposalKeyword`, (err) => {
+                                                                if(err){
+                                                                    reject(err);
+                                                                } else{ //delete from proposalGroup
+                                                                    db.run(`DELETE FROM proposalGroup`, (err) => {
+                                                                        if(err){
+                                                                            reject(err);
+                                                                        } else {
+                                                                            resolve();
+                                                                        }
+                                                                    });
+                                                                }
+                                                            });
+                                                        }
+                                                    });
+                                                }
+                                            });
                                         }
                                     });
                                 }
@@ -104,6 +191,7 @@ const emptyTables = () => {
         });
     });
 };
+
 
 const insertData = () => {
     return new Promise((resolve, reject) => {
@@ -200,10 +288,106 @@ const insertData = () => {
                 insertStatement.finalize();                    
             }
 
+            const insertDataThesisProposal = () => {
+                const filePath = 'thesisProposal.xlsx';
+                const workbook = xlsx.readFile(filePath);
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+               
+                const insertStatement = db.prepare(`INSERT INTO thesisProposal(title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+                //iterate through the rows and insert data into the database
+                
+                const data = xlsx.utils.sheet_to_json(worksheet, { header: 1, defval: null });
+
+                data.forEach((row) => {
+                    console.log(row);
+                    insertStatement.run(
+                        row, (err) => {
+                            if (err) {reject(err);}
+                        }
+                    )
+                });
+                //finalize the prepared statement
+                insertStatement.finalize();                    
+            }
+
+            const insertDataProposalKeyWords = () => {
+                const filePath = 'proposalKeyWords.xlsx';
+                const workbook = xlsx.readFile(filePath);
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+               
+                const insertStatement = db.prepare(`INSERT INTO proposalKeyword(proposal_id, keyword) VALUES (?, ?)`);
+                //iterate through the rows and insert data into the database
+                
+                const data = xlsx.utils.sheet_to_json(worksheet, { header: 1, defval: null });
+
+                data.forEach((row) => {
+                    console.log(row);
+                    insertStatement.run(
+                        row, (err) => {
+                            if (err) {reject(err);}
+                        }
+                    )
+                });
+                //finalize the prepared statement
+                insertStatement.finalize();                    
+            }
+
+            const insertDataCoSupervisors = () => {
+                const filePath = 'cosupervisors.xlsx';
+                const workbook = xlsx.readFile(filePath);
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+               
+                const insertStatement = db.prepare(`INSERT INTO coSupervisor(proposal_id, co_supervisor_id) VALUES (?, ?)`);
+                //iterate through the rows and insert data into the database
+                
+                const data = xlsx.utils.sheet_to_json(worksheet, { header: 1, defval: null });
+
+                data.forEach((row) => {
+                    console.log(row);
+                    insertStatement.run(
+                        row, (err) => {
+                            if (err) {reject(err);}
+                        }
+                    )
+                });
+                //finalize the prepared statement
+                insertStatement.finalize();                    
+            }
+
+            const insertDataProposalGroups = () => {
+                const filePath = 'proposalGroups.xlsx';
+                const workbook = xlsx.readFile(filePath);
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+               
+                const insertStatement = db.prepare(`INSERT INTO proposalGroup(proposal_id, cod_group) VALUES (?, ?)`);
+                //iterate through the rows and insert data into the database
+                
+                const data = xlsx.utils.sheet_to_json(worksheet, { header: 1, defval: null });
+
+                data.forEach((row) => {
+                    console.log(row);
+                    insertStatement.run(
+                        row, (err) => {
+                            if (err) {reject(err);}
+                        }
+                    )
+                });
+                //finalize the prepared statement
+                insertStatement.finalize();                    
+            }
+
             insertDataStudents();
             insertDataTeachers();
             insertDataDegrees();
             insertDataCareers();
+            insertDataThesisProposal();
+            insertDataProposalKeyWords();
+            insertDataCoSupervisors();
+            insertDataProposalGroups();
             resolve();
         })
         
