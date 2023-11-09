@@ -1,20 +1,22 @@
 'use strict'
 
 const db = require('./db');
+const xlsx = require('xlsx');
 
 // create a promise to create a table:
 const createTables = () => {
     return new Promise((resolve, reject) => {
         db.serialize(() => {
             db.run(`CREATE TABLE IF NOT EXISTS student(
-                studentId TEXT NOT NULL PRIMARY KEY,
+                id TEXT PRIMARY KEY,
                 surname TEXT NOT NULL,
                 name TEXT NOT NULL,
                 gender TEXT NOT NULL,
                 nationality TEXT NOT NULL,
                 email TEXT NOT NULL,
                 cod_degree TEXT NOT NULL,
-                enrollment_year TEXT NOT NULL
+                enrollment_year TEXT NOT NULL,
+                FOREIGN KEY(cod_degree) REFERENCES degree(degreeId)
             )`, (err) => {
                 if (err){
                     reject(err);
@@ -24,12 +26,12 @@ const createTables = () => {
             });
 
             db.run(`CREATE TABLE IF NOT EXISTS teacher(
-                teacherId TEXT NOT NULL PRIMARY KEY,
-                sunrname TEXT NOT NULL,
+                id TEXT PRIMARY KEY,
+                surname TEXT NOT NULL,
                 name TEXT NOT NULL, 
                 email TEXT NOT NULL,
                 cod_group TEXT NOT NULL,
-                cod_deparment TEXT NOT NULL
+                cod_department TEXT NOT NULL
             )`, (err) => {
                 if (err){
                     reject(err);
@@ -39,7 +41,7 @@ const createTables = () => {
             });
 
             db.run(`CREATE TABLE IF NOT EXISTS degree(
-                degreeId TEXT NOT NULL PRIMARY KEY,
+                cod_degree TEXT PRIMARY KEY,
                 title_degree TEXT NOT NULL
             )`, (err) => {
                 if (err){
@@ -50,12 +52,14 @@ const createTables = () => {
             });
 
             db.run(`CREATE TABLE IF NOT EXISTS career(
-                careerID TEXT NOT NULL PRIMARY KEY,
+                id TEXT NOT NULL,
                 cod_course TEXT NOT NULL,
                 title_course TEXT NOT NULL,
                 cfu INTEGER NOT NULL,
                 grade REAL NOT NULL,
-                date TEXT NOT NULL
+                date TEXT NOT NULL,
+                FOREIGN KEY(id) REFERENCES student(id)
+                PRIMARY KEY(id, cod_course)
             )`, (err) => {
                 if (err){
                     reject(err);
@@ -101,32 +105,117 @@ const emptyTables = () => {
     });
 };
 
-// create a promise to insert data into a table:
 const insertData = () => {
-    db.serialize(() => {
-        const myData = ['s318771', 'Husanu', 'Diana', 'Female', 'Romanian', 's318771@studenti.polito.it', 'INGINFSW', 2022];
-        const insertMyData = db.prepare(`INSERT INTO student(studentId, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES (?,?,?,?,?,?,?,?)`);
-        insertMyData.run('s318771', 'Husanu', 'Diana', 'Female', 'Romanian', 's318771@studenti.polito.it', 'INGINFSW', 2022);
-        insertMyData.finalize();
-    });
+    return new Promise((resolve, reject) => {
+        db.serialize(() => {
+            const insertDataStudents = () => {
+                const filePath = 'students.xlsx';
+                const workbook = xlsx.readFile(filePath);
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+               
+                const insertStatement = db.prepare(`INSERT INTO student(id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`);
+                //iterate through the rows and insert data into the database
+                
+                const data = xlsx.utils.sheet_to_json(worksheet, { header: 1, defval: null });
+
+                data.forEach((row) => {
+                    console.log(row);
+                    insertStatement.run(
+                        row, (err) => {
+                            if (err) {reject(err);}
+                        }
+                    )
+                });
+                //finalize the prepared statement
+                insertStatement.finalize();                    
+            }
+
+            const insertDataTeachers = () => {
+                const filePath = 'teachers.xlsx';
+                const workbook = xlsx.readFile(filePath);
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+               
+                const insertStatement = db.prepare(`INSERT INTO teacher(id, surname, name, email, cod_group, cod_department) VALUES (?, ?, ?, ?, ?, ?)`);
+                //iterate through the rows and insert data into the database
+                
+                const data = xlsx.utils.sheet_to_json(worksheet, { header: 1, defval: null });
+
+                data.forEach((row) => {
+                    console.log(row);
+                    insertStatement.run(
+                        row, (err) => {
+                            if (err) {reject(err);}
+                        }
+                    )
+                });
+                //finalize the prepared statement
+                insertStatement.finalize();                    
+            }
+
+            const insertDataDegrees = () => {
+                const filePath = 'degrees.xlsx';
+                const workbook = xlsx.readFile(filePath);
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+               
+                const insertStatement = db.prepare(`INSERT INTO degree(cod_degree, title_degree) VALUES (?, ?)`);
+                //iterate through the rows and insert data into the database
+                
+                const data = xlsx.utils.sheet_to_json(worksheet, { header: 1, defval: null });
+
+                data.forEach((row) => {
+                    console.log(row);
+                    insertStatement.run(
+                        row, (err) => {
+                            if (err) {reject(err);}
+                        }
+                    )
+                });
+                //finalize the prepared statement
+                insertStatement.finalize();                    
+            }
+
+            
+        
+
+            insertDataStudents();
+            insertDataTeachers();
+            insertDataDegrees();
+            resolve();
+        })
+        
+
+    })
+
+
 }
 
-(async () => {
+const populate_db = async () => {
     try{
-    await createTables();
-    console.log("Tables created if they were not present");
+        await createTables();
+        console.log("Tables created if they were not present");
 
-    await emptyTables();
-    console.log("Tables emptied");
+        await emptyTables();
+        console.log("Tables emptied");
 
-    await insertData();
-    console.log('Tables created and data inserted successfully');
+        await insertData();
+        console.log('Tables created and data inserted successfully');
         
-    db.close();
-    } catch(err){
-        console.error('Error', err);
+        db.close((err) => {
+            if(err){
+                console.log("Error", err);
+            } else{
+                console.log("Db populated");
+            }
+        })
+    } catch(error){
+        console.log('error', error);
     }
 
-})();
+};
+
+populate_db();
 
 
