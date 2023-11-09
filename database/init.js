@@ -177,12 +177,33 @@ const insertData = () => {
                 insertStatement.finalize();                    
             }
 
-            
-        
+            const insertDataCareers = () => {
+                const filePath = 'careers.xlsx';
+                const workbook = xlsx.readFile(filePath);
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+               
+                const insertStatement = db.prepare(`INSERT INTO career(id, cod_course, title_course, cfu, grade, date) VALUES (?, ?, ?, ?, ?, ?)`);
+                //iterate through the rows and insert data into the database
+                
+                const data = xlsx.utils.sheet_to_json(worksheet, { header: 1, defval: null });
+
+                data.forEach((row) => {
+                    console.log(row);
+                    insertStatement.run(
+                        row, (err) => {
+                            if (err) {reject(err);}
+                        }
+                    )
+                });
+                //finalize the prepared statement
+                insertStatement.finalize();                    
+            }
 
             insertDataStudents();
             insertDataTeachers();
             insertDataDegrees();
+            insertDataCareers();
             resolve();
         })
         
