@@ -44,5 +44,6 @@
 }
 
 .user-topbar-style{
+  display: flex;
   margin-right: 3%;
 }
