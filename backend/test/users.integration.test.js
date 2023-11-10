@@ -19,7 +19,7 @@ describe('Integration Tests for Authentication APIs', () => {
           .set('Accept', 'application/json');
     
         expect(response.status).toBe(401);
-        expect(response.body).toBe('Incorrect email and/or password');
+        expect(response.body).toEqual({message: 'Incorrect email and/or password'});
     });
     test('should return 401 for an unsuccessful  (wrong password)', async () => {
           const response = await request(app)
@@ -28,7 +28,7 @@ describe('Integration Tests for Authentication APIs', () => {
             .set('Accept', 'application/json');
       
           expect(response.status).toBe(401);
-          expect(response.body).toBe('Incorrect email and/or password');
+          expect(response.body).toEqual({message: 'Incorrect email and/or password'});
     });
     test('should return 201 for a successful login of a student', async () => {
       service.getUser.mockResolvedValue(
@@ -91,6 +91,49 @@ describe('Integration Tests for Authentication APIs', () => {
         }
       )
     });
+    test('should return 200 for the current logged user', async () => {
+      service.getUser.mockResolvedValue(
+        { 
+          id: 's1',
+          surname: 'C',
+          name: 'A',
+          gender: 'MALE',
+          nationality: 'It',
+          email: 'c.a@email.com', 
+          cod_degree: 'LM-1',
+          enrollment_year: 2021
+        }
+      );
+
+        const loginResponse = await request(app)
+          .post('/api/sessions')
+          .send({ username: 'c.a@email.com', password: 's1' })
+          .set('Accept', 'application/json')
+
+        expect(loginResponse.status).toBe(201);
+        // Check if cookies are present in the login response
+        const cookies = loginResponse.headers['set-cookie'];
+        expect(cookies).toBeDefined();
+
+        const response = await request(app)
+          .get('/api/sessions/current')
+          .set('Accept', 'application/json')
+          .set('Cookie', loginResponse.headers['set-cookie']);
+    
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(
+          { 
+            id: 's1',
+            surname: 'C',
+            name: 'A',
+            gender: 'MALE',
+            nationality: 'It',
+            email: 'c.a@email.com', 
+            cod_degree: 'LM-1',
+            enrollment_year: 2021
+          }
+        );        
+    });
     test('should return 204 for a successful logout', async () => {
         const logoutResponse = await request(app)
           .delete('/api/sessions/current')
@@ -104,6 +147,6 @@ describe('Integration Tests for Authentication APIs', () => {
           .set('Accept', 'application/json');
     
         expect(getCurrentUserResponse.status).toBe(401);
-        expect(getCurrentUserResponse.body).toHaveProperty('error', 'Not authenticated');
+        expect(getCurrentUserResponse.body).toEqual({message: 'Not authenticated'});
       });
   });
