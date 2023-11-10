@@ -8,11 +8,12 @@ const { db } = require('./db');
 exports.getGroup = (teacherId) => {
     return new Promise((resolve, reject) => {
         const getGroupQuery = `
-        SELECT * FROM teacher WHERE id=?
+        SELECT cod_group FROM teacher WHERE id=?
       `;
 
-        const res = db.prepare(getGroupQuery).run(teacherId)
-        resolve(res);
+        const res = db.prepare(getGroupQuery).get(teacherId)
+        console.log("RES:",res.cod_group);
+        resolve(res.cod_group)
     })
 }
 
@@ -39,20 +40,21 @@ exports.createThesisProposal = (thesisTitle, id, coSupervisors, keywords, type, 
     `;
 
         const res = db.prepare(insertThesisProposalQuery).run(thesisTitle, id, type, description, knowledge, note, expiration, level, cds);
-        const proposalId = res.lastInsertRowid();
+        const proposalId = res.lastInsertRowid;
 
         // Inserisce le keywords
         keywords.forEach(keyword => {
             db.prepare(insertProposalKeywordQuery).run(proposalId, keyword);
         });
-
-        // Inserisce i supervisori nella tabella
+       
+      if(coSupervisors){
         coSupervisors.forEach(supervisor => {
             db.prepare(insertCoSupervisorsQuery).run(proposalId, supervisor);
         });
-        groups.forEach(group => {
-            db.prepare(insertGroupsQuery).run(proposalId, group);
-        });
+    }
+      
+        db.prepare(insertGroupsQuery).run(proposalId, groups);
+        
 
 
         resolve(proposalId);

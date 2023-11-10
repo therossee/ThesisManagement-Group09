@@ -6,7 +6,7 @@ Content-Type: application/json
 
 {
   "thesisTitle": "TitoloTesi",
-  "keywords": "keyword",
+  "keywords": ["keyword"],
   "type": "compilativa",
   "description": "description",
   "knowledge": "knowledge",

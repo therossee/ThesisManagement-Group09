@@ -4,6 +4,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
+const { check, validationResult } = require('express-validator'); // validation middleware
 
 const thesisDao = require('./thesis_dao.js');
 
@@ -25,7 +26,7 @@ app.use(cors(corsOptions));
 // 1. Insert a new thesis proposal
 // POST api/teacher/thesis_proposals
 app.post('/api/teacher/thesis_proposals',[
-  heck('thesisTitle').isLength({ min: 1 }),
+  check('thesisTitle').isLength({ min: 1 }),
   check('type').isLength({ min: 1 }),
   check('description').isLength({ min: 1 }),
   check('note').isLength({ min: 1 }),
@@ -33,7 +34,7 @@ app.post('/api/teacher/thesis_proposals',[
   check('cds').isLength({ min: 1 }),
   check('expiration').isISO8601(),
   check('knowledge').isArray({ min: 1 }),
-], (req,res) =>{
+], async (req,res) =>{
   const { id } = req.user.id;
   const {thesisTitle, coSupervisors, keywords, type, description, knowledge, note, expiration, level, cds} = req.body;
 
@@ -41,15 +42,15 @@ app.post('/api/teacher/thesis_proposals',[
     return res.status(400).json({ error: 'Missing required fields.' });
   }
 
-  const groups = thesisDao.getGroup(id);
-
+  const groups = await thesisDao.getGroup(id);
+  console.log("GRuppi:"+groups)
  thesisDao.createThesisProposal(thesisTitle, id, coSupervisors, keywords, type ,groups, description, knowledge, note, expiration, level, cds)
   .then((thesisProposalId)=>{
     res.status(201).json({ id: thesisProposalId });
   })
   .catch((error) => {
     console.error(error);
-    res.status(500).json({ error: 'Failed to create thesis proposal.' });
+    res.status(500).json({ error: `Failed to create thesis proposal. ${error.message || error}` });
   });
 });
 
