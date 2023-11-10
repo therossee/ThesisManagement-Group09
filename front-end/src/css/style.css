@@ -43,7 +43,6 @@
   /* 64px is header height */
 }
 
-.user-topbar-style{
-  display: flex;
-  margin-right: 3%;
+.user-topbar-style {
+  margin-right: 2%;
 }
