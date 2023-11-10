@@ -115,6 +115,26 @@ function InsertBody() {
             <Form.Item label="Expiration Date">
                 <DatePicker disabledDate={disabledDate}/>
             </Form.Item>
+            <Form.Item
+                name="level"
+                label="Level"
+            >
+                <Select
+                    placeholder="Select a option"
+                    allowClear
+                >
+                    <Option value="bachelor">L - Bachelor Degree</Option>
+                    <Option value="master">LM - Master Degree</Option>
+                </Select>
+            </Form.Item>
+            <Form.Item name="cds" label="CdS">
+                    <Select
+                        placeholder="Select a option"
+                        allowClear>
+                            <Option value="Scienze delle merendine">Scienze delle merendine</Option>
+                            <Option value="Università della vita">Università della vita</Option>
+                    </Select>
+            </Form.Item>
         </Form>
 
     )
