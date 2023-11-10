@@ -128,6 +128,8 @@ app.delete('/api/sessions/current', (req, res) => {
 // PATCH api/teacher/:id/thesis_proposals/:id
 
 const PORT = 3000;
-app.listen(PORT, () => { console.log(`Server started on http://localhost:${PORT}/`) });
+const server = app.listen(PORT, () => {
+  console.log(`Server started on http://localhost:${PORT}/`);
+});
 
-module.exports = app;
+module.exports = { app, server };

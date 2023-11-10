@@ -1,15 +1,16 @@
 require('jest');
 const request = require("supertest");
 const service = require("../users_dao");
-const app = require("../index");
+const {app, server} = require("../index");
 
 jest.mock('../users_dao', () => ({
   getUser: jest.fn(),
 }));
 
 describe('Integration Tests for Authentication APIs', () => {
-    afterAll(() => {
+    afterAll((done) => {
       jest.resetAllMocks();
+      server.close(done);
     }); 
     test('should return 401 for an unsuccessful  (inexistent user)', async () => {
         const response = await request(app)
