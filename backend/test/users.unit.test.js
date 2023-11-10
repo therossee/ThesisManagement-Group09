@@ -4,35 +4,48 @@ const db = require('../db');
 const users = require('../users_dao');
 
 describe('getUser function', () => {
+        beforeEach(() => {
+            db.prepare('INSERT INTO degree (cod_degree, title_degree) VALUES (?, ?)').run('L-01', 'Mock Degree Name');
+            db.prepare('INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+              .run('s1', 'mockStudentSurname', 'mockStudentName', 'MALE', 'Italian', 'mockStudentEmail@email.com', 'L-01', '2020');
+            db.prepare('INSERT INTO teacher (id, surname, name, email, cod_group, cod_department) VALUES (?, ?, ?, ?, ?, ?)')
+              .run('d1', 'mockTeacherSurname', 'mockTeacherName', 'mockTeacherEmail@email.com', 'Group1', 'Dep1');
+            
+        });
+        afterEach(() => {
+             // Delete data from the student table
+            db.prepare('DELETE FROM student WHERE id = ?').run('s1');
+             // Delete data from the degree table
+            db.prepare('DELETE FROM degree WHERE cod_degree = ?').run('L-01');
+             // Delete data from the teacher table
+            db.prepare('DELETE FROM teacher WHERE id = ?').run('d1');
+        });
     test('should return student data if the email and password are correct', async () => {
-      const mockRow = {
-        id: 's294301',
-        surname: 'Rossi',
-        name: 'Abbondanzio',
-        gender: 'Male',
+      
+      const result = await users.getUser('mockStudentEmail@email.com', 's1');
+      
+      expect(result).toEqual({
+        id: 's1',
+        surname: 'mockStudentSurname',
+        name: 'mockStudentName',
+        gender: 'MALE',
         nationality: 'Italian',
-        email: 'rossi.abbondanzio@email.com',
-        cod_degree: 'L-07',
+        email: 'mockStudentEmail@email.com',
+        cod_degree: 'L-01',
         enrollment_year: '2020',
-      };
-  
-      const result = await users.getUser('rossi.abbondanzio@email.com', 's294301');
-  
-      expect(result).toEqual(mockRow);
+      });
     });
     test('should return teacher data if the email and password are correct', async () => {
-        const mockRow = {
-          id: 'd279620',
-          surname: 'Rossi',
-          name: 'Marco',
-          email: 'rossi.marco@email.com',
-          cod_group: 'Group1',
-          cod_department: 'Dep1',
-        };
+      const result = await users.getUser('mockTeacherEmail@email.com', 'd1');
   
-        const result = await users.getUser('rossi.marco@email.com', 'd279620');
-    
-        expect(result).toEqual(mockRow);
+      expect(result).toEqual({
+        id: 'd1',
+        surname: 'mockTeacherSurname',
+        name: 'mockTeacherName',
+        email: 'mockTeacherEmail@email.com',
+        cod_group: 'Group1',
+        cod_department: 'Dep1',
+      });
     });
     test('should return false if the email does not exist in the database', async () => {
   
@@ -41,17 +54,8 @@ describe('getUser function', () => {
       expect(result).toBe(false);
     });
     test('should return false if the password is incorrect', async () => {
-        const mockRow = {
-          id: 'd279620',
-          surname: 'Rossi',
-          name: 'Marco',
-          email: 'rossi.marco@email.com',
-          cod_group: 'Group1',
-          cod_department: 'Dep1',
-        };
-    
         // Provide an incorrect password (different from the user's ID)
-        const result = await users.getUser('rossi.marco@email.com', 'incorrect_password');
+        const result = await users.getUser('mockStudentEmail@email.com', 's0');
     
         expect(result).toBe(false);
     });   

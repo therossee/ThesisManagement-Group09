@@ -7,6 +7,18 @@ const xlsx = require('xlsx');
 const createTables = () => {
     return new Promise((resolve, reject) => {
         db.serialize(() => {
+            
+            db.run(`CREATE TABLE IF NOT EXISTS degree(
+                cod_degree TEXT PRIMARY KEY,
+                title_degree TEXT NOT NULL
+            )`, (err) => {
+                if (err){
+                    reject(err);
+                } else{
+                    resolve();
+                }
+            });
+
             db.run(`CREATE TABLE IF NOT EXISTS student(
                 id TEXT PRIMARY KEY,
                 surname TEXT NOT NULL,
@@ -16,7 +28,7 @@ const createTables = () => {
                 email TEXT NOT NULL,
                 cod_degree TEXT NOT NULL,
                 enrollment_year TEXT NOT NULL,
-                FOREIGN KEY(cod_degree) REFERENCES degree(degreeId)
+                FOREIGN KEY(cod_degree) REFERENCES degree(cod_degree)
             )`, (err) => {
                 if (err){
                     reject(err);
@@ -32,17 +44,6 @@ const createTables = () => {
                 email TEXT NOT NULL,
                 cod_group TEXT NOT NULL,
                 cod_department TEXT NOT NULL
-            )`, (err) => {
-                if (err){
-                    reject(err);
-                } else{
-                    resolve();
-                }
-            });
-
-            db.run(`CREATE TABLE IF NOT EXISTS degree(
-                cod_degree TEXT PRIMARY KEY,
-                title_degree TEXT NOT NULL
             )`, (err) => {
                 if (err){
                     reject(err);
@@ -108,6 +109,30 @@ const emptyTables = () => {
 const insertData = () => {
     return new Promise((resolve, reject) => {
         db.serialize(() => {
+            
+            const insertDataDegrees = () => {
+                const filePath = 'degrees.xlsx';
+                const workbook = xlsx.readFile(filePath);
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+               
+                const insertStatement = db.prepare(`INSERT INTO degree(cod_degree, title_degree) VALUES (?, ?)`);
+                //iterate through the rows and insert data into the database
+                
+                const data = xlsx.utils.sheet_to_json(worksheet, { header: 1, defval: null });
+
+                data.forEach((row) => {
+                    console.log(row);
+                    insertStatement.run(
+                        row, (err) => {
+                            if (err) {reject(err);}
+                        }
+                    )
+                });
+                //finalize the prepared statement
+                insertStatement.finalize();                    
+            }
+
             const insertDataStudents = () => {
                 const filePath = 'students.xlsx';
                 const workbook = xlsx.readFile(filePath);
@@ -138,29 +163,6 @@ const insertData = () => {
                 const worksheet = workbook.Sheets[sheetName];
                
                 const insertStatement = db.prepare(`INSERT INTO teacher(id, surname, name, email, cod_group, cod_department) VALUES (?, ?, ?, ?, ?, ?)`);
-                //iterate through the rows and insert data into the database
-                
-                const data = xlsx.utils.sheet_to_json(worksheet, { header: 1, defval: null });
-
-                data.forEach((row) => {
-                    console.log(row);
-                    insertStatement.run(
-                        row, (err) => {
-                            if (err) {reject(err);}
-                        }
-                    )
-                });
-                //finalize the prepared statement
-                insertStatement.finalize();                    
-            }
-
-            const insertDataDegrees = () => {
-                const filePath = 'degrees.xlsx';
-                const workbook = xlsx.readFile(filePath);
-                const sheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[sheetName];
-               
-                const insertStatement = db.prepare(`INSERT INTO degree(cod_degree, title_degree) VALUES (?, ?)`);
                 //iterate through the rows and insert data into the database
                 
                 const data = xlsx.utils.sheet_to_json(worksheet, { header: 1, defval: null });
