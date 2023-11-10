@@ -9,8 +9,9 @@ describe('[DATABASE] Check database access using SQLite3', () => {
         const rows = await db.prepare('SELECT * FROM student').all();
 
         expect(rows.length).toBeGreaterThan(0);
+        
         for (const row of rows) {
-            expect(row).toHaveProperty('studentId');
+            expect(row).toHaveProperty('id');
             expect(row).toHaveProperty('surname');
             expect(row).toHaveProperty('name');
             expect(row).toHaveProperty('gender');
@@ -21,11 +22,19 @@ describe('[DATABASE] Check database access using SQLite3', () => {
             
         }
     });
-
     test('should return the list of teachers', async () => {
         const rows = await db.prepare('SELECT * FROM teacher').all();
 
-        expect(rows.length).toBe(0);
+        expect(rows.length).toBeGreaterThan(0);
+
+        for (const row of rows) {
+            expect(row).toHaveProperty('id');
+            expect(row).toHaveProperty('surname');
+            expect(row).toHaveProperty('name');
+            expect(row).toHaveProperty('email');
+            expect(row).toHaveProperty('cod_group');
+            expect(row).toHaveProperty('cod_department');
+        }
         
     });
 });

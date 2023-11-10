@@ -68,7 +68,7 @@ app.post('/api/sessions', function(req, res, next) {
       return next(err);
       if (!user) {
         // display wrong login messages
-        return res.status(401).send(info);
+        return res.status(401).json(info);
       }
       // success, perform the login
       req.login(user, (err) => {
@@ -94,7 +94,7 @@ app.get('/api/sessions/current', (req, res) => {
 // DELETE /api/sessions/current
 app.delete('/api/sessions/current', (req, res) => {
   req.logout();
-  res.end();
+  res.status(204).end();
 });
 
 
@@ -127,7 +127,7 @@ app.delete('/api/sessions/current', (req, res) => {
 // 9. Update a thesis proposal
 // PATCH api/teacher/:id/thesis_proposals/:id
 
-module.exports = app;
-
 const PORT = 3000;
 app.listen(PORT, () => { console.log(`Server started on http://localhost:${PORT}/`) });
+
+module.exports = app;

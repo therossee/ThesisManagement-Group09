@@ -2,7 +2,7 @@
 
 /* Data Access Object (DAO) module for accessing users data */
 
-const {db} = require('./db');
+const db = require('./db');
   
 // This function is used at log-in time to verify username and password.
 exports.getUser = (email, password) => {
