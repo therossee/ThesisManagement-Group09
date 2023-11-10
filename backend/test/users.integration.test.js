@@ -19,7 +19,7 @@ describe('Integration Tests for Authentication APIs', () => {
           .set('Accept', 'application/json');
     
         expect(response.status).toBe(401);
-        expect(response.body).toEqual({message: 'Incorrect email and/or password'});
+        expect(response.body).toEqual('Incorrect email and/or password');
     });
     test('should return 401 for an unsuccessful  (wrong password)', async () => {
           const response = await request(app)
@@ -28,7 +28,7 @@ describe('Integration Tests for Authentication APIs', () => {
             .set('Accept', 'application/json');
       
           expect(response.status).toBe(401);
-          expect(response.body).toEqual({message: 'Incorrect email and/or password'});
+          expect(response.body).toEqual('Incorrect email and/or password');
     });
     test('should return 201 for a successful login of a student', async () => {
       service.getUser.mockResolvedValue(
@@ -147,6 +147,6 @@ describe('Integration Tests for Authentication APIs', () => {
           .set('Accept', 'application/json');
     
         expect(getCurrentUserResponse.status).toBe(401);
-        expect(getCurrentUserResponse.body).toEqual({message: 'Not authenticated'});
+        expect(getCurrentUserResponse.body).toEqual('Not authenticated');
       });
   });
