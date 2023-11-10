@@ -28,7 +28,7 @@ function UserTopBar() {
 
 function LoginForm() {
 
-  const { doLogIn } = useAuth();
+  const { doLogIn, loginLoading } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -45,6 +45,7 @@ function LoginForm() {
     <Form layout="inline" style={{ marginTop: "15px" }}>
       <Form.Item>
         <Input
+          disabled={loginLoading}
           prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
           type="email"
           placeholder="Email"
@@ -53,6 +54,7 @@ function LoginForm() {
       </Form.Item>
       <Form.Item>
         <Input
+          disabled={loginLoading}
           prefix={<KeyOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
           type="password"
           placeholder="Password"
@@ -60,7 +62,7 @@ function LoginForm() {
         />
       </Form.Item>
       <Form.Item>
-        <Button type="primary" htmlType="submit" onClick={handleSubmit}>
+        <Button ghost type="primary" htmlType="submit" onClick={handleSubmit} loading={loginLoading}>
           Log in
         </Button>
       </Form.Item>

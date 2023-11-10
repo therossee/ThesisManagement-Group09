@@ -8,7 +8,7 @@ import './css/App.css'
 const AuthContext = createContext();
 
 // Hook for using AuthContext
-// Hook usage: const { user, isLoggedIn, isTeacher, doLogIn, doLogOut } = useAuth();
+// Hook usage: const { user, loginLoading, isLoggedIn, isTeacher, doLogIn, doLogOut } = useAuth();
 export function useAuth() {
   return useContext(AuthContext);
 }
@@ -21,6 +21,11 @@ function App() {
   // Could also use instead user === undefined but isLoggedIn is used for better comprehension
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isTeacher, setIsTeacher] = useState(false);
+
+  // Handle the login loading state
+  const [loginLoading, setLoginLoading] = useState(false);
+
+  // Handle notification box for api errors during login
   const [api, notificationBox] = notification.useNotification();
 
   function openNotification(text) {
@@ -56,6 +61,7 @@ function App() {
   }
 
   const doLogIn = (credentials) => {
+    setLoginLoading(true);
     API.logIn(credentials)
       .then(user => {
         loginSuccessful(user);
@@ -63,6 +69,7 @@ function App() {
       .catch(err => {
         // NB: should not give additional info (e.g., if user exists etc.)
         openNotification(err.message ? err.message : err);
+        setLoginLoading(false);
       })
   }
 
@@ -71,10 +78,11 @@ function App() {
     setIsLoggedIn(false);
     setIsTeacher(false);
     setUser(undefined);
+    setLoginLoading(false);
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn, isTeacher, doLogIn, doLogOut }}>
+    <AuthContext.Provider value={{ user, loginLoading, isLoggedIn, isTeacher, doLogIn, doLogOut }}>
       {notificationBox}
       <MainLayout />
     </AuthContext.Provider>
