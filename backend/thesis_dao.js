@@ -58,6 +58,19 @@ exports.createThesisProposal = (thesisTitle, id, coSupervisors, keywords, type, 
         resolve(proposalId);
     })
 }
+
+exports.s = (id)=>{
+    return new Promise((resolve,reject)=>{
+        const query = `
+    SELECT *
+    FROM teacher
+    WHERE id <> ?;
+  `;
+
+  const teachers = db.prepare(query).all(idToExclude);
+  return teachers;
+    })
+}
 // 2. Function to search for thesis proposals
 
 // 3. Function to apply for a thesis proposal

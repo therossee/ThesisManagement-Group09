@@ -23,7 +23,7 @@ app.use(cors(corsOptions));
 /*** APIs ***/
 
 // 1. Insert a new thesis proposal
-// POST api/teacher/:id/thesis_proposals
+// POST api/teacher/thesis_proposals
 app.post('/api/teacher/thesis_proposals',[
   //check
 ], (req,res) =>{
@@ -36,7 +36,7 @@ app.post('/api/teacher/thesis_proposals',[
 
   const groups = thesisDao.getGroup(id);
 
-  thesisDao.createThesisProposal(thesisTitle, id, coSupervisors, keywords, type ,groups, description, knowledge, note, expiration, level, cds)
+ thesisDao.createThesisProposal(thesisTitle, id, coSupervisors, keywords, type ,groups, description, knowledge, note, expiration, level, cds)
   .then((thesisProposalId)=>{
     res.status(201).json({ id: thesisProposalId });
   })
@@ -44,8 +44,20 @@ app.post('/api/teacher/thesis_proposals',[
     console.error(error);
     res.status(500).json({ error: 'Failed to create thesis proposal.' });
   });
-}
-)
+});
+
+//GET /api/teachers
+app.get('/api/teachers', (req, res) => {
+  try {
+    const excludedTeacherId = req.user.id; // Puoi passare l'ID come parametro nella querystring
+    const teacherList = getTeacherListExcept(excludedTeacherId);
+
+    res.json({ teachers: teacherList });
+  } catch (error) {
+    console.error('Errore durante il recupero della lista degli insegnanti:', error);
+    res.status(500).json({ error: 'Errore interno del server' });
+  }
+});
 
 // 2. Search for thesis proposals
 // GET api/student/:id/thesis_proposals?title=...&supervisor=...&co-supervisor=...&tags=...&keywords=...&type=...
