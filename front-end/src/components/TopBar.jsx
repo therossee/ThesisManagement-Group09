@@ -17,11 +17,11 @@ function TopBar() {
 
 function UserTopBar() {
 
-  const { loggedIn } = useAuth();
+  const { isLoggedIn } = useAuth();
 
   return (
     <>
-      {loggedIn ? <LoggedInForm /> : <LoginForm />}
+      {isLoggedIn ? <IsLoggedInForm /> : <LoginForm />}
     </>
   );
 }
@@ -33,16 +33,11 @@ function LoginForm() {
   const [password, setPassword] = useState('');
 
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
 
     const credentials = { username, password };
-    try {
-      await doLogIn(credentials);
-      // Code to execute on successful login
-    } catch (err) {
-      console.log(err); // Handle login error
-    }
+    doLogIn(credentials); // err catching handlend directly in App.jsx
   }
 
 
@@ -73,7 +68,7 @@ function LoginForm() {
   )
 }
 
-function LoggedInForm() {
+function IsLoggedInForm() {
 
   const { doLogOut } = useAuth();
 

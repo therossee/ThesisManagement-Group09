@@ -17,7 +17,7 @@ async function logIn(credentials) {
         const user = await response.json();
         return user;
     } else {
-        const errDetail = await response.text(); // return value is not an object but just a string!
+        const errDetail = await response.json();
         throw errDetail;
     }
 }

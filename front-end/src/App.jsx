@@ -8,7 +8,7 @@ import './css/App.css'
 const AuthContext = createContext();
 
 // Hook for using AuthContext
-// Hook usage: const { user, loggedIn, doLogIn, doLogOut } = useAuth();
+// Hook usage: const { user, isLoggedIn, isTeacher, doLogIn, doLogOut } = useAuth();
 export function useAuth() {
   return useContext(AuthContext);
 }
@@ -17,15 +17,16 @@ function App() {
 
   const [user, setUser] = useState(undefined);
 
-  // Keep track in the client if user is loggedin or not
-  // Could also use instead user === undefined but loggedIn is used for better comprehension
-  const [loggedIn, setLoggedIn] = useState(false);
+  // Keep track in the client if user is isLoggedIn or not
+  // Could also use instead user === undefined but isLoggedIn is used for better comprehension
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isTeacher, setIsTeacher] = useState(false);
   const [api, notificationBox] = notification.useNotification();
 
-  const openNotification = (err) => {
+  function openNotification(text) {
     api.error({
       message: "Error encountered!",
-      description: err,
+      description: text,
       placement: 'bottomRight',
       duration: 4,
     });
@@ -36,8 +37,10 @@ function App() {
       try {
         // Here we have the user info, if already logged in
         const user = await API.getUserInfo();
-        setLoggedIn(true);
+        setIsLoggedIn(true);
         setUser(user);
+        if (user.id.startsWith("d"))
+          setIsTeacher(true);
       } catch (err) {
         // NO need to do anything: user is simply not yet authenticated
       }
@@ -47,7 +50,9 @@ function App() {
 
   const loginSuccessful = (user) => {
     setUser(user);
-    setLoggedIn(true);
+    setIsLoggedIn(true);
+    if (user.id.startsWith("d"))
+      setIsTeacher(true);
   }
 
   const doLogIn = (credentials) => {
@@ -57,19 +62,19 @@ function App() {
       })
       .catch(err => {
         // NB: should not give additional info (e.g., if user exists etc.)
-        // NB2: err is plain text and not json obj!
-        openNotification(err);
+        openNotification(err.message);
       })
   }
 
   const doLogOut = async () => {
     await API.logOut();
-    setLoggedIn(false);
+    setIsLoggedIn(false);
+    setIsTeacher(false);
     setUser(undefined);
   }
 
   return (
-    <AuthContext.Provider value={{ user, loggedIn, doLogIn, doLogOut }}>
+    <AuthContext.Provider value={{ user, isLoggedIn, isTeacher, doLogIn, doLogOut }}>
       {notificationBox}
       <MainLayout />
     </AuthContext.Provider>
