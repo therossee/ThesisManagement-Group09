@@ -34,9 +34,9 @@ app.post('/api/teacher/thesis_proposals',[
     return res.status(400).json({ error: 'Missing required fields.' });
   }
 
-  const group = thesisDao.getGroup(id);
+  const groups = thesisDao.getGroup(id);
 
-  thesisDao.createThesisProposal(thesisTitle, id, coSupervisors, keywords, type ,group, description, knowledge, note, expiration, level, cds)
+  thesisDao.createThesisProposal(thesisTitle, id, coSupervisors, keywords, type ,groups, description, knowledge, note, expiration, level, cds)
   .then((thesisProposalId)=>{
     res.status(201).json({ id: thesisProposalId });
   })

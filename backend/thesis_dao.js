@@ -2,47 +2,60 @@
 
 /* Data Access Object (DAO) module for accessing thesis data */
 
-const {db} = require('./db');
+const { db } = require('./db');
 
 // 1. Function to create a new thesis proposal
-exports.getGroup= (teacherId) =>{
-    return new Promise((resolve, reject)=>{
+exports.getGroup = (teacherId) => {
+    return new Promise((resolve, reject) => {
         const getGroupQuery = `
         SELECT * FROM teacher WHERE id=?
       `;
-    
-      const res = db.prepare(getGroupQuery).run(teacherId)
-      resolve(res);
+
+        const res = db.prepare(getGroupQuery).run(teacherId)
+        resolve(res);
     })
 }
 
 exports.createThesisProposal = (thesisTitle, id, coSupervisors, keywords, type, groups, description, knowledge, note, expiration, level, cds) => {
-    return new Promise((resolve, reject)=>{
+    return new Promise((resolve, reject) => {
         const insertThesisProposalQuery = `
-        INSERT INTO thesisProposal (thesisTitle, id, coSupervisors, keywords, type, groups, description, knowledge, note, expiration, level, cds)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
       `;
 
-      const insertProposalKeywordQuery = `
+        const insertProposalKeywordQuery = `
       INSERT INTO proposalKeyword (proposal_id, keyword)
       VALUES (?, ?);
     `;
-    
-      const res = db.prepare(insertThesisProposalQuery).run(thesisTitle, id, coSupervisors, keywords, type, groups, description, knowledge, note, expiration, level, cds);
 
-      // Ottieni le keywords già presenti per la proposta
-      const existingKeywords = db.prepare(`SELECT keyword FROM proposalKeyword;`).all().map(row => row.keyword);
+        const insertCoSupervisorsQuery = `
+      INSERT INTO coSupervisor (proposal_id, co_supervisor_id)
+      VALUES (?, ?);
+    `;
 
-      // Filtra solo le nuove keywords
-      const newKeywords = keywords.filter(keyword => !existingKeywords.includes(keyword));
+        const insertGroupsQuery = `
+      INSERT INTO proposalGroup (proposal_id, cod_group)
+      VALUES (?, ?);
+    `;
 
-      // Inserisci solo le nuove keywords
-      newKeywords.forEach(keyword => {
-        db.prepare(insertProposalKeywordQuery).run(proposalId, keyword);
-      });
+        const res = db.prepare(insertThesisProposalQuery).run(thesisTitle, id, type, description, knowledge, note, expiration, level, cds);
+        const proposalId = res.lastInsertRowid();
+
+        // Inserisce le keywords
+        keywords.forEach(keyword => {
+            db.prepare(insertProposalKeywordQuery).run(proposalId, keyword);
+        });
+
+        // Inserisce i supervisori nella tabella
+        coSupervisors.forEach(supervisor => {
+            db.prepare(insertCoSupervisorsQuery).run(proposalId, supervisor);
+        });
+        groups.forEach(group => {
+            db.prepare(insertGroupsQuery).run(proposalId, group);
+        });
 
 
-      resolve(db.lastInsertRowid());
+        resolve(proposalId);
     })
 }
 // 2. Function to search for thesis proposals
