@@ -16,7 +16,6 @@ const createTables = () => {
                 email TEXT NOT NULL,
                 cod_degree TEXT NOT NULL,
                 enrollment_year TEXT NOT NULL,
-                FOREIGN KEY(cod_degree) REFERENCES degree(degreeId)
             )`, (err) => {
                 if (err){
                     reject(err);
