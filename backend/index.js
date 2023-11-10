@@ -56,7 +56,7 @@ const isLoggedIn = (req, res, next) => {
   if(req.isAuthenticated()) {
     return next();
   }
-  return res.status(401).json({message: 'Not authorized'});
+  return res.status(401).json('Not authorized');
 }
 
 /*** Authentication APIs ***/
@@ -68,7 +68,7 @@ app.post('/api/sessions', function(req, res, next) {
       return next(err);
       if (!user) {
         // display wrong login messages
-        return res.status(401).json({message: info});
+        return res.status(401).json(info);
       }
       // success, perform the login
       req.login(user, (err) => {
@@ -87,7 +87,7 @@ app.get('/api/sessions/current', (req, res) => {
     res.json(req.user);
   }
   else{
-    res.status(401).json({message: 'Not authenticated'});
+    res.status(401).json('Not authenticated');
   }
 });
 
