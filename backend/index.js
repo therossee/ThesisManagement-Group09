@@ -25,7 +25,14 @@ app.use(cors(corsOptions));
 // 1. Insert a new thesis proposal
 // POST api/teacher/thesis_proposals
 app.post('/api/teacher/thesis_proposals',[
-  //check
+  heck('thesisTitle').isLength({ min: 1 }),
+  check('type').isLength({ min: 1 }),
+  check('description').isLength({ min: 1 }),
+  check('note').isLength({ min: 1 }),
+  check('level').isLength({ min: 1 }),
+  check('cds').isLength({ min: 1 }),
+  check('expiration').isISO8601(),
+  check('knowledge').isArray({ min: 1 }),
 ], (req,res) =>{
   const { id } = req.user.id;
   const {thesisTitle, coSupervisors, keywords, type, description, knowledge, note, expiration, level, cds} = req.body;
@@ -49,7 +56,7 @@ app.post('/api/teacher/thesis_proposals',[
 //GET /api/teachers
 app.get('/api/teachers', (req, res) => {
   try {
-    const excludedTeacherId = req.user.id; // Puoi passare l'ID come parametro nella querystring
+    const excludedTeacherId = req.user.id; //Ricava l'id dall'utente loggato
     const teacherList = getTeacherListExcept(excludedTeacherId);
 
     res.json({ teachers: teacherList });
