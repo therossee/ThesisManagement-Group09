@@ -60,7 +60,7 @@ function LoginForm() {
         />
       </Form.Item>
       <Form.Item>
-        <Button type="primary" onClick={handleSubmit}>
+        <Button type="primary" htmlType="submit" onClick={handleSubmit}>
           Log in
         </Button>
       </Form.Item>

@@ -62,7 +62,7 @@ function App() {
       })
       .catch(err => {
         // NB: should not give additional info (e.g., if user exists etc.)
-        openNotification(err.message);
+        openNotification(err.message ? err.message : err);
       })
   }
 
