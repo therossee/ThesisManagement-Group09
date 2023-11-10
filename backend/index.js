@@ -24,6 +24,28 @@ app.use(cors(corsOptions));
 
 // 1. Insert a new thesis proposal
 // POST api/teacher/:id/thesis_proposals
+app.post('/api/teacher/thesis_proposals',[
+  //check
+], (req,res) =>{
+  const { id } = req.user.id;
+  const {thesisTitle, coSupervisors, keywords, type, description, knowledge, note, expiration, level, cds} = req.body;
+
+  if (!thesisTitle || !keywords || !type || !description || !knowledge || !expiration || !level || !cds) {
+    return res.status(400).json({ error: 'Missing required fields.' });
+  }
+
+  const group = thesisDao.getGroup(id);
+
+  thesisDao.createThesisProposal(thesisTitle, id, coSupervisors, keywords, type ,group, description, knowledge, note, expiration, level, cds)
+  .then((thesisProposalId)=>{
+    res.status(201).json({ id: thesisProposalId });
+  })
+  .catch((error) => {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to create thesis proposal.' });
+  });
+}
+)
 
 // 2. Search for thesis proposals
 // GET api/student/:id/thesis_proposals?title=...&supervisor=...&co-supervisor=...&tags=...&keywords=...&type=...
