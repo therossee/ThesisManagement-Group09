@@ -59,7 +59,7 @@ exports.createThesisProposal = (thesisTitle, id, coSupervisors, keywords, type, 
     })
 }
 
-exports.s = (id)=>{
+exports.getTeacherListExcept = (id)=>{
     return new Promise((resolve,reject)=>{
         const query = `
     SELECT *
