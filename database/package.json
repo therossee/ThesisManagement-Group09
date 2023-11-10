@@ -9,7 +9,7 @@
   "license": "ISC",
   "dependencies": {
     "sqlite3": "^5.1.6",
-    "xlsx": "^0.19.3"
+    "xlsx": ">=0.19.3"
   },
   "devDependencies": {},
   "description": ""
