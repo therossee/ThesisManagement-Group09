@@ -48,8 +48,7 @@ function LoginForm() {
           disabled={loginLoading}
           prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
           type="email"
-          placeholder="Email"
-          value={username} onChange={ev => setUsername(ev.target.value)}
+          placeholder="Email" onChange={ev => setUsername(ev.target.value)}
         />
       </Form.Item>
       <Form.Item>
@@ -57,8 +56,7 @@ function LoginForm() {
           disabled={loginLoading}
           prefix={<KeyOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
           type="password"
-          placeholder="Password"
-          value={password} onChange={ev => setPassword(ev.target.value)}
+          placeholder="Password" onChange={ev => setPassword(ev.target.value)}
         />
       </Form.Item>
       <Form.Item>
