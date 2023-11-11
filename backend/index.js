@@ -25,7 +25,8 @@ app.use(cors(corsOptions));
 
 // 1. Insert a new thesis proposal
 // POST api/teacher/thesis_proposals
-app.post('/api/teacher/thesis_proposals',[
+app.post('/api/teacher/thesis_proposals',
+[
   check('thesisTitle').isLength({ min: 1 }),
   check('type').isLength({ min: 1 }),
   check('description').isLength({ min: 1 }),
@@ -43,8 +44,8 @@ app.post('/api/teacher/thesis_proposals',[
   }
 
   const groups = await thesisDao.getGroup(id);
-  console.log("GRuppi:"+groups)
- thesisDao.createThesisProposal(thesisTitle, id, coSupervisors, keywords, type ,groups, description, knowledge, note, expiration, level, cds)
+  console.log("Gruppi:"+groups);
+  thesisDao.createThesisProposal(thesisTitle, id, coSupervisors, keywords, type ,groups, description, knowledge, note, expiration, level, cds)
   .then((thesisProposalId)=>{
     res.status(201).json({ id: thesisProposalId });
   })
@@ -54,10 +55,11 @@ app.post('/api/teacher/thesis_proposals',[
   });
 });
 
+// 2. Get list of teachers not logged
 //GET /api/teachers
 app.get('/api/teachers', (req, res) => {
   try {
-    const excludedTeacherId = req.user.id; //Ricava l'id dall'utente loggato
+    const excludedTeacherId = req.user.id; // logged in teacher
     const teacherList = getTeacherListExcept(excludedTeacherId);
 
     res.json({ teachers: teacherList });
@@ -67,28 +69,28 @@ app.get('/api/teachers', (req, res) => {
   }
 });
 
-// 2. Search for thesis proposals
+// 3. Search for thesis proposals
 // GET api/student/:id/thesis_proposals?title=...&supervisor=...&co-supervisor=...&tags=...&keywords=...&type=...
 
-// 3. Apply for a thesis proposal
+// 4. Apply for a thesis proposal
 // POST api/student/:id/applications
 
-// 4. List all applications for a teacher's thesis proposals
+// 5. List all applications for a teacher's thesis proposals
 // GET api/teacher/:id/applications
 
-// 5. Accept an application
+// 6. Accept an application
 // PATCH api/teacher/:id/applications/:id
 
-// 6. Reject an application
+// 7. Reject an application
 // PATCH api/teacher/:id/applications/:id
 
-// 7. List student's application decisions
+// 8. List student's application decisions
 // GET api/student/:id/applications
 
-// 8. List professor's active thesis proposala
+// 9. List professor's active thesis proposala
 // GET api/teacher/:id/thesis_proposals
 
-// 9. Update a thesis proposal
+// 10. Update a thesis proposal
 // PATCH api/teacher/:id/thesis_proposals/:id
 
 module.exports = app;
