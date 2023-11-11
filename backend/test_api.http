@@ -35,7 +35,8 @@ Content-Type: application/json
 {
   "title": "TitoloTesi",
   "supervisor_id": "d279620",
-  "co_supervisors_id": ["d370335"],
+  "internal_co_supervisors_id": ["d370335"],
+  "external_co_supervisors_id": ["31"],
   "type": "compilativa",
   "description": "description",
   "required_knowledge": "required knowledge",

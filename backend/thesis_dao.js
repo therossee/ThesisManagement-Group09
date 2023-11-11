@@ -5,7 +5,7 @@
 const db = require('./db');
 
 // 1. Function to create a new thesis proposal
-exports.createThesisProposal = (title, supervisor_id, co_supervisors_id, type, groups, description, required_knowledge, notes, expiration, level, cds, keywords) => {
+exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id, external_co_supervisors_id, type, groups, description, required_knowledge, notes, expiration, level, cds, keywords) => {
     return new Promise((resolve, reject) => {
       const insertThesisProposalQuery = `
       INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds)
@@ -38,9 +38,15 @@ exports.createThesisProposal = (title, supervisor_id, co_supervisors_id, type, g
         db.prepare(insertProposalKeywordQuery).run(proposalId, keyword);
       });
        
-      if(co_supervisors_id.length > 0){
-        co_supervisors_id.forEach(co_supervisor_id => {
-          db.prepare(insertInternalCoSupervisorsQuery).run(proposalId, co_supervisor_id);
+      if(internal_co_supervisors_id.length > 0){
+        internal_co_supervisors_id.forEach(internal_co_supervisor_id => {
+          db.prepare(insertInternalCoSupervisorsQuery).run(proposalId, internal_co_supervisor_id);
+        });
+      }
+
+      if(external_co_supervisors_id.length > 0){
+        external_co_supervisors_id.forEach(external_co_supervisor_id => {
+          db.prepare(insertExternalCoSupervisorsQuery).run(proposalId, external_co_supervisor_id);
         });
       }
       
@@ -69,7 +75,6 @@ exports.getGroup = (teacherId) => {
       resolve(res.cod_group)
   })
 }
-
 
 // 4. Function to search for thesis proposals
 
