@@ -2,10 +2,14 @@
 
 /*** Importing modules ***/
 const express = require('express');
+const session = require('express-session');
 const morgan = require('morgan');
 const cors = require('cors');
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
 
 const thesisDao = require('./thesis_dao.js');
+const usersDao = require('./users_dao.js');
 
 /*** init express and setup the middlewares ***/
 const app = express();
@@ -19,6 +23,80 @@ const corsOptions = {
     credentials: true
   };
 app.use(cors(corsOptions));
+
+// Passport: set up local strategy
+passport.use(new LocalStrategy(async function verify(username, password, cb) {
+  const user = await usersDao.getUser(username, password);
+  if(!user)
+    return cb(null, false, 'Incorrect email and/or password');
+    
+  return cb(null, user);
+}));
+
+passport.serializeUser(function (user, cb) {
+  cb(null, user);
+});
+
+passport.deserializeUser(function (user, cb) { 
+  return cb(null, user);
+});
+
+app.use(session({
+  secret: "shhhhh... it's a secret!",
+  resave: false,
+  saveUninitialized: false
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(passport.authenticate('session'));
+
+const isLoggedIn = (req, res, next) => {
+  if(req.isAuthenticated()) {
+    return next();
+  }
+  return res.status(401).json('Not authorized');
+}
+
+/*** Authentication APIs ***/
+
+// POST /api/sessions
+app.post('/api/sessions', function(req, res, next) {
+  passport.authenticate('local', (err, user, info) => {
+    if (err)
+      return next(err);
+      if (!user) {
+        // display wrong login messages
+        return res.status(401).json(info);
+      }
+      // success, perform the login
+      req.login(user, (err) => {
+        if (err)
+          return next(err);
+        
+        // req.user contains the authenticated user, we send all the user info back
+        return res.status(201).json(req.user);
+      });
+  })(req, res, next);
+});
+
+// GET /api/sessions/current
+app.get('/api/sessions/current', (req, res) => {
+  if(req.isAuthenticated()) {
+    res.json(req.user);
+  }
+  else{
+    res.status(401).json('Not authenticated');
+  }
+});
+
+// DELETE /api/sessions/current
+app.delete('/api/sessions/current', (req, res) => {
+  req.logout();
+  res.status(204).end();
+});
+
 
 /*** APIs ***/
 
@@ -49,7 +127,9 @@ app.use(cors(corsOptions));
 // 9. Update a thesis proposal
 // PATCH api/teacher/:id/thesis_proposals/:id
 
-module.exports = app;
-
 const PORT = 3000;
-app.listen(PORT, () => { console.log(`Server started on http://localhost:${PORT}/`) });
+const server = app.listen(PORT, () => {
+  console.log(`Server started on http://localhost:${PORT}/`);
+});
+
+module.exports = { app, server };

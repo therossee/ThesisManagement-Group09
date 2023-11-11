@@ -1,8 +1,8 @@
 require('jest');
-const request = require("supertest");
-const service = require("../thesis_dao");
-const app = require("../index");
-const db = require('../db');
+//  request = require("supertest");
+//  const service = require("../thesis_dao");
+//  const app = require("../index");
+//  const db = require('../db');
 
 // TEST POST api/teacher/:id/thesis_proposals
 
