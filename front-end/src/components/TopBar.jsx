@@ -1,17 +1,20 @@
 import { useState } from "react";
-import { Avatar, Badge, Button, Form, Input, Layout, notification } from "antd";
+import { useNavigate } from "react-router-dom";
+import { Avatar, Badge, Button, Form, Input, Layout } from "antd";
 import { UserOutlined, BellOutlined, KeyOutlined, LogoutOutlined } from '@ant-design/icons';
 import { useAuth } from '../App';
 import '../css/style.css';
 
 const { Header } = Layout;
 
-
 function TopBar() {
   return (
-    <Header className="header-style">
-      <UserTopBar />
-    </Header >
+    <>
+      <div className="cover-style" />
+      <Header className="header-style">
+        <UserTopBar />
+      </Header >
+    </>
   )
 }
 
@@ -70,17 +73,22 @@ function LoginForm() {
 
 function IsLoggedInForm() {
 
-  const { doLogOut } = useAuth();
+  const { isTeacher, doLogOut } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div>
+      {
+        isTeacher &&
+        <Button ghost type="primary" style={{marginRight: "20px"}} onClick={() => navigate("/insert-proposal")}>Add Proposal</Button>
+      }
       <Badge count={1} style={{ marginRight: '22px' }}>
         <BellOutlined style={{ fontSize: '24px', marginRight: '22px', verticalAlign: 'middle' }} />
       </Badge>
       <Avatar size="large" style={{ backgroundColor: '#1677ff', marginRight: '30px', verticalAlign: 'middle' }}>
         <UserOutlined />
       </Avatar>
-      <Button type="secondary" icon={<LogoutOutlined style={{ fontSize: '20px', verticalAlign: 'middle' }} />} onClick={doLogOut} />
+      <LogoutOutlined style={{ fontSize: '20px', verticalAlign: 'middle' }} onClick={doLogOut}/>
     </div>
   )
 }
