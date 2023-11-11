@@ -5,7 +5,7 @@
 const db = require('./db');
 
 // 1. Function to create a new thesis proposal
-exports.createThesisProposal = (thesisTitle, id, coSupervisors, keywords, type, groups, description, knowledge, note, expiration, level, cds) => {
+exports.createThesisProposal = (title, supervisor_id, co_supervisors_id, type, groups, description, required_knowledge, notes, expiration, level, cds, keywords) => {
     return new Promise((resolve, reject) => {
       const insertThesisProposalQuery = `
       INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds)
@@ -15,29 +15,38 @@ exports.createThesisProposal = (thesisTitle, id, coSupervisors, keywords, type, 
       INSERT INTO proposalKeyword (proposal_id, keyword)
       VALUES (?, ?); `;
 
-      const insertCoSupervisorsQuery = `
-      INSERT INTO coSupervisor (proposal_id, co_supervisor_id)
+      const insertInternalCoSupervisorsQuery = `
+      INSERT INTO thesisInternalCoSupervisor (proposal_id, co_supervisor_id)
+      VALUES (?, ?); `;
+
+      const insertExternalCoSupervisorsQuery = `
+      INSERT INTO thesisExternalCoSupervisor (proposal_id, co_supervisor_id)
       VALUES (?, ?); `;
 
       const insertGroupsQuery = `
       INSERT INTO proposalGroup (proposal_id, cod_group)
       VALUES (?, ?); `;
 
-      const res = db.prepare(insertThesisProposalQuery).run(thesisTitle, id, type, description, knowledge, note, expiration, level, cds);
+      console.log("CDS: "+cds);
+      const res = db.prepare(insertThesisProposalQuery).run(title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds);
       const proposalId = res.lastInsertRowid;
+
+      console.log("PROPOSAL ID: "+proposalId);
 
       // Keywords insertion
       keywords.forEach(keyword => {
         db.prepare(insertProposalKeywordQuery).run(proposalId, keyword);
       });
        
-      if(coSupervisors){
-        coSupervisors.forEach(supervisor => {
-          db.prepare(insertCoSupervisorsQuery).run(proposalId, supervisor);
+      if(co_supervisors_id.length > 0){
+        co_supervisors_id.forEach(co_supervisor_id => {
+          db.prepare(insertInternalCoSupervisorsQuery).run(proposalId, co_supervisor_id);
         });
       }
       
-      db.prepare(insertGroupsQuery).run(proposalId, groups);
+      groups.forEach(group => {
+        db.prepare(insertGroupsQuery).run(proposalId, group);
+      });
         
       resolve(proposalId);
     })
@@ -55,10 +64,9 @@ exports.getTeacherListExcept = (id)=>{
 // 3. Function to retrieve the cod_group of a teacher
 exports.getGroup = (teacherId) => {
   return new Promise((resolve, reject) => {
-      const getGroupQuery = `
-      SELECT cod_group FROM teacher WHERE id=? `;
+      const getGroupQuery = `SELECT cod_group FROM teacher WHERE id=? `;
       const res = db.prepare(getGroupQuery).get(teacherId)
-      resolve(res)
+      resolve(res.cod_group)
   })
 }
 

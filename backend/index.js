@@ -120,27 +120,47 @@ app.delete('/api/sessions/current', (req, res) => {
 app.post('/api/teacher/thesis_proposals',
 isLoggedIn,
 isTeacher,
-[
-  check('thesisTitle').isLength({ min: 1 }),
-  check('type').isLength({ min: 1 }),
-  check('description').isLength({ min: 1 }),
-  check('note').isLength({ min: 1 }),
-  check('level').isLength({ min: 1 }),
-  check('cds').isLength({ min: 1 }),
-  check('expiration').isISO8601(),
-  check('knowledge').isArray({ min: 1 }),
-], async (req,res) =>{
-  const id  = req.user.id;
-  const {thesisTitle, coSupervisors, keywords, type, description, knowledge, note, expiration, level, cds} = req.body;
+async (req,res) => {
+  const supervisor_id  = req.user.id;
+  const {title, co_supervisors_id, type, description, required_knowledge, notes, expiration, level, cds, keywords} = req.body;
 
-  if (!thesisTitle || !keywords || !type || !description || !knowledge || !expiration || !level || !cds) {
+  if (!title || !type || !description || !expiration || !level || !cds || !keywords ) {
     return res.status(400).json('Missing required fields.');
   }
 
-  const groups = await thesisDao.getGroup(id);
-  thesisDao.createThesisProposal(thesisTitle, id, coSupervisors, keywords, type ,groups, description, knowledge, note, expiration, level, cds)
+  // Array to store all grous 
+  const groups = [];
+
+  // Get supervisor's group and add it to the array
+  const supervisor_group = await thesisDao.getGroup(supervisor_id);
+  groups.push(supervisor_group);
+
+  // Check if there are co-supervisors and if yes, retrieve their cod_group
+  if (co_supervisors_id.length > 0) {
+    for (const co_supervisor of co_supervisors_id) {
+      const co_supervisor_group = await thesisDao.getGroup(co_supervisor);
+      groups.push(co_supervisor_group);
+    }
+  }
+
+  thesisDao.createThesisProposal(title, supervisor_id, co_supervisors_id, type, groups, description, required_knowledge, notes, expiration, level, cds, keywords)
   .then((thesisProposalId)=>{
-    res.status(201).json({ id: thesisProposalId });
+    res.status(201).json(
+      { 
+        id: thesisProposalId,
+        title: title,
+        supervisor_id: supervisor_id,
+        co_supervisors_id: co_supervisors_id,
+        type: type,
+        groups: groups,
+        description: description,
+        required_knowledge: required_knowledge,
+        notes: notes,
+        expiration: expiration,
+        level: level,
+        cds: cds,
+        keywords: keywords 
+      });
   })
   .catch((error) => {
     res.status(500).json(`Failed to create thesis proposal. ${error.message || error}`);

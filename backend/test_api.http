@@ -28,21 +28,22 @@ GET http://localhost:3000/api/sessions/current HTTP/1.1
 DELETE http://localhost:3000/api/sessions/current HTTP/1.1
 ###
 
-
 // 1. Insert a new thesis proposal
 POST http://localhost:3000/api/teacher/thesis_proposals
 Content-Type: application/json
 
 {
-  "thesisTitle": "TitoloTesi",
-  "keywords": ["keyword"],
+  "title": "TitoloTesi",
+  "supervisor_id": "d279620",
+  "co_supervisors_id": ["d370335"],
   "type": "compilativa",
   "description": "description",
-  "knowledge": "knowledge",
-  "note": "note",
-  "expiration": "expiration",
+  "required_knowledge": "required knowledge",
+  "notes": "notes",
+  "expiration": "28/11/2023",
   "level": "Bachelor's",
-  "cds" :"cds"
+  "cds" : "LM-29",
+  "keywords": ["keyword"]
 }
 ###
 
