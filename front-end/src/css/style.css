@@ -49,8 +49,3 @@
   height: calc(100vh - 64px);
   /* 64px is header height */
 }
-
-.user-topbar-style {
-  display: flex;
-  margin-right: 3%;
-}

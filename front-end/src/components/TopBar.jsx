@@ -73,7 +73,7 @@ function IsLoggedInForm() {
   const { doLogOut } = useAuth();
 
   return (
-    <div className="user-topbar-style">
+    <div>
       <Badge count={1} style={{ marginRight: '22px' }}>
         <BellOutlined style={{ fontSize: '24px', marginRight: '22px', verticalAlign: 'middle' }} />
       </Badge>
