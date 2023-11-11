@@ -1,7 +1,7 @@
 require('jest');
 
-const db = require('../db');
-const thesis = require('../thesis_dao');
+// const db = require('../db');
+// const thesis = require('../thesis_dao');
 
 
 // 1. Test function to create a new thesis proposal

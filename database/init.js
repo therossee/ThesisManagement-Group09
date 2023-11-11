@@ -16,7 +16,7 @@ const createTables = () => {
                 email TEXT NOT NULL,
                 cod_degree TEXT NOT NULL,
                 enrollment_year TEXT NOT NULL,
-                FOREIGN KEY(cod_degree) REFERENCES degree(degreeId)
+                FOREIGN KEY(cod_degree) REFERENCES degree(cod_degree)
             )`, (err) => {
                 if (err){
                     reject(err);
@@ -238,5 +238,3 @@ const populate_db = async () => {
 };
 
 populate_db();
-
-
