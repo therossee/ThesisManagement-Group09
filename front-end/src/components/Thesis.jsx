@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { DatePicker, Button, Form, Input, Select, Steps } from "antd";
+import { DatePicker, FloatButton, Button, Form, Input, Select, Steps } from "antd";
 
 const { Option } = Select;
 
@@ -83,6 +83,7 @@ function InsertThesisProposal() {
           )}
         </div>
       </div>
+      <FloatButton.BackTop style={{ marginBottom: "40px" }} tooltip={<div>Back to Top</div>} />
     </>
   );
 }
