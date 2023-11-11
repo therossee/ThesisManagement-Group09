@@ -9,6 +9,4 @@ const options = {
 
 const db = betterSqlite3(PATH_DB, options);
 
-module.exports = {
-  db: db
-};
+module.exports = db;
