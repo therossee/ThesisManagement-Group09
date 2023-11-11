@@ -77,7 +77,7 @@ const createTables = () => {
                 `CREATE TABLE IF NOT EXISTS thesisApplication (
                     proposal_id INTEGER NOT NULL,
                     student_id TEXT NOT NULL,
-                    accepted BOOLEAN DEFAULT FALSE NOT NULL,
+                    status TEXT DEFAULT 'waiting for approval' NOT NULL,
                     FOREIGN KEY(proposal_id) REFERENCES thesisProposal(proposal_id),
                     FOREIGN KEY(student_id) REFERENCES student(id),
                     PRIMARY KEY (proposal_id, student_id)
