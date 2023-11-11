@@ -238,5 +238,3 @@ const populate_db = async () => {
 };
 
 populate_db();
-
-

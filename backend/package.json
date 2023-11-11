@@ -5,19 +5,21 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --detectOpenHandles",
-    "start": "node indecd",
+    "start": "node index",
     "dev": "nodemon index"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "better-sqlite3": "^9.0.0",
     "cors": "^2.8.5",
     "dayjs": "^1.11.7",
     "express": "^4.18.2",
-    "express-validator": "^7.0.1",
     "morgan": "^1.10.0",
-    "supertest": "^6.3.3"
+    "better-sqlite3": "^9.0.0",
+    "supertest": "^6.3.3",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0", 
+    "express-session": "1.17.3"
   },
   "devDependencies": {
     "@types/jest": "^29.5.6",
@@ -28,3 +30,4 @@
     "collectCoverage": true
   }
 }
+

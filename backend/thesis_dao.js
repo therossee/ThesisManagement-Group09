@@ -2,7 +2,7 @@
 
 /* Data Access Object (DAO) module for accessing thesis data */
 
-const { db } = require('./db');
+const db = require('./db');
 
 // 1. Function to create a new thesis proposal
 exports.createThesisProposal = (thesisTitle, id, coSupervisors, keywords, type, groups, description, knowledge, note, expiration, level, cds) => {

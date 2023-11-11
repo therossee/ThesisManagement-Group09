@@ -1,0 +1,49 @@
+.ant-layout {
+  background-color: white;
+}
+
+.content-style {
+  margin: 24px 16px 24px 16px;
+  background-color: white;
+}
+
+.footer-style {
+  text-align: center;
+  background-color: white;
+}
+
+.home-title {
+  margin: 36px 32px;
+  background-color: white;
+}
+
+.header-style {
+  padding: 0;
+  background-color: white;
+  box-shadow: 0 2px 8px #69c0ff;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.logo-style {
+  height: 64px;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #f0f0f0;
+}
+
+.sider-style {
+  height: 100vh;
+}
+
+.menu-style {
+  height: calc(100vh - 64px);
+  /* 64px is header height */
+}
+
+.user-topbar-style{
+  display: flex;
+  margin-right: 3%;
+}
