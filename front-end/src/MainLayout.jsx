@@ -15,7 +15,7 @@ function MainLayout() {
         <Router>
             <Layout>
                 <SideBar />
-                <Layout >
+                <Layout>
                     <TopBar />
                     <Content className="content-style">
                         <Routes>

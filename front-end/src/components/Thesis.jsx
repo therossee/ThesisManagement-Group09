@@ -22,6 +22,7 @@ const steps = [
 ];
 
 function InsertThesisProposal() {
+
   const items = steps.map((item) => ({
     key: item.title,
     title: item.title,
@@ -103,7 +104,7 @@ function InsertBody({ onSave }) {
   };
 
   return (
-    <Form form={form} layout="horizontal" onFinish={onFinish}>
+    <Form form={form} layout="vertical" onFinish={onFinish}>
       <Form.Item label="Title" name="title">
         <Input />
       </Form.Item>

@@ -8,8 +8,13 @@
 }
 
 .footer-style {
+  position: sticky;
+  bottom: 0;
   text-align: center;
   background-color: white;
+  box-shadow: 0 10px 20px rgb(0,0,0,.25);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
 }
 
 .home-title {
@@ -18,9 +23,13 @@
 }
 
 .header-style {
-  padding: 0;
+  margin: 20px;
+  border-radius: 20px;
+  position: sticky;
+  top: 20px;
+  z-index: 1;
   background-color: white;
-  box-shadow: 0 2px 8px #69c0ff;
+  box-shadow: 0 0px 20px #69c0ff;
   display: flex;
   justify-content: flex-end;
 }
@@ -32,10 +41,6 @@
   align-items: center;
   justify-content: center;
   border-right: 1px solid #f0f0f0;
-}
-
-.sider-style {
-  height: 100vh;
 }
 
 .menu-style {
