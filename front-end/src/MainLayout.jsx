@@ -2,7 +2,7 @@ import { Layout } from 'antd';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './routes/Home';
 import InsertProposal from './routes/InsertProposal';
-import NotFound from './routes/NotFound'
+import Errors from './routes/Errors'
 import SideBar from './components/SideBar';
 import TopBar from './components/TopBar';
 import './css/style.css';
@@ -21,7 +21,7 @@ function MainLayout() {
                         <Routes>
                             <Route path="/" element={<Home />} />
                             <Route path="/insert-proposal" element={<InsertProposal />} />
-                            <Route path="/*" element={<NotFound />} />
+                            <Route path="/*" element={<Errors code="404"/>} />
                         </Routes>
                     </Content>
                     <Footer className="footer-style">
