@@ -57,10 +57,8 @@ exports.getGroup = (teacherId) => {
   return new Promise((resolve, reject) => {
       const getGroupQuery = `
       SELECT cod_group FROM teacher WHERE id=? `;
-
       const res = db.prepare(getGroupQuery).get(teacherId)
-      console.log("RES: ",res.cod_group);
-      resolve(res.cod_group)
+      resolve(res)
   })
 }
 

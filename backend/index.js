@@ -60,6 +60,20 @@ const isLoggedIn = (req, res, next) => {
   return res.status(401).json('Not authorized');
 }
 
+const isStudent = (req, res, next) => {
+  if(req.user.id.startsWith('s')){
+    return next();
+  }
+  return res.status(403).json('Unauthorized');
+}
+
+const isTeacher = (req, res, next) => {
+  if(req.user.id.startsWith('d')){
+    return next();
+  }
+  return res.status(403).json('Unauthorized');
+}
+
 /*** Authentication APIs ***/
 
 // POST /api/sessions
@@ -104,6 +118,8 @@ app.delete('/api/sessions/current', (req, res) => {
 // 1. Insert a new thesis proposal
 // POST api/teacher/thesis_proposals
 app.post('/api/teacher/thesis_proposals',
+isLoggedIn,
+isTeacher,
 [
   check('thesisTitle').isLength({ min: 1 }),
   check('type').isLength({ min: 1 }),
@@ -114,22 +130,20 @@ app.post('/api/teacher/thesis_proposals',
   check('expiration').isISO8601(),
   check('knowledge').isArray({ min: 1 }),
 ], async (req,res) =>{
-  const { id } = req.user.id;
+  const id  = req.user.id;
   const {thesisTitle, coSupervisors, keywords, type, description, knowledge, note, expiration, level, cds} = req.body;
 
   if (!thesisTitle || !keywords || !type || !description || !knowledge || !expiration || !level || !cds) {
-    return res.status(400).json({ error: 'Missing required fields.' });
+    return res.status(400).json('Missing required fields.');
   }
 
   const groups = await thesisDao.getGroup(id);
-  console.log("Gruppi:"+groups);
   thesisDao.createThesisProposal(thesisTitle, id, coSupervisors, keywords, type ,groups, description, knowledge, note, expiration, level, cds)
   .then((thesisProposalId)=>{
     res.status(201).json({ id: thesisProposalId });
   })
   .catch((error) => {
-    console.error(error);
-    res.status(500).json({ error: `Failed to create thesis proposal. ${error.message || error}` });
+    res.status(500).json(`Failed to create thesis proposal. ${error.message || error}`);
   });
 });
 
@@ -142,8 +156,7 @@ app.get('/api/teachers', (req, res) => {
 
     res.json({ teachers: teacherList });
   } catch (error) {
-    console.error('Errore durante il recupero della lista degli insegnanti:', error);
-    res.status(500).json({ error: 'Errore interno del server' });
+    res.status(500).json('Internal Server Error');
   }
 });
 
