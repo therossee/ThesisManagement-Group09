@@ -27,11 +27,8 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
       INSERT INTO proposalGroup (proposal_id, cod_group)
       VALUES (?, ?); `;
 
-      console.log("CDS: "+cds);
       const res = db.prepare(insertThesisProposalQuery).run(title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds);
       const proposalId = res.lastInsertRowid;
-
-      console.log("PROPOSAL ID: "+proposalId);
 
       // Keywords insertion
       keywords.forEach(keyword => {
@@ -59,10 +56,10 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
 }
 
 // 2. Function to get list of teachers not logged
-exports.getTeacherListExcept = (id)=>{
+exports.getTeacherListExcept = (id) => {
   return new Promise((resolve,reject)=>{
       const query = `SELECT * FROM teacher WHERE id <> ?; `;
-      const teachers = db.prepare(query).all(idToExclude);
+      const teachers = db.prepare(query).all(id);
       return teachers;
   })
 }
