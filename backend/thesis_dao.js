@@ -92,7 +92,16 @@ exports.getGroup = (teacherId) => {
 // 5. Function to search for thesis proposals
 
 // 6. Function to apply for a thesis proposal
+exports.applyForProposal = (proposal_id, student_id) => {
+  return new Promise((resolve, reject) => {
+    const insertApplicationQuery = `
+    INSERT INTO thesisApplication (proposal_id, student_id)
+    VALUES (?, ?); `; // at first the application has default status 'waiting for approval'
 
+    const res = db.prepare(insertApplicationQuery).run(proposal_id, student_id);
+    resolve(res.lastInsertRowid);
+  })
+}
 // 7. Function to list all applications for a teacher's thesis proposals
 
 // 8. Function to accept an application

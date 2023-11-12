@@ -174,7 +174,7 @@ async (req,res) => {
     }
   }
 
-  thesisDao.createThesisProposal(title, supervisor_id, internal_co_supervisors_id, external_co_supervisors_id, type, groups, description, required_knowledge, notes, expiration, level, cds, keywords)
+  await thesisDao.createThesisProposal(title, supervisor_id, internal_co_supervisors_id, external_co_supervisors_id, type, groups, description, required_knowledge, notes, expiration, level, cds, keywords)
   .then((thesisProposalId)=>{
     res.status(201).json(
       {
@@ -234,7 +234,28 @@ async(req, res) => {
 // GET api/student/:id/thesis_proposals?title=...&supervisor=...&co-supervisor=...&tags=...&keywords=...&type=...
 
 // 5. Apply for a thesis proposal
-// POST api/student/:id/applications
+// POST api/student/applications
+app.post('/api/student/applications',
+isLoggedIn,
+isStudent,
+async(req,res) => {
+  try{
+    const student_id = req.user.id; // logged in student
+    const {thesis_proposal_id} = req.body;
+    await thesisDao.applyForProposal(thesis_proposal_id, student_id).then((applicationId)=>{  
+      res.status(201).json(
+        {
+          application_id: applicationId, 
+          thesis_proposal_id: thesis_proposal_id, 
+          student_id: student_id,
+          status: 'waiting for approval'
+        });
+    });
+  }catch(error){
+    res.status(500).json(`Failed to apply for thesis proposal. ${error.message || error}`);
+  }
+  
+});
 
 // 6. List all applications for a teacher's thesis proposals
 // GET api/teacher/:id/applications
