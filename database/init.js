@@ -27,6 +27,12 @@ const createTables = () => {
                     cod_group TEXT NOT NULL,
                     cod_department TEXT NOT NULL
                 );`,
+                `CREATE TABLE IF NOT EXISTS externalCoSupervisor (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    surname TEXT NOT NULL,
+                    name TEXT NOT NULL, 
+                    email TEXT NOT NULL
+                );`,
                 `CREATE TABLE IF NOT EXISTS degree (
                     cod_degree TEXT PRIMARY KEY,
                     title_degree TEXT NOT NULL UNIQUE
@@ -47,19 +53,26 @@ const createTables = () => {
                     supervisor_id TEXT NOT NULL,
                     type TEXT NOT NULL,
                     description TEXT NOT NULL,
-                    required_knowledge TEXT NOT NULL,
-                    notes TEXT NOT NULL,
+                    required_knowledge TEXT,
+                    notes TEXT,
                     expiration TEXT NOT NULL,
                     level TEXT NOT NULL,
                     cds TEXT NOT NULL,
                     FOREIGN KEY(supervisor_id) REFERENCES teacher(id),
-                    FOREIGN KEY(cds) REFERENCES degree(title_degree)
+                    FOREIGN KEY(cds) REFERENCES degree(cod_degree)
                 );`,
-                `CREATE TABLE IF NOT EXISTS coSupervisor (
+                `CREATE TABLE IF NOT EXISTS thesisInternalCoSupervisor (
                     proposal_id INTEGER NOT NULL,
                     co_supervisor_id TEXT NOT NULL,
                     FOREIGN KEY(proposal_id) REFERENCES thesisProposal(proposal_id),
                     FOREIGN KEY(co_supervisor_id) REFERENCES teacher(id),
+                    PRIMARY KEY (proposal_id, co_supervisor_id)
+                );`,
+                `CREATE TABLE IF NOT EXISTS thesisExternalCoSupervisor (
+                    proposal_id INTEGER NOT NULL,
+                    co_supervisor_id TEXT NOT NULL,
+                    FOREIGN KEY(proposal_id) REFERENCES thesisProposal(proposal_id),
+                    FOREIGN KEY(co_supervisor_id) REFERENCES externalCoSupervisor(id),
                     PRIMARY KEY (proposal_id, co_supervisor_id)
                 );`,
                 `CREATE TABLE IF NOT EXISTS proposalKeyword (
@@ -109,7 +122,7 @@ const createTables = () => {
 const emptyTables = () => {
     return new Promise((resolve, reject) => {
         db.serialize(() => {
-            const tableNames = ['student', 'teacher', 'degree', 'career', 'thesisProposal', 'coSupervisor', 'proposalKeyword', 'proposalGroup', 'thesisApplication'];
+            const tableNames = ['student', 'teacher', 'externalCoSupervisor', 'degree', 'career', 'thesisProposal', 'thesisInternalCoSupervisor', 'thesisExternalCoSupervisor', 'proposalKeyword', 'proposalGroup', 'thesisApplication'];
 
             const deleteTable = (tableName) => {
                 return new Promise((resolve, reject) => {
@@ -164,11 +177,13 @@ const insertData = () => {
 
             insertDataGeneric('students.xlsx', 'student', db.prepare(`INSERT INTO student(id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`));
             insertDataGeneric('teachers.xlsx', 'teacher', db.prepare(`INSERT INTO teacher(id, surname, name, email, cod_group, cod_department) VALUES (?, ?, ?, ?, ?, ?)`));
+            insertDataGeneric('external-co-supervisors.xlsx', 'externalCoSupervisor', db.prepare(`INSERT INTO externalCoSupervisor(surname, name, email) VALUES (?, ?, ?)`));
             insertDataGeneric('degrees.xlsx', 'degree', db.prepare(`INSERT INTO degree(cod_degree, title_degree) VALUES (?, ?)`));
             insertDataGeneric('careers.xlsx', 'career', db.prepare(`INSERT INTO career(id, cod_course, title_course, cfu, grade, date) VALUES (?, ?, ?, ?, ?, ?)`));
             insertDataGeneric('thesisProposal.xlsx', 'thesisProposal', db.prepare(`INSERT INTO thesisProposal(title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`));
             insertDataGeneric('proposalKeyWords.xlsx', 'proposalKeyword', db.prepare(`INSERT INTO proposalKeyword(proposal_id, keyword) VALUES (?, ?)`));
-            insertDataGeneric('cosupervisors.xlsx', 'coSupervisor', db.prepare(`INSERT INTO coSupervisor(proposal_id, co_supervisor_id) VALUES (?, ?)`));
+            insertDataGeneric('thesis-internal-co-supervisors.xlsx', 'thesisInternalCoSupervisor', db.prepare(`INSERT INTO thesisInternalCoSupervisor(proposal_id, co_supervisor_id) VALUES (?, ?)`));
+            insertDataGeneric('thesis-external-co-supervisors.xlsx', 'thesisExternalCoSupervisor', db.prepare(`INSERT INTO thesisExternalCoSupervisor(proposal_id, co_supervisor_id) VALUES (?, ?)`));
             insertDataGeneric('proposalGroups.xlsx', 'proposalGroup', db.prepare(`INSERT INTO proposalGroup(proposal_id, cod_group) VALUES (?, ?)`));
             insertDataGeneric('thesis_applications.xlsx', 'thesisApplication', db.prepare(`INSERT INTO thesisApplication(proposal_id, student_id) VALUES (?, ?)`));
 
