@@ -71,7 +71,7 @@ exports.getTeacherListExcept = (id) => {
   })
 }
 
-// 3. Function to get list of teachers not logged
+// 3. Function to get list of external co-supervisors
 exports.getExternalCoSupervisorList = (id) => {
   return new Promise((resolve,reject)=>{
       const query = `SELECT * FROM externalCoSupervisor;`;
