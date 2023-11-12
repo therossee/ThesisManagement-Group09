@@ -5,6 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --detectOpenHandles",
+    "test:coverage": "jest --coverage --colors",
+    "test:unit": "npx jest --coverage --coverageDirectory=coverage/coverage_unit --colors --runInBand users.unit.test.js thesis.unit.test.js database.test.js",
+    "test:integration": "npx jest --coverage --coverageDirectory=coverage/coverage_integration  --runInBand --colors auth.integration.test.js users.integration.test.js thesis.integration.test.js",
     "start": "node index",
     "dev": "nodemon index"
   },
