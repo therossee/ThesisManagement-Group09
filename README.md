@@ -64,8 +64,8 @@
     | supervisor_id      | TEXT     | **NOT NULL**, **FK** [teacher](#teacher)(id)          |
     | type               | TEXT     | **NOT NULL**                                          |
     | description        | TEXT     | **NOT NULL**                                          |
-    | required_knowledge | TEXT     |                                                       |
-    | notes              | TEXT     |                                                       |
+    | required_knowledge | TEXT     | **OPTIONAL**                                          |
+    | notes              | TEXT     | **OPTIONAL**                                          |
     | expiration         | TEXT     | **NOT NULL**                                          |
     | level              | TEXT     | **NOT NULL**                                          |
     | cds                | TEXT     | **NOT NULL**, **FK** [degree](#degree)(cod_degree)    |
