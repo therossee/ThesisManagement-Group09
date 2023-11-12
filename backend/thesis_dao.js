@@ -28,31 +28,34 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
         INSERT INTO proposalGroup (proposal_id, cod_group)
         VALUES (?, ?); `;
 
-        const res = db.prepare(insertThesisProposalQuery).run(title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds);
-        const proposalId = res.lastInsertRowid;
+        // Self-called transaction
+        db.transaction(() => {
+          const res = db.prepare(insertThesisProposalQuery).run(title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds);
+          const proposalId = res.lastInsertRowid;
 
-        // Keywords insertion
-        keywords.forEach(keyword => {
-          db.prepare(insertProposalKeywordQuery).run(proposalId, keyword);
-        });
-        
-        if(internal_co_supervisors_id.length > 0){
-          internal_co_supervisors_id.forEach(internal_co_supervisor_id => {
-            db.prepare(insertInternalCoSupervisorsQuery).run(proposalId, internal_co_supervisor_id);
+          // Keywords insertion
+          keywords.forEach(keyword => {
+            db.prepare(insertProposalKeywordQuery).run(proposalId, keyword);
           });
-        }
-
-        if(external_co_supervisors_id.length > 0){
-          external_co_supervisors_id.forEach(external_co_supervisor_id => {
-            db.prepare(insertExternalCoSupervisorsQuery).run(proposalId, external_co_supervisor_id);
-          });
-        }
-        
-        groups.forEach(group => {
-          db.prepare(insertGroupsQuery).run(proposalId, group);
-        });
           
-        resolve(proposalId);
+          if(internal_co_supervisors_id.length > 0){
+            internal_co_supervisors_id.forEach(internal_co_supervisor_id => {
+              db.prepare(insertInternalCoSupervisorsQuery).run(proposalId, internal_co_supervisor_id);
+            });
+          }
+
+          if(external_co_supervisors_id.length > 0){
+            external_co_supervisors_id.forEach(external_co_supervisor_id => {
+              db.prepare(insertExternalCoSupervisorsQuery).run(proposalId, external_co_supervisor_id);
+            });
+          }
+          
+          groups.forEach(group => {
+            db.prepare(insertGroupsQuery).run(proposalId, group);
+          });
+          
+          resolve(proposalId)
+        })();
     } catch(err){
       reject(err)
     }

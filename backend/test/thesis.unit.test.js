@@ -9,6 +9,7 @@ jest.mock('../db', () => ({
   run: jest.fn().mockReturnValue({ lastInsertRowid: 1 }),
   all: jest.fn(),
   get: jest.fn(),
+  transaction: jest.fn().mockImplementation(callback => callback()),
 }));
 
 // 1. Test function to create a new thesis proposal
@@ -17,8 +18,8 @@ describe('createThesisProposal', () => {
     const proposalData = {
       title: 'Test Proposal',
       supervisor_id: 1,
-      internal_co_supervisors_id: [2, 3],
-      external_co_supervisors_id: [4, 5],
+      internal_co_supervisors_id: ['d1', 'd2', 'd3'],
+      external_co_supervisors_id: [1, 2],
       type: 'Test Type',
       groups: ['Group1', 'Group2'],
       description: 'Test Description',
@@ -47,6 +48,7 @@ describe('createThesisProposal', () => {
     );
 
     expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
+    expect(db.prepare).toHaveBeenCalledTimes(10); // 10 queries
   });
 });
 
