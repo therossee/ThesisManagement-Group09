@@ -5,6 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --detectOpenHandles",
+    "test:coverage": "jest --coverage --colors",
+    "test:unit": "npx jest --coverage --coverageDirectory=coverage/coverage_unit --colors --runInBand users.unit.test.js thesis.unit.test.js database.test.js",
+    "test:integration": "npx jest --coverage --coverageDirectory=coverage/coverage_integration  --runInBand --colors auth.integration.test.js users.integration.test.js thesis.integration.test.js",
     "start": "node index",
     "dev": "nodemon index"
   },
@@ -19,7 +22,8 @@
     "supertest": "^6.3.3",
     "passport": "^0.4.1",
     "passport-local": "^1.0.0", 
-    "express-session": "1.17.3"
+    "express-session": "1.17.3",
+    "express-validator": "^6.12.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.6",

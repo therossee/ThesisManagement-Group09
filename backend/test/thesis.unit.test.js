@@ -61,12 +61,11 @@ describe('getTeacherListExcept', () => {
     afterAll(() => {
       jest.restoreAllMocks(); // Restore original functionality after all tests
     });
-    test.skip('returns a list of teachers excluding the specified ID', async () => {
-        const excludedTeacherId = 3;
+    test('returns a list of teachers excluding the specified ID', async () => {
+        const excludedTeacherId = 'd3';
         const mockTeacherData = [
-          { id: 1, name: 'Teacher1' },
-          { id: 2, name: 'Teacher2' },
-          { id: 3, name: 'Teacher3' },
+          { id: 'd1', name: 'Teacher1' },
+          { id: 'd2', name: 'Teacher2' },
         ];
     
         // Mock the database query result

@@ -170,10 +170,10 @@ async (req,res) => {
 
 // 2. Get list of teachers not logged
 //GET /api/teachers
-app.get('/api/teachers', (req, res) => {
+app.get('/api/teachers', async(req, res) => {
   try {
     const excludedTeacherId = req.user.id; // logged in teacher
-    const teacherList = getTeacherListExcept(excludedTeacherId);
+    const teacherList = await thesisDao.getTeacherListExcept(excludedTeacherId);
 
     res.json({ teachers: teacherList });
   } catch (error) {
