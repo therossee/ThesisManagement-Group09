@@ -20,6 +20,7 @@ afterAll((done) => {
     jest.resetAllMocks();
     server.close(done);
 });
+
 // TEST GET api/teachers
 describe('GET /api/teachers', () => {
     test('returns a list of teachers excluding the logged-in teacher', async () => {
@@ -174,7 +175,6 @@ describe('GET /api/externalCoSupervisors', () => {
       expect(response.text).toEqual("\"Internal Server Error\"");
     });
 });
-
 
 // TEST POST api/teacher/thesis_proposals
 describe('POST /api/teacher/thesis_proposals', () => {
@@ -429,7 +429,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
         expect(response.status).toBe(500);
       
     });
-  });
+});
 
 // TEST GET api/student/:id/thesis_proposals?title=...&supervisor=...&co-supervisor=...&tags=...&keywords=...&type=...
 
