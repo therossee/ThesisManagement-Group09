@@ -170,7 +170,10 @@ async (req,res) => {
 
 // 2. Get list of teachers not logged
 //GET /api/teachers
-app.get('/api/teachers', async(req, res) => {
+app.get('/api/teachers',
+isLoggedIn,
+isTeacher, 
+async(req, res) => {
   try {
     const excludedTeacherId = req.user.id; // logged in teacher
     const teacherList = await thesisDao.getTeacherListExcept(excludedTeacherId);
@@ -181,28 +184,43 @@ app.get('/api/teachers', async(req, res) => {
   }
 });
 
-// 3. Search for thesis proposals
+// 3. Get list of external co-supervisors
+//GET /api/externalCoSupervisors
+app.get('/api/externalCoSupervisors',
+isLoggedIn,
+isTeacher,
+async(req, res) => {
+  try {
+    const externalCoSupervisorList = await thesisDao.getExternalCoSupervisorList();
+
+    res.json({ externalCoSupervisors: externalCoSupervisorList });
+  } catch (error) {
+    res.status(500).json('Internal Server Error');
+  }
+});
+
+// 4. Search for thesis proposals
 // GET api/student/:id/thesis_proposals?title=...&supervisor=...&co-supervisor=...&tags=...&keywords=...&type=...
 
-// 4. Apply for a thesis proposal
+// 5. Apply for a thesis proposal
 // POST api/student/:id/applications
 
-// 5. List all applications for a teacher's thesis proposals
+// 6. List all applications for a teacher's thesis proposals
 // GET api/teacher/:id/applications
 
-// 6. Accept an application
+// 7. Accept an application
 // PATCH api/teacher/:id/applications/:id
 
-// 7. Reject an application
+// 8. Reject an application
 // PATCH api/teacher/:id/applications/:id
 
-// 8. List student's application decisions
+// 9. List student's application decisions
 // GET api/student/:id/applications
 
-// 9. List professor's active thesis proposala
+// 10. List professor's active thesis proposala
 // GET api/teacher/:id/thesis_proposals
 
-// 10. Update a thesis proposal
+// 11. Update a thesis proposal
 // PATCH api/teacher/:id/thesis_proposals/:id
 
 const PORT = 3000;

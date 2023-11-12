@@ -87,7 +87,43 @@ describe('getTeacherListExcept', () => {
       await expect(thesis.getTeacherListExcept(excludedTeacherId)).rejects.toThrow('Database query failed');
       expect(mockDb.prepare().all).toHaveBeenCalledWith(excludedTeacherId);
     });
+});
+
+// 3. Test Function to get list of external co-supervisors
+describe('getExternalCoSupervisors', () => {
+  let mockDb;
+
+  beforeAll(() => {
+    mockDb = require('../db');
   });
+
+  afterAll(() => {
+    jest.restoreAllMocks(); // Restore original functionality after all tests
+  });
+  test('returns the list of external co-supervisors', async () => {
+    
+      const mockExternalCoSupervisorData = [
+        { id: '1', name: 'ExternalCoSupervisor1' },
+        { id: '2', name: 'ExternalCoSupervisor2' },
+      ];
+  
+      // Mock the database query result
+      mockDb.prepare().all.mockReturnValue(mockExternalCoSupervisorData);
+  
+      const result = await thesis.getExternalCoSupervisorList();
+  
+      expect(result).toEqual(mockExternalCoSupervisorData);
+    });
+  test('handles errors and rejects the promise if the database query fails', async () => {
+
+    // Mock the database query to throw an error
+    mockDb.prepare().all.mockImplementation(() => {
+      throw new Error('Database query failed');
+    });
+
+    await expect(thesis.getExternalCoSupervisorList()).rejects.toThrow('Database query failed');
+  });
+});
 
 // 3. Test function to retrieve the cod_group of a teacher
 describe('getGroup', () => {
@@ -125,7 +161,7 @@ describe('getGroup', () => {
       await expect(thesis.getGroup(teacherId)).rejects.toThrow('Database query failed');
       expect(mockDb.prepare().get).toHaveBeenCalledWith(teacherId);
     });
-  });
+});
 
 // 4. Test function to search for thesis proposals
 

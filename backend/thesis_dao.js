@@ -68,7 +68,16 @@ exports.getTeacherListExcept = (id) => {
   })
 }
 
-// 3. Function to retrieve the cod_group of a teacher
+// 3. Function to get list of teachers not logged
+exports.getExternalCoSupervisorList = (id) => {
+  return new Promise((resolve,reject)=>{
+      const query = `SELECT * FROM externalCoSupervisor;`;
+      const externalCoSupervisors = db.prepare(query).all();
+      resolve(externalCoSupervisors);
+  })
+}
+
+// 4. Function to retrieve the cod_group of a teacher
 exports.getGroup = (teacherId) => {
   return new Promise((resolve, reject) => {
       const getGroupQuery = `SELECT cod_group FROM teacher WHERE id=? `;
@@ -77,18 +86,18 @@ exports.getGroup = (teacherId) => {
   })
 }
 
-// 4. Function to search for thesis proposals
+// 5. Function to search for thesis proposals
 
-// 5. Function to apply for a thesis proposal
+// 6. Function to apply for a thesis proposal
 
-// 6. Function to list all applications for a teacher's thesis proposals
+// 7. Function to list all applications for a teacher's thesis proposals
 
-// 7. Function to accept an application
+// 8. Function to accept an application
 
-// 8. Function to reject an application
+// 9. Function to reject an application
 
-// 9. Function to list student's application decisions
+// 10. Function to list student's application decisions
 
-// 10. Function to list professor's active thesis proposals
+// 11. Function to list professor's active thesis proposals
 
 // 11. Function to update a thesis proposal

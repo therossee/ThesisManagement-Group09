@@ -7,6 +7,7 @@ const {app, server} = require("../index");
 // Mocking the getTeacherListExcept function
 jest.mock('../thesis_dao', () => ({
     getTeacherListExcept: jest.fn(),
+    getExternalCoSupervisorList: jest.fn(),
     getGroup: jest.fn(),
     createThesisProposal: jest.fn(),
 }));
@@ -63,24 +64,117 @@ describe('GET /api/teachers', () => {
     });
   
     test('handles internal server error gracefully', async () => {
-      // Mock the user ID in the request
-      const userId = 2;
-      const mockRequest = {
-        user: { id: userId },
-      };
+      
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
+
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        service.getTeacherListExcept.mockRejectedValue(new Error('Mocked error during getTeacherListExcept'));
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 'd1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+        expect(cookies).toBeDefined();
+        expect(loginResponse.status).toBe(201);
   
-      const response = await request(app)
-        .get('/api/teachers')
-        .set('Accept', 'application/json')
-        .set('Authorization', 'Invalid token')
-        .send()
-        .expect(500);
+        const response = await request(app)
+            .get('/api/teachers')
+            .set('Accept', 'application/json')
+            .set('Cookie', loginResponse.headers['set-cookie'])
+            .expect(500);
   
       
       expect(response.status).toBe(500);
       expect(response.text).toEqual("\"Internal Server Error\"");
     });
 });
+
+// TEST GET api/externalCoSupervisors
+describe('GET /api/externalCoSupervisors', () => {
+    test('returns the list of external co-supervisors', async () => {
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
+
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        service.getExternalCoSupervisorList.mockResolvedValue([
+            { id: '1', name: 'ExternalCoSupervisor1' },
+            { id: '2', name: 'ExternalCoSupervisor2' },
+        ]);
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 'd1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+        expect(cookies).toBeDefined();
+        expect(loginResponse.status).toBe(201);
+
+        const response = await request(app)
+            .get('/api/externalCoSupervisors')
+            .set('Accept', 'application/json')
+            .set('Cookie', loginResponse.headers['set-cookie']);
+
+        // Verify that the response contains the expected data
+        expect(response.body.externalCoSupervisors).toEqual([
+            { id: '1', name: 'ExternalCoSupervisor1' },
+            { id: '2', name: 'ExternalCoSupervisor2' },
+        ]);
+    });
+  
+    test('handles internal server error gracefully', async () => {
+      
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
+
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        service.getExternalCoSupervisorList.mockRejectedValue(new Error('Mocked error during getTeacherListExcept'));
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 'd1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+        expect(cookies).toBeDefined();
+        expect(loginResponse.status).toBe(201);
+  
+        const response = await request(app)
+            .get('/api/externalCoSupervisors')
+            .set('Accept', 'application/json')
+            .set('Cookie', loginResponse.headers['set-cookie'])
+            .expect(500);
+  
+      
+      expect(response.status).toBe(500);
+      expect(response.text).toEqual("\"Internal Server Error\"");
+    });
+});
+
 
 // TEST POST api/teacher/thesis_proposals
 describe('POST /api/teacher/thesis_proposals', () => {
