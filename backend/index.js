@@ -3,7 +3,6 @@
 /*** Importing modules ***/
 const express = require('express');
 const session = require('express-session');
-const { check, validationResult } = require('express-validator'); // validation middleware
 const morgan = require('morgan');
 const cors = require('cors');
 const passport = require('passport');
@@ -11,6 +10,9 @@ const LocalStrategy = require('passport-local');
 
 const thesisDao = require('./thesis_dao.js');
 const usersDao = require('./users_dao.js');
+const AdvancedDate = require("./AdvancedDate");
+const schemas = require('./schemas.js');
+const {ZodError} = require("zod");
 
 /*** init express and setup the middlewares ***/
 const app = express();
@@ -30,7 +32,7 @@ passport.use(new LocalStrategy(async function verify(username, password, cb) {
   const user = await usersDao.getUser(username, password);
   if(!user)
     return cb(null, false, 'Incorrect email and/or password');
-    
+
   return cb(null, user);
 }));
 
@@ -38,7 +40,7 @@ passport.serializeUser(function (user, cb) {
   cb(null, user);
 });
 
-passport.deserializeUser(function (user, cb) { 
+passport.deserializeUser(function (user, cb) {
   return cb(null, user);
 });
 
@@ -89,7 +91,7 @@ app.post('/api/sessions', function(req, res, next) {
       req.login(user, (err) => {
         if (err)
           return next(err);
-        
+
         // req.user contains the authenticated user, we send all the user info back
         return res.status(201).json(req.user);
       });
@@ -115,6 +117,35 @@ app.delete('/api/sessions/current', (req, res) => {
 
 /*** APIs ***/
 
+app.get('/api/system/virtual-clock', (req, res) => {
+  const json = {
+    date: AdvancedDate.virtual.getVirtualDate().toISOString(),
+    offset: AdvancedDate.virtual.offsetMs
+  };
+
+  res.status(200).json(json);
+});
+
+app.post('/api/system/virtual-clock', (req, res, next) => {
+  try {
+    const { newDate } = schemas.APIVirtualClockUpdateSchema.parse(req.body);
+
+    AdvancedDate.virtual.setNewOffset(newDate || 0);
+
+    const json = {
+      date: AdvancedDate.virtual.getVirtualDate().toISOString(),
+      offset: AdvancedDate.virtual.offsetMs
+    };
+    res.status(200).json(json);
+  } catch (e) {
+    if (e instanceof ZodError) {
+      res.status(400).json({ message: 'Some properties are missing or invalid.', errors: e.issues });
+    } else {
+      next(e);
+    }
+  }
+});
+
 // 1. Insert a new thesis proposal
 // POST api/teacher/thesis_proposals
 app.post('/api/teacher/thesis_proposals',
@@ -128,7 +159,7 @@ async (req,res) => {
     return res.status(400).json('Missing required fields.');
   }
 
-  // Array to store all grous 
+  // Array to store all grous
   const groups = [];
 
   // Get supervisor's group and add it to the array
@@ -146,7 +177,7 @@ async (req,res) => {
   thesisDao.createThesisProposal(title, supervisor_id, internal_co_supervisors_id, external_co_supervisors_id, type, groups, description, required_knowledge, notes, expiration, level, cds, keywords)
   .then((thesisProposalId)=>{
     res.status(201).json(
-      { 
+      {
         id: thesisProposalId,
         title: title,
         supervisor_id: supervisor_id,
@@ -160,7 +191,7 @@ async (req,res) => {
         expiration: expiration,
         level: level,
         cds: cds,
-        keywords: keywords 
+        keywords: keywords
       });
   })
   .catch((error) => {
@@ -172,7 +203,7 @@ async (req,res) => {
 //GET /api/teachers
 app.get('/api/teachers',
 isLoggedIn,
-isTeacher, 
+isTeacher,
 async(req, res) => {
   try {
     const excludedTeacherId = req.user.id; // logged in teacher
