@@ -118,14 +118,21 @@ describe('AdvancedDate class', () => {
             const dayjsDate = dayjs();
             const advancedDate = new AdvancedDate();
 
-            expect(advancedDate.unix()).toBe(dayjsDate.unix());
+            // Check with a tolerance of 1 second
+            expect(advancedDate.unix()).toBeGreaterThanOrEqual(dayjsDate.unix());
+            expect(advancedDate.unix()).toBeLessThanOrEqual(dayjsDate.unix() + 1);
         });
 
         test('should return the correct valueOf', () => {
+            /**
+             * @type {dayjs.Dayjs}
+             */
             const dayjsDate = dayjs();
             const advancedDate = new AdvancedDate();
 
-            expect(advancedDate.valueOf()).toBe(dayjsDate.valueOf());
+            // Check with a tolerance of 3 milliseconds
+            expect(advancedDate.valueOf()).toBeGreaterThanOrEqual(dayjsDate.valueOf());
+            expect(advancedDate.valueOf()).toBeLessThanOrEqual(dayjsDate.valueOf() + 3);
         });
 
         test('should apply offset to the current date', () => {
