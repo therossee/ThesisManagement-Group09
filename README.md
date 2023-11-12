@@ -105,3 +105,11 @@
     | proposal_id       | INTEGER  | **NOT NULL**, **FK** [thesisProposal](#thesisProposal)(proposal_id) |
     | co_supervisor_id  | TEXT     | **NOT NULL**, **FK** [externalCoSupervisor](#externalCoSupervisor)(id) |
     | PRIMARY KEY       | proposal_id, co_supervisor_id                        |
+
+- Table `thesisApplication`:
+    | Column        | Type    | Constraints                                          |
+    | ------------- | ------- | ---------------------------------------------------- |
+    | proposal_id   | INTEGER | **NOT NULL**, **FK** [thesisProposal](#thesisProposal)(proposal_id) |
+    | student_id    | TEXT    | **NOT NULL**, **FK** [student](#student)(id)         |
+    | status        | TEXT    | **DEFAULT 'waiting for approval' NOT NULL**         |
+    | PRIMARY KEY   | proposal_id, student_id                             |
