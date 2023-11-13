@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, Row } from "react";
 import { useNavigate } from "react-router-dom";
-import { DatePicker, FloatButton, Button, Form, Input, Select, Steps } from "antd";
+import { DatePicker, FloatButton, Button, Form, Input, Select, Steps, Spin } from "antd";
+import API from "../API.jsx";
 
 const { Option } = Select;
 
@@ -28,9 +29,19 @@ function InsertThesisProposal() {
     title: item.title,
   }));
 
+  useEffect(() => {}, []);
+
   const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState(null);
+  const [keywords, setKeywords] = useState([]);
+  const [coSupervisors, setCoSupervisors] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(false);
+  }, []);
+
 
   const next = () => {
     setCurrent(current + 1);
@@ -47,6 +58,12 @@ function InsertThesisProposal() {
 
   return (
     <>
+    {loading ?
+    <div style={{ marginLeft: "49%", marginRight: "25%", marginTop: "25%"}}>
+      <Spin tip="Loading" size="large" />
+    </div>
+    :
+    <>
       <Steps
         current={current}
         items={items}
@@ -54,25 +71,15 @@ function InsertThesisProposal() {
       />
       <div style={{ marginLeft: "15%", marginRight: "15%", marginTop: "3%" }}>
         <div>
-          {current === 0 ? (
-            <InsertBody onSave={saveFormData} />
-          ) : (
-            React.cloneElement(steps[current].content, { formData })
-          )}
-        </div>
-        <div>
-          {current < steps.length - 1 && (
-            <Button type="primary" onClick={() => next()}>
-              Next
-            </Button>
-          )}
-          {current === steps.length - 1 && (
-            <Button type="primary" onClick={() => navigate("/")}>
-              Done
-            </Button>
-          )}
-          {current === 1 && (
-            <Button
+          {current === 0 && (
+            <InsertBody saveData={saveFormData} />
+          )} {current === 1 && (
+            <>
+            <ReviewProposal formData={formData}/>
+              <Button type="primary" onClick={() => next()}>
+                Next
+              </Button>
+              <Button
               style={{
                 margin: "0 8px",
               }}
@@ -80,15 +87,25 @@ function InsertThesisProposal() {
             >
               Previous
             </Button>
+            </>
+          )}
+        </div>
+        <div>
+          {current === steps.length - 1 && (
+            <Button type="primary" onClick={() => navigate("/")}>
+              Done
+            </Button>
           )}
         </div>
       </div>
       <FloatButton.BackTop style={{ marginBottom: "40px" }} tooltip={<div>Back to Top</div>} />
     </>
+  }
+    </>
   );
 }
 
-function InsertBody({ onSave }) {
+function InsertBody(props) {
   const [selectedItems, setSelectedItems] = useState([]);
   const optionsCoSupervisors = OPTIONS_COSUPERVISORS.filter(
     (x) => !selectedItems.includes(x)
@@ -100,8 +117,8 @@ function InsertBody({ onSave }) {
   }
 
   const onFinish = (values) => {
-    //Function to save the values of the form when the user clicks save
-    onSave(values);
+    console.log("Received values of form: ", values);
+    props.saveData(values);
   };
 
   return (
@@ -154,21 +171,23 @@ function InsertBody({ onSave }) {
         </Select>
       </Form.Item>
       <Form.Item>
-        <Button type="primary" htmlType="submit">
-          Save and Continue
+      <Button type="primary" htmlType="submit">
+          Submit
         </Button>
       </Form.Item>
     </Form>
   );
 }
 
-function ReviewProposal({ formData }) {
+function ReviewProposal(props) {
   //Function to retrieve the data of the form inserted in insert body
+  const formData = props.formData;
   return (
     <div>
       <h2>Review Proposal</h2>
       <p>Title: {formData.title}</p>
-      <p>Co-Supervisors: {formData.coSupervisors.join(", ")}</p>
+      {formData.coSupervisors ?
+      <p>Co-Supervisors: {formData.coSupervisors.join(", ")}</p> : <p>Co-Supervisors: </p>}
       <p>Keywords: {formData.keywords}</p>
       <p>Type: {formData.type}</p>
       <p>Description: {formData.description}</p>
