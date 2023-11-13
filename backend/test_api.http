@@ -54,6 +54,7 @@ GET http://localhost:3000/api/teachers
 
 ## 3. Get list of external co-supervisors
 GET http://localhost:3000/api/externalCoSupervisors
+###
 
 // 4. Search for thesis proposals
 // GET api/student/:id/thesis_proposals?title=...&supervisor=...&co-supervisor=...&tags=...&keywords=...&type=...
@@ -61,20 +62,21 @@ GET http://localhost:3000/api/externalCoSupervisors
 // 5. Apply for a thesis proposal
 // POST api/student/:id/applications
 
-// 6. List all applications for a teacher's thesis proposals
-// GET api/teacher/:id/applications
+## 6. List all applications for a teacher's thesis proposals
+GET http://localhost:3000/api/teacher/applications
+###
 
-// 7. Accept an application
+// 8. Accept an application
 // PATCH api/teacher/:id/applications/:id
 
-// 8. Reject an application
+// 9. Reject an application
 // PATCH api/teacher/:id/applications/:id
 
-// 9. List student's application decisions
+// 10. List student's application decisions
 // GET api/student/:id/applications
 
-// 10. List professor's active thesis proposala
+// 11. List professor's active thesis proposala
 // GET api/teacher/:id/thesis_proposals
 
-// 11. Update a thesis proposal
+// 12. Update a thesis proposal
 // PATCH api/teacher/:id/thesis_proposals/:id

@@ -263,8 +263,36 @@ app.get('/api/thesis-proposals',
 // 5. Apply for a thesis proposal
 // POST api/student/:id/applications
 
-// 6. List all applications for a teacher's thesis proposals
-// GET api/teacher/:id/applications
+// 6. List all thesis proposals ids of a tearcher
+// GET api/teacher/thesis_proposals
+app.get('/api/teacher/thesis_proposals',
+isLoggedIn,
+isTeacher,
+async (req, res) => {
+  try {
+    const teacherId = req.user.id;
+    const thesisProposals = await thesisDao.listThesisProposalsTeacher(teacherId);
+
+    res.json({ thesisProposals });
+  } catch (e) {
+    res.status(500).json('Internal Server Error');
+  }
+});
+
+// 7. List all applications for a teacher's thesis proposals
+// GET api/teacher/applications
+app.get('/api/teacher/applications',
+isLoggedIn,
+isTeacher,
+async (req, res) => {
+  try {
+    const teacherId = req.user.id;
+    const applications = await thesisDao.listThesisApplicationsForTeacher(teacherId);
+    res.json({ applications });
+  } catch (e) {
+    res.status(500).json('Internal Server Error');
+  }
+});
 
 // 7. Accept an application
 // PATCH api/teacher/:id/applications/:id

@@ -7,7 +7,7 @@ const db = require('./db');
 // 1. Function to create a new thesis proposal
 exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id, external_co_supervisors_id, type, groups, description, required_knowledge, notes, expiration, level, cds, keywords) => {
     return new Promise((resolve, reject) => {
-      try{
+      
         const insertThesisProposalQuery = `
         INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?); `;
@@ -55,11 +55,11 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
           });
 
           resolve(proposalId)
-        })();
-    } catch(err){
-      reject(err)
-    }
-  })
+        })()
+    .catch((err) => {
+      reject(err);
+    });
+  });
 };
 
 // 2. Function to get list of teachers not logged
@@ -199,3 +199,32 @@ exports.getSupervisorOfProposal = (proposalId) => {
  * @property {string} name
  * @property {string} email
  */
+
+// 6. Function to list all applications for a teacher's thesis proposals
+exports.listThesisApplicationsForTeacher = (teacherId) => {
+  return new Promise((resolve) => {
+
+    db.transaction(() => {
+      const getProposalsIds = `SELECT proposal_id
+      FROM thesisProposal 
+      WHERE supervisor_id=?`;
+      const proposals = db.prepare(getProposalsIds).all(teacherId);
+
+      const getApplications = `SELECT *
+      FROM thesisApplication
+      WHERE proposal_id=?`;
+
+      const applications = {};
+      console.log(proposals);
+      for (const proposal of proposals) {
+        console.log(proposal.proposal_id);
+        applications[proposal.proposal_id] = db.prepare(getApplications).all(proposal.proposal_id);
+      }
+      
+      resolve(applications)
+    })()
+    .catch((err) => {
+      reject(err)
+    });
+  })
+};
