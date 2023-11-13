@@ -244,8 +244,7 @@ async(req,res) => {
     const {thesis_proposal_id} = req.body;
     await thesisDao.applyForProposal(thesis_proposal_id, student_id).then((applicationId)=>{  
       res.status(201).json(
-        {
-          application_id: applicationId, 
+        { 
           thesis_proposal_id: thesis_proposal_id, 
           student_id: student_id,
           status: 'waiting for approval'
