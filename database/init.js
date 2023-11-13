@@ -9,7 +9,7 @@ const createTables = () => {
         db.serialize(() => {
 
             // Enable foreign key constraints
-            //db.run('PRAGMA foreign_keys = ON;');
+            db.run('PRAGMA foreign_keys = ON;');
 
             const queries = [
                 `CREATE TABLE IF NOT EXISTS student (
@@ -198,10 +198,11 @@ const insertData = () => {
                 insertStatement.finalize();
             };
 
-            insertDataGeneric('students.xlsx', 'student', db.prepare(`INSERT INTO student(id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`));
+            
             insertDataGeneric('teachers.xlsx', 'teacher', db.prepare(`INSERT INTO teacher(id, surname, name, email, cod_group, cod_department) VALUES (?, ?, ?, ?, ?, ?)`));
             insertDataGeneric('external-co-supervisors.xlsx', 'externalCoSupervisor', db.prepare(`INSERT INTO externalCoSupervisor(surname, name, email) VALUES (?, ?, ?)`));
             insertDataGeneric('degrees.xlsx', 'degree', db.prepare(`INSERT INTO degree(cod_degree, title_degree) VALUES (?, ?)`));
+            insertDataGeneric('students.xlsx', 'student', db.prepare(`INSERT INTO student(id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`));
             insertDataGeneric('careers.xlsx', 'career', db.prepare(`INSERT INTO career(id, cod_course, title_course, cfu, grade, date) VALUES (?, ?, ?, ?, ?, ?)`));
             insertDataGeneric('thesisProposal.xlsx', 'thesisProposal', db.prepare(`INSERT INTO thesisProposal(title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`));
             insertDataGeneric('proposalKeyWords.xlsx', 'proposalKeyword', db.prepare(`INSERT INTO proposalKeyword(proposal_id, keyword) VALUES (?, ?)`));
