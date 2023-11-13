@@ -1,4 +1,5 @@
 const dayjs = require('dayjs');
+dayjs.extend(require('dayjs/plugin/utc'));
 
 class VirtualClock {
     /**
@@ -20,7 +21,7 @@ class VirtualClock {
         if (typeof offsetOrDateStr === 'number') {
             offset = offsetOrDateStr;
         } else {
-            const date = dayjs(offsetOrDateStr);
+            const date = dayjs.utc(offsetOrDateStr);
             const now = dayjs();
 
             offset = date.valueOf() - now.valueOf();
@@ -36,7 +37,7 @@ class VirtualClock {
      */
     static getVirtualDate(date) {
         if (!date) {
-            date = dayjs();
+            date = dayjs.utc();
         }
 
         return date.add(this._offsetMs, 'millisecond');
@@ -57,7 +58,8 @@ class AdvancedDate {
             /**
              * @type {dayjs.Dayjs}
              */
-            Object.defineProperty(this, 'date', { value: dayjs(dateStr) });
+            Object.defineProperty(this, 'date', { value: dayjs.utc(dateStr) });
+            console.log(dateStr, this.date.toISOString());
         } else {
             /**
              * @type {dayjs.Dayjs}
