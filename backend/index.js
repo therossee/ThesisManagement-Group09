@@ -239,21 +239,20 @@ app.post('/api/student/applications',
 isLoggedIn,
 isStudent,
 async(req,res) => {
-  try{
     const student_id = req.user.id; // logged in student
     const {thesis_proposal_id} = req.body;
-    await thesisDao.applyForProposal(thesis_proposal_id, student_id).then((applicationId)=>{  
+    await thesisDao.applyForProposal(thesis_proposal_id, student_id).then
+    ((applicationId)=>{  
       res.status(201).json(
         { 
           thesis_proposal_id: thesis_proposal_id, 
           student_id: student_id,
           status: 'waiting for approval'
         });
-    });
-  }catch(error){
+    })
+  .catch((error) => {
     res.status(500).json(`Failed to apply for thesis proposal. ${error.message || error}`);
-  }
-  
+  });
 });
 
 // 6. List all applications for a teacher's thesis proposals
