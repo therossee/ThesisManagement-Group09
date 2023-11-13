@@ -14,7 +14,11 @@ jest.mock('../db', () => ({
 
 // 1. Test function to create a new thesis proposal
 describe('createThesisProposal', () => {
-  test('create a thesis proposal', async () => {
+  beforeEach(() => {
+    // Reset the mock before each test
+    db.prepare.mockClear();
+  });
+  test('create a thesis proposal with cosupervisors', async () => {
     const proposalData = {
       title: 'Test Proposal',
       supervisor_id: 1,
@@ -49,6 +53,42 @@ describe('createThesisProposal', () => {
 
     expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
     expect(db.prepare).toHaveBeenCalledTimes(10); // 10 queries
+  });
+  test('create a thesis proposal without cosupervisors', async () => {
+    const proposalData = {
+      title: 'Test Proposal',
+      supervisor_id: 1,
+      internal_co_supervisors_id: [],
+      external_co_supervisors_id: [],
+      type: 'Test Type',
+      groups: ['Group1'],
+      description: 'Test Description',
+      required_knowledge: 'Test Knowledge',
+      notes: 'Test Notes',
+      expiration: '2023-12-31',
+      level: 'Test Level',
+      cds: 'Test CDS',
+      keywords: ['Keyword1', 'Keyword2'],
+    };
+
+    const proposalId = await thesis.createThesisProposal(
+      proposalData.title,
+      proposalData.supervisor_id,
+      proposalData.internal_co_supervisors_id,
+      proposalData.external_co_supervisors_id,
+      proposalData.type,
+      proposalData.groups,
+      proposalData.description,
+      proposalData.required_knowledge,
+      proposalData.notes,
+      proposalData.expiration,
+      proposalData.level,
+      proposalData.cds,
+      proposalData.keywords
+    );
+
+    expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
+    expect(db.prepare).toHaveBeenCalledTimes(4); 
   });
 });
 
@@ -151,7 +191,6 @@ describe('getGroup', () => {
       expect(result).toBe(expectedCodGroup);
       expect(mockDb.prepare().get).toHaveBeenCalledWith(teacherId);
     });
-  
     test('handles errors and rejects the promise if the database query fails', async () => {
       const teacherId = 1;
   
@@ -168,6 +207,19 @@ describe('getGroup', () => {
 // 4. Test function to search for thesis proposals
 
 // 5. Test function to apply for a thesis proposal
+describe('applyForProposal', () => {
+  test('applies for a proposal and resolves with applicationId', async () => {
+      // Mock data
+      const proposal_id = 1;
+      const student_id = 's12345';
+
+      // Call the function
+      const applicationId = await thesis.applyForProposal(proposal_id, student_id);
+
+      // Check if the function resolves with the expected applicationId
+      expect(applicationId).toBe(1); // Assuming your mock database always returns applicationId 1
+  });
+});
 
 // 6. Test function to list all applications for a teacher's thesis proposals
 
