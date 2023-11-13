@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import { React, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { DatePicker, FloatButton, Button, Form, Input, Select, Steps } from "antd";
+import { DatePicker, FloatButton, Button, Form, Input, Select, Space, Steps, Table, Tag, Tooltip } from "antd";
+import { EyeOutlined } from '@ant-design/icons';
+import API from "../API";
 
 const { Option } = Select;
 
@@ -195,4 +197,116 @@ function Done() {
   );
 }
 
-export { InsertThesisProposal };
+function ThesisProposals() {
+
+
+  useEffect(() => {
+    API.getStudentThesisProposals()
+      .then((x) => {
+        setData(handleReceivedData(x));
+      })
+      .catch((err) => {/*err handling w message*/ });
+  }, []);
+
+  // Array of objs for storing table data
+  const [data, setData] = useState([])
+
+  // Loading table data fetching
+  const [loadingTable, setLoadingTable] = useState(false);
+
+  const columns = [
+    {
+      title: 'Title',
+      dataIndex: 'title',
+      fixed: 'left',
+    },
+    {
+      title: 'Level',
+      dataIndex: 'level',
+    },
+    {
+      title: 'Supervisor',
+      dataIndex: 'supervisor',
+    },
+    {
+      title: 'Co-Supervisors',
+      dataIndex: 'coSupervisors',
+    },
+    {
+      title: 'Keyworkds',
+      dataIndex: 'keywords',
+    },
+    {
+      title: 'Type',
+      dataIndex: 'type',
+    },
+    {
+      title: 'Groups',
+      dataIndex: 'groups',
+    },
+    {
+      title: 'Expiration',
+      dataIndex: 'expiration',
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      fixed: 'right',
+      render: () => (
+        <Space size="middle">
+          <Tooltip title="View Proposal">
+            <EyeOutlined style={{ fontSize: '20px' }} />
+          </Tooltip>
+        </Space>
+      ),
+    },
+  ];
+
+  const tableProps = {
+    bordered: false,
+    scroll: { x: true },
+    loading: loadingTable,
+  };
+
+  function handleReceivedData(data) {
+    const formattedData = data.map((x) => ({
+      // Take all fields from API.jsx
+      ...x,
+      // Custom format some of the fields needed
+      supervisor: x.supervisor.name + " " + x.supervisor.surname,
+      coSupervisors: [].concat(
+        x.internalCoSupervisors.map((x) => <Tag color="blue" key={x.id}>{x.name + ' ' + x.surname}</Tag>),
+        x.externalCoSupervisors.map((x) => <Tag color="blue" key={x.id}>{x.name + ' ' + x.surname}</Tag>)
+      ),
+      keywords: x.keywords.map((keyword) => (
+        <Tag color="blue" key={keyword}>
+          {keyword}
+        </Tag>
+      )),
+      groups: x.internalCoSupervisors
+      .map((x) => <Tag color="blue" key={x.id}>{x.codGroup}</Tag>)
+    }));
+    return formattedData;
+  }
+
+  /*const data = [
+    {
+      key: "1",
+      title: "giovanniiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
+      keywords:
+      {
+        xxxxxxxxxxxxxx.map((tag) => (
+          <Tag color="blue" key={tag}>
+            {tag}
+          </Tag>
+        ))
+      },
+    }
+  ]*/
+
+  return (
+    <Table {...tableProps} columns={columns} dataSource={data} />
+  )
+}
+
+export { InsertThesisProposal, ThesisProposals };

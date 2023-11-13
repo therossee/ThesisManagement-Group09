@@ -43,7 +43,34 @@ async function getUserInfo() {
 
 /****** End APIs for auth ******/
 
+// GET Student's Thesis Proposals
+async function getStudentThesisProposals() {
+    const response = await fetch(URL + '/thesis-proposals', {
+        credentials: 'include',
+    });
+    const proposals = await response.json();
+    if (response.ok) {
+        return proposals.items.map((x) => ({
+            id: x.id,
+            title: x.title,
+            supervisor: x.supervisor,
+            internalCoSupervisors: x.coSupervisors.internal,
+            externalCoSupervisors: x.coSupervisors.external,
+            type: x.type,
+            description: x.description,
+            requiredKnowledge: x.requiredKnowledge,
+            notes: x.notes,
+            expiration: x.expiration,
+            level: x.level,
+            keywords: x.keywords
+        }))
+    } else {
+        throw proposals;
+    }
+}
+
+
 const API = {
-    logIn, logOut, getUserInfo
+    logIn, logOut, getUserInfo, getStudentThesisProposals
 };
 export default API;

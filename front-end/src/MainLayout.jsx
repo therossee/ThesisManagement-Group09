@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './routes/Home';
 import InsertProposal from './routes/InsertProposal';
 import Errors from './routes/Errors'
+import Proposals from './routes/Proposals';
 import SideBar from './components/SideBar';
 import TopBar from './components/TopBar';
 import './css/style.css';
@@ -20,6 +21,7 @@ function MainLayout() {
                     <Content className="content-style">
                         <Routes>
                             <Route path="/" element={<Home />} />
+                            <Route path="/proposals" element={<Proposals />} />
                             <Route path="/insert-proposal" element={<InsertProposal />} />
                             <Route path="/*" element={<Errors code="404"/>} />
                         </Routes>
