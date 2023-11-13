@@ -7,6 +7,10 @@ const xlsx = require('xlsx');
 const createTables = () => {
     return new Promise((resolve, reject) => {
         db.serialize(() => {
+
+            // Enable foreign key constraints
+            db.run('PRAGMA foreign_keys = ON;');
+
             const queries = [
                 `CREATE TABLE IF NOT EXISTS student (
                     id TEXT PRIMARY KEY,
@@ -16,7 +20,7 @@ const createTables = () => {
                     nationality TEXT NOT NULL,
                     email TEXT NOT NULL,
                     cod_degree TEXT NOT NULL,
-                    enrollment_year TEXT NOT NULL,
+                    enrollment_year INTEGER NOT NULL,
                     FOREIGN KEY(cod_degree) REFERENCES degree(cod_degree)
                 );`,
                 `CREATE TABLE IF NOT EXISTS teacher (
@@ -90,7 +94,7 @@ const createTables = () => {
                 `CREATE TABLE IF NOT EXISTS thesisApplication (
                     proposal_id INTEGER NOT NULL,
                     student_id TEXT NOT NULL,
-                    status TEXT DEFAULT 'waiting for approval' NOT NULL,
+                    status TEXT DEFAULT 'waiting for approval',
                     FOREIGN KEY(proposal_id) REFERENCES thesisProposal(proposal_id),
                     FOREIGN KEY(student_id) REFERENCES student(id),
                     PRIMARY KEY (proposal_id, student_id)
@@ -156,14 +160,33 @@ const emptyTables = () => {
 const insertData = () => {
     return new Promise((resolve, reject) => {
         db.serialize(() => {
+            db.run('BEGIN TRANSACTION;');
+
             const insertDataGeneric = (filePath, tableName, insertStatement) => {
                 const workbook = xlsx.readFile(filePath);
                 const sheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[sheetName];
-               
+
                 const data = xlsx.utils.sheet_to_json(worksheet, { header: 1, defval: null });
 
                 data.forEach((row) => {
+                    // Convert Excel serial numbers to ISO format for specific date columns
+                    if (tableName === 'career') {
+                        // Convert the 6th column (index 5) to ISO format
+                        if (typeof row[5] === 'number') {
+                            const excelBaseDate = new Date('1899-12-30');
+                            const daysSinceBaseDate = row[5] - 1;
+                            row[5] = new Date(excelBaseDate.getTime() + daysSinceBaseDate * 24 * 60 * 60 * 1000).toISOString();
+                        }
+                    } else if (tableName === 'thesisProposal') {
+                        // Convert the 7th column (index 6) to ISO format
+                        if (typeof row[6] === 'number') {
+                            const excelBaseDate = new Date('1899-12-30');
+                            const daysSinceBaseDate = row[6] - 1;
+                            row[6] = new Date(excelBaseDate.getTime() + daysSinceBaseDate * 24 * 60 * 60 * 1000).toISOString();
+                        }
+                    }
+
                     console.log(row);
                     insertStatement.run(row, (err) => {
                         if (err) {
@@ -175,10 +198,11 @@ const insertData = () => {
                 insertStatement.finalize();
             };
 
-            insertDataGeneric('students.xlsx', 'student', db.prepare(`INSERT INTO student(id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`));
+            
             insertDataGeneric('teachers.xlsx', 'teacher', db.prepare(`INSERT INTO teacher(id, surname, name, email, cod_group, cod_department) VALUES (?, ?, ?, ?, ?, ?)`));
             insertDataGeneric('external-co-supervisors.xlsx', 'externalCoSupervisor', db.prepare(`INSERT INTO externalCoSupervisor(surname, name, email) VALUES (?, ?, ?)`));
             insertDataGeneric('degrees.xlsx', 'degree', db.prepare(`INSERT INTO degree(cod_degree, title_degree) VALUES (?, ?)`));
+            insertDataGeneric('students.xlsx', 'student', db.prepare(`INSERT INTO student(id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`));
             insertDataGeneric('careers.xlsx', 'career', db.prepare(`INSERT INTO career(id, cod_course, title_course, cfu, grade, date) VALUES (?, ?, ?, ?, ?, ?)`));
             insertDataGeneric('thesisProposal.xlsx', 'thesisProposal', db.prepare(`INSERT INTO thesisProposal(title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`));
             insertDataGeneric('proposalKeyWords.xlsx', 'proposalKeyword', db.prepare(`INSERT INTO proposalKeyword(proposal_id, keyword) VALUES (?, ?)`));
@@ -187,8 +211,14 @@ const insertData = () => {
             insertDataGeneric('proposalGroups.xlsx', 'proposalGroup', db.prepare(`INSERT INTO proposalGroup(proposal_id, cod_group) VALUES (?, ?)`));
             insertDataGeneric('thesis_applications.xlsx', 'thesisApplication', db.prepare(`INSERT INTO thesisApplication(proposal_id, student_id) VALUES (?, ?)`));
 
-            // Resolve after all data insertions are completed
-            resolve();
+            db.run('COMMIT;', (err) => {
+                if (err) {
+                    console.error('Error committing transaction:', err);
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
         });
     });
 };

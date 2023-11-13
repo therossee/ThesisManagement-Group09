@@ -8,6 +8,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dayjs": "^1.11.10",
     "sqlite3": "^5.1.6",
     "xlsx": ">=0.19.3"
   },
