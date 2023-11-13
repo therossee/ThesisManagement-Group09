@@ -3,7 +3,7 @@ request = require("supertest");
 const service = require("../thesis_dao");
 const usersService = require("../users_dao");
 const {app, server} = require("../index");
-  
+
 // Mocking the getTeacherListExcept function
 jest.mock('../thesis_dao', () => ({
     getTeacherListExcept: jest.fn(),
@@ -63,9 +63,9 @@ describe('GET /api/teachers', () => {
         // Verify that getTeacherListExcept was called with the correct arguments
         expect(service.getTeacherListExcept).toHaveBeenCalledWith(mockUser.id);
     });
-  
+
     test('handles internal server error gracefully', async () => {
-      
+
         const mockUser = {
             id: 'd1',
             surname: 'R',
@@ -87,14 +87,14 @@ describe('GET /api/teachers', () => {
         const cookies = loginResponse.headers['set-cookie'];
         expect(cookies).toBeDefined();
         expect(loginResponse.status).toBe(201);
-  
+
         const response = await request(app)
             .get('/api/teachers')
             .set('Accept', 'application/json')
             .set('Cookie', loginResponse.headers['set-cookie'])
             .expect(500);
-  
-      
+
+
       expect(response.status).toBe(500);
       expect(response.text).toEqual("\"Internal Server Error\"");
     });
@@ -139,9 +139,9 @@ describe('GET /api/externalCoSupervisors', () => {
             { id: '2', name: 'ExternalCoSupervisor2' },
         ]);
     });
-  
+
     test('handles internal server error gracefully', async () => {
-      
+
         const mockUser = {
             id: 'd1',
             surname: 'R',
@@ -163,14 +163,14 @@ describe('GET /api/externalCoSupervisors', () => {
         const cookies = loginResponse.headers['set-cookie'];
         expect(cookies).toBeDefined();
         expect(loginResponse.status).toBe(201);
-  
+
         const response = await request(app)
             .get('/api/externalCoSupervisors')
             .set('Accept', 'application/json')
             .set('Cookie', loginResponse.headers['set-cookie'])
             .expect(500);
-  
-      
+
+
       expect(response.status).toBe(500);
       expect(response.text).toEqual("\"Internal Server Error\"");
     });
@@ -213,19 +213,19 @@ describe('POST /api/teacher/thesis_proposals', () => {
             cds: 'Test CDS',
             keywords: ['test', 'keywords'],
         };
-  
+
         service.getGroup.mockResolvedValueOnce({ cod_group: 'Group1' });
         service.getGroup.mockResolvedValueOnce({ cod_group: 'Group2' });
-    
+
         // Mock the createThesisProposal function
         require('../thesis_dao').createThesisProposal.mockResolvedValue('mockedThesisProposalId');
-  
+
         const response = await request(app)
             .post('/api/teacher/thesis_proposals')
             .set('Accept', 'application/json')
             .set('Cookie', loginResponse.headers['set-cookie'])
             .send(requestBody);
-    
+
         expect(response.status).toBe(201);
         expect(response.body).toEqual({
             id: 'mockedThesisProposalId',
@@ -281,19 +281,19 @@ describe('POST /api/teacher/thesis_proposals', () => {
             cds: 'Test CDS',
             keywords: ['test', 'keywords'],
         };
-  
+
         service.getGroup.mockResolvedValueOnce({ cod_group: 'Group1' });
         service.getGroup.mockResolvedValueOnce({ cod_group: 'Group2' });
-    
+
         // Mock the createThesisProposal function
         require('../thesis_dao').createThesisProposal.mockResolvedValue('mockedThesisProposalId');
-  
+
         const response = await request(app)
             .post('/api/teacher/thesis_proposals')
             .set('Accept', 'application/json')
             .set('Cookie', loginResponse.headers['set-cookie'])
             .send(requestBody);
-    
+
         expect(response.status).toBe(400);
         expect(response.text).toEqual("\"Missing required fields.\"");
     });
@@ -331,19 +331,19 @@ describe('POST /api/teacher/thesis_proposals', () => {
             cds: 'Test CDS',
             keywords: ['test', 'keywords'],
         };
-  
+
         service.getGroup.mockResolvedValueOnce({ cod_group: 'Group1' });
         service.getGroup.mockResolvedValueOnce({ cod_group: 'Group2' });
-    
+
         // Mock the createThesisProposal function
         require('../thesis_dao').createThesisProposal.mockResolvedValue('mockedThesisProposalId');
-  
+
         const response = await request(app)
             .post('/api/teacher/thesis_proposals')
             .set('Accept', 'application/json')
             .set('Cookie', loginResponse.headers['set-cookie'])
             .send(requestBody);
-    
+
         expect(response.status).toBe(403);
         expect(response.text).toEqual("\"Unauthorized\"");
     });
@@ -362,18 +362,18 @@ describe('POST /api/teacher/thesis_proposals', () => {
             cds: 'Test CDS',
             keywords: ['test', 'keywords'],
         };
-  
+
         service.getGroup.mockResolvedValueOnce({ cod_group: 'Group1' });
         service.getGroup.mockResolvedValueOnce({ cod_group: 'Group2' });
-    
+
         // Mock the createThesisProposal function
         require('../thesis_dao').createThesisProposal.mockResolvedValue('mockedThesisProposalId');
-  
+
         const response = await request(app)
             .post('/api/teacher/thesis_proposals')
             .set('Accept', 'application/json')
             .send(requestBody);
-    
+
         expect(response.status).toBe(401);
         expect(response.text).toEqual("\"Not authorized\"");
     });
@@ -386,18 +386,18 @@ describe('POST /api/teacher/thesis_proposals', () => {
           cod_group: 'Group1',
           cod_department: 'Dep1',
         };
-      
+
         usersService.getUser.mockResolvedValue(mockUser);
-      
+
         const loginResponse = await request(app)
           .post('/api/sessions')
           .send({ username: 'r.m@email.com', password: 'd1' })
           .set('Accept', 'application/json');
-      
+
         const cookies = loginResponse.headers['set-cookie'];
         expect(cookies).toBeDefined();
         expect(loginResponse.status).toBe(201);
-      
+
         // Mock data for the request body
         const requestBody = {
             title: 'Test Thesis',
@@ -412,37 +412,21 @@ describe('POST /api/teacher/thesis_proposals', () => {
             cds: 'Test CDS',
             keywords: ['test', 'keywords'],
         };
-      
+
         service.getGroup.mockResolvedValueOnce({ cod_group: 'Group1' });
         service.getGroup.mockResolvedValueOnce({ cod_group: 'Group2' });
-      
+
         // Mock the createThesisProposal function to throw an error
         require('../thesis_dao').createThesisProposal.mockRejectedValue(new Error('Mocked error during thesis proposal creation'));
-      
+
         const response = await request(app)
           .post('/api/teacher/thesis_proposals')
           .set('Accept', 'application/json')
           .set('Cookie', loginResponse.headers['set-cookie'])
           .send(requestBody);
-      
+
         // Expecting a 500 status code
         expect(response.status).toBe(500);
-      
+
     });
 });
-
-// TEST GET api/student/:id/thesis_proposals?title=...&supervisor=...&co-supervisor=...&tags=...&keywords=...&type=...
-
-// TEST POST api/student/:id/applications
-
-// TEST GET api/teacher/:id/applications
-
-// TEST PATCH api/teacher/:id/applications/:id
-
-// TEST PATCH api/teacher/:id/applications/:id
-
-// TEST GET api/student/:id/applications
-
-// TEST GET api/teacher/:id/thesis_proposals
-
-// TEST PATCH api/teacher/:id/thesis_proposals/:id
