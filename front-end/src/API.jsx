@@ -101,16 +101,33 @@ async function getAllKeywords() {
             'Content-Type': 'application/json',
         },
     });
-    const teachers = await response.json();
+    const keywords = await response.json();
     if (response.ok) {
-        return teachers;
+        return keywords;
     } else {
-        throw teachers;
+        throw keywords;
+    }
+}
+
+async function getAllDegrees() {
+    const response = await fetch(URL + '/degrees', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    const degrees = await response.json();
+    if (response.ok) {
+        return degrees;
+    } else {
+        throw degrees;
     }
 }
 
 
+
 const API = {
-    logIn, logOut, getUserInfo, insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords
+    logIn, logOut, getUserInfo, insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees
 };
 export default API;

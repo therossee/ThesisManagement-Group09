@@ -23,8 +23,10 @@ const steps = [
 function InsertThesisProposal() {
 
   const [keywords, setKeywords] = useState([]);
-  const [coSupervisors, setCoSupervisors] = useState([]);
+  const [intCoSupervisors, setIntCoSupervisors] = useState([]);
+  const [extCoSupervisors, setExtCoSupervisors] = useState([]);
   const [errorMsg, setErrorMsg] = useState("");
+  const [degrees, setDegrees] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
@@ -34,21 +36,27 @@ function InsertThesisProposal() {
   useEffect(() => {
     API.getTeachers()
     .then((obj) => {
-      setCoSupervisors(obj.teachers);
+      setIntCoSupervisors(obj.teachers);
     })
     .catch((err) => {
       setErrorMsg("Failed to fetch teachers");
     });
     API.getExtCoSupervisors()
     .then((obj) => {
-      addSupervisors(obj.externalCoSupervisors);
+      setExtCoSupervisors(obj.externalCoSupervisors);
     })
     .catch((err) => {
       setErrorMsg("Failed to fetch external co-supervisors");
     });
+    API.getAllDegrees()
+    .then((obj) => {
+      setDegrees(obj);
+    })
+    .catch((err) => {
+      setErrorMsg("Failed to fetch degrees");
+    });
     API.getAllKeywords()
     .then((obj) => {
-      console.log(obj.keywords);
       setKeywords(obj.keywords);
     })
     .catch((err) => {
@@ -58,7 +66,7 @@ function InsertThesisProposal() {
       setLoading(false);
     })
   }, [current]);
-
+  
   const items = steps.map((item) => ({
     key: item.title,
     title: item.title,
@@ -74,13 +82,8 @@ function InsertThesisProposal() {
   };
 
   const saveFormData = (data) => {
-    console.log(data);
     setFormData(data);
     next();
-  };
-
-  const addSupervisors = (extSup) => {
-    setCoSupervisors(coSupervisors => [...coSupervisors, ...extSup]);
   };
 
   return (
@@ -99,10 +102,10 @@ function InsertThesisProposal() {
       <div style={{ marginLeft: "15%", marginRight: "15%", marginTop: "3%" }}>
         <div>
           {current === 0 && (
-            <InsertBody saveData={saveFormData} coSupervisors={coSupervisors} keywords={keywords} form={form}/>
+            <InsertBody saveData={saveFormData} intCoSupervisors={intCoSupervisors} extCoSupervisors={extCoSupervisors} keywords={keywords} degrees={degrees} form={form}/>
           )} {current === 1 && (
             <>
-            <ReviewProposal formData={formData}/>
+            <ReviewProposal formData={formData} intCoSupervisors={intCoSupervisors} extCoSupervisors={extCoSupervisors} degrees={degrees}/>
             <Button
               style={{
                 margin: "0 8px",
@@ -133,16 +136,31 @@ function InsertThesisProposal() {
 }
 
 function InsertBody(props) {
-  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedInt, setSelectedInt] = useState([]);
+  const [selectedExt, setSelectedExt] = useState([]);
   const [selectedKw, setSelectedKw] = useState([]);
   const [newKeyword, setNewKeyword] = useState("");
-  const {keywords, coSupervisors, form} = props;
-  const unselected = coSupervisors.filter((x) => !selectedItems.includes(x));
+  const [lev, setSelLev] = useState("");
+  const [selDegrees, setSelDegrees] = useState([]);
+  const {keywords, intCoSupervisors, extCoSupervisors, degrees, form} = props;
+  const unselectedInt = intCoSupervisors.filter((x) => !selectedInt.includes(x));
+  const unselectedExt = extCoSupervisors.filter((x) => !selectedExt.includes(x));
 
+  useEffect(() => {
+    if (form.getFieldValue("degreeLevel") === "L") {
+      setSelLev("L");
+      setSelDegrees(degrees.filter((x) => x.cod_degree.includes("L-")));
+    } else if (form.getFieldValue("degreeLevel") === "LM") {
+      setSelLev("LM");
+      setSelDegrees(degrees.filter((x) => x.cod_degree.includes("LM-")));
+    } else {
+      setSelLev("");
+      setSelDegrees([]);
+    }
+  }, []);
 
   const handleInputChange = (value) => {
     setNewKeyword(value);
-    console.log(form);
   };
 
   const handleKeyDown = (e) => {
@@ -152,8 +170,15 @@ function InsertBody(props) {
     }
   };
 
-  const handleSelectChange = (values) => {
+  const handleSelectKwChange = (values) => {
     setSelectedKw(values);
+  };
+
+  const handleDegreeSelection = (lev) => {
+    setSelLev(lev);
+    form.setFieldValue("cds", "");
+    const str = lev === "L" ? "L-" : "LM-";
+    setSelDegrees(degrees.filter((x) => x.cod_degree.includes(str)));
   };
 
   function disabledDate(current) {
@@ -165,126 +190,163 @@ function InsertBody(props) {
   };
 
   return (
-    <Form form={form} layout="vertical" onFinish={onFinish}>
-      <Form.Item label="Title" name="title" rules={[
-        {
-          required: true,
-          message: 'Please input a title!',
-        },
-      ]}>
-        <Input />
-      </Form.Item>
-      <Form.Item label="Co-Supervisors" name="coSupervisors">
-      <Select
+      <Form form={form} layout="vertical" onFinish={onFinish}>
+        <Form.Item label="Title" name="title" rules={[
+          {
+            required: true,
+            message: 'Please input a title!',
+          },
+        ]}>
+          <Input />
+        </Form.Item>
+        <Form.Item label="Internal co-Supervisors" name="intCoSupervisors">
+        <Select
+          mode="multiple"
+          placeholder="Select internal co-Supervisors"
+          value={selectedInt}
+          onChange={setSelectedInt}
+          options={unselectedInt.map((x) => ({
+            value: x.id, // assuming x.id is a string or number
+            label: `${x.name} ${x.surname}`, // assuming x.name and x.surname are strings
+          }))}
+        />
+        </Form.Item>
+        <Form.Item label="External co-Supervisors" name="extCoSupervisors">
+        <Select
+          mode="multiple"
+          placeholder="Select external co-Supervisors"
+          value={selectedExt}
+          onChange={setSelectedExt}
+          options={unselectedExt.map((x) => ({
+            value: x.id, // assuming x.id is a string or number
+            label: `${x.name} ${x.surname}`, // assuming x.name and x.surname are strings
+          }))}
+        />
+        </Form.Item>
+        <Form.Item label="Keywords" name="keywords">
+        <Select
         mode="multiple"
-        placeholder="Select Co-Supervisor"
-        value={selectedItems}
-        onChange={setSelectedItems}
-        options={unselected.map((x) => ({
-          value: x.id, // assuming x.id is a string or number
-          label: `${x.name} ${x.surname}`, // assuming x.name and x.surname are strings
-        }))}
-      />
-      </Form.Item>
-      <Form.Item label="Keywords" name="keywords">
-      <Select
-      mode="multiple"
-      placeholder="Select keywords"
-      value={selectedKw}
-      onChange={handleSelectChange}
-      onInputKeyDown={handleKeyDown}
-      onSearch={handleInputChange}
-      optionLabelProp="label"
-    >
-      {keywords.map((kw) => (
-        <Option key={kw} value={kw} label={kw}>
-          {kw}
-        </Option>
-      ))}
-      {newKeyword.trim() !== '' && !keywords.includes(newKeyword) && (
-        <Option key={newKeyword} value={newKeyword} label={newKeyword}>
-          {newKeyword}
-        </Option>
-      )}
-    </Select>
-      </Form.Item>
-      <Form.Item label="Type" name="type" rules={[
-        {
-          required: true,
-          message: 'Please input a type!',
-        },
-      ]}>
-        <Input />
-      </Form.Item>
-      <Form.Item label="Description" name="description" rules={[
-        {
-          required: true,
-          message: 'Please insert a description for this thesis!',
-        },
-      ]}>
-        <Input.TextArea rows={6} />
-      </Form.Item>
-      <Form.Item label="Required Knowledge" name="requiredKnowledge" >
-        <Input.TextArea rows={4} />
-      </Form.Item>
-      <Form.Item label="Notes" name="notes">
-        <Input.TextArea rows={4} />
-      </Form.Item>
-      <Form.Item label="Expiration Date" name="expirationDate" rules={[
-        {
-          required: true,
-          message: 'Please select an expiration date!',
-        },
-      ]}>
-        <DatePicker disabledDate={disabledDate} />
-      </Form.Item>
-      <Form.Item name="level" label="Level" rules={[
-        {
-          required: true,
-          message: 'Please select a level!',
-        },
-      ]}>
-        <Select placeholder="Select a option" allowClear>
-          <Option value="L">L - Bachelor Degree</Option>
-          <Option value="LM">LM - Master Degree</Option>
-        </Select>
-      </Form.Item>
-      <Form.Item name="cds" label="CdS" rules={[
-        {
-          required: true,
-          message: 'Please select a CdS!',
-        },
-      ]}>
-        <Select placeholder="Select a option" allowClear>
-          <Option value="Scienze delle merendine">
-            Scienze delle merendine
+        placeholder="Select keywords"
+        value={selectedKw}
+        onChange={handleSelectKwChange}
+        onInputKeyDown={handleKeyDown}
+        onSearch={handleInputChange}
+        optionLabelProp="label"
+      >
+        {keywords.map((kw) => (
+          <Option key={kw} value={kw} label={kw}>
+            {kw}
           </Option>
-          <Option value="Università della vita">Università della vita</Option>
-        </Select>
-      </Form.Item>
-      <Form.Item>
-      <Button type="primary" htmlType="submit">
-          Submit
-        </Button>
-      </Form.Item>
-    </Form>
+        ))}
+        {newKeyword.trim() !== '' && !keywords.includes(newKeyword) && (
+          <Option key={newKeyword} value={newKeyword} label={newKeyword}>
+            {newKeyword}
+          </Option>
+        )}
+      </Select>
+        </Form.Item>
+        <Form.Item label="Type" name="type" rules={[
+          {
+            required: true,
+            message: 'Please input a type!',
+          },
+        ]}>
+          <Input />
+        </Form.Item>
+        <Form.Item label="Description" name="description" rules={[
+          {
+            required: true,
+            message: 'Please insert a description for this thesis!',
+          },
+        ]}>
+          <Input.TextArea rows={6} />
+        </Form.Item>
+        <Form.Item label="Required Knowledge" name="requiredKnowledge" >
+          <Input.TextArea rows={4} />
+        </Form.Item>
+        <Form.Item label="Notes" name="notes">
+          <Input.TextArea rows={4} />
+        </Form.Item>
+        <Form.Item label="Expiration Date" name="expirationDate" rules={[
+          {
+            required: true,
+            message: 'Please select an expiration date!',
+          },
+        ]}>
+          <DatePicker disabledDate={disabledDate} />
+        </Form.Item>
+        <Form.Item
+          name="degreeLevel"
+          label="Degree Level"
+          rules={[
+            {
+              required: true,
+              message: 'Please select a degree level!',
+            },
+          ]}
+        >
+          <Select
+            placeholder="Select a degree level"
+            allowClear
+            onChange={handleDegreeSelection}
+          >
+            <Select.Option value="L">L - Bachelor Degree</Select.Option>
+            <Select.Option value="LM">LM - Master Degree</Select.Option>
+          </Select>
+        </Form.Item>
+        <Form.Item
+          name="cds"
+          label="CdS"
+          rules={[
+            {
+              required: true,
+              message: 'Please select a CdS!',
+            },
+          ]}
+        >
+          <Select placeholder="Select a CdS" allowClear disabled={lev === ""}>
+            {selDegrees.map((d) => (d.cod_degree.includes(lev) ?
+              <Select.Option key={d.title_degree} value={d.cod_degree}>
+                {d.title_degree}
+              </Select.Option>
+              : null
+            ))}
+          </Select>  
+        </Form.Item>
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            Submit
+          </Button>
+        </Form.Item>
+      </Form>
   );
 }
 
 function ReviewProposal(props) {
   //Function to retrieve the data of the form inserted in insert body
   const formData = props.formData;
-  let coSup;
-  if(formData.coSupervisors.length > 0) {
-    coSup = formData.coSupervisors;
-    console.log(coSup);
+  const {intCoSupervisors, extCoSupervisors, degrees} = props;
+  const deg = degrees.find((x) => x.cod_degree === formData.cds);
+  const level = formData.degreeLevel === "L" ? "L - Bachelor Degree" : "LM - Master Degree";
+  let intCoSup, extCoSup;
+  if(formData.intCoSupervisors !== undefined){
+    intCoSup = intCoSupervisors.filter((x) => formData.intCoSupervisors.includes(x.id));
+  }
+  if(formData.extCoSupervisors !== undefined){
+    extCoSup = extCoSupervisors.filter((x) => formData.extCoSupervisors.includes(x.id));
   }
   return (
     <div>
       <h2>Review Proposal</h2>
       <p>Title: {formData.title}</p>
-      {formData.coSupervisors ?
-      <p>Co-Supervisors: {formData.coSupervisors.join(", ")}</p> : <p>Co-Supervisors: </p>}
+      {formData.intCoSupervisors !== undefined ?
+      <p>Internal co-Supervisors: {intCoSup.map((x) => {
+        return `${x.name} ${x.surname}`;
+      }).join(", ")}</p> : <p>Internal co-Supervisors: </p>}
+      {formData.intCoSupervisors !== undefined ?
+      <p>External co-Supervisors: {extCoSup.map((x) => {
+        return `${x.name} ${x.surname}`;
+      }).join(", ")}</p> : <p>External co-Supervisors: </p>}
       {formData.keywords ? 
         <p>Keywords: {formData.keywords.join(", ")}</p> : <p>Keywords: </p>}
       <p>Type: {formData.type}</p>
@@ -297,8 +359,8 @@ function ReviewProposal(props) {
           ? formData.expirationDate.format("YYYY-MM-DD")
           : ""}
       </p>
-      <p>Level: {formData.level}</p>
-      <p>CdS: {formData.cds}</p>
+      <p>Level: {level}</p>
+      <p>CdS: {formData.cds} - {deg.title_degree}</p>
     </div>
   );
 }
@@ -308,6 +370,15 @@ function Done() {
     <div>
       <h2>Done</h2>
       <p>You have finished!</p>
+    </div>
+  );
+}
+
+function ErrorInsert(){
+  return (
+    <div>
+      <h2>Error</h2>
+      <p>Error while inserting new proposal!</p>
     </div>
   );
 }
