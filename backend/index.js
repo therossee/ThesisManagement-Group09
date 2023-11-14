@@ -231,6 +231,19 @@ async(req, res) => {
   }
 });
 
+//GET /api/keywords
+app.get('/api/keywords',
+isLoggedIn,
+isTeacher,
+async(req, res) => {
+  try {
+    const keywords = await thesisDao.getAllKeywords();
+    res.json({ keywords });
+  } catch (error) {
+    res.status(500).json('Internal Server Error');
+  }
+});
+
 // 4. Search for thesis proposals
 // GET api/thesis-proposals
 app.get('/api/thesis-proposals',
