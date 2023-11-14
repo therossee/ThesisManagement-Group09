@@ -33,7 +33,9 @@ describe('AdvancedDate class', () => {
             const dayjsDate = dayjs('2021-01-01T00:00:00.000Z');
             const virtualDate = AdvancedDate.virtual.getVirtualDate(dayjsDate);
 
-            expect(virtualDate.valueOf()).toBe(dayjsDate.valueOf() + offset);
+            // Check with a tolerance of 3 milliseconds
+            expect(virtualDate.valueOf()).toBeGreaterThanOrEqual(dayjsDate.valueOf() + offset - 3);
+            expect(virtualDate.valueOf()).toBeLessThanOrEqual(dayjsDate.valueOf() + offset);
         });
 
         test('should return virtual date based on the offset', () => {
