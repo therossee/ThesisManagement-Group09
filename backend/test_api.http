@@ -54,6 +54,11 @@ GET http://localhost:3000/api/teachers
 
 ## 3. Get list of external co-supervisors
 GET http://localhost:3000/api/externalCoSupervisors
+###
+
+## Get all keywors
+GET http://localhost:3000/api/keywords
+###
 
 // 4. Search for thesis proposals
 // GET api/student/:id/thesis_proposals?title=...&supervisor=...&co-supervisor=...&tags=...&keywords=...&type=...

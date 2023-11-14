@@ -89,6 +89,17 @@ exports.getGroup = (teacherId) => {
   })
 };
 
+// Function to retrieve all the keywords
+exports.getAllKeywords = () => {
+  return new Promise((resolve) => {
+      const getKeywords = `SELECT DISTINCT(keyword) FROM proposalKeyword`;
+      const res = db.prepare(getKeywords).all();
+      // Extracting the keyword property from each row
+      const keywords = res.map(row => row.keyword);
+      resolve(keywords)
+  })
+};
+
 /**
  * Return the proposal with the given id related to a student degree (if exists)
  *
