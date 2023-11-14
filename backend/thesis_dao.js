@@ -90,6 +90,26 @@ exports.getGroup = (teacherId) => {
 };
 
 /**
+ * Return the proposal with the given id related to a student degree (if exists)
+ *
+ * @param {string} proposalId
+ * @param {string} studentId
+ *
+ * @return {Promise<ThesisProposalRow | null>}
+ */
+exports.getThesisProposal = (proposalId, studentId) => {
+    return new Promise((resolve) => {
+        const query = `SELECT * FROM thesisProposal P
+            JOIN degree D ON P.cds = D.cod_degree
+            JOIN student S ON S.cod_degree = D.cod_degree
+            WHERE P.proposal_id = ? AND S.id = ?`;
+
+        const thesisProposal = db.prepare(query).get(proposalId, studentId);
+        resolve(thesisProposal ?? null);
+    })
+};
+
+/**
  * Return the list of thesis proposals related to a student degree
  *
  * @param {string} studentId
@@ -97,7 +117,7 @@ exports.getGroup = (teacherId) => {
  */
 exports.listThesisProposalsFromStudent = (studentId) => {
     return new Promise((resolve) => {
-        const query = `SELECT * FROM thesisProposal P 
+        const query = `SELECT * FROM thesisProposal P
             JOIN degree D ON P.cds = D.cod_degree
             JOIN student S ON S.cod_degree = D.cod_degree
             WHERE S.id = ?`;
@@ -118,6 +138,21 @@ exports.getKeywordsOfProposal = (proposalId) => {
         const query = `SELECT keyword FROM proposalKeyword WHERE proposal_id = ?`;
         const data = db.prepare(query).all(proposalId);
         resolve(data.map( row => row.keyword ));
+    })
+};
+
+/**
+ * Return the list of thesis proposals groups
+ *
+ * @param {string} proposalId
+ * @return {Promise<string[]>}
+ */
+exports.getProposalGroups = (proposalId) => {
+    return new Promise((resolve) => {
+        const query = `SELECT cod_group FROM proposalGroup WHERE proposal_id = ?`;
+        const data = db.prepare(query).all(proposalId);
+
+        resolve(data.map( row => row.cod_group ));
     })
 };
 
