@@ -22,103 +22,14 @@ const steps = [
 
 function InsertThesisProposal() {
 
-  const items = steps.map((item) => ({
-    key: item.title,
-    title: item.title,
-  }));
-
-  useEffect(() => {
-    
-  }, []);
-
-  const navigate = useNavigate();
-  const [current, setCurrent] = useState(0);
-  const [formData, setFormData] = useState(null);
-
-  const next = () => {
-    setCurrent(current + 1);
-  };
-
-  const prev = () => {
-    setCurrent(current - 1);
-  };
-
-  const saveFormData = (data) => {
-    setFormData(data);
-    next();
-  };
-
-  return (
-    <>
-      <Steps
-        current={current}
-        items={items}
-        style={{ paddingRight: "20%", paddingLeft: "20%" }}
-      />
-      <div style={{ marginLeft: "15%", marginRight: "15%", marginTop: "3%" }}>
-        <div>
-          {current === 0 && (
-            <InsertBody saveData={saveFormData}/>
-          )} {current === 1 && (
-            <>
-            <ReviewProposal formData={formData}/>
-            <Button
-              style={{
-                margin: "0 8px",
-              }}
-              onClick={() => prev()}
-            >
-              Previous
-            </Button>
-              <Button type="primary" onClick={() => next()}>
-                Next
-              </Button>
-            </>
-          )}
-        </div>
-        <div>
-          {current === steps.length - 1 && (
-            <Button type="primary" onClick={() => navigate("/")}>
-              Done
-            </Button>
-          )}
-        </div>
-      </div>
-      <FloatButton.BackTop style={{ marginBottom: "40px" }} tooltip={<div>Back to Top</div>} />
-    </>
-  );
-}
-
-function InsertBody(props) {
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [selectedKw, setSelectedKw] = useState([]);
-  const [newKeyword, setNewKeyword] = useState("");
   const [keywords, setKeywords] = useState([]);
   const [coSupervisors, setCoSupervisors] = useState([]);
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(true);
-  const [newItem, setNewItem] = useState("");
+  const navigate = useNavigate();
+  const [current, setCurrent] = useState(0);
+  const [formData, setFormData] = useState(null);
   const [form] = Form.useForm();
-  const unselected = coSupervisors.filter((x) => !selectedItems.includes(x));
-
-  const addSupervisors = (extSup) => {
-    setCoSupervisors(coSupervisors => [...coSupervisors, ...extSup]);
-  };
-
-  const handleInputChange = (value) => {
-    setNewKeyword(value);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && newKeyword.trim() !== '') {
-      setSelectedKw([...selectedKw, newKeyword]);
-      setNewKeyword('');
-    }
-  };
-
-  const handleSelectChange = (values) => {
-    setSelectedKw(values);
-  };
 
   useEffect(() => {
     API.getTeachers()
@@ -146,7 +57,104 @@ function InsertBody(props) {
     .finally(() => {
       setLoading(false);
     })
-  }, []);
+  }, [current]);
+
+  const items = steps.map((item) => ({
+    key: item.title,
+    title: item.title,
+  }));
+
+
+  const next = () => {
+    setCurrent(current + 1);
+  };
+
+  const prev = () => {
+    setCurrent(current - 1);
+  };
+
+  const saveFormData = (data) => {
+    console.log(data);
+    setFormData(data);
+    next();
+  };
+
+  const addSupervisors = (extSup) => {
+    setCoSupervisors(coSupervisors => [...coSupervisors, ...extSup]);
+  };
+
+  return (
+    <>
+    {loading ?
+    <div style={{ marginLeft: "49%", marginRight: "25%", marginTop: "25%"}}>
+      <Spin tip="Loading" size="large" />
+    </div>
+    :
+    <>
+      <Steps
+        current={current}
+        items={items}
+        style={{ paddingRight: "20%", paddingLeft: "20%" }}
+      />
+      <div style={{ marginLeft: "15%", marginRight: "15%", marginTop: "3%" }}>
+        <div>
+          {current === 0 && (
+            <InsertBody saveData={saveFormData} coSupervisors={coSupervisors} keywords={keywords} form={form}/>
+          )} {current === 1 && (
+            <>
+            <ReviewProposal formData={formData}/>
+            <Button
+              style={{
+                margin: "0 8px",
+              }}
+              onClick={() => prev()}
+            >
+              Previous
+            </Button>
+              <Button type="primary" onClick={() => next()}>
+                Next
+              </Button>
+            </>
+          )}
+        </div>
+        <div>
+          {current === steps.length - 1 && (
+            <Button type="primary" onClick={() => navigate("/")}>
+              Done
+            </Button>
+          )}
+        </div>
+      </div>
+      <FloatButton.BackTop style={{ marginBottom: "40px" }} tooltip={<div>Back to Top</div>} />
+    </>
+    }
+  </>
+  );
+}
+
+function InsertBody(props) {
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedKw, setSelectedKw] = useState([]);
+  const [newKeyword, setNewKeyword] = useState("");
+  const {keywords, coSupervisors, form} = props;
+  const unselected = coSupervisors.filter((x) => !selectedItems.includes(x));
+
+
+  const handleInputChange = (value) => {
+    setNewKeyword(value);
+    console.log(form);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && newKeyword.trim() !== '') {
+      setSelectedKw([...selectedKw, newKeyword]);
+      setNewKeyword('');
+    }
+  };
+
+  const handleSelectChange = (values) => {
+    setSelectedKw(values);
+  };
 
   function disabledDate(current) {
     return current && current.valueOf() < Date.now();
@@ -157,12 +165,6 @@ function InsertBody(props) {
   };
 
   return (
-    <>
-    {loading ?
-    <div style={{ marginLeft: "49%", marginRight: "25%", marginTop: "25%"}}>
-      <Spin tip="Loading" size="large" />
-    </div>
-    :
     <Form form={form} layout="vertical" onFinish={onFinish}>
       <Form.Item label="Title" name="title" rules={[
         {
@@ -243,8 +245,8 @@ function InsertBody(props) {
         },
       ]}>
         <Select placeholder="Select a option" allowClear>
-          <Option value="bachelor">L - Bachelor Degree</Option>
-          <Option value="master">LM - Master Degree</Option>
+          <Option value="L">L - Bachelor Degree</Option>
+          <Option value="LM">LM - Master Degree</Option>
         </Select>
       </Form.Item>
       <Form.Item name="cds" label="CdS" rules={[
@@ -266,8 +268,6 @@ function InsertBody(props) {
         </Button>
       </Form.Item>
     </Form>
-  }
-  </>
   );
 }
 
