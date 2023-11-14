@@ -259,6 +259,25 @@ app.get('/api/thesis-proposals',
       res.status(500).json('Internal Server Error');
     }
   });
+app.get('/api/thesis-proposals/:id',
+  isLoggedIn,
+  isStudent,
+  async (req, res) => {
+    try {
+      const studentId = req.user.id;
+      const proposalId = req.params.id;
+
+      const proposal = await thesisDao.getThesisProposal(proposalId, studentId);
+      if (!proposal) {
+          return res.status(404).json({ message: `Thesis proposal with id ${proposalId} not found.` });
+      }
+
+      res.json( await _populateProposal(proposal) );
+    } catch (e) {
+      console.error(e);
+      res.status(500).json('Internal Server Error');
+    }
+  });
 
 // 5. Apply for a thesis proposal
 // POST api/student/:id/applications
@@ -324,7 +343,8 @@ async function _populateProposal(proposalData) {
 
           return _serializeDegree(degree);
         }),
-    keywords: await thesisDao.getKeywordsOfProposal(proposalData.proposal_id)
+    keywords: await thesisDao.getKeywordsOfProposal(proposalData.proposal_id),
+    groups: await thesisDao.getProposalGroups(proposalData.proposal_id)
   };
 }
 
