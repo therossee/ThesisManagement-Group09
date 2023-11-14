@@ -1,15 +1,16 @@
 -- Drop the existing tables if they exist
-DROP TABLE IF EXISTS student;
-DROP TABLE IF EXISTS teacher;
-DROP TABLE IF EXISTS externalCoSupervisor;
-DROP TABLE IF EXISTS degree;
-DROP TABLE IF EXISTS career;
-DROP TABLE IF EXISTS thesisProposal;
-DROP TABLE IF EXISTS thesisInternalCoSupervisor;
-DROP TABLE IF EXISTS thesisExternalCoSupervisor;
-DROP TABLE IF EXISTS proposalKeyword;
-DROP TABLE IF EXISTS proposalGroup;
 DROP TABLE IF EXISTS thesisApplication;
+DROP TABLE IF EXISTS proposalGroup;
+DROP TABLE IF EXISTS proposalKeyword;
+DROP TABLE IF EXISTS thesisExternalCoSupervisor;
+DROP TABLE IF EXISTS thesisInternalCoSupervisor;
+DROP TABLE IF EXISTS thesisProposal;
+DROP TABLE IF EXISTS career;
+DROP TABLE IF EXISTS externalCoSupervisor;
+DROP TABLE IF EXISTS teacher;
+DROP TABLE IF EXISTS student;
+DROP TABLE IF EXISTS degree;
+
 
 -- Create the degree table
 CREATE TABLE degree (
@@ -188,48 +189,106 @@ VALUES
     ('Russo', 'Marco', 'marco.russo@email.com');
 
 -- Insert data into the student table
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year)
-VALUES
-    ('s294301', 'Rossi', 'Abbondanzio', 'Male', 'Italian', 'rossi.abbondanzio@email.com', 'L-07', 2020),
-    ('s309429', 'Ferrari', 'Abbondio', 'Male', 'Italian', 'ferrari.abbondio@email.com', 'L-08', 2024),
-    ('s322044', 'Russo', 'Abelardo', 'Male', 'Italian', 'russo.abelardo@email.com', 'L-09', 2023),
-    ('s288327', 'Esposito', 'Abenzio', 'Male', 'Italian', 'esposito.abenzio@email.com', 'L-09', 2021),
-    ('s287107', 'Bianchi', 'Abramio', 'Male', 'Italian', 'bianchi.abramio@email.com', 'L-08', 2022),
-    ('s288512', 'Romano', 'Acacio', 'Male', 'Italian', 'romano.acacio@email.com', 'LM-22', 2021),
-    ('s318894', 'Gallo', 'Accursio', 'Male', 'Italian', 'gallo.accursio@email.com', 'LM-30', 2018),
-    ('s299838', 'Costa', 'Acilio', 'Male', 'Italian', 'costa.acilio@email.com', 'LM-33', 2023),
-    ('s301938', 'Fontana', 'Caldo', 'Male', 'Italian', 'fontana.caldo@email.com', 'LM-27', 2022),
-    ('s322276', 'Conti', 'Acrisio', 'Male', 'Italian', 'conti.acrisio@email.com', 'LM-34', 2021),
-    ('s317988', 'Ricci', 'Adalberto', 'Male', 'Italian', 'ricci.adalberto@email.com', 'LM-34', 2023),
-    ('s304823', 'Bruno', 'Adalgiso', 'Male', 'Italian', 'bruno.adalgiso@email.com', 'LM-28', 2019),
-    ('s289041', 'De Luca', 'Adamo', 'Male', 'Italian', 'de luca.adamo@email.com', 'LM-24', 2021),
-    ('s297117', 'Moretti', 'Adelardo', 'Male', 'Italian', 'moretti.adelardo@email.com', 'LM-21', 2021),
-    ('s293605', 'Marino', 'Adelchi', 'Male', 'Italian', 'marino.adelchi@email.com', 'LM-33', 2024),
-    ('s324327', 'Greco', 'Adelgardo', 'Male', 'Italian', 'greco.adelgardo@email.com', 'LM-21', 2021),
-    ('s289300', 'Barbieri', 'Adeodato', 'Male', 'Italian', 'barbieri.adeodato@email.com', 'LM-35', 2021),
-    ('s313395', 'Lombardi', 'Adone', 'Male', 'Italian', 'lombardi.adone@email.com', 'LM-30', 2019),
-    ('s313562', 'Giordano', 'Adrione', 'Male', 'Italian', 'giordano.adrione@email.com', 'LM-30', 2022),
-    ('s317577', 'Cassano', 'Agabio', 'Male', 'Italian', 'cassano.agabio@email.com', 'LM-23', 2024),
-    ('s329608', 'Colombo', 'Agapito', 'Male', 'Italian', 'colombo.agapito@email.com', 'LM-30', 2022),
-    ('s308631', 'Mancini', 'Agenore', 'Male', 'Italian', 'mancini.agenore@email.com', 'LM-31', 2022),
-    ('s291500', 'Longo', 'Agostino', 'Male', 'Italian', 'longo.agostino@email.com', 'LM-35', 2021),
-    ('s303712', 'Marchetti', 'Aiace', 'Male', 'Italian', 'marchetti.aiace@email.com', 'LM-35', 2021),
-    ('s296014', 'Martini', 'Aimone', 'Male', 'Italian', 'martini.aimone@email.com', 'LM-24', 2021),
-    ('s323519', 'Galli', 'Albano', 'Male', 'Italian', 'galli.albano@email.com', 'LM-25', 2024),
-    ('s290090', 'Gatti', 'Alamanno', 'Male', 'Italian', 'gatti.alamanno@email.com', 'LM-27', 2021),
-    ('s319332', 'Zarella', 'Lorena', 'Female', 'Italian', 'zarella.lorena@email.com', 'LM-20', 2021),
-    ('s308699', 'Zarlengo', 'Lorenza', 'Female', 'Italian', 'zarlengo.lorenza@email.com', 'LM-31', 2020),
-    ('s313316', 'Zaro', 'Luana', 'Female', 'Italian', 'zaro.luana@email.com', 'LM-31', 2022),
-    ('s319540', 'Zarrella', 'Emma', 'Female', 'Italian', 'zarrella.emma@email.com', 'LM-20', 2021),
-    ('s290157', 'Zarrilli', 'Enrica', 'Female', 'Italian', 'zarrilli.enrica@email.com', 'LM-25', 2023),
-    ('s299119', 'Zarro', 'Erica', 'Female', 'Italian', 'zarro.erica@email.com', 'LM-34', 2023),
-    ('s290592', 'Zavaglia', 'Ermenegilda', 'Female', 'Italian', 'zavaglia.ermenegilda@email.com', 'LM-22', 2022),
-    ('s315270', 'Zecca', 'Erminia', 'Female', 'Italian', 'zecca.erminia@email.com', 'LM-35', 2024),
-    ('s296510', 'Zegarelli', 'Ermione', 'Female', 'Italian', 'zegarelli.ermione@email.com', 'LM-28', 2019),
-    ('s290989', 'Giacomo', 'Ersilia', 'Female', 'Italian', 'giacomo.ersilia@email.com', 'LM-29', 2022),
-    ('s305475', 'Giacona', 'Eugenia', 'Female', 'Italian', 'giacona.eugenia@email.com', 'LM-23', 2024);
-
-
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s294301', 'Rossi', 'Abbondanzio', 'Male', 'Italian', 'rossi.abbondanzio@email.com', 'L-07', 2020);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s309429', 'Ferrari', 'Abbondio', 'Male', 'Italian', 'ferrari.abbondio@email.com', 'L-08', 2024);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s322044', 'Russo', 'Abelardo', 'Male', 'Italian', 'russo.abelardo@email.com', 'L-09', 2023);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s288327', 'Esposito', 'Abenzio', 'Male', 'Italian', 'esposito.abenzio@email.com', 'L-09', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s287107', 'Bianchi', 'Abramio', 'Male', 'Italian', 'bianchi.abramio@email.com', 'L-08', 2022);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s288512', 'Romano', 'Acacio', 'Male', 'Italian', 'romano.acacio@email.com', 'LM-22', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s318894', 'Gallo', 'Accursio', 'Male', 'Italian', 'gallo.accursio@email.com', 'LM-30', 2018);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s299838', 'Costa', 'Acilio', 'Male', 'Italian', 'costa.acilio@email.com', 'LM-33', 2023);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s301938', 'Fontana', 'Caldo', 'Male', 'Italian', 'fontana.caldo@email.com', 'LM-27', 2022);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s322276', 'Conti', 'Acrisio', 'Male', 'Italian', 'conti.acrisio@email.com', 'LM-34', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s317988', 'Ricci', 'Adalberto', 'Male', 'Italian', 'ricci.adalberto@email.com', 'LM-34', 2023);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s304823', 'Bruno', 'Adalgiso', 'Male', 'Italian', 'bruno.adalgiso@email.com', 'LM-28', 2019);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s289041', 'De Luca', 'Adamo', 'Male', 'Italian', 'de luca.adamo@email.com', 'LM-24', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s297117', 'Moretti', 'Adelardo', 'Male', 'Italian', 'moretti.adelardo@email.com', 'LM-21', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s293605', 'Marino', 'Adelchi', 'Male', 'Italian', 'marino.adelchi@email.com', 'LM-33', 2024);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s324327', 'Greco', 'Adelgardo', 'Male', 'Italian', 'greco.adelgardo@email.com', 'LM-21', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s289300', 'Barbieri', 'Adeodato', 'Male', 'Italian', 'barbieri.adeodato@email.com', 'LM-35', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s313395', 'Lombardi', 'Adone', 'Male', 'Italian', 'lombardi.adone@email.com', 'LM-30', 2019);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s313562', 'Giordano', 'Adrione', 'Male', 'Italian', 'giordano.adrione@email.com', 'LM-30', 2022);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s317577', 'Cassano', 'Agabio', 'Male', 'Italian', 'cassano.agabio@email.com', 'LM-23', 2024);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s329608', 'Colombo', 'Agapito', 'Male', 'Italian', 'colombo.agapito@email.com', 'LM-30', 2022);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s308631', 'Mancini', 'Agenore', 'Male', 'Italian', 'mancini.agenore@email.com', 'LM-31', 2022);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s291500', 'Longo', 'Agostino', 'Male', 'Italian', 'longo.agostino@email.com', 'LM-35', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s303712', 'Marchetti', 'Aiace', 'Male', 'Italian', 'marchetti.aiace@email.com', 'LM-35', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s296014', 'Martini', 'Aimone', 'Male', 'Italian', 'martini.aimone@email.com', 'LM-24', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s323519', 'Galli', 'Albano', 'Male', 'Italian', 'galli.albano@email.com', 'LM-25', 2024);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s290090', 'Gatti', 'Alamanno', 'Male', 'Italian', 'gatti.alamanno@email.com', 'LM-27', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s301590', 'Mariani', 'Alarico', 'Male', 'Italian', 'mariani.alarico@email.com', 'LM-24', 2023);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s313048', 'Ferrara', 'Alberico', 'Male', 'Italian', 'ferrara.alberico@email.com', 'LM-34', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s321096', 'Santoro', 'Albino', 'Male', 'Italian', 'santoro.albino@email.com', 'LM-27', 2024);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s314291', 'Marini', 'Albrico', 'Male', 'Italian', 'marini.albrico@email.com', 'LM-21', 2020);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s286993', 'Bianco', 'Alceste', 'Male', 'Italian', 'bianco.alceste@email.com', 'LM-25', 2024);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s290692', 'Conte', 'Alcide', 'Male', 'Italian', 'conte.alcide@email.com', 'LM-34', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s314288', 'Serra', 'Aldo', 'Male', 'Italian', 'serra.aldo@email.com', 'LM-26', 2024);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s325784', 'Farina', 'Aleandro', 'Male', 'Italian', 'farina.aleandro@email.com', 'LM-24', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s302797', 'Gentile', 'Aleramo', 'Male', 'Italian', 'gentile.aleramo@email.com', 'LM-23', 2018);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s304535', 'Caruso', 'Alessio', 'Male', 'Italian', 'caruso.alessio@email.com', 'LM-34', 2023);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s303129', 'Morelli', 'Alfonso', 'Male', 'Italian', 'morelli.alfonso@email.com', 'LM-21', 2024);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s290817', 'Ferri', 'Algiso', 'Male', 'Italian', 'ferri.algiso@email.com', 'LM-29', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s325645', 'Testa', 'Almerigo', 'Male', 'Italian', 'testa.almerigo@email.com', 'LM-28', 2019);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s298289', 'Ferraro', 'Aloisio', 'Male', 'Italian', 'ferraro.aloisio@email.com', 'LM-29', 2019);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s314494', 'Pellegrini', 'Alviero', 'Male', 'Italian', 'pellegrini.alviero@email.com', 'LM-25', 2022);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s316149', 'Grassi', 'Amelio', 'Male', 'Italian', 'grassi.amelio@email.com', 'LM-29', 2018);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s300790', 'Rossetti', 'Amabile', 'Male', 'Italian', 'rossetti.amabile@email.com', 'LM-29', 2024);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s318074', 'D''Angelo', 'Amando', 'Male', 'Italian', 'd''angelo.amando@email.com', 'LM-24', 2018);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s324576', 'Bernardi', 'Amaranto', 'Male', 'Italian', 'bernardi.amaranto@email.com', 'LM-28', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s294596', 'Mazza', 'Amatore', 'Male', 'Italian', 'mazza.amatore@email.com', 'LM-22', 2019);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s327923', 'Rizzi', 'Ambrogio', 'Male', 'Italian', 'rizzi.ambrogio@email.com', 'LM-34', 2022);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s319225', 'Natale', 'Amedeo', 'Male', 'Italian', 'natale.amedeo@email.com', 'LM-35', 2023);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s304580', 'Rizzo', 'Amerigo', 'Male', 'Italian', 'rizzo.amerigo@email.com', 'LM-32', 2023);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s322753', 'Seta', 'Amilcare', 'Male', 'Italian', 'seta.amilcare@email.com', 'LM-26', 2020);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s303116', 'Setaro', 'Amleto', 'Male', 'Italian', 'setaro.amleto@email.com', 'LM-28', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s313347', 'Severini', 'Barbara', 'Female', 'Italian', 'severini.barbara@email.com', 'LM-23', 2020);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s312234', 'Severino', 'Beatrice', 'Female', 'Italian', 'severino.beatrice@email.com', 'LM-32', 2024);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s316031', 'Severo', 'Bella', 'Female', 'Italian', 'severo.bella@email.com', 'LM-23', 2018);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s292717', 'Sferra', 'Benedetta', 'Female', 'Italian', 'sferra.benedetta@email.com', 'LM-26', 2022);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s318174', 'Sferrazza', 'Bianca', 'Female', 'Italian', 'sferrazza.bianca@email.com', 'LM-24', 2020);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s294228', 'Sforza', 'Jasmine', 'Female', 'Italian', 'sforza.jasmine@email.com', 'LM-23', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s298114', 'Sgambati', 'Jessica', 'Female', 'Italian', 'sgambati.jessica@email.com', 'LM-24', 2019);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s295800', 'Sgarlata', 'Rita', 'Female', 'Italian', 'sgarlata.rita@email.com', 'LM-32', 2020);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s306042', 'Sibilia', 'Roberta', 'Female', 'Italian', 'sibilia.roberta@email.com', 'LM-26', 2022);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s309619', 'Sica', 'Romina', 'Female', 'Italian', 'sica.romina@email.com', 'LM-30', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s295416', 'Sicignano', 'Rosa', 'Female', 'Italian', 'sicignano.rosa@email.com', 'LM-22', 2019);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s290387', 'Sicilia', 'Rosalba', 'Female', 'Italian', 'sicilia.rosalba@email.com', 'LM-27', 2023);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s296477', 'Pontarelli', 'Rosalinda', 'Female', 'Italian', 'pontarelli.rosalinda@email.com', 'LM-34', 2018);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s327367', 'Pontecorvo', 'Rosanna', 'Female', 'Italian', 'pontecorvo.rosanna@email.com', 'LM-28', 2019);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s324696', 'Ponti', 'Rosaria', 'Female', 'Italian', 'ponti.rosaria@email.com', 'LM-32', 2018);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s316864', 'Ponticello', 'Rossana', 'Female', 'Italian', 'ponticello.rossana@email.com', 'LM-34', 2024);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s308704', 'Pontillo', 'Nerina', 'Female', 'Italian', 'pontillo.nerina@email.com', 'LM-34', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s311745', 'Pontrelli', 'Nicoletta', 'Female', 'Italian', 'pontrelli.nicoletta@email.com', 'LM-33', 2018);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s323472', 'Ponzi', 'Nina', 'Female', 'Italian', 'ponzi.nina@email.com', 'LM-20', 2020);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s306020', 'Ponzio', 'Noemi', 'Female', 'Italian', 'ponzio.noemi@email.com', 'LM-35', 2019);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s315182', 'Ponzo', 'Nora', 'Female', 'Italian', 'ponzo.nora@email.com', 'LM-33', 2023);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s297229', 'Popolizio', 'Paola', 'Female', 'Italian', 'popolizio.paola@email.com', 'LM-24', 2022);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s323077', 'Poppa', 'Patrizia', 'Female', 'Italian', 'poppa.patrizia@email.com', 'LM-20', 2023);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s303285', 'Ventola', 'Penelope', 'Female', 'Italian', 'ventola.penelope@email.com', 'LM-33', 2024);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s323929', 'Ventre', 'Perla', 'Female', 'Italian', 'ventre.perla@email.com', 'LM-32', 2024);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s324883', 'Ventrella', 'Petra', 'Female', 'Italian', 'ventrella.petra@email.com', 'LM-30', 2018);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s326660', 'Ventresca', 'Piera', 'Female', 'Italian', 'ventresca.piera@email.com', 'LM-21', 2023);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s319815', 'Ventrone', 'Preziosa', 'Female', 'Italian', 'ventrone.preziosa@email.com', 'LM-35', 2024);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s294198', 'Ventura', 'Priscilla', 'Female', 'Italian', 'ventura.priscilla@email.com', 'LM-22', 2022);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s297502', 'Venturella', 'Licia', 'Female', 'Italian', 'venturella.licia@email.com', 'LM-25', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s286802', 'Venturelli', 'Lidia', 'Female', 'Italian', 'venturelli.lidia@email.com', 'LM-25', 2023);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s314576', 'Venturi', 'Liliana', 'Female', 'Italian', 'venturi.liliana@email.com', 'LM-20', 2024);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s305644', 'Venturini', 'Linda', 'Female', 'Italian', 'venturini.linda@email.com', 'LM-34', 2020);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s295137', 'Venturino', 'Lisa', 'Female', 'Italian', 'venturino.lisa@email.com', 'LM-34', 2019);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s300060', 'Venturo', 'Livia', 'Female', 'Italian', 'venturo.livia@email.com', 'LM-22', 2022);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s300558', 'Venuti', 'Loredana', 'Female', 'Italian', 'venuti.loredana@email.com', 'LM-30', 2023);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s308898', 'Venuto', 'Lorella', 'Female', 'Italian', 'venuto.lorella@email.com', 'LM-30', 2018);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s319332', 'Zarella', 'Lorena', 'Female', 'Italian', 'zarella.lorena@email.com', 'LM-20', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s308699', 'Zarlengo', 'Lorenza', 'Female', 'Italian', 'zarlengo.lorenza@email.com', 'LM-31', 2020);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s313316', 'Zaro', 'Luana', 'Female', 'Italian', 'zaro.luana@email.com', 'LM-31', 2022);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s319540', 'Zarrella', 'Emma', 'Female', 'Italian', 'zarrella.emma@email.com', 'LM-20', 2021);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s290157', 'Zarrilli', 'Enrica', 'Female', 'Italian', 'zarrilli.enrica@email.com', 'LM-25', 2023);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s299119', 'Zarro', 'Erica', 'Female', 'Italian', 'zarro.erica@email.com', 'LM-34', 2023);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s290592', 'Zavaglia', 'Ermenegilda', 'Female', 'Italian', 'zavaglia.ermenegilda@email.com', 'LM-22', 2022);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s315270', 'Zecca', 'Erminia', 'Female', 'Italian', 'zecca.erminia@email.com', 'LM-35', 2024);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s296510', 'Zegarelli', 'Ermione', 'Female', 'Italian', 'zegarelli.ermione@email.com', 'LM-28', 2019);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s290989', 'Giacomo', 'Ersilia', 'Female', 'Italian', 'giacomo.ersilia@email.com', 'LM-29', 2022);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s305475', 'Giacona', 'Eugenia', 'Female', 'Italian', 'giacona.eugenia@email.com', 'LM-23', 2024);
 
 -- Insert data into the career table
 INSERT INTO career (id, cod_course, title_course, cfu, grade, date)
@@ -325,12 +384,14 @@ VALUES
 -- Insert into thesisApplication
 INSERT INTO thesisApplication (proposal_id, student_id)
 VALUES
-    (1, 's290817'),
-    (1, 's298289'),
-    (1, 's314494'),
-    (2, 's305475'),
+    (1, 's294301'), 
+    (1, 's309429'), 
+    (1, 's322044'),
+    (2, 's309429'),
     (2, 's295416'),
     (2, 's318894'),
-    (1, 's322044'),
-    (4, 's313347'),
-    (1, 's306042');
+    (1, 's288327'),
+    (4, 's297117'),
+    (1, 's304823');
+
+    
