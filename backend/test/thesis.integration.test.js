@@ -574,7 +574,7 @@ describe('GET /api/degrees', () => {
         const cookies = loginResponse.headers['set-cookie'];
 
         // Mock an error in thesisDao.getAllKeywords
-        const mockError = new Error('Mocked error during getAllKeywords');
+        const mockError = new Error('Mocked error during getDegrees');
         service.getDegrees.mockRejectedValueOnce(mockError);
     
         // Send a request to the endpoint
