@@ -18,6 +18,8 @@ jest.mock('../thesis_dao', () => ({
     getSupervisorOfProposal: jest.fn(),
     getProposalGroups: jest.fn(),
     getThesisProposal: jest.fn(),
+    getAllKeywords: jest.fn(),
+    getDegrees: jest.fn(),
     applyForProposal: jest.fn()
 }));
 
@@ -66,7 +68,7 @@ describe('GET /api/teachers', () => {
         const response = await request(app)
             .get('/api/teachers')
             .set('Accept', 'application/json')
-            .set('Cookie', loginResponse.headers['set-cookie']);
+            .set('Cookie', cookies);
 
         // Verify that the response contains the expected data
         expect(response.body.teachers).toEqual([
@@ -105,7 +107,7 @@ describe('GET /api/teachers', () => {
         const response = await request(app)
             .get('/api/teachers')
             .set('Accept', 'application/json')
-            .set('Cookie', loginResponse.headers['set-cookie'])
+            .set('Cookie', cookies)
             .expect(500);
 
     
@@ -145,7 +147,7 @@ describe('GET /api/externalCoSupervisors', () => {
         const response = await request(app)
             .get('/api/externalCoSupervisors')
             .set('Accept', 'application/json')
-            .set('Cookie', loginResponse.headers['set-cookie']);
+            .set('Cookie', cookies);
 
         // Verify that the response contains the expected data
         expect(response.body.externalCoSupervisors).toEqual([
@@ -181,7 +183,7 @@ describe('GET /api/externalCoSupervisors', () => {
         const response = await request(app)
             .get('/api/externalCoSupervisors')
             .set('Accept', 'application/json')
-            .set('Cookie', loginResponse.headers['set-cookie'])
+            .set('Cookie', cookies)
             .expect(500);
 
     
@@ -237,7 +239,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
         const response = await request(app)
             .post('/api/teacher/thesis_proposals')
             .set('Accept', 'application/json')
-            .set('Cookie', loginResponse.headers['set-cookie'])
+            .set('Cookie', cookies)
             .send(requestBody);
 
         expect(response.status).toBe(201);
@@ -372,7 +374,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
         const response = await request(app)
             .post('/api/teacher/thesis_proposals')
             .set('Accept', 'application/json')
-            .set('Cookie', loginResponse.headers['set-cookie'])
+            .set('Cookie', cookies)
             .send(requestBody);
 
         expect(response.status).toBe(400);
@@ -422,7 +424,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
         const response = await request(app)
             .post('/api/teacher/thesis_proposals')
             .set('Accept', 'application/json')
-            .set('Cookie', loginResponse.headers['set-cookie'])
+            .set('Cookie', cookies)
             .send(requestBody);
 
         expect(response.status).toBe(403);
@@ -502,14 +504,158 @@ describe('POST /api/teacher/thesis_proposals', () => {
         require('../thesis_dao').createThesisProposal.mockRejectedValue(new Error('Mocked error during thesis proposal creation'));
     
         const response = await request(app)
-        .post('/api/teacher/thesis_proposals')
-        .set('Accept', 'application/json')
-        .set('Cookie', loginResponse.headers['set-cookie'])
-        .send(requestBody);
-    
+          .post('/api/teacher/thesis_proposals')
+          .set('Accept', 'application/json')
+          .set('Cookie', cookies)
+          .send(requestBody);
+
         // Expecting a 500 status code
         expect(response.status).toBe(500);
     
+    });
+});
+
+// TEST GET api/keywords
+describe('GET /api/keywords', () => {
+    test('should return an array of keywords', async () => {
+      
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
+
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 'd1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+
+        // Mock the response from thesisDao.getAllKeywords
+        const mockKeywords = ['Keyword1', 'Keyword2'];
+        service.getAllKeywords.mockResolvedValue(mockKeywords);
+    
+        // Send a request to the endpoint
+        const response = await request(app)
+                               .get('/api/keywords')
+                               .set('Cookie', cookies);
+    
+        // Assertions
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({ keywords: mockKeywords });
+        expect(service.getAllKeywords).toHaveBeenCalled();
+    });
+  
+    test('should handle errors and return 500', async () => {
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
+
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 'd1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+
+        // Mock an error in thesisDao.getAllKeywords
+        const mockError = new Error('Mocked error during getAllKeywords');
+        service.getAllKeywords.mockRejectedValueOnce(mockError);
+    
+        // Send a request to the endpoint
+        const response = await request(app)
+                               .get('/api/keywords')
+                               .set('Cookie', cookies);
+    
+        // Assertions
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Internal Server Error');
+        expect(service.getAllKeywords).toHaveBeenCalled();
+    });
+});
+
+// TEST GET api/degrees
+describe('GET /api/degrees', () => {
+    test('should return an array of degrees', async () => {
+      
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
+
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 'd1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+
+        // Mock the response from thesisDao.getAllKeywords
+        const mockDegrees = [{ cod_degree: 'L-01', title_degree: 'Ingegneria Informatica' }, { cod_degree: 'L-02', title_degree: 'Ingegneria Elettronica' }];
+        service.getDegrees.mockResolvedValue(mockDegrees);
+    
+        // Send a request to the endpoint
+        const response = await request(app)
+                               .get('/api/degrees')
+                               .set('Cookie', cookies);
+    
+        // Assertions
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(mockDegrees);
+        expect(service.getDegrees).toHaveBeenCalled();
+    });
+  
+    test('should handle errors and return 500', async () => {
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
+
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 'd1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+
+        // Mock an error in thesisDao.getAllKeywords
+        const mockError = new Error('Mocked error during getDegrees');
+        service.getDegrees.mockRejectedValueOnce(mockError);
+    
+        // Send a request to the endpoint
+        const response = await request(app)
+                               .get('/api/degrees')
+                               .set('Cookie', cookies);
+    
+        // Assertions
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Internal Server Error');
+        expect(service.getDegrees).toHaveBeenCalled();
     });
 });
 
