@@ -1,15 +1,16 @@
 -- Drop the existing tables if they exist
-DROP TABLE IF EXISTS student;
-DROP TABLE IF EXISTS teacher;
-DROP TABLE IF EXISTS externalCoSupervisor;
-DROP TABLE IF EXISTS degree;
-DROP TABLE IF EXISTS career;
-DROP TABLE IF EXISTS thesisProposal;
-DROP TABLE IF EXISTS thesisInternalCoSupervisor;
-DROP TABLE IF EXISTS thesisExternalCoSupervisor;
-DROP TABLE IF EXISTS proposalKeyword;
-DROP TABLE IF EXISTS proposalGroup;
 DROP TABLE IF EXISTS thesisApplication;
+DROP TABLE IF EXISTS proposalGroup;
+DROP TABLE IF EXISTS proposalKeyword;
+DROP TABLE IF EXISTS thesisExternalCoSupervisor;
+DROP TABLE IF EXISTS thesisInternalCoSupervisor;
+DROP TABLE IF EXISTS thesisProposal;
+DROP TABLE IF EXISTS career;
+DROP TABLE IF EXISTS externalCoSupervisor;
+DROP TABLE IF EXISTS teacher;
+DROP TABLE IF EXISTS student;
+DROP TABLE IF EXISTS degree;
+
 
 -- Create the degree table
 CREATE TABLE degree (
@@ -334,3 +335,4 @@ VALUES
     (1, 's322044'),
     (4, 's313347'),
     (1, 's306042');
+    
