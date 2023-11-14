@@ -43,7 +43,74 @@ async function getUserInfo() {
 
 /****** End APIs for auth ******/
 
+async function insertProposal(proposal) {
+    let response = await fetch(URL + '/teacher/thesis_proposals', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(proposal),
+    });
+    if (response.ok) {
+        const prop = await response.json();
+        return prop;
+    } else {
+        const errDetail = await response.json();
+        throw errDetail;
+    }
+}
+
+async function getExtCoSupervisors() {
+    const response = await fetch(URL + '/externalCoSupervisors', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    const coSup = await response.json();
+    if (response.ok) {
+        return coSup;
+    } else {
+        throw coSup;
+    }
+}
+
+async function getTeachers() {
+    const response = await fetch(URL + '/teachers', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    const teachers = await response.json();
+    if (response.ok) {
+        return teachers;
+    } else {
+        throw teachers;
+    }
+}
+
+async function getKeywords() {
+    const response = await fetch(URL + '/teachers', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    const teachers = await response.json();
+    if (response.ok) {
+        return teachers;
+    } else {
+        throw teachers;
+    }
+}
+
+
 const API = {
-    logIn, logOut, getUserInfo
+    logIn, logOut, getUserInfo, insertProposal, getExtCoSupervisors, getTeachers, getKeywords
 };
 export default API;
