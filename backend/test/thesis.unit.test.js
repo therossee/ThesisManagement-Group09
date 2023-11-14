@@ -321,3 +321,31 @@ describe('getSupervisorOfProposal', () => {
         expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
     });
 });
+
+describe('getProposalGroups', () => {
+    afterEach(() => {
+        jest.restoreAllMocks()
+    });
+
+    test('should return the result of the db query', async () => {
+        const proposalId = "1";
+        const mockedData = [
+            {
+                proposal_id: proposalId,
+                cod_group: "Group1"
+            },
+            {
+                proposal_id: proposalId,
+                cod_group: "Group2"
+            }
+        ];
+        const expectedResult = mockedData.map( row => row.cod_group );
+
+        db.prepare().all.mockReturnValue(mockedData);
+
+        const result = await thesis.getProposalGroups(proposalId);
+
+        expect(result).toEqual(expectedResult);
+        expect(db.prepare().all).toHaveBeenCalledWith(proposalId);
+    })
+});

@@ -15,7 +15,8 @@ jest.mock('../thesis_dao', () => ({
     getKeywordsOfProposal: jest.fn(),
     getInternalCoSupervisorsOfProposal: jest.fn(),
     getExternalCoSupervisorsOfProposal: jest.fn(),
-    getSupervisorOfProposal: jest.fn()
+    getSupervisorOfProposal: jest.fn(),
+    getProposalGroups: jest.fn()
 }));
 
 jest.mock('../users_dao', () => ({
@@ -616,6 +617,12 @@ describe('GET /api/thesis_proposals', () => {
         ];
         service.getKeywordsOfProposal.mockResolvedValue(keywordsMocked);
 
+        const mockGroups = [
+            'Group1',
+            'Group2'
+        ];
+        service.getProposalGroups.mockResolvedValueOnce(mockGroups);
+
         const mockDegree = {
             cod_degree: mockThesisProposal[0].cds,
             title_degree: 'Ingegneria Informatica',
@@ -657,7 +664,8 @@ describe('GET /api/thesis_proposals', () => {
                     type: 'Bachelor',
                     requiredKnowledge: 'Test knowledge',
                     notes: 'Test notes',
-                    keywords: keywordsMocked
+                    keywords: keywordsMocked,
+                    groups: mockGroups
                 }
             ]
         });

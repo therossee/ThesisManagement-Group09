@@ -343,7 +343,8 @@ async function _populateProposal(proposalData) {
 
           return _serializeDegree(degree);
         }),
-    keywords: await thesisDao.getKeywordsOfProposal(proposalData.proposal_id)
+    keywords: await thesisDao.getKeywordsOfProposal(proposalData.proposal_id),
+    groups: await thesisDao.getProposalGroups(proposalData.proposal_id)
   };
 }
 
