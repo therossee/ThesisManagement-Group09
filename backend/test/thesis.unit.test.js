@@ -392,7 +392,6 @@ describe('getProposalGroups', () => {
   })
 });
 
-
 // 5. Test function to apply for a thesis proposal
 describe('applyForProposal', () => {
   test('applies for a proposal and resolves with applicationId', async () => {
