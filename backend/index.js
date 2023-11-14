@@ -245,6 +245,20 @@ async(req, res) => {
   }
 });
 
+//GET /api/degrees
+app.get('/api/degrees',
+isLoggedIn,
+isTeacher,
+async(req, res) => {
+  try {
+    const degrees = await thesisDao.getDegrees();
+    res.json(degrees);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json('Internal Server Error');
+  }
+});
+
 // 4. Search for thesis proposals
 // GET api/thesis-proposals
 app.get('/api/thesis-proposals',
