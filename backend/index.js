@@ -196,6 +196,7 @@ async (req,res) => {
       });
   })
   .catch((error) => {
+    console.error(error);
     res.status(500).json(`Failed to create thesis proposal. ${error.message || error}`);
   });
 });
@@ -212,6 +213,7 @@ async(req, res) => {
 
     res.json({ teachers: teacherList });
   } catch (error) {
+    console.error(error);
     res.status(500).json('Internal Server Error');
   }
 });
@@ -227,6 +229,7 @@ async(req, res) => {
 
     res.json({ externalCoSupervisors: externalCoSupervisorList });
   } catch (error) {
+    console.error(error);
     res.status(500).json('Internal Server Error');
   }
 });
@@ -325,6 +328,7 @@ async(req,res) => {
         });
     })
   .catch((error) => {
+    console.error(error); 
     res.status(500).json(`Failed to apply for thesis proposal. ${error.message || error}`);
   });
 });
