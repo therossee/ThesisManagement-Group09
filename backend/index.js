@@ -240,6 +240,7 @@ async(req, res) => {
     const keywords = await thesisDao.getAllKeywords();
     res.json({ keywords });
   } catch (error) {
+    console.error(error);
     res.status(500).json('Internal Server Error');
   }
 });

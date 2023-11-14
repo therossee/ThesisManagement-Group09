@@ -161,6 +161,26 @@ describe('getGroup', () => {
     });
 });
 
+describe('getAllKeywords', () => {
+  test('should return an array of keywords', async () => {
+    // Mock the response from the database
+    const mockKeywords = [
+      { keyword: 'Keyword1' },
+      { keyword: 'Keyword2' },
+    ];
+
+    // Mock the SQLite database query
+    db.prepare.mockReturnValueOnce({ all: jest.fn(() => mockKeywords) });
+
+    // Call the function
+    const result = await thesis.getAllKeywords();
+
+    // Assertions
+    expect(result).toEqual(['Keyword1', 'Keyword2']);
+    expect(db.prepare).toHaveBeenCalledWith('SELECT DISTINCT(keyword) FROM proposalKeyword');
+  });
+});
+
 describe('listThesisProposalsFromStudent', () => {
     afterEach(() => {
         jest.restoreAllMocks()
