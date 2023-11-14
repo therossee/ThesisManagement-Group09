@@ -313,7 +313,7 @@ app.get('/api/thesis-proposals/:id',
 // 5. Apply for a thesis proposal
 // POST api/student/:id/applications
 
-// 6. List all thesis proposals of a tearcher
+// 6. List all thesis proposals of a teacher
 // GET api/teacher/thesis_proposals
 app.get('/api/teacher/thesis_proposals',
 isLoggedIn,
