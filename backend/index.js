@@ -234,11 +234,11 @@ async(req, res) => {
 // 4. Search for thesis proposals
 // GET api/thesis-proposals
 app.get('/api/thesis-proposals',
-  // isLoggedIn,
-  // isStudent,
+  isLoggedIn,
+  isStudent,
   async (req, res) => {
     try {
-      const studentId = "s304580"
+      const studentId = req.user.id;
       const proposals = await thesisDao.listThesisProposalsFromStudent(studentId);
       const proposalsPopulated = await Promise.all(
         proposals.map(async proposal => {
