@@ -62,6 +62,7 @@ async function getStudentThesisProposals() {
             notes: x.notes,
             expiration: x.expiration,
             level: x.level,
+            groups: x.groups,
             keywords: x.keywords
         }))
     } else {
