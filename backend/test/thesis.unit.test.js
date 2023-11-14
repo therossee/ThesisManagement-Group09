@@ -161,6 +161,46 @@ describe('getGroup', () => {
     });
 });
 
+describe('getAllKeywords', () => {
+  test('should return an array of keywords', async () => {
+    // Mock the response from the database
+    const mockKeywords = [
+      { keyword: 'Keyword1' },
+      { keyword: 'Keyword2' },
+    ];
+
+    // Mock the SQLite database query
+    db.prepare.mockReturnValueOnce({ all: jest.fn(() => mockKeywords) });
+
+    // Call the function
+    const result = await thesis.getAllKeywords();
+
+    // Assertions
+    expect(result).toEqual(['Keyword1', 'Keyword2']);
+    expect(db.prepare).toHaveBeenCalledWith('SELECT DISTINCT(keyword) FROM proposalKeyword');
+  });
+});
+
+describe('getDegrees', () => {
+  test('should return an array of keywords', async () => {
+    // Mock the response from the database
+    const mockKeywords = [
+      { cod_degree: 'L-01' },
+      { title_degree: 'Mock Degree Title' },
+    ];
+
+    // Mock the SQLite database query
+    db.prepare.mockReturnValueOnce({ all: jest.fn(() => mockKeywords) });
+
+    // Call the function
+    const result = await thesis.getDegrees();
+
+    // Assertions
+    expect(result).toEqual(mockKeywords);
+    expect(db.prepare).toHaveBeenCalledWith('SELECT * FROM degree');
+  });
+});
+
 describe('listThesisProposalsFromStudent', () => {
     afterEach(() => {
         jest.restoreAllMocks()

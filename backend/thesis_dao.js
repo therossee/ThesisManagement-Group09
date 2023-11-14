@@ -89,6 +89,28 @@ exports.getGroup = (teacherId) => {
   })
 };
 
+// Function to retrieve all the keywords
+exports.getAllKeywords = () => {
+  return new Promise((resolve) => {
+      const getKeywords = `SELECT DISTINCT(keyword) FROM proposalKeyword`;
+      const res = db.prepare(getKeywords).all();
+      // Extracting the keyword property from each row
+      const keywords = res.map(row => row.keyword);
+      resolve(keywords)
+  })
+};
+
+// Function to retrieve all the keywords
+exports.getDegrees = () => {
+  return new Promise((resolve) => {
+      const getDegrees = `SELECT * FROM degree`;
+      const res = db.prepare(getDegrees).all();
+      // Extracting the degree property from each row
+      //const keywords = res.map(row => row.keyword);
+      resolve(res)
+  })
+};
+
 /**
  * Return the proposal with the given id related to a student degree (if exists)
  *
