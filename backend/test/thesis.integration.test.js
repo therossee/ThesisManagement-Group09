@@ -1,20 +1,31 @@
 require('jest');
 request = require("supertest");
 const service = require("../thesis_dao");
+const degreeService = require("../degree_dao");
 const usersService = require("../users_dao");
 const {app, server} = require("../index");
-  
+
 // Mocking the getTeacherListExcept function
 jest.mock('../thesis_dao', () => ({
     getTeacherListExcept: jest.fn(),
     getExternalCoSupervisorList: jest.fn(),
     getGroup: jest.fn(),
     createThesisProposal: jest.fn(),
-    applyForProposal: jest.fn(),
+    listThesisProposalsFromStudent: jest.fn(),
+    getKeywordsOfProposal: jest.fn(),
+    getInternalCoSupervisorsOfProposal: jest.fn(),
+    getExternalCoSupervisorsOfProposal: jest.fn(),
+    getSupervisorOfProposal: jest.fn(),
+    getProposalGroups: jest.fn(),
+    applyForProposal: jest.fn()
 }));
 
 jest.mock('../users_dao', () => ({
     getUser: jest.fn(),
+}));
+
+jest.mock('../degree_dao', () => ({
+    getDegreeFromCode: jest.fn(),
 }));
 
 afterAll((done) => {
@@ -65,8 +76,9 @@ describe('GET /api/teachers', () => {
         // Verify that getTeacherListExcept was called with the correct arguments
         expect(service.getTeacherListExcept).toHaveBeenCalledWith(mockUser.id);
     });
-    test('handles internal server error', async () => {
-    
+
+    test('handles internal server error gracefully', async () => {
+
         const mockUser = {
             id: 'd1',
             surname: 'R',
@@ -140,8 +152,9 @@ describe('GET /api/externalCoSupervisors', () => {
             { id: '2', name: 'ExternalCoSupervisor2' },
         ]);
     });
-    test('handles internal server error', async () => {
-    
+
+    test('handles internal server error gracefully', async () => {
+
         const mockUser = {
             id: 'd1',
             surname: 'R',
@@ -216,7 +229,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
 
         service.getGroup.mockResolvedValueOnce({ cod_group: 'Group1' });
         service.getGroup.mockResolvedValueOnce({ cod_group: 'Group2' });
-    
+
         // Mock the createThesisProposal function
         require('../thesis_dao').createThesisProposal.mockResolvedValue('mockedThesisProposalId');
 
@@ -225,7 +238,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
             .set('Accept', 'application/json')
             .set('Cookie', loginResponse.headers['set-cookie'])
             .send(requestBody);
-    
+
         expect(response.status).toBe(201);
         expect(response.body).toEqual({
             id: 'mockedThesisProposalId',
@@ -351,7 +364,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
 
         service.getGroup.mockResolvedValueOnce({ cod_group: 'Group1' });
         service.getGroup.mockResolvedValueOnce({ cod_group: 'Group2' });
-    
+
         // Mock the createThesisProposal function
         require('../thesis_dao').createThesisProposal.mockResolvedValue('mockedThesisProposalId');
 
@@ -360,7 +373,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
             .set('Accept', 'application/json')
             .set('Cookie', loginResponse.headers['set-cookie'])
             .send(requestBody);
-    
+
         expect(response.status).toBe(400);
         expect(response.body).toEqual("Missing required fields.");
     });
@@ -401,7 +414,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
 
         service.getGroup.mockResolvedValueOnce({ cod_group: 'Group1' });
         service.getGroup.mockResolvedValueOnce({ cod_group: 'Group2' });
-    
+
         // Mock the createThesisProposal function
         require('../thesis_dao').createThesisProposal.mockResolvedValue('mockedThesisProposalId');
 
@@ -410,7 +423,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
             .set('Accept', 'application/json')
             .set('Cookie', loginResponse.headers['set-cookie'])
             .send(requestBody);
-    
+
         expect(response.status).toBe(403);
         expect(response.body).toEqual("Unauthorized");
     });
@@ -432,15 +445,16 @@ describe('POST /api/teacher/thesis_proposals', () => {
 
         service.getGroup.mockResolvedValueOnce({ cod_group: 'Group1' });
         service.getGroup.mockResolvedValueOnce({ cod_group: 'Group2' });
-    
+
         // Mock the createThesisProposal function
         require('../thesis_dao').createThesisProposal.mockResolvedValue('mockedThesisProposalId');
+
 
         const response = await request(app)
             .post('/api/teacher/thesis_proposals')
             .set('Accept', 'application/json')
             .send(requestBody);
-    
+
         expect(response.status).toBe(401);
         expect(response.body).toEqual("Not authorized");
     });
@@ -499,6 +513,304 @@ describe('POST /api/teacher/thesis_proposals', () => {
 });
 
 // TEST GET api/thesis_proposals
+describe('GET /api/thesis_proposals', () => {
+    test('should return the list of thesis proposals of a student', async () => {
+        const mockUser = {
+            id: 's1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 's1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+        expect(cookies).toBeDefined();
+        expect(loginResponse.status).toBe(201);
+
+        /**
+         * @type {ThesisProposalRow[]}
+         */
+        const mockThesisProposal = [
+            {
+                proposal_id: '1',
+                title: 'Test Thesis',
+                description: 'Test description',
+                expiration: '2021-12-31',
+                level: 'Bachelor',
+                cds: 'Test CDS',
+                supervisor_id: 'd1',
+                type: 'Bachelor',
+                required_knowledge: 'Test knowledge',
+                notes: 'Test notes'
+            }
+        ];
+        service.listThesisProposalsFromStudent.mockResolvedValue(mockThesisProposal);
+
+        const supervisorMocked = {
+            id: mockThesisProposal[0].supervisor_id,
+            surname: 'R',
+            name: 'M',
+            email: 'd1@polito.com'
+        };
+        service.getSupervisorOfProposal.mockResolvedValue(supervisorMocked);
+
+        service.getInternalCoSupervisorsOfProposal.mockResolvedValue([]);
+
+        const externalCoSupervisorsMocked = [
+            {
+                id: '1',
+                name: 'ExternalCoSupervisor1',
+                email: 'extern@polito.com'
+            }
+        ];
+        service.getExternalCoSupervisorsOfProposal.mockResolvedValue(externalCoSupervisorsMocked);
+
+        const keywordsMocked = [
+            "keyword1",
+            "keyword2"
+        ];
+        service.getKeywordsOfProposal.mockResolvedValue(keywordsMocked);
+
+        const mockDegree = {
+            cod_degree: mockThesisProposal[0].cds,
+            title_degree: 'Ingegneria Informatica',
+        };
+        degreeService.getDegreeFromCode.mockResolvedValue(mockDegree);
+
+        const response = await request(app)
+            .get('/api/thesis-proposals')
+            .set('Accept', 'application/json')
+            .set('Cookie', cookies)
+            .send();
+
+        // Expecting a 500 status code
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({
+            $metadata: {
+                index: 0,
+                count: mockThesisProposal.length,
+                total: mockThesisProposal.length,
+                currentPage: 1
+            },
+            items: [
+                {
+                    id: '1',
+                    status: 'EXPIRED',
+                    title: 'Test Thesis',
+                    description: 'Test description',
+                    expiration: '2021-12-31',
+                    level: 'Bachelor',
+                    cds: {
+                        code: mockThesisProposal[0].cds,
+                        title: mockDegree.title_degree
+                    },
+                    supervisor: supervisorMocked,
+                    coSupervisors: {
+                        internal: [],
+                        external: externalCoSupervisorsMocked
+                    },
+                    type: 'Bachelor',
+                    requiredKnowledge: 'Test knowledge',
+                    notes: 'Test notes',
+                    keywords: keywordsMocked
+                }
+            ]
+        });
+    });
+    test('should return the list of thesis proposals of a student and set status as ACTIVE', async () => {
+        const mockUser = {
+            id: 's1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 's1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+        expect(cookies).toBeDefined();
+        expect(loginResponse.status).toBe(201);
+
+        /**
+         * @type {ThesisProposalRow[]}
+         */
+        const mockThesisProposal = [
+            {
+                proposal_id: '1',
+                title: 'Test Thesis',
+                description: 'Test description',
+                expiration: '2051-12-31',
+                level: 'Bachelor',
+                cds: 'Test CDS',
+                supervisor_id: 'd1',
+                type: 'Bachelor',
+                required_knowledge: 'Test knowledge',
+                notes: 'Test notes'
+            }
+        ];
+        service.listThesisProposalsFromStudent.mockResolvedValue(mockThesisProposal);
+
+        const supervisorMocked = {
+            id: mockThesisProposal[0].supervisor_id,
+            surname: 'R',
+            name: 'M',
+            email: 'd1@polito.com'
+        };
+        service.getSupervisorOfProposal.mockResolvedValue(supervisorMocked);
+
+        service.getInternalCoSupervisorsOfProposal.mockResolvedValue([]);
+
+        const externalCoSupervisorsMocked = [
+            {
+                id: '1',
+                name: 'ExternalCoSupervisor1',
+                email: 'extern@polito.com'
+            }
+        ];
+        service.getExternalCoSupervisorsOfProposal.mockResolvedValue(externalCoSupervisorsMocked);
+
+        const keywordsMocked = [
+            "keyword1",
+            "keyword2"
+        ];
+        service.getKeywordsOfProposal.mockResolvedValue(keywordsMocked);
+
+        const mockGroups = [
+            'Group1',
+            'Group2'
+        ];
+        service.getProposalGroups.mockResolvedValueOnce(mockGroups);
+
+        const mockDegree = {
+            cod_degree: mockThesisProposal[0].cds,
+            title_degree: 'Ingegneria Informatica',
+        };
+        degreeService.getDegreeFromCode.mockResolvedValue(mockDegree);
+
+        const response = await request(app)
+            .get('/api/thesis-proposals')
+            .set('Accept', 'application/json')
+            .set('Cookie', cookies)
+            .send();
+
+        // Expecting a 500 status code
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({
+            $metadata: {
+                index: 0,
+                count: mockThesisProposal.length,
+                total: mockThesisProposal.length,
+                currentPage: 1
+            },
+            items: [
+                {
+                    id: '1',
+                    status: 'ACTIVE',
+                    title: 'Test Thesis',
+                    description: 'Test description',
+                    expiration: '2051-12-31',
+                    level: 'Bachelor',
+                    cds: {
+                        code: mockThesisProposal[0].cds,
+                        title: mockDegree.title_degree
+                    },
+                    supervisor: supervisorMocked,
+                    coSupervisors: {
+                        internal: [],
+                        external: externalCoSupervisorsMocked
+                    },
+                    type: 'Bachelor',
+                    requiredKnowledge: 'Test knowledge',
+                    notes: 'Test notes',
+                    keywords: keywordsMocked,
+                    groups: mockGroups
+                }
+            ]
+        });
+    });
+    test('should return error 403 if not authorized', async () => {
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 'd1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+        expect(cookies).toBeDefined();
+        expect(loginResponse.status).toBe(201);
+
+        const response = await request(app)
+            .get('/api/thesis-proposals')
+            .set('Accept', 'application/json')
+            .set('Cookie', loginResponse.headers['set-cookie'])
+            .send();
+
+        expect(response.status).toBe(403);
+        expect(response.text).toEqual("\"Unauthorized\"");
+    });
+    test('should return error 401 if not logged in', async () => {
+        const response = await request(app)
+            .get('/api/thesis-proposals')
+            .set('Accept', 'application/json')
+            .send();
+
+        expect(response.status).toBe(401);
+        expect(response.text).toEqual("\"Not authorized\"");
+    });
+    test('should return error 500 if dao throws an error', async () => {
+        const mockUser = {
+            id: 's1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 's1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+        expect(cookies).toBeDefined();
+        expect(loginResponse.status).toBe(201);
+
+        service.listThesisProposalsFromStudent.mockRejectedValue(new Error());
+
+        const response = await request(app)
+            .get('/api/thesis-proposals')
+            .set('Accept', 'application/json')
+            .set('Cookie', cookies)
+            .send();
+
+        // Expecting a 500 status code
+        expect(response.status).toBe(500);
+    });
+});
 
 // TEST POST api/student/applications
 describe('POST /api/student/applications', () => {
@@ -649,4 +961,5 @@ describe('POST /api/student/applications', () => {
 // TEST GET api/teacher/:id/thesis_proposals
 
 // TEST PATCH api/teacher/:id/thesis_proposals/:id
+
 
