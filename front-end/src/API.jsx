@@ -93,8 +93,8 @@ async function getTeachers() {
     }
 }
 
-async function getKeywords() {
-    const response = await fetch(URL + '/teachers', {
+async function getAllKeywords() {
+    const response = await fetch(URL + '/keywords', {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -111,6 +111,6 @@ async function getKeywords() {
 
 
 const API = {
-    logIn, logOut, getUserInfo, insertProposal, getExtCoSupervisors, getTeachers, getKeywords
+    logIn, logOut, getUserInfo, insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords
 };
 export default API;
