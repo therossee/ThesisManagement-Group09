@@ -11,6 +11,12 @@ DROP TABLE IF EXISTS proposalKeyword;
 DROP TABLE IF EXISTS proposalGroup;
 DROP TABLE IF EXISTS thesisApplication;
 
+-- Create the degree table
+CREATE TABLE degree (
+    cod_degree TEXT PRIMARY KEY,
+    title_degree TEXT NOT NULL UNIQUE
+);
+
 -- Create the student table
 CREATE TABLE student (
     id TEXT PRIMARY KEY,
@@ -36,16 +42,10 @@ CREATE TABLE teacher (
 
 -- Create the externalCoSupervisor table
 CREATE TABLE externalCoSupervisor (
-    id INTEGER PRIMARY KEY IDENTITY(1,1),
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     surname TEXT NOT NULL,
     name TEXT NOT NULL, 
     email TEXT NOT NULL
-);
-
--- Create the degree table
-CREATE TABLE degree (
-    cod_degree TEXT PRIMARY KEY,
-    title_degree TEXT NOT NULL UNIQUE
 );
 
 -- Create the career table
@@ -54,7 +54,7 @@ CREATE TABLE career (
     cod_course TEXT NOT NULL,
     title_course TEXT NOT NULL,
     cfu INTEGER NOT NULL,
-    grade REAL NOT NULL,
+    grade INTEGER NOT NULL,
     date TEXT NOT NULL,
     FOREIGN KEY(id) REFERENCES student(id),
     PRIMARY KEY(id, cod_course)
@@ -62,7 +62,7 @@ CREATE TABLE career (
 
 -- Create the thesisProposal table
 CREATE TABLE thesisProposal (
-    proposal_id INTEGER PRIMARY KEY IDENTITY(1,1),
+    proposal_id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     supervisor_id TEXT NOT NULL,
     type TEXT NOT NULL,
@@ -124,6 +124,30 @@ CREATE TABLE thesisApplication (
 
 -- Insert Data
 
+-- Insert data into the degree table
+INSERT INTO degree (cod_degree, title_degree)
+VALUES
+    ('L-07', 'Ingegneria Civile e Ambientale'),
+    ('L-08', 'Ingegneria Elettronica'),
+    ('L-09', 'Ingegneria dell''Informazione'),
+    ('LM-20', 'Ingegneria Chimica'),
+    ('LM-21', 'Ingegneria dei Materiali'),
+    ('LM-22', 'Ingegneria Meccanica'),
+    ('LM-23', 'Ingegneria Aerospaziale'),
+    ('LM-24', 'Ingegneria Nucleare'),
+    ('LM-25', 'Ingegneria dei Trasporti e della Logistica'),
+    ('LM-26', 'Ingegneria Matematica'),
+    ('LM-27', 'Ingegneria delle Telecomunicazioni'),
+    ('LM-28', 'Ingegneria Biomedica'),
+    ('LM-29', 'Ingegneria Gestionale'),
+    ('LM-30', 'Ingegneria dell''Energia'),
+    ('LM-31', 'Ingegneria dell''Automazione'),
+    ('LM-32', 'Ingegneria Informatica'),
+    ('LM-33', 'Ingegneria dell''Automazione e dei Sistemi di Controllo'),
+    ('LM-34', 'Ingegneria dell''Informazione per l''Organizzazione Aziendale'),
+    ('LM-35', 'Ingegneria della Produzione Industriale');
+
+
 -- Insert data into the teacher table
 INSERT INTO teacher (id, surname, name, email, cod_group, cod_department)
 VALUES
@@ -162,31 +186,6 @@ VALUES
     ('Moretti', 'Luca', 'luca.moretti@email.com'),
     ('Rossi', 'Isabella', 'isabella.rossi@email.com'),
     ('Russo', 'Marco', 'marco.russo@email.com');
-
-
--- Insert data into the degree table
-INSERT INTO degree (cod_degree, title_degree)
-VALUES
-    ('L-07', 'Ingegneria Civile e Ambientale'),
-    ('L-08', 'Ingegneria Elettronica'),
-    ('L-09', 'Ingegneria dell''Informazione'),
-    ('LM-20', 'Ingegneria Chimica'),
-    ('LM-21', 'Ingegneria dei Materiali'),
-    ('LM-22', 'Ingegneria Meccanica'),
-    ('LM-23', 'Ingegneria Aerospaziale'),
-    ('LM-24', 'Ingegneria Nucleare'),
-    ('LM-25', 'Ingegneria dei Trasporti e della Logistica'),
-    ('LM-26', 'Ingegneria Matematica'),
-    ('LM-27', 'Ingegneria delle Telecomunicazioni'),
-    ('LM-28', 'Ingegneria Biomedica'),
-    ('LM-29', 'Ingegneria Gestionale'),
-    ('LM-30', 'Ingegneria dell''Energia'),
-    ('LM-31', 'Ingegneria dell''Automazione'),
-    ('LM-32', 'Ingegneria Informatica'),
-    ('LM-33', 'Ingegneria dell''Automazione e dei Sistemi di Controllo'),
-    ('LM-34', 'Ingegneria dell''Informazione per l''Organizzazione Aziendale'),
-    ('LM-35', 'Ingegneria della Produzione Industriale');
-
 
 -- Insert data into the student table
 INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year)
@@ -314,7 +313,7 @@ VALUES
     (4, 5);
 
 -- Insert data into proposalGroup table
-INSERT INTO proposalGroup (proposal_id, group_name)
+INSERT INTO proposalGroup (proposal_id, cod_group)
 VALUES
     (1, 'Group1'),
     (1, 'Group2'),
