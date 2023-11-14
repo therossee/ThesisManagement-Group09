@@ -1,7 +1,8 @@
 import { React, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Highlighter from 'react-highlight-words';
 import { DatePicker, FloatButton, Button, Form, Input, Select, Space, Steps, Table, Tag, Tooltip } from "antd";
-import { EyeOutlined } from '@ant-design/icons';
+import { EyeOutlined, SearchOutlined } from '@ant-design/icons';
 import API from "../API";
 
 const { Option } = Select;
@@ -197,13 +198,66 @@ function Done() {
   );
 }
 
+
+
 function ThesisProposals() {
 
+  const filterTitle = () => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+      <div style={{ padding: 8 }}>
+        <Input
+          placeholder="Search Title"
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys, confirm)}
+          style={{ width: '100%', marginBottom: 8, display: 'block' }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Search
+          </Button>
+          <Button onClick={() => handleReset(clearFilters)} size="small" style={{ width: 90 }}>
+            Reset
+          </Button>
+          <Button type="link" size="small" onClick={() => { close() }}>
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => (
+      <SearchOutlined
+        style={{
+          color: filtered ? '#1677ff' : undefined,
+        }}
+      />
+    ),
+    onFilter: (value, record) =>
+      record['title'].toString().toLowerCase().includes(value.toLowerCase()),
+    render: (text) =>
+      <Highlighter
+        highlightStyle={{
+          backgroundColor: '#ffc069',
+          padding: 0
+        }}
+        searchWords={[searchTitle]}
+        autoEscape
+        textToHighlight={text ? text : ''}
+      />
+  });
 
   useEffect(() => {
+    setIsLoadingTable(true);
     API.getStudentThesisProposals()
       .then((x) => {
         setData(handleReceivedData(x));
+        setIsLoadingTable(false);
       })
       .catch((err) => {/*err handling w message*/ });
   }, []);
@@ -212,17 +266,35 @@ function ThesisProposals() {
   const [data, setData] = useState([])
 
   // Loading table data fetching
-  const [loadingTable, setLoadingTable] = useState(false);
+  const [isLoadingTable, setIsLoadingTable] = useState(false);
 
+  // Storing Title Search filter
+  const [searchTitle, setSearchTitle] = useState('');
+
+  // Columns of the table
   const columns = [
     {
       title: 'Title',
       dataIndex: 'title',
       fixed: 'left',
+      ...filterTitle(),
     },
     {
       title: 'Level',
       dataIndex: 'level',
+      sorter: (a, b) => a.level.localeCompare(b.level),
+      onFilter: (value, record) => record.level == value,
+      filterMultiple: false,
+      filters: [
+        {
+          text: 'LM',
+          value: 'LM',
+        },
+        {
+          text: 'L',
+          value: 'L',
+        }
+      ],
     },
     {
       title: 'Supervisor',
@@ -233,12 +305,23 @@ function ThesisProposals() {
       dataIndex: 'coSupervisors',
     },
     {
-      title: 'Keyworkds',
+      title: 'Keywords',
       dataIndex: 'keywords',
+      filters: [
+        {
+          text: 'LM',
+          value: 'LM',
+        },
+        {
+          text: 'L',
+          value: 'L',
+        }
+      ],
     },
     {
       title: 'Type',
       dataIndex: 'type',
+      sorter: (a, b) => a.level.localeCompare(b.level)
     },
     {
       title: 'Groups',
@@ -262,51 +345,61 @@ function ThesisProposals() {
     },
   ];
 
+  // Some props regarding the table
   const tableProps = {
     bordered: false,
     scroll: { x: true },
-    loading: loadingTable,
+    loading: isLoadingTable,
+  };
+
+  const handleSearch = (selectedKeys, confirm) => {
+    confirm();
+    setSearchTitle(selectedKeys[0]);
+  };
+
+  const handleReset = (clearFilters) => {
+    clearFilters();
+    setSearchTitle('');
   };
 
   function handleReceivedData(data) {
+
     const formattedData = data.map((x) => ({
       // Take all fields from API.jsx
       ...x,
       // Custom format some of the fields needed
-      supervisor: x.supervisor.name + " " + x.supervisor.surname,
+      supervisor: <Tag color="blue">{x.supervisor.name + " " + x.supervisor.surname}</Tag>,
       coSupervisors: [].concat(
         x.internalCoSupervisors.map((x) => <Tag color="blue" key={x.id}>{x.name + ' ' + x.surname}</Tag>),
         x.externalCoSupervisors.map((x) => <Tag color="blue" key={x.id}>{x.name + ' ' + x.surname}</Tag>)
       ),
-      keywords: x.keywords.map((keyword) => (
-        <Tag color="blue" key={keyword}>
+      keywords: x.keywords.map((keyword, index) => (
+        <Tag color="blue" key={index}>
           {keyword}
         </Tag>
       )),
-      groups: x.internalCoSupervisors
-      .map((x) => <Tag color="blue" key={x.id}>{x.codGroup}</Tag>)
+      groups: "change",
     }));
+
     return formattedData;
   }
-
-  /*const data = [
-    {
-      key: "1",
-      title: "giovanniiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
-      keywords:
-      {
-        xxxxxxxxxxxxxx.map((tag) => (
-          <Tag color="blue" key={tag}>
-            {tag}
-          </Tag>
-        ))
-      },
-    }
-  ]*/
 
   return (
     <Table {...tableProps} columns={columns} dataSource={data} />
   )
 }
 
-export { InsertThesisProposal, ThesisProposals };
+
+
+
+function ViewThesisProposal() {
+
+  return (
+    <></>
+  )
+}
+
+
+
+
+export { InsertThesisProposal, ThesisProposals, ViewThesisProposal };
