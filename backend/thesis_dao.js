@@ -250,9 +250,7 @@ exports.listThesisApplicationsForTeacher = (teacherId) => {
       WHERE proposal_id=?`;
 
       const applications = {};
-      console.log(proposals);
       for (const proposal of proposals) {
-        console.log(proposal.proposal_id);
         applications[proposal.proposal_id] = db.prepare(getApplications).all(proposal.proposal_id);
       }
       
