@@ -122,6 +122,21 @@ exports.getKeywordsOfProposal = (proposalId) => {
 };
 
 /**
+ * Return the list of thesis proposals groups
+ *
+ * @param {string} proposalId
+ * @return {Promise<string[]>}
+ */
+exports.getProposalGroups = (proposalId) => {
+    return new Promise((resolve) => {
+        const query = `SELECT cod_group FROM proposalGroup WHERE proposal_id = ?`;
+        const data = db.prepare(query).all(proposalId);
+
+        resolve(data.map( row => row.cod_group ));
+    })
+};
+
+/**
  * Return the list of internal co-supervisors (teachers) of a thesis proposal
  *
  * @param {string} proposalId
