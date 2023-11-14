@@ -389,3 +389,45 @@ describe('getProposalGroups', () => {
         expect(db.prepare().all).toHaveBeenCalledWith(proposalId);
     })
 });
+
+describe('listThesisProposalsTeacher', () => {
+  test('should return an array of thesis proposals for a teacher', async () => {
+    // Mock the response from the database
+    const mockProposals = [
+      { proposal_id: 1, title: 'Proposal1' },
+      { proposal_id: 2, title: 'Proposal2' },
+    ];
+
+    // Mock the SQLite database query
+    db.prepare.mockReturnValueOnce({ all: jest.fn(() => mockProposals) });
+
+    // Call the function
+    const result = await thesis.listThesisProposalsTeacher('teacher1');
+
+    // Assertions
+    expect(result).toEqual(mockProposals);
+    expect(db.prepare).toHaveBeenCalledWith('SELECT * FROM thesisProposal WHERE supervisor_id=?');
+  });
+});
+
+describe('listApplicationsForTeacherThesisProposal', () => {
+  test('should return an array of thesis applications for a teacher and proposal', async () => {
+    // Mock the response from the database
+    const mockApplications = [
+      { application_id: 1, status: 'Approved' },
+      { application_id: 2, status: 'Pending' },
+    ];
+
+    // Mock the SQLite database query
+    db.prepare.mockReturnValueOnce({ all: jest.fn(() => mockApplications) });
+
+    // Call the function
+    const result = await thesis.listApplicationsForTeacherThesisProposal(1, 'teacher1');
+
+    // Assertions
+    expect(result).toEqual(mockApplications);
+    expect(db.prepare).toHaveBeenCalledWith(
+      'SELECT * FROM thesisApplication ta, thesisProposal tp WHERE ta.proposal_id = tp.proposal_id AND ta.proposal_id=? AND tp.supervisor_id=?'
+    );
+  });
+});

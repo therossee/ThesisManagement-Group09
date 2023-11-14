@@ -105,8 +105,6 @@ exports.getDegrees = () => {
   return new Promise((resolve) => {
       const getDegrees = `SELECT * FROM degree`;
       const res = db.prepare(getDegrees).all();
-      // Extracting the degree property from each row
-      //const keywords = res.map(row => row.keyword);
       resolve(res)
   })
 };
@@ -257,29 +255,25 @@ exports.getSupervisorOfProposal = (proposalId) => {
  * @property {string} email
  */
 
-// 6. Function to list all applications for a teacher's thesis proposals
-exports.listThesisApplicationsForTeacher = (teacherId) => {
+// 6. Function to list all thesis proposals of a tearcher (supervisor)
+exports.listThesisProposalsTeacher = (teacherId) => {
   return new Promise((resolve) => {
+      const getProposals = `SELECT * FROM thesisProposal WHERE supervisor_id=?`;
+      const proposals = db.prepare(getProposals).all(teacherId);
+      resolve(proposals)
+    
+  })
+};
 
-    db.transaction(() => {
-      const getProposalsIds = `SELECT proposal_id
-      FROM thesisProposal 
-      WHERE supervisor_id=?`;
-      const proposals = db.prepare(getProposalsIds).all(teacherId);
 
-      const getApplications = `SELECT *
-      FROM thesisApplication
-      WHERE proposal_id=?`;
+// 7. Function to list all applications for a teacher's thesis proposals
+exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
+  return new Promise((resolve) => {
+    
+    const getApplications = `SELECT * FROM thesisApplication ta, thesisProposal tp WHERE ta.proposal_id = tp.proposal_id AND ta.proposal_id=? AND tp.supervisor_id=?`;
 
-      const applications = {};
-      for (const proposal of proposals) {
-        applications[proposal.proposal_id] = db.prepare(getApplications).all(proposal.proposal_id);
-      }
-      
-      resolve(applications)
-    })()
-    .catch((err) => {
-      reject(err)
-    });
+    const applications = db.prepare(getApplications).all(proposal_id, teacherId);    
+    resolve(applications)
+    
   })
 };
