@@ -13,7 +13,11 @@ jest.mock('../db', () => ({
 }));
 
 describe('createThesisProposal', () => {
-  test('create a thesis proposal', async () => {
+  beforeEach(() => {
+    // Reset the mock before each test
+    db.prepare.mockClear();
+  });
+  test('create a thesis proposal with cosupervisors', async () => {
     const proposalData = {
       title: 'Test Proposal',
       supervisor_id: 1,
@@ -49,8 +53,45 @@ describe('createThesisProposal', () => {
     expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
     expect(db.prepare).toHaveBeenCalledTimes(10); // 10 queries
   });
+  test('create a thesis proposal without cosupervisors', async () => {
+    const proposalData = {
+      title: 'Test Proposal',
+      supervisor_id: 1,
+      internal_co_supervisors_id: [],
+      external_co_supervisors_id: [],
+      type: 'Test Type',
+      groups: ['Group1'],
+      description: 'Test Description',
+      required_knowledge: 'Test Knowledge',
+      notes: 'Test Notes',
+      expiration: '2023-12-31',
+      level: 'Test Level',
+      cds: 'Test CDS',
+      keywords: ['Keyword1', 'Keyword2'],
+    };
+
+    const proposalId = await thesis.createThesisProposal(
+      proposalData.title,
+      proposalData.supervisor_id,
+      proposalData.internal_co_supervisors_id,
+      proposalData.external_co_supervisors_id,
+      proposalData.type,
+      proposalData.groups,
+      proposalData.description,
+      proposalData.required_knowledge,
+      proposalData.notes,
+      proposalData.expiration,
+      proposalData.level,
+      proposalData.cds,
+      proposalData.keywords
+    );
+
+    expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
+    expect(db.prepare).toHaveBeenCalledTimes(4); 
+  });
 });
 
+// 2. Test Function to get list of teachers not logged
 describe('getTeacherListExcept', () => {
     let mockDb;
 
@@ -124,6 +165,7 @@ describe('getExternalCoSupervisors', () => {
   });
 });
 
+// 3. Test function to retrieve the cod_group of a teacher
 describe('getGroup', () => {
     let mockDb;
 
@@ -147,7 +189,6 @@ describe('getGroup', () => {
       expect(result).toBe(expectedCodGroup);
       expect(mockDb.prepare().get).toHaveBeenCalledWith(teacherId);
     });
-
     test('handles errors and rejects the promise if the database query fails', async () => {
       const teacherId = 1;
 
@@ -201,195 +242,222 @@ describe('getDegrees', () => {
   });
 });
 
+// 4. Test functions to search for thesis proposals
 describe('listThesisProposalsFromStudent', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
+  afterEach(() => {
+      jest.restoreAllMocks()
+  });
 
-    test('should return the result of the db query', async () => {
-        const studentId = "1";
-        const mockedData = [
-            {
-                id: "1",
-                title: 'Test Proposal',
-                supervisor_id: 1,
-                type: 'Test Type',
-                description: 'Test Description',
-                required_knowledge: 'Test Knowledge',
-                notes: 'Test Notes',
-                expiration: '2023-12-31',
-                level: 'Test Level',
-                cds: 'Test CDS'
-            }
-        ];
+  test('should return the result of the db query', async () => {
+      const studentId = "1";
+      const mockedData = [
+          {
+              id: "1",
+              title: 'Test Proposal',
+              supervisor_id: 1,
+              type: 'Test Type',
+              description: 'Test Description',
+              required_knowledge: 'Test Knowledge',
+              notes: 'Test Notes',
+              expiration: '2023-12-31',
+              level: 'Test Level',
+              cds: 'Test CDS'
+          }
+      ];
 
-        db.prepare().all.mockReturnValue(mockedData);
+      db.prepare().all.mockReturnValue(mockedData);
 
-        const result = await thesis.listThesisProposalsFromStudent(studentId);
+      const result = await thesis.listThesisProposalsFromStudent(studentId);
 
-        expect(result).toEqual(mockedData);
-        expect(db.prepare().all).toHaveBeenCalledWith(studentId);
-    });
+      expect(result).toEqual(mockedData);
+      expect(db.prepare().all).toHaveBeenCalledWith(studentId);
+  });
 
-    test('should return an empty list', async () => {
-        const studentId = "1";
-        const mockedData = [];
+  test('should return an empty list', async () => {
+      const studentId = "1";
+      const mockedData = [];
 
-        db.prepare().all.mockReturnValue(mockedData);
+      db.prepare().all.mockReturnValue(mockedData);
 
-        const result = await thesis.listThesisProposalsFromStudent(studentId);
+      const result = await thesis.listThesisProposalsFromStudent(studentId);
 
-        expect(result).toEqual(mockedData);
-        expect(db.prepare().all).toHaveBeenCalledWith(studentId);
-    });
+      expect(result).toEqual(mockedData);
+      expect(db.prepare().all).toHaveBeenCalledWith(studentId);
+  });
 });
 
 describe('getKeywordsOfProposal', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
+  afterEach(() => {
+      jest.restoreAllMocks()
+  });
 
-    test('should return the result of the db query', async () => {
-        const proposalId = "1";
-        const mockedData = [
-            {
-                proposal_id: proposalId,
-                keyword: "Keyword1"
-            },
-            {
-                proposal_id: proposalId,
-                keyword: "Keyword2"
-            }
-        ];
-        const expectedResult = mockedData.map( row => row.keyword );
+  test('should return the result of the db query', async () => {
+      const proposalId = "1";
+      const mockedData = [
+          {
+              proposal_id: proposalId,
+              keyword: "Keyword1"
+          },
+          {
+              proposal_id: proposalId,
+              keyword: "Keyword2"
+          }
+      ];
+      const expectedResult = mockedData.map( row => row.keyword );
 
-        db.prepare().all.mockReturnValue(mockedData);
+      db.prepare().all.mockReturnValue(mockedData);
 
-        const result = await thesis.getKeywordsOfProposal(proposalId);
+      const result = await thesis.getKeywordsOfProposal(proposalId);
 
-        expect(result).toEqual(expectedResult);
-        expect(db.prepare().all).toHaveBeenCalledWith(proposalId);
-    });
+      expect(result).toEqual(expectedResult);
+      expect(db.prepare().all).toHaveBeenCalledWith(proposalId);
+  });
 
-    test('should return an empty list', async () => {
-        const proposalId = "1";
-        const mockedData = [];
-        const expectedResult = mockedData.map( row => row.keyword );
+  test('should return an empty list', async () => {
+      const proposalId = "1";
+      const mockedData = [];
+      const expectedResult = mockedData.map( row => row.keyword );
 
-        db.prepare().all.mockReturnValue(mockedData);
+      db.prepare().all.mockReturnValue(mockedData);
 
-        const result = await thesis.getKeywordsOfProposal(proposalId);
+      const result = await thesis.getKeywordsOfProposal(proposalId);
 
-        expect(result).toEqual(expectedResult);
-        expect(db.prepare().all).toHaveBeenCalledWith(proposalId);
-    });
+      expect(result).toEqual(expectedResult);
+      expect(db.prepare().all).toHaveBeenCalledWith(proposalId);
+  });
 });
 
 describe('getInternalCoSupervisorsOfProposal', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
+  afterEach(() => {
+      jest.restoreAllMocks()
+  });
 
-    test('should return the result of the db query', async () => {
-        const proposalId = "1";
-        const mockedData = {
-            id: "1",
-            surname: "MockedSurname",
-            name: "MockedName",
-            email: "mocked@gmail.com",
-            cod_group: "Group1",
-            cod_department: "Dep1",
-            proposal_id: proposalId,
-            co_supervisor_id: "1"
-        };
+  test('should return the result of the db query', async () => {
+      const proposalId = "1";
+      const mockedData = {
+          id: "1",
+          surname: "MockedSurname",
+          name: "MockedName",
+          email: "mocked@gmail.com",
+          cod_group: "Group1",
+          cod_department: "Dep1",
+          proposal_id: proposalId,
+          co_supervisor_id: "1"
+      };
 
-        db.prepare().all.mockReturnValue(mockedData);
+      db.prepare().all.mockReturnValue(mockedData);
 
-        const result = await thesis.getInternalCoSupervisorsOfProposal(proposalId);
+      const result = await thesis.getInternalCoSupervisorsOfProposal(proposalId);
 
-        expect(result).toEqual(mockedData);
-        expect(db.prepare().all).toHaveBeenCalledWith(proposalId);
-    });
+      expect(result).toEqual(mockedData);
+      expect(db.prepare().all).toHaveBeenCalledWith(proposalId);
+  });
 });
 
 describe('getExternalCoSupervisorsOfProposal', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
+  afterEach(() => {
+      jest.restoreAllMocks()
+  });
 
-    test('should return the result of the db query', async () => {
-        const proposalId = "1";
-        const mockedData = {
-            id: "1",
-            surname: "MockedSurname",
-            name: "MockedName",
-            email: "mocked@gmail.com",
-            proposal_id: proposalId,
-            co_supervisor_id: "1"
-        };
+  test('should return the result of the db query', async () => {
+      const proposalId = "1";
+      const mockedData = {
+          id: "1",
+          surname: "MockedSurname",
+          name: "MockedName",
+          email: "mocked@gmail.com",
+          proposal_id: proposalId,
+          co_supervisor_id: "1"
+      };
 
-        db.prepare().all.mockReturnValue(mockedData);
+      db.prepare().all.mockReturnValue(mockedData);
 
-        const result = await thesis.getExternalCoSupervisorsOfProposal(proposalId);
+      const result = await thesis.getExternalCoSupervisorsOfProposal(proposalId);
 
-        expect(result).toEqual(mockedData);
-        expect(db.prepare().all).toHaveBeenCalledWith(proposalId);
-    });
+      expect(result).toEqual(mockedData);
+      expect(db.prepare().all).toHaveBeenCalledWith(proposalId);
+  });
 });
 
 describe('getSupervisorOfProposal', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
+  afterEach(() => {
+      jest.restoreAllMocks()
+  });
 
-    test('should return the result of the db query', async () => {
-        const proposalId = "1";
-        const mockedData = {
-            id: "1",
-            surname: "MockedSurname",
-            name: "MockedName",
-            email: "mocked@gmail.com",
-            cod_group: "Group1",
-            cod_department: "Dep1"
-        };
+  test('should return the result of the db query', async () => {
+      const proposalId = "1";
+      const mockedData = {
+          id: "1",
+          surname: "MockedSurname",
+          name: "MockedName",
+          email: "mocked@gmail.com",
+          cod_group: "Group1",
+          cod_department: "Dep1"
+      };
 
-        db.prepare().get.mockReturnValue(mockedData);
+      db.prepare().get.mockReturnValue(mockedData);
 
-        const result = await thesis.getSupervisorOfProposal(proposalId);
+      const result = await thesis.getSupervisorOfProposal(proposalId);
 
-        expect(result).toEqual(mockedData);
-        expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
-    });
+      expect(result).toEqual(mockedData);
+      expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+  });
 });
 
 describe('getProposalGroups', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
+  afterEach(() => {
+      jest.restoreAllMocks()
+  });
 
-    test('should return the result of the db query', async () => {
-        const proposalId = "1";
-        const mockedData = [
-            {
-                proposal_id: proposalId,
-                cod_group: "Group1"
-            },
-            {
-                proposal_id: proposalId,
-                cod_group: "Group2"
-            }
-        ];
-        const expectedResult = mockedData.map( row => row.cod_group );
+  test('should return the result of the db query', async () => {
+      const proposalId = "1";
+      const mockedData = [
+          {
+              proposal_id: proposalId,
+              cod_group: "Group1"
+          },
+          {
+              proposal_id: proposalId,
+              cod_group: "Group2"
+          }
+      ];
+      const expectedResult = mockedData.map( row => row.cod_group );
 
-        db.prepare().all.mockReturnValue(mockedData);
+      db.prepare().all.mockReturnValue(mockedData);
 
-        const result = await thesis.getProposalGroups(proposalId);
+      const result = await thesis.getProposalGroups(proposalId);
 
-        expect(result).toEqual(expectedResult);
-        expect(db.prepare().all).toHaveBeenCalledWith(proposalId);
-    })
+      expect(result).toEqual(expectedResult);
+      expect(db.prepare().all).toHaveBeenCalledWith(proposalId);
+  })
 });
 
+// 5. Test function to apply for a thesis proposal
+describe('applyForProposal', () => {
+  test('applies for a proposal and resolves with applicationId', async () => {
+      // Mock data
+      const proposal_id = 1;
+      const student_id = 's12345';
+
+      // Call the function
+      const applicationId = await thesis.applyForProposal(proposal_id, student_id);
+
+      // Check if the function resolves with the expected applicationId
+      expect(applicationId).toBe(1); // Assuming your mock database always returns applicationId 1
+  });
+});
+
+// 6. Test function to list all applications for a teacher's thesis proposals
+
+// 7. Test function to accept an application
+
+// 8. Test function to reject an application
+
+// 9. Test function to list student's application decisions
+
+// 10. Test function to list professor's active thesis proposals
+
+// 11. Test function to update a thesis proposal
 describe('listThesisProposalsTeacher', () => {
   test('should return an array of thesis proposals for a teacher', async () => {
     // Mock the response from the database

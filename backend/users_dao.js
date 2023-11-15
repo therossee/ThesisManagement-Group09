@@ -7,8 +7,7 @@ const db = require('./db');
 // This function is used at log-in time to verify username and password.
 exports.getUser = (email, password) => {
   return new Promise((resolve, reject) => {
-    try{
-        let sql;
+    let sql;
         // Check the first letter of the email
         if (password.charAt(0) === 's') {
             sql = 'SELECT * FROM student WHERE email = ?';
@@ -38,10 +37,6 @@ exports.getUser = (email, password) => {
                 resolve(user);
             }
         }    
-    }catch(err){
-        reject(err);
-    }
-    
   });
 };
 
