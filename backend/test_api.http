@@ -70,9 +70,16 @@ GET http://localhost:3000/api/degrees
 // 5. Apply for a thesis proposal
 // POST api/student/:id/applications
 
-// 6. List all applications for a teacher's thesis proposals
-// GET api/teacher/:id/applications
+## 6. List all thesis proposals of a tearcher (supervisor)
+GET http://localhost:3000/api/teacher/thesis_proposals HTTP/1.1
+###
 
+GET http://localhost:3000/api/teacher/applications/1 HTTP/1.1
+
+###
+
+GET http://localhost:3000/api/thesis-proposals HTTP/1.1
+###
 // 7. Accept an application
 // PATCH api/teacher/:id/applications/:id
 

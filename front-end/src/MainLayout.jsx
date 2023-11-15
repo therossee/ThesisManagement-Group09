@@ -8,6 +8,7 @@ import ViewProposal from './routes/ViewProposal';
 import SideBar from './components/SideBar';
 import TopBar from './components/TopBar';
 import './css/style.css';
+import Applications from './routes/Applications';
 
 const { Content, Footer } = Layout;
 
@@ -23,6 +24,7 @@ function MainLayout() {
                         <Routes>
                             <Route path="/" element={<Home />} />
                             <Route path="/proposals" element={<Proposals />} />
+                            <Route path="/applications" element={<Applications />} />
                             <Route path="/insert-proposal" element={<InsertProposal />} />
                             <Route path="/view-proposal/:id" element={<ViewProposal />} />
                             <Route path="/*" element={<Errors code="404"/>} />
