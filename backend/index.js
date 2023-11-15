@@ -160,22 +160,22 @@ async (req,res) => {
     return res.status(400).json('Missing required fields.');
   }
 
-  // Array to store all grous
-  const groups = [];
+  // Set to store all grous
+  const unique_groups = new Set();
 
   // Get supervisor's group and add it to the array
   const supervisor_group = await thesisDao.getGroup(supervisor_id);
-  groups.push(supervisor_group);
+  unique_groups.add(supervisor_group);
 
   // Check if there are co-supervisors and if yes, retrieve their cod_group
   if (internal_co_supervisors_id.length > 0) {
     for (const internal_co_supervisor of internal_co_supervisors_id) {
       const co_supervisor_group = await thesisDao.getGroup(internal_co_supervisor);
-      groups.push(co_supervisor_group);
+      unique_groups.add(co_supervisor_group);
     }
   }
 
-  await thesisDao.createThesisProposal(title, supervisor_id, internal_co_supervisors_id, external_co_supervisors_id, type, groups, description, required_knowledge, notes, expiration, level, cds, keywords)
+  thesisDao.createThesisProposal(title, supervisor_id, internal_co_supervisors_id, external_co_supervisors_id, type, unique_groups, description, required_knowledge, notes, expiration, level, cds, keywords)
   .then((thesisProposalId)=>{
     res.status(201).json(
       {
@@ -185,7 +185,7 @@ async (req,res) => {
         internal_co_supervisors_id: internal_co_supervisors_id,
         external_co_supervisors_id:external_co_supervisors_id,
         type: type,
-        groups: groups,
+        groups: [...unique_groups],
         description: description,
         required_knowledge: required_knowledge,
         notes: notes,
