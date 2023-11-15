@@ -3,14 +3,13 @@
 }
 
 .content-style {
-  margin: 12px 24px 89px 24px;
+  margin: 14px 24px 14px 24px;
   background-color: white;
 }
 
 .footer-style {
-  position: fixed;
+  position: relative;
   width: 100%;
-  bottom: 0;
   text-align: center;
   background-color: white;
   box-shadow: 0 10px 20px rgba(0, 0, 0, .25);
