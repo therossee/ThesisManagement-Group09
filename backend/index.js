@@ -196,6 +196,7 @@ async (req,res) => {
       });
   })
   .catch((error) => {
+    console.error(error);
     res.status(500).json(`Failed to create thesis proposal. ${error.message || error}`);
   });
 });
@@ -212,6 +213,7 @@ async(req, res) => {
 
     res.json({ teachers: teacherList });
   } catch (error) {
+    console.error(error);
     res.status(500).json('Internal Server Error');
   }
 });
@@ -227,6 +229,7 @@ async(req, res) => {
 
     res.json({ externalCoSupervisors: externalCoSupervisorList });
   } catch (error) {
+    console.error(error);
     res.status(500).json('Internal Server Error');
   }
 });
@@ -310,8 +313,39 @@ app.get('/api/thesis-proposals/:id',
 // 5. Apply for a thesis proposal
 // POST api/student/:id/applications
 
-// 6. List all applications for a teacher's thesis proposals
-// GET api/teacher/:id/applications
+// 6. List all thesis proposals of a teacher
+// GET api/teacher/thesis_proposals
+app.get('/api/teacher/thesis_proposals',
+isLoggedIn,
+isTeacher,
+async (req, res) => {
+  try {
+    const teacherId = req.user.id;
+    const thesisProposals = await thesisDao.listThesisProposalsTeacher(teacherId);
+
+    res.json(thesisProposals);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json('Internal Server Error');
+  }
+});
+
+// 7. List all applications for a teacher's thesis proposal
+// GET api/teacher/applications/:proposal_id
+app.get('/api/teacher/applications/:proposal_id',
+isLoggedIn,
+isTeacher,
+async (req, res) => {
+  try {
+    const proposal_id=req.params.proposal_id;
+    const teacherId = req.user.id;
+    const applications = await thesisDao.listApplicationsForTeacherThesisProposal(proposal_id, teacherId);
+    res.json(applications);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json('Internal Server Error');
+  }
+});
 
 // 7. Accept an application
 // PATCH api/teacher/:id/applications/:id
