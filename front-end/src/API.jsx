@@ -57,7 +57,7 @@ async function insertProposal(proposal) {
         return prop;
     } else {
         const errDetail = await response.json();
-        throw errDetail;
+        throw {status: response.status, msg: errDetail};
     }
 }
 

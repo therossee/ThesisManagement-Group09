@@ -26,6 +26,7 @@ function InsertThesisProposal(props) {
   const [intCoSupervisors, setIntCoSupervisors] = useState([]);
   const [extCoSupervisors, setExtCoSupervisors] = useState([]);
   const [errorMsg, setErrorMsg] = useState("");
+  const [error, setError] = useState(-1);
   const [insert, setInsert] = useState(false);
   const [degrees, setDegrees] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -95,6 +96,7 @@ function InsertThesisProposal(props) {
       .catch((err) => {
         console.log(err);
         setProposalId(-1);
+        setError(err.status);
         next();
       });
       setInsert(false);
@@ -161,7 +163,7 @@ function InsertThesisProposal(props) {
         </div>
         <div>
           {current === steps.length - 1 && 
-            <Done proposalId={proposalId}/>
+            <Done proposalId={proposalId} error={error}/>
           }
         </div>
       </div>
@@ -410,6 +412,7 @@ function ReviewProposal(props) {
 function Done(props) {
   const navigate = useNavigate();
   const id = props.proposalId;
+  const error = props.error;
   if(id !== -1){
     return (
     <Result
@@ -426,8 +429,8 @@ function Done(props) {
   }else{
     return (
       <Result
-          status="500"
-          title="500"
+          status={`${error}`}
+          title={`${error}`}
           subTitle="Sorry, something went wrong."
           extra={<Button ghost type="primary" onClick={() => navigate("/")}>Back Home</Button>}
       />
