@@ -10,6 +10,7 @@ const LocalStrategy = require('passport-local');
 
 const thesisDao = require('./thesis_dao.js');
 const usersDao = require('./users_dao.js');
+const degreeDao = require('./degree_dao.js');
 const AdvancedDate = require("./AdvancedDate");
 const schemas = require('./schemas.js');
 const {ZodError} = require("zod");
@@ -230,8 +231,81 @@ async(req, res) => {
   }
 });
 
+//GET /api/keywords
+app.get('/api/keywords',
+isLoggedIn,
+isTeacher,
+async(req, res) => {
+  try {
+    const keywords = await thesisDao.getAllKeywords();
+    res.json({ keywords });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json('Internal Server Error');
+  }
+});
+
+//GET /api/degrees
+app.get('/api/degrees',
+isLoggedIn,
+isTeacher,
+async(req, res) => {
+  try {
+    const degrees = await thesisDao.getDegrees();
+    res.json(degrees);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json('Internal Server Error');
+  }
+});
+
 // 4. Search for thesis proposals
-// GET api/student/:id/thesis_proposals?title=...&supervisor=...&co-supervisor=...&tags=...&keywords=...&type=...
+// GET api/thesis-proposals
+app.get('/api/thesis-proposals',
+  isLoggedIn,
+  isStudent,
+  async (req, res) => {
+    try {
+      const studentId = req.user.id;
+      const proposals = await thesisDao.listThesisProposalsFromStudent(studentId);
+      const proposalsPopulated = await Promise.all(
+        proposals.map(async proposal => {
+          return await _populateProposal(proposal);
+        })
+      );
+
+      // Not used right now, but it's here for potential future use
+      const metadata = {
+        index: 0,
+        count: proposals.length,
+        total: proposals.length,
+        currentPage: 1
+      };
+      res.json({ $metadata: metadata, items: proposalsPopulated });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json('Internal Server Error');
+    }
+  });
+app.get('/api/thesis-proposals/:id',
+  isLoggedIn,
+  isStudent,
+  async (req, res) => {
+    try {
+      const studentId = req.user.id;
+      const proposalId = req.params.id;
+
+      const proposal = await thesisDao.getThesisProposal(proposalId, studentId);
+      if (!proposal) {
+          return res.status(404).json({ message: `Thesis proposal with id ${proposalId} not found.` });
+      }
+
+      res.json( await _populateProposal(proposal) );
+    } catch (e) {
+      console.error(e);
+      res.status(500).json('Internal Server Error');
+    }
+  });
 
 // 5. Apply for a thesis proposal
 // POST api/student/:id/applications
@@ -260,3 +334,94 @@ const server = app.listen(PORT, () => {
 });
 
 module.exports = { app, server };
+
+/**
+ * Serialize and populate a proposal object in order to have all the data needed by the API
+ *
+ * @param {ThesisProposalRow} proposalData
+ * @return {Promise<object>}
+ * @private
+ */
+async function _populateProposal(proposalData) {
+  return {
+    id: proposalData.proposal_id,
+    title: proposalData.title,
+    status: _getProposalStatus(proposalData),
+    supervisor: await thesisDao.getSupervisorOfProposal(proposalData.proposal_id)
+        .then( _serializeTeacher ),
+    coSupervisors: {
+      internal: await thesisDao.getInternalCoSupervisorsOfProposal(proposalData.proposal_id)
+          .then( supervisors => {
+            return supervisors.map( supervisor => _serializeTeacher(supervisor));
+          }),
+      external: await thesisDao.getExternalCoSupervisorsOfProposal(proposalData.proposal_id)
+    },
+    type: proposalData.type,
+    description: proposalData.description,
+    requiredKnowledge: proposalData.required_knowledge,
+    notes: proposalData.notes,
+    expiration: proposalData.expiration,
+    level: proposalData.level,
+    cds: await degreeDao.getDegreeFromCode(proposalData.cds)
+        .then( degree => {
+          if (!degree) {
+            // Should never happen, but just in case
+            throw new Error(`Degree with code ${proposalData.cds} not found`);
+          }
+
+          return _serializeDegree(degree);
+        }),
+    keywords: await thesisDao.getKeywordsOfProposal(proposalData.proposal_id),
+    groups: await thesisDao.getProposalGroups(proposalData.proposal_id)
+  };
+}
+
+/**
+ * Return the status of a proposal
+ *
+ * @param proposalData
+ * @return {'EXPIRED' | 'ACTIVE'}
+ * @private
+ */
+function _getProposalStatus(proposalData) {
+  const now = new AdvancedDate();
+  const expirationDate = new AdvancedDate(proposalData.expiration);
+
+  if (expirationDate.isBefore(now)) {
+    return 'EXPIRED';
+  }
+
+  return 'ACTIVE';
+}
+
+/**
+ * Serializes a degree object to a more compact format for the API
+ *
+ * @param {DegreeRow} degree
+ * @return {{code: string, title: string}}
+ * @private
+ */
+function _serializeDegree(degree) {
+  return {
+    code: degree.cod_degree,
+    title: degree.title_degree
+  };
+}
+
+/**
+ * Serialize a teacher object to a more compact format for the API
+ *
+ * @param {TeacherRow} teacher
+ * @return {{id: string, name: string, surname: string, email: string, codGroup: string, codDepartment: string}}
+ * @private
+ */
+function _serializeTeacher(teacher) {
+  return {
+    id: teacher.id,
+    name: teacher.name,
+    surname: teacher.surname,
+    email: teacher.email,
+    codGroup: teacher.cod_group,
+    codDepartment: teacher.cod_department
+  };
+}

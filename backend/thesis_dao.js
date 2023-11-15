@@ -37,7 +37,7 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
           keywords.forEach(keyword => {
             db.prepare(insertProposalKeywordQuery).run(proposalId, keyword);
           });
-          
+
           if(internal_co_supervisors_id.length > 0){
             internal_co_supervisors_id.forEach(internal_co_supervisor_id => {
               db.prepare(insertInternalCoSupervisorsQuery).run(proposalId, internal_co_supervisor_id);
@@ -49,58 +49,210 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
               db.prepare(insertExternalCoSupervisorsQuery).run(proposalId, external_co_supervisor_id);
             });
           }
-          
+
           groups.forEach(group => {
             db.prepare(insertGroupsQuery).run(proposalId, group);
           });
-          
+
           resolve(proposalId)
         })();
     } catch(err){
       reject(err)
     }
   })
-}
+};
 
 // 2. Function to get list of teachers not logged
 exports.getTeacherListExcept = (id) => {
-  return new Promise((resolve,reject)=>{
+  return new Promise((resolve)=>{
       const query = `SELECT * FROM teacher WHERE id <> ?; `;
       const teachers = db.prepare(query).all(id);
       resolve(teachers);
   })
-}
+};
 
 // 3. Function to get list of external co-supervisors
-exports.getExternalCoSupervisorList = (id) => {
-  return new Promise((resolve,reject)=>{
+exports.getExternalCoSupervisorList = () => {
+  return new Promise((resolve)=>{
       const query = `SELECT * FROM externalCoSupervisor;`;
       const externalCoSupervisors = db.prepare(query).all();
       resolve(externalCoSupervisors);
   })
-}
+};
 
 // 4. Function to retrieve the cod_group of a teacher
 exports.getGroup = (teacherId) => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
       const getGroupQuery = `SELECT cod_group FROM teacher WHERE id=? `;
-      const res = db.prepare(getGroupQuery).get(teacherId)
+      const res = db.prepare(getGroupQuery).get(teacherId);
       resolve(res.cod_group)
   })
-}
+};
 
-// 5. Function to search for thesis proposals
+// Function to retrieve all the keywords
+exports.getAllKeywords = () => {
+  return new Promise((resolve) => {
+      const getKeywords = `SELECT DISTINCT(keyword) FROM proposalKeyword`;
+      const res = db.prepare(getKeywords).all();
+      // Extracting the keyword property from each row
+      const keywords = res.map(row => row.keyword);
+      resolve(keywords)
+  })
+};
 
-// 6. Function to apply for a thesis proposal
+// Function to retrieve all the keywords
+exports.getDegrees = () => {
+  return new Promise((resolve) => {
+      const getDegrees = `SELECT * FROM degree`;
+      const res = db.prepare(getDegrees).all();
+      // Extracting the degree property from each row
+      //const keywords = res.map(row => row.keyword);
+      resolve(res)
+  })
+};
 
-// 7. Function to list all applications for a teacher's thesis proposals
+/**
+ * Return the proposal with the given id related to a student degree (if exists)
+ *
+ * @param {string} proposalId
+ * @param {string} studentId
+ *
+ * @return {Promise<ThesisProposalRow | null>}
+ */
+exports.getThesisProposal = (proposalId, studentId) => {
+    return new Promise((resolve) => {
+        const query = `SELECT * FROM thesisProposal P
+            JOIN degree D ON P.cds = D.cod_degree
+            JOIN student S ON S.cod_degree = D.cod_degree
+            WHERE P.proposal_id = ? AND S.id = ?`;
 
-// 8. Function to accept an application
+        const thesisProposal = db.prepare(query).get(proposalId, studentId);
+        resolve(thesisProposal ?? null);
+    })
+};
 
-// 9. Function to reject an application
+/**
+ * Return the list of thesis proposals related to a student degree
+ *
+ * @param {string} studentId
+ * @return {Promise<ThesisProposalRow[]>}
+ */
+exports.listThesisProposalsFromStudent = (studentId) => {
+    return new Promise((resolve) => {
+        const query = `SELECT * FROM thesisProposal P
+            JOIN degree D ON P.cds = D.cod_degree
+            JOIN student S ON S.cod_degree = D.cod_degree
+            WHERE S.id = ?`;
 
-// 10. Function to list student's application decisions
+        const thesisProposals = db.prepare(query).all(studentId);
+        resolve(thesisProposals);
+    })
+};
 
-// 11. Function to list professor's active thesis proposals
+/**
+ * Return the list of keywords of a thesis proposal
+ *
+ * @param {string} proposalId
+ * @return {Promise<string[]>}
+ */
+exports.getKeywordsOfProposal = (proposalId) => {
+    return new Promise((resolve) => {
+        const query = `SELECT keyword FROM proposalKeyword WHERE proposal_id = ?`;
+        const data = db.prepare(query).all(proposalId);
+        resolve(data.map( row => row.keyword ));
+    })
+};
 
-// 11. Function to update a thesis proposal
+/**
+ * Return the list of thesis proposals groups
+ *
+ * @param {string} proposalId
+ * @return {Promise<string[]>}
+ */
+exports.getProposalGroups = (proposalId) => {
+    return new Promise((resolve) => {
+        const query = `SELECT cod_group FROM proposalGroup WHERE proposal_id = ?`;
+        const data = db.prepare(query).all(proposalId);
+
+        resolve(data.map( row => row.cod_group ));
+    })
+};
+
+/**
+ * Return the list of internal co-supervisors (teachers) of a thesis proposal
+ *
+ * @param {string} proposalId
+ *
+ * @return {Promise<TeacherRow[]>}
+ */
+exports.getInternalCoSupervisorsOfProposal = (proposalId) => {
+    return new Promise((resolve) => {
+        const query = `SELECT * FROM thesisInternalCoSupervisor I JOIN teacher T ON I.co_supervisor_id = T.id WHERE I.proposal_id = ?`;
+        const data = db.prepare(query).all(proposalId);
+        resolve(data);
+    })
+};
+
+/**
+ * Return the list of external co-supervisors of a thesis proposal
+ *
+ * @param {string} proposalId
+ * @return {Promise<ExternalCoSupervisorRow[]>}
+ */
+exports.getExternalCoSupervisorsOfProposal = (proposalId) => {
+    return new Promise((resolve) => {
+        const query = `SELECT * FROM thesisExternalCoSupervisor E JOIN externalCoSupervisor C ON E.co_supervisor_id = C.id WHERE E.proposal_id = ?`;
+        const data = db.prepare(query).all(proposalId);
+        resolve(data);
+    })
+};
+
+/**
+ * Return the supervisor of a thesis proposal
+ *
+ * @param {string} proposalId
+ * @return {Promise<TeacherRow>}
+ */
+exports.getSupervisorOfProposal = (proposalId) => {
+    return new Promise((resolve) => {
+        const query = `SELECT T.id, T.surname, T.name, T.email, T.cod_group, T.cod_department FROM thesisProposal P JOIN teacher T ON P.supervisor_id = T.id WHERE P.proposal_id = ?`;
+        const data = db.prepare(query).get(proposalId);
+        resolve(data);
+    })
+};
+
+
+/**
+ * @typedef {Object} ThesisProposalRow
+ *
+ * @property {string} proposal_id
+ * @property {string} title
+ * @property {string} supervisor_id
+ * @property {string} type
+ * @property {string} description
+ * @property {string} [required_knowledge]
+ * @property {string} [notes]
+ * @property {string} expiration
+ * @property {string} level
+ * @property {string} cds
+ */
+
+/**
+ * @typedef {Object} TeacherRow
+ *
+ * @property {string} id
+ * @property {string} surname
+ * @property {string} name
+ * @property {string} email
+ * @property {string} cod_group
+ * @property {string} cod_department
+ */
+
+/**
+ * @typedef {Object} ExternalCoSupervisorRow
+ *
+ * @property {string} id
+ * @property {string} surname
+ * @property {string} name
+ * @property {string} email
+ */
