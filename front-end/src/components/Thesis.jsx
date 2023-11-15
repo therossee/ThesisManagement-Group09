@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Row } from "react";
 import { useNavigate } from "react-router-dom";
-import { DatePicker, FloatButton, Button, Form, Input, Select, Steps, Spin } from "antd";
+import { DatePicker, FloatButton, Button, Form, Input, Select, Steps, Spin, Result } from "antd";
 import API from "../API.jsx";
 
 const { Option } = Select;
@@ -29,7 +29,6 @@ function InsertThesisProposal(props) {
   const [insert, setInsert] = useState(false);
   const [degrees, setDegrees] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
   const [formData, setFormData] = useState(null);
   const [form] = Form.useForm();
@@ -162,13 +161,8 @@ function InsertThesisProposal(props) {
         </div>
         <div>
           {current === steps.length - 1 && 
-          <>
-          <Done proposalId={proposalId}/>
-            <Button type="primary" onClick={() => navigate("/")}>
-              Done
-            </Button>
-          </>
-            }
+            <Done proposalId={proposalId}/>
+          }
         </div>
       </div>
       <FloatButton.BackTop style={{ marginBottom: "40px" }} tooltip={<div>Back to Top</div>} />
@@ -414,20 +408,29 @@ function ReviewProposal(props) {
 }
 
 function Done(props) {
+  const navigate = useNavigate();
   const id = props.proposalId;
   if(id !== -1){
     return (
-      <div>
-        <h2>Done</h2>
-        <p>You have finished! Your proposal has been inserted with ID: {id}</p>
-      </div>
+    <Result
+      status="success"
+      title="Proposal added succesfully!"
+      subTitle={`ID of the proposal: ${id}`}
+      extra={[
+      <Button type="primary" key="on" onClick={() => navigate("/")}>
+        Back Home
+      </Button>,
+    ]}
+  />
     );
   }else{
     return (
-      <div>
-        <h2>Error</h2>
-        <p>DB or network error while trying to insert new proposal</p>
-      </div>
+      <Result
+          status="500"
+          title="500"
+          subTitle="Sorry, something went wrong."
+          extra={<Button ghost type="primary" onClick={() => navigate("/")}>Back Home</Button>}
+      />
     );
   }
 }
