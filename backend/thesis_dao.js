@@ -100,7 +100,7 @@ exports.getAllKeywords = () => {
   })
 };
 
-// Function to retrieve all the keywords
+// Function to retrieve all the degrees
 exports.getDegrees = () => {
   return new Promise((resolve) => {
       const getDegrees = `SELECT * FROM degree`;
