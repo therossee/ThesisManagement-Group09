@@ -331,15 +331,15 @@ async (req, res) => {
 });
 
 // 7. List all applications for a teacher's thesis proposal
-// GET api/teacher/applications
-app.get('/api/teacher/applications',
+// GET api/teacher/applications/:proposal_id
+app.get('/api/teacher/applications/:proposal_id',
 isLoggedIn,
 isTeacher,
 async (req, res) => {
   try {
-    const proposalId = req.body.proposal_id;
+    const proposal_id=req.params.proposal_id;
     const teacherId = req.user.id;
-    const applications = await thesisDao.listApplicationsForTeacherThesisProposal(proposalId, teacherId);
+    const applications = await thesisDao.listApplicationsForTeacherThesisProposal(proposal_id, teacherId);
     res.json(applications);
   } catch (e) {
     console.error(e);
