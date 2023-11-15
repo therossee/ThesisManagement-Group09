@@ -254,7 +254,11 @@ function InsertBody(props) {
           options={unselectedInt.map((x) => ({
             value: x.id, // assuming x.id is a string or number
             label: `${x.name} ${x.surname}`, // assuming x.name and x.surname are strings
+            searchValue: `${x.id} ${x.name} ${x.surname}`, // combine id, name, and surname for search
           }))}
+          filterOption={(input, option) =>
+            option.searchValue.toLowerCase().includes(input.toLowerCase())
+          }
         />
         </Form.Item>
         <Form.Item label="External co-Supervisors" name="extCoSupervisors">
@@ -266,7 +270,11 @@ function InsertBody(props) {
           options={unselectedExt.map((x) => ({
             value: x.id, // assuming x.id is a string or number
             label: `${x.name} ${x.surname}`, // assuming x.name and x.surname are strings
+            searchValue: `${x.id} ${x.name} ${x.surname}`, // combine id, name, and surname for search
           }))}
+          filterOption={(input, option) =>
+            option.searchValue.toLowerCase().includes(input.toLowerCase())
+          }
         />
         </Form.Item>
         <Form.Item label="Keywords" name="keywords" rules={[
