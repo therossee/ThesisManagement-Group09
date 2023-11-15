@@ -420,9 +420,9 @@ function Done(props) {
       title="Proposal added succesfully!"
       subTitle={`ID of the proposal: ${id}`}
       extra={[
-      <Button type="primary" key="on" onClick={() => navigate("/")}>
+      <Button ghost type="primary" onClick={() => navigate("/")}>
         Back Home
-      </Button>,
+      </Button>
     ]}
   />
     );
@@ -432,7 +432,11 @@ function Done(props) {
           status={`${error}`}
           title={`${error}`}
           subTitle="Sorry, something went wrong."
-          extra={<Button ghost type="primary" onClick={() => navigate("/")}>Back Home</Button>}
+          extra={
+            <Button ghost type="primary" onClick={() => navigate("/")}>
+              Back Home
+            </Button>
+          }
       />
     );
   }
