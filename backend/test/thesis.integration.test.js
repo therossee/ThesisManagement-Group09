@@ -4,6 +4,7 @@ const service = require("../thesis_dao");
 const degreeService = require("../degree_dao");
 const usersService = require("../users_dao");
 const {app, server} = require("../index");
+const { serialize } = require('../db');
 
 // Mocking the getTeacherListExcept function
 jest.mock('../thesis_dao', () => ({
@@ -20,6 +21,8 @@ jest.mock('../thesis_dao', () => ({
     getThesisProposal: jest.fn(),
     getAllKeywords: jest.fn(),
     getDegrees: jest.fn(),
+    listThesisProposalsTeacher: jest.fn(),
+    listApplicationsForTeacherThesisProposal: jest.fn(),
     applyForProposal: jest.fn()
 }));
 
@@ -36,8 +39,6 @@ afterAll((done) => {
     server.close(done);
 });
 
-
-// TEST GET api/teachers
 describe('GET /api/teachers', () => {
     test('returns a list of teachers excluding the logged-in teacher', async () => {
         const mockUser = {
@@ -116,7 +117,6 @@ describe('GET /api/teachers', () => {
     });
 });
 
-// TEST GET api/externalCoSupervisors
 describe('GET /api/externalCoSupervisors', () => {
     test('returns the list of external co-supervisors', async () => {
         const mockUser = {
@@ -192,7 +192,6 @@ describe('GET /api/externalCoSupervisors', () => {
     });
 });
 
-// TEST POST api/teacher/thesis_proposals
 describe('POST /api/teacher/thesis_proposals', () => {
     test('should create a new thesis proposal', async () => {
         const mockUser = {
@@ -515,7 +514,6 @@ describe('POST /api/teacher/thesis_proposals', () => {
     });
 });
 
-// TEST GET api/keywords
 describe('GET /api/keywords', () => {
     test('should return an array of keywords', async () => {
       
@@ -587,7 +585,6 @@ describe('GET /api/keywords', () => {
     });
 });
 
-// TEST GET api/degrees
 describe('GET /api/degrees', () => {
     test('should return an array of degrees', async () => {
       
@@ -659,7 +656,6 @@ describe('GET /api/degrees', () => {
     });
 });
 
-// TEST GET api/thesis_proposals
 describe('GET /api/thesis_proposals', () => {
     test('should return the list of thesis proposals of a student', async () => {
         const mockUser = {
@@ -957,7 +953,6 @@ describe('GET /api/thesis_proposals', () => {
     });
 });
 
-// TEST GET api/thesis_proposals/:id
 describe('GET /api/thesis_proposals/:id', () => {
     test('should return the thesis proposal', async () => {
         const mockUser = {
@@ -1159,7 +1154,6 @@ describe('GET /api/thesis_proposals/:id', () => {
     });
 });
 
-// TEST POST api/student/applications
 describe('POST /api/student/applications', () => {
     beforeEach(() => {   
         jest.clearAllMocks();
@@ -1297,16 +1291,147 @@ describe('POST /api/student/applications', () => {
     });
 });
 
-// TEST GET api/teacher/:id/applications
+describe('GET /api/teacher/thesis_proposals', () => {
+    test('should return an array of thesis proposals for a teacher', async () => {
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
 
-// TEST PATCH api/teacher/:id/applications/:id
+        usersService.getUser.mockResolvedValue(mockUser);
 
-// TEST PATCH api/teacher/:id/applications/:id
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 'd1' })
+            .set('Accept', 'application/json');
 
-// TEST GET api/student/:id/applications
+        const cookies = loginResponse.headers['set-cookie'];
+        const mockThesisProposals = [
+            { proposal_id: 1, title: 'Proposal1' },
+            { proposal_id: 2, title: 'Proposal2' },
+        ];
 
-// TEST GET api/teacher/:id/thesis_proposals
+        // Mock the function call
+        service.listThesisProposalsTeacher.mockResolvedValueOnce(mockThesisProposals);
 
-// TEST PATCH api/teacher/:id/thesis_proposals/:id
+        // Send a request to the endpoint
+        const response = await request(app)
+                               .get('/api/teacher/thesis_proposals')
+                               .set('Cookie', cookies);
 
+        // Assertions
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(mockThesisProposals);
+        expect(service.listThesisProposalsTeacher).toHaveBeenCalledWith('d1'); 
+    });
+    test('should handle errors and return 500', async () => {
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
 
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 'd1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+
+        // Mock an error in thesisDao.getAllKeywords
+        const mockError = new Error('Mocked error during getAllKeywords');
+        service.listThesisProposalsTeacher.mockRejectedValueOnce(mockError);
+    
+        // Send a request to the endpoint
+        const response = await request(app)
+                               .get('/api/teacher/thesis_proposals')
+                               .set('Cookie', cookies);
+    
+        // Assertions
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Internal Server Error');
+        expect(service.listThesisProposalsTeacher).toHaveBeenCalled();
+    });
+  });
+
+describe('GET /api/teacher/applications/:proposal_id', () => {
+    test('should return an array of applications for a teacher and proposal', async () => {
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
+
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 'd1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+        
+        // Mock the response from thesisDao.listThesisApplicationsForTeacherThesisProposal
+        const mockApplications = [
+            { application_id: 1, status: 'Approved' },
+            { application_id: 2, status: 'Pending' },
+        ];
+
+        // Mock the function call
+        service.listApplicationsForTeacherThesisProposal.mockResolvedValueOnce(mockApplications);
+
+        // Send a request to the endpoint
+        const response = await request(app)
+                               .get('/api/teacher/applications/1')
+                               .set('Cookie', cookies);
+
+        // Assertions
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(mockApplications);
+    });
+    test('should handle errors and return 500', async () => {
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
+
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 'd1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+
+        // Mock an error in thesisDao.getAllKeywords
+        const mockError = new Error('Mocked error during getAllKeywords');
+        service.listApplicationsForTeacherThesisProposal.mockRejectedValueOnce(mockError);
+    
+        // Send a request to the endpoint
+        const response = await request(app)
+                               .get('/api/teacher/applications/1')
+                               .set('Cookie', cookies);
+    
+        // Assertions
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Internal Server Error');
+        expect(service.listApplicationsForTeacherThesisProposal).toHaveBeenCalled();
+    });
+});  
