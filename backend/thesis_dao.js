@@ -100,7 +100,7 @@ exports.getAllKeywords = () => {
   })
 };
 
-// Function to retrieve all the keywords
+// Function to retrieve all the degrees
 exports.getDegrees = () => {
   return new Promise((resolve) => {
       const getDegrees = `SELECT * FROM degree`;
@@ -111,6 +111,7 @@ exports.getDegrees = () => {
   })
 };
 
+// 5. Function to search for thesis proposals
 /**
  * Return the proposal with the given id related to a student degree (if exists)
  *
@@ -256,3 +257,26 @@ exports.getSupervisorOfProposal = (proposalId) => {
  * @property {string} name
  * @property {string} email
  */
+
+// 6. Function to apply for a thesis proposal
+exports.applyForProposal = (proposal_id, student_id) => {
+  return new Promise((resolve, reject) => {
+    const insertApplicationQuery = `
+    INSERT INTO thesisApplication (proposal_id, student_id)
+    VALUES (?, ?); `; // at first the application has default status 'waiting for approval'
+
+    const res = db.prepare(insertApplicationQuery).run(proposal_id, student_id);
+    resolve(res.lastInsertRowid);
+  })
+}
+// 7. Function to list all applications for a teacher's thesis proposals
+
+// 8. Function to accept an application
+
+// 9. Function to reject an application
+
+// 10. Function to list student's application decisions
+
+// 11. Function to list professor's active thesis proposals
+
+// 11. Function to update a thesis proposal

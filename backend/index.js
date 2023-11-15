@@ -160,22 +160,22 @@ async (req,res) => {
     return res.status(400).json('Missing required fields.');
   }
 
-  // Array to store all grous
-  const groups = [];
+  // Set to store all grous
+  const unique_groups = new Set();
 
   // Get supervisor's group and add it to the array
   const supervisor_group = await thesisDao.getGroup(supervisor_id);
-  groups.push(supervisor_group);
+  unique_groups.add(supervisor_group);
 
   // Check if there are co-supervisors and if yes, retrieve their cod_group
   if (internal_co_supervisors_id.length > 0) {
     for (const internal_co_supervisor of internal_co_supervisors_id) {
       const co_supervisor_group = await thesisDao.getGroup(internal_co_supervisor);
-      groups.push(co_supervisor_group);
+      unique_groups.add(co_supervisor_group);
     }
   }
 
-  thesisDao.createThesisProposal(title, supervisor_id, internal_co_supervisors_id, external_co_supervisors_id, type, groups, description, required_knowledge, notes, expiration, level, cds, keywords)
+  thesisDao.createThesisProposal(title, supervisor_id, internal_co_supervisors_id, external_co_supervisors_id, type, unique_groups, description, required_knowledge, notes, expiration, level, cds, keywords)
   .then((thesisProposalId)=>{
     res.status(201).json(
       {
@@ -185,7 +185,7 @@ async (req,res) => {
         internal_co_supervisors_id: internal_co_supervisors_id,
         external_co_supervisors_id:external_co_supervisors_id,
         type: type,
-        groups: groups,
+        groups: [...unique_groups],
         description: description,
         required_knowledge: required_knowledge,
         notes: notes,
@@ -196,6 +196,7 @@ async (req,res) => {
       });
   })
   .catch((error) => {
+    console.error(error);
     res.status(500).json(`Failed to create thesis proposal. ${error.message || error}`);
   });
 });
@@ -212,6 +213,7 @@ async(req, res) => {
 
     res.json({ teachers: teacherList });
   } catch (error) {
+    console.error(error);
     res.status(500).json('Internal Server Error');
   }
 });
@@ -227,6 +229,7 @@ async(req, res) => {
 
     res.json({ externalCoSupervisors: externalCoSupervisorList });
   } catch (error) {
+    console.error(error);
     res.status(500).json('Internal Server Error');
   }
 });
@@ -308,7 +311,27 @@ app.get('/api/thesis-proposals/:id',
   });
 
 // 5. Apply for a thesis proposal
-// POST api/student/:id/applications
+// POST api/student/applications
+app.post('/api/student/applications',
+isLoggedIn,
+isStudent,
+async(req,res) => {
+    const student_id = req.user.id; // logged in student
+    const {thesis_proposal_id} = req.body;
+    await thesisDao.applyForProposal(thesis_proposal_id, student_id).then
+    ((applicationId)=>{  
+      res.status(201).json(
+        { 
+          thesis_proposal_id: thesis_proposal_id, 
+          student_id: student_id,
+          status: 'waiting for approval'
+        });
+    })
+  .catch((error) => {
+    console.error(error); 
+    res.status(500).json(`Failed to apply for thesis proposal. ${error.message || error}`);
+  });
+});
 
 // 6. List all applications for a teacher's thesis proposals
 // GET api/teacher/:id/applications
