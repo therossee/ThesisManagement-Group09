@@ -1,7 +1,7 @@
 import { React, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import Highlighter from 'react-highlight-words';
-import { DatePicker, FloatButton, Button, Form, Input, Select, Space, Steps, Table, Tag, Tooltip } from "antd";
+import { DatePicker, FloatButton, Button, Descriptions, Drawer, Form, Input, Select, Skeleton, Space, Steps, Table, Tag, Tooltip, Typography } from "antd";
 import { EyeOutlined, SearchOutlined } from '@ant-design/icons';
 import API from "../API";
 
@@ -225,21 +225,17 @@ function ThesisProposals() {
           <Button onClick={() => handleReset(clearFilters)} size="small" style={{ width: 90 }}>
             Reset
           </Button>
-          <Button type="link" size="small" onClick={() => { close() }}>
+          <Button type="link" size="small" onClick={() => close()}>
             close
           </Button>
         </Space>
       </div>
     ),
     filterIcon: (filtered) => (
-      <SearchOutlined
-        style={{
-          color: filtered ? '#1677ff' : undefined,
-        }}
-      />
+      <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
     ),
     onFilter: (value, record) =>
-      record['title'].toString().toLowerCase().includes(value.toLowerCase()),
+      record['title'].toLowerCase().includes(value.toLowerCase()),
     render: (text) =>
       <Highlighter
         highlightStyle={{
@@ -253,7 +249,6 @@ function ThesisProposals() {
   });
 
   useEffect(() => {
-    setIsLoadingTable(true);
     API.getStudentThesisProposals()
       .then((x) => {
         setData(handleReceivedData(x));
@@ -266,10 +261,15 @@ function ThesisProposals() {
   const [data, setData] = useState([])
 
   // Loading table data fetching
-  const [isLoadingTable, setIsLoadingTable] = useState(false);
+  const [isLoadingTable, setIsLoadingTable] = useState(true);
 
   // Storing Title Search filter
   const [searchTitle, setSearchTitle] = useState('');
+
+  // Drawer for viewing more filters
+  const [isOpen, setIsOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   // Columns of the table
   const columns = [
@@ -278,6 +278,13 @@ function ThesisProposals() {
       dataIndex: 'title',
       fixed: 'left',
       ...filterTitle(),
+      render: (text, record) => (
+        <Tooltip title="View Proposal">
+          <Link to={`/view-proposal/${record.id}`}>
+            {text}
+          </Link>
+        </Tooltip>
+      )
     },
     {
       title: 'Level',
@@ -303,7 +310,7 @@ function ThesisProposals() {
       // Search in the table is implemented usign uinique ids (for homonymy)
       onFilter: (value, record) => record.supervisor.id === value,
       filterSearch: (input, record) => (
-        //search for id or for name/surname
+        // Search for id or for name/surname
         record.value.toLowerCase().includes(input.toLowerCase()) ||
         input.toLowerCase().split(" ").every(term => record.text.toLowerCase().includes(term))
       ),
@@ -328,6 +335,32 @@ function ThesisProposals() {
     {
       title: 'Co-Supervisors',
       dataIndex: 'coSupervisors',
+      onFilter: (value, record) => record.coSupervisors.some(cosupervisor => cosupervisor.id === value),
+      filterSearch: (input, record) => (
+        // Search for id or for name/surname
+        // toString needed because externalCoSupervisors (put inside coSupervisors) has an int id
+        record.value.toString().toLowerCase().includes(input.toLowerCase()) ||
+        input.toLowerCase().split(" ").every(term => record.text.toLowerCase().includes(term))
+      ),
+      filters: data.reduce((accumulator, x) => {
+        x.coSupervisors.forEach(cosupervisor => {
+          // Check if there is already the obj
+          const existingObject = accumulator.find(item => item.value === cosupervisor.id);
+          // If not add it
+          if (!existingObject) {
+            accumulator.push({
+              text: cosupervisor.name + " " + cosupervisor.surname,
+              value: cosupervisor.id,
+            });
+          }
+        });
+        return accumulator;
+      }, []),
+      render: (_, x) => x.coSupervisors.map((cosupervisor, i) => (
+        <Tag color="blue" key={i}>
+          {cosupervisor.name + " " + cosupervisor.surname}
+        </Tag>
+      )),
     },
     {
       title: 'Keywords',
@@ -400,15 +433,16 @@ function ThesisProposals() {
     {
       title: 'Expiration',
       dataIndex: 'expiration',
+      sorter: (a, b) => new Date(a.expiration) - new Date(b.expiration),
     },
     {
       title: 'Actions',
       key: 'actions',
       fixed: 'right',
-      render: () => (
+      render: (record) => (
         <Space size="middle">
           <Tooltip title="View Proposal">
-            <EyeOutlined style={{ fontSize: '20px' }} />
+            <EyeOutlined style={{ fontSize: '20px' }} onClick={() => navigate(`/view-proposal/${record.id}`)} />
           </Tooltip>
         </Space>
       ),
@@ -437,33 +471,136 @@ function ThesisProposals() {
     const formattedData = data.map((x) => ({
       // Take all fields from API.jsx
       ...x,
-      // Custom format some of the fields needed
-      coSupervisors: [].concat(
-        x.internalCoSupervisors.map((x) => <Tag color="blue" key={x.id}>{x.name + ' ' + x.surname}</Tag>),
-        x.externalCoSupervisors.map((x) => <Tag color="blue" key={x.id}>{x.name + ' ' + x.surname}</Tag>)
-      ),
+      // Concatenate internal/external co-supervisors
+      coSupervisors: [].concat(x.internalCoSupervisors, x.externalCoSupervisors),
     }));
 
     return formattedData;
   }
 
+  function MoreFilters() {
+
+    return (
+      <Drawer size="large" open={isOpen} onClose={() => setIsOpen(false)}>
+        "add"
+      </Drawer>
+    )
+  }
+
   return (
-    <Table {...tableProps} columns={columns} dataSource={data}
-      title={() => <Button type="link" size="small" onClick={() => { expandFilters() }}>Show even more filters...</Button>} />
+    <>
+      <MoreFilters />
+      <Table {...tableProps} columns={columns} dataSource={data}
+        title={() => <Button type="link" size="small" onClick={() => setIsOpen(true)}>Show even more filters...</Button>} />
+    </>
   )
 }
-
-
-
 
 function ViewThesisProposal() {
 
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { Text } = Typography;
+
+  // Storing all Thesis Proposal Information
+  const [data, setData] = useState();
+
+  useEffect(() => {
+    API.getThesisProposalbyId(id)
+      .then((x) => {
+        setData(x);
+      })
+      .catch((err) => {/* handle error*/ });
+  }, []);
+
+  // If data is still empty
+  if (!data) {
+    return <Skeleton active />;
+  }
+
+  // Description fields
+  const items = [
+    {
+      key: '1',
+      label: 'Level',
+      span: 1,
+      children: <Text copyable>{data.level}</Text>
+    },
+    {
+      key: '2',
+      label: 'Type',
+      span: 1,
+      children: <Text copyable>{data.type}</Text>
+    },
+    {
+      key: '3',
+      label: 'Expiration Date',
+      span: 1,
+      children: <Text copyable>{data.expiration}</Text>
+    },
+    {
+      key: '4',
+      label: 'Description',
+      span: 3,
+      children: <Text copyable>{data.description}</Text>
+    },
+    {
+      key: '5',
+      label: 'Required Knowledge',
+      span: 3,
+      children: <Text copyable>{data.requiredKnowledge}</Text>
+    },
+    {
+      key: '6',
+      label: 'Supervisor',
+      span: 3,
+      children: <Tag color="blue">{data.supervisor.name + " " + data.supervisor.surname}</Tag>
+    },
+    {
+      key: '7',
+      label: 'Co-Supervisors',
+      span: 3,
+      children:
+        [].concat(data.internalCoSupervisors, data.externalCoSupervisors)
+          .map((x, index, array) => (
+            x.name + " " + x.surname + `${index !== array.length - 1 ? ", " : ""}`
+          ))
+    },
+    {
+      key: '8',
+      label: 'Groups',
+      span: 3,
+      children:
+        data.groups.map((x, index, array) => (
+          x + `${index !== array.length - 1 ? ", " : ""}`
+        ))
+    },
+    {
+      key: '9',
+      label: 'Notes',
+      span: 3,
+      children:
+        <Text copyable>
+          {data.notes}
+        </Text>
+    },
+    {
+      key: '10',
+      label: 'Keywords',
+      span: 3,
+      children:
+        data.keywords.map((x, index, array) => (
+          x + `${index !== array.length - 1 ? ", " : ""}`
+        ))
+    }
+  ];
+
   return (
-    <></>
+    <>
+      <Button type="link" onClick={() => navigate("/proposals")}>&lt; Back to Thesis Proposals</Button>
+      <Descriptions title={data.title} layout="vertical" items={items} style={{ marginLeft: "2%", marginRight: "2%" }} />
+    </>
   )
 }
-
-
-
 
 export { InsertThesisProposal, ThesisProposals, ViewThesisProposal };

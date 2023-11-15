@@ -70,8 +70,34 @@ async function getStudentThesisProposals() {
     }
 }
 
+// GET Thesis Proposals by given id
+async function getThesisProposalbyId(id) {
+    const response = await fetch(URL + `/thesis-proposals/${id}`, {
+        credentials: 'include',
+    });
+    const thesisProposal = await response.json();
+    if (response.ok) {
+        return {
+            id: thesisProposal.id,
+            title: thesisProposal.title,
+            supervisor: thesisProposal.supervisor,
+            internalCoSupervisors: thesisProposal.coSupervisors.internal,
+            externalCoSupervisors: thesisProposal.coSupervisors.external,
+            type: thesisProposal.type,
+            description: thesisProposal.description,
+            requiredKnowledge: thesisProposal.requiredKnowledge,
+            notes: thesisProposal.notes,
+            expiration: thesisProposal.expiration,
+            level: thesisProposal.level,
+            groups: thesisProposal.groups,
+            keywords: thesisProposal.keywords
+        }
+    } else {
+        throw thesisProposal;
+    }
+}
 
 const API = {
-    logIn, logOut, getUserInfo, getStudentThesisProposals
+    logIn, logOut, getUserInfo, getStudentThesisProposals, getThesisProposalbyId
 };
 export default API;
