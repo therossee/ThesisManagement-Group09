@@ -279,6 +279,7 @@ app.get('/api/thesis-proposals',
       console.error(e);
       res.status(500).json('Internal Server Error');
     }
+
 });
 
 app.get('/api/thesis-proposals/:id',
@@ -353,7 +354,6 @@ async (req, res) => {
     res.status(500).json('Internal Server Error');
   }
 });
-
 
 const PORT = 3000;
 const server = app.listen(PORT, () => {
