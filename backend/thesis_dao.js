@@ -272,7 +272,7 @@ exports.listThesisProposalsTeacher = (teacherId) => {
 exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
   return new Promise((resolve) => {
     
-    const getApplications = `SELECT s.name, s.surname, ta.status
+    const getApplications = `SELECT s.name, s.surname, ta.status, s.id
     FROM thesisApplication ta, thesisProposal tp, student s
     WHERE ta.proposal_id = tp.proposal_id AND s.id = ta.student_id AND ta.proposal_id=? AND tp.supervisor_id= ?`;
 

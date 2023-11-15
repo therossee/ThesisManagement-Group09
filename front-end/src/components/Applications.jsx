@@ -20,7 +20,6 @@ function ThesisApplications() {
                 await Promise.all(
                     proposals.map(async (proposal) => {
                         const students = await API.getTeacherThesisApplications(proposal.id);
-                        console.log("STUDENTI: " + students)
                         studentApplicationsData[proposal.id] = Array.isArray(students) ? students : [];
                     })
                 );
@@ -31,7 +30,6 @@ function ThesisApplications() {
         };
 
         fetchData();
-        console.log(studentApplications[1])
     }, []);
 
     return (
@@ -49,7 +47,7 @@ function ThesisApplications() {
                                 <Skeleton loading={isLoadingTable} avatar title={true} active>
                                     <List.Item.Meta
                                         avatar={<Avatar icon={<UserOutlined />} />}
-                                        title={`${student.name} ${student.surname}`}
+                                        title={`${student.surname} ${student.name}`}
                                         description={student.status}
                                     />
                                     <Flex wrap="wrap" gap="small">
