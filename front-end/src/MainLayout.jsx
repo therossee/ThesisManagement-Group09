@@ -9,8 +9,7 @@ import './css/style.css';
 
 const { Content, Footer } = Layout;
 
-function MainLayout(props) {
-    const user = props.user;
+function MainLayout() {
 
     return (
         <Router>
@@ -21,7 +20,7 @@ function MainLayout(props) {
                     <Content className="content-style">
                         <Routes>
                             <Route path="/" element={<Home />} />
-                            <Route path="/insert-proposal" element={<InsertProposal user={user}/>} />
+                            <Route path="/insert-proposal" element={<InsertProposal/>} />
                             <Route path="/*" element={<Errors code="404"/>} />
                         </Routes>
                     </Content>

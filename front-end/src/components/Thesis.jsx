@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Row } from "react";
 import { useNavigate } from "react-router-dom";
-import { DatePicker, FloatButton, Button, Form, Input, Select, Steps, Spin, Result, Typography, Table, Tag } from "antd";
+import { DatePicker, FloatButton, Button, Form, Input, Select, Steps, Spin, Result, Typography, Table, Tag, message } from "antd";
 import API from "../API.jsx";
 
 const { Option } = Select;
@@ -21,12 +21,11 @@ const steps = [
 ];
 
 
-function InsertThesisProposal(props) {
+function InsertThesisProposal() {
 
   const [keywords, setKeywords] = useState([]);
   const [intCoSupervisors, setIntCoSupervisors] = useState([]);
   const [extCoSupervisors, setExtCoSupervisors] = useState([]);
-  const [errorMsg, setErrorMsg] = useState("");
   const [error, setError] = useState(-1);
   const [insert, setInsert] = useState(false);
   const [degrees, setDegrees] = useState([]);
@@ -35,7 +34,7 @@ function InsertThesisProposal(props) {
   const [formData, setFormData] = useState(null);
   const [form] = Form.useForm();
   const [proposalId, setProposalId] = useState(-1);
-  const user = props.user;
+  const [messageApi, contextHolder] = message.useMessage();
 
 
   useEffect(() => {
@@ -44,28 +43,28 @@ function InsertThesisProposal(props) {
       setIntCoSupervisors(obj.teachers);
     })
     .catch((err) => {
-      setErrorMsg("Failed to fetch teachers");
+      messageApi.error("Failed to fetch teachers!");
     });
     API.getExtCoSupervisors()
     .then((obj) => {
       setExtCoSupervisors(obj.externalCoSupervisors);
     })
     .catch((err) => {
-      setErrorMsg("Failed to fetch external co-supervisors");
+      messageApi.error("Failed to fetch external co-supervisors!");
     });
     API.getAllDegrees()
     .then((obj) => {
       setDegrees(obj);
     })
     .catch((err) => {
-      setErrorMsg("Failed to fetch degrees");
+      messageApi.error("Failed to fetch degrees!");
     });
     API.getAllKeywords()
     .then((obj) => {
       setKeywords(obj.keywords);
     })
     .catch((err) => {
-      setErrorMsg("Failed to fetch keywords");
+      messageApi.error("Failed to fetch keywords!");
     })
     .finally(() => {
       setLoading(false);
@@ -76,7 +75,6 @@ function InsertThesisProposal(props) {
     if(insert){
       const proposal = {
         title: formData.title,
-        supervisor_id: user.id,
         internal_co_supervisors_id: formData.intCoSupervisors ?? [],
         external_co_supervisors_id: formData.extCoSupervisors ?? [],
         type: formData.type,
@@ -135,6 +133,7 @@ function InsertThesisProposal(props) {
     </div>
     :
     <>
+     {contextHolder}
       <Steps
         current={current}
         items={items}

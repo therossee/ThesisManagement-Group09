@@ -84,7 +84,7 @@ function App() {
   return (
     <AuthContext.Provider value={{ user, loginLoading, isLoggedIn, isTeacher, doLogIn, doLogOut }}>
       {notificationBox}
-      <MainLayout user={user}/>
+      <MainLayout />
     </AuthContext.Provider>
   )
 }
