@@ -4,7 +4,6 @@ import { DatePicker, FloatButton, Button, Form, Input, Select, Steps, Spin } fro
 import API from "../API.jsx";
 
 const { Option } = Select;
-
 const steps = [
   {
     title: "Insert Thesis Proposal",
@@ -16,22 +15,27 @@ const steps = [
   },
   {
     title: "Upload",
-    content: <Done />,
+    content: <Done/>,
   },
 ];
 
-function InsertThesisProposal() {
+
+function InsertThesisProposal(props) {
 
   const [keywords, setKeywords] = useState([]);
   const [intCoSupervisors, setIntCoSupervisors] = useState([]);
   const [extCoSupervisors, setExtCoSupervisors] = useState([]);
   const [errorMsg, setErrorMsg] = useState("");
+  const [insert, setInsert] = useState(false);
   const [degrees, setDegrees] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
   const [formData, setFormData] = useState(null);
   const [form] = Form.useForm();
+  const [proposalId, setProposalId] = useState(-1);
+  const user = props.user;
+
 
   useEffect(() => {
     API.getTeachers()
@@ -66,6 +70,41 @@ function InsertThesisProposal() {
       setLoading(false);
     })
   }, [current]);
+
+  useEffect(() => {
+    if(insert){
+      const proposal = {
+        title: formData.title,
+        supervisor_id: user.id,
+        internal_co_supervisors_id: formData.intCoSupervisors ?? [],
+        external_co_supervisors_id: formData.extCoSupervisors ?? [],
+        type: formData.type,
+        description: formData.description,
+        required_knowledge: formData.requiredKnowledge,
+        notes: formData.notes,
+        keywords: formData.keywords,
+        expiration: formData.expirationDate.format("YYYY-MM-DD"),
+        cds: formData.cds,
+        level: formData.degreeLevel
+      }
+      API.insertProposal(proposal)
+      .then((obj) => {
+        console.log(obj);
+        setProposalId(obj.id);
+        next();
+      })
+      .catch((err) => {
+        console.log(err);
+        setProposalId(-1);
+        next();
+      });
+      setInsert(false);
+    }
+  }, [insert]);
+
+  const addProposal = () => {
+    setInsert(true);
+  }
   
   const items = steps.map((item) => ({
     key: item.title,
@@ -103,7 +142,8 @@ function InsertThesisProposal() {
         <div>
           {current === 0 && (
             <InsertBody saveData={saveFormData} intCoSupervisors={intCoSupervisors} extCoSupervisors={extCoSupervisors} keywords={keywords} degrees={degrees} form={form}/>
-          )} {current === 1 && (
+          )} 
+          {current === 1 && (
             <>
             <ReviewProposal formData={formData} intCoSupervisors={intCoSupervisors} extCoSupervisors={extCoSupervisors} degrees={degrees}/>
             <Button
@@ -114,18 +154,21 @@ function InsertThesisProposal() {
             >
               Previous
             </Button>
-              <Button type="primary" onClick={() => next()}>
+              <Button type="primary" onClick={addProposal}>
                 Next
               </Button>
             </>
           )}
         </div>
         <div>
-          {current === steps.length - 1 && (
+          {current === steps.length - 1 && 
+          <>
+          <Done proposalId={proposalId}/>
             <Button type="primary" onClick={() => navigate("/")}>
               Done
             </Button>
-          )}
+          </>
+            }
         </div>
       </div>
       <FloatButton.BackTop style={{ marginBottom: "40px" }} tooltip={<div>Back to Top</div>} />
@@ -223,7 +266,12 @@ function InsertBody(props) {
           }))}
         />
         </Form.Item>
-        <Form.Item label="Keywords" name="keywords">
+        <Form.Item label="Keywords" name="keywords" rules={[
+          {
+            required: true,
+            message: 'Please input keywords!',
+          },
+        ]}>
         <Select
         mode="multiple"
         placeholder="Select keywords"
@@ -365,22 +413,23 @@ function ReviewProposal(props) {
   );
 }
 
-function Done() {
-  return (
-    <div>
-      <h2>Done</h2>
-      <p>You have finished!</p>
-    </div>
-  );
-}
-
-function ErrorInsert(){
-  return (
-    <div>
-      <h2>Error</h2>
-      <p>Error while inserting new proposal!</p>
-    </div>
-  );
+function Done(props) {
+  const id = props.proposalId;
+  if(id !== -1){
+    return (
+      <div>
+        <h2>Done</h2>
+        <p>You have finished! Your proposal has been inserted with ID: {id}</p>
+      </div>
+    );
+  }else{
+    return (
+      <div>
+        <h2>Error</h2>
+        <p>DB or network error while trying to insert new proposal</p>
+      </div>
+    );
+  }
 }
 
 export { InsertThesisProposal };
