@@ -14,12 +14,12 @@
 ## React Client Application Routes
 - Route `/`: Displays the home page
 - Route `/proposals`: Displays the proposals for a student
-- Route `/insert-proposal/:id`: Displays the proposal form for the teacher to insert a new thesis proposal.
+- Route `/insert-proposal`: Displays the proposal form for the teacher to insert a new thesis proposal.
 
 ## API SERVER
-### Teacher Login
+### Login
 - HTTP Method: `POST` URL `/api/sessions`
-- Description: Validates Login information for the teacher.
+- Description: Validates Login information for the user.
 - Request body:
 ```
         {
@@ -28,7 +28,7 @@
         }
 ```
 - Response: `201 CREATED` (success)
-- Response body: An array of objects, each one containing information on the session user.
+- Response body: An object containing information on the user logged in.
 ```
         {
           "id": "d279620",
@@ -39,38 +39,14 @@
           "cod_department": "Dep1"
         }
 ```
-
-### STUDENT LOGIN
-- HTTP Method: `POST` URL `/api/sessions`
-- Description: Validates Login information for the student.
-- Request body:
-```
-        {
-        "username": "rossi.abbondanzio@email.com",
-        "password": "s294301"
-        }
-```
-- Response: `201 CREATED` (success)
-- Response body: An array of objects, each one containing information on the session user.
-```
-        {
-          "id": "s294301",
-          "surname": "Rossi",
-          "name": "Abbondanzio",
-          "gender": "Male",
-          "nationality": "Italian",
-          "email": "rossi.abbondanzio@email.com",
-          "cod_degree": "L-07",
-          "enrollment_year": "2020"
-        }
-```
 - Error Response: `401 Unauthorized` ("Incorrect email and/or password")
-### CURRENT LOGGED USER
+
+### GET CURRENT LOGGED USER
 - HTTP Method: `GET` URL `/api/sessions/current`
-- Description: Retrieves information for the current student logged.
+- Description: Retrieves information for the current user logged.
 - Request body: _None_
 - Response: `200 OK` (success)
-- Response body: An array of objects, each one containing information on the actual session user.
+- Response body: An object containing information on the actual logged user.
 ```
         {
           "id": "s294301",
@@ -83,7 +59,8 @@
           "enrollment_year": "2020"
         }
 ```
-- Error Response: `401 Unauthorized` ("Incorrect email and/or password")
+- Error Response: `401 Unauthorized` ("Not authenticated")
+
 ### LOGOUT
 - HTTP Method: `DELETE` URL `/api/sessions/current`
 - Description: Closes current session.
@@ -93,7 +70,8 @@
 
 ### INSERT NEW THESIS PROPOSAL
 - HTTP Method: `POST` URL `/api/teacher/thesis_proposals`
-- Description: Inserts new thesis proposal.
+- Description: Inserts new thesis proposal. 
+- Details: Route only for logged teachers
 - Request body:
 ```
        {
@@ -112,7 +90,7 @@
         }
 ```
 - Response: `201 CREATED` (success)
-- Response body: An array of objects, each one containing information on the thesis proposal.
+- Response body: An object containing information on the thesis proposal.
 ```
         {
           "id": 2,
@@ -140,14 +118,19 @@
           ]
         }
 ```
-- Error Response: `401 Unauthorized` ("Not authorized")
+- Error Responses: 
+    - `401 Unauthorized` ("Not authorized")
+    - `403 Forbidden` ("Unauthorized")
+    - `400 Bad Request` ("Missing required fields")
+    - `500 Internal Server Error` ("Failed to create thesis proposal.")
   
 ### LIST OF TEACHERS NOT LOGGED
 - HTTP Method: `GET` URL `/api/teachers`
 - Description: Retrieves list of teachers not logged.
+- Details: Route only for logged teachers
 - Request body: _None_
 - Response: `200 OK` (success)
-- Response body: An array of objects, each one containing information on the not logged teacher.
+- Response body: An array of objects, each one containing information on the teacher.
 ```
        {
           "teachers": [
@@ -170,10 +153,15 @@
             ]
     }
 ```
-- Error Response: `401 Unauthorized` ("Not authorized")
+Error Responses: 
+    - `401 Unauthorized` ("Not authorized")
+    - `403 Forbidden` ("Unauthorized")
+    - `500 Internal Server Error` 
+
 ### GET LIST OF EXTERNAL CO-SUPERVISORS
 - HTTP Method: `GET` URL `/api/externalCoSupervisors`
-- Description: Obtains list of external Co-Supervisors..
+- Description: Obtains list of external Co-Supervisors.
+- Details: Route only for logged teachers
 - Request body: _None_
 - Response: `200 OK` (success)
 - Response body: An array of objects, contains the information of the external co-supervisors.
@@ -195,14 +183,18 @@
             ]
     }
 ```
-- Error Response: `401 Unauthorized` ("Not authorized")
+Error Responses: 
+    - `401 Unauthorized` ("Not authorized")
+    - `403 Forbidden` ("Unauthorized")
+    - `500 Internal Server Error`
   
 ### GET ALL KEYWORDS
 - HTTP Method: `GET` URL `/api/keywords`
 - Description: Obtains list of all the keywords of a thesis.
+- Details: Routes only for logged teacher
 - Request body: _None_
 - Response: `200 OK` (success)
-- Response body: An array of objects, contains the keywords.
+- Response body: An array of string (keywords).
 ```
         {
           "keywords": [
@@ -213,8 +205,78 @@
           ]
         }
 ```
-- Error Response: `401 Unauthorized` ("Not authorized")
-  
+Error Responses: 
+    - `401 Unauthorized` ("Not authorized")
+    - `403 Forbidden` ("Unauthorized")
+    - `500 Internal Server Error`
+
+### GET ALL DEGREES
+- HTTP Method: `GET` URL `/api/degrees`
+- Description: Obtains list of all the degrees.
+- Details: Routes only for logged teacher
+- Request body: _None_
+- Response: `200 OK` (success)
+- Response body: An array of objects, each one containing info on the degrees.
+```
+       [
+        {
+          "cod_degree": "L-07",
+          "title_degree": "Ingegneria Civile e Ambientale"
+        },
+        {
+          "cod_degree": "L-08",
+          "title_degree": "Ingegneria Elettronica"
+        }
+       ]
+```
+Error responses:
+    - `401 Unauthorized` ("Not authorized")
+    - `403 Forbidden` ("Unauthorized")
+    - `500 Internal Server Error` 
+
+### SEARCH FOR THESIS PROPOSALS
+- HTTP Method: `GET` URL `/api/thesis-proposals`
+- Description: Obtains list of all the thesis proposals for the course of study of the logged student.
+- Details: Routes only for logged student
+- Request body: _None_
+- Response: `200 OK` (success)
+- Response body: Some metadata (number of proposals found) and an array of objects, each one containing info on a proposal.
+```
+       {
+        "$metadata": {
+          "index": 0,
+          "count": 1,
+          "total": 1,
+          "currentPage": 1
+        },
+        "items": [
+          {
+            "id": 1,
+            "title": "AI-GUIDED WEB CRAWLER FOR AUTOMATIC DETECTION OF MALICIOUS SITES",
+            "status": "ACTIVE",
+            "supervisor": {
+              "id": "d279620",
+              "name": "Marco",
+              "surname": "Rossi",
+              "email": "rossi.marco@email.com",
+              "codGroup": "Group1",
+              "codDepartment": "Dep1"
+            }
+          }
+        ]
+       }
+```
+Error responses:
+    - `401 Unauthorized` ("Not authorized")
+    - `403 Forbidden` ("Unauthorized")
+    - `500 Internal Server Error` 
+
+### APPLY FOR THESIS PROPOSAL
+
+### LIST ALL APPLICATIONS FOR A TEACHER'S THESIS PROPOSAL
+
+### ACCEPT AN APPLICATION
+
 ### LIST ALL THESIS PROPOSALS OF A TEACHER (supervisor)
 - HTTP Method: `GET` URL `/api/thesis_proposals`
 - Description: Obtains list of all the thesis proposals of a teacher.

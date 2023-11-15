@@ -15,8 +15,8 @@ POST http://localhost:3000/api/sessions HTTP/1.1
 Content-Type: application/json
 
 {
-    "username": "rossi.abbondanzio@email.com",
-    "password": "s294301"
+    "username": "rizzo.amerigo@email.com",
+    "password": "s304580"
 }
 ### 
 
@@ -64,8 +64,9 @@ GET http://localhost:3000/api/keywords
 GET http://localhost:3000/api/degrees
 ###
 
-// 4. Search for thesis proposals
-// GET api/student/:id/thesis_proposals?title=...&supervisor=...&co-supervisor=...&tags=...&keywords=...&type=...
+## 4. Search for thesis proposals
+GET http://localhost:3000/api/thesis-proposals
+###
 
 // 5. Apply for a thesis proposal
 // POST api/student/:id/applications
