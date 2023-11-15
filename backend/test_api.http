@@ -75,13 +75,8 @@ GET http://localhost:3000/api/teacher/thesis_proposals HTTP/1.1
 ###
 
 ## 7. List all applications for a teacher's thesis proposal
-GET http://localhost:3000/api/teacher/applications HTTP/1.1
+GET http://localhost:3000/api/teacher/applications/1 HTTP/1.1
 Content-Type: application/json
-
-{
-  "proposal_id": "1"
-}
-
 ###
 
 // 8. Accept an application

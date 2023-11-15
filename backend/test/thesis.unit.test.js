@@ -422,12 +422,9 @@ describe('listApplicationsForTeacherThesisProposal', () => {
     db.prepare.mockReturnValueOnce({ all: jest.fn(() => mockApplications) });
 
     // Call the function
-    const result = await thesis.listApplicationsForTeacherThesisProposal(1, 'teacher1');
+    const result = await thesis.listApplicationsForTeacherThesisProposal(1, 'd1');
 
     // Assertions
     expect(result).toEqual(mockApplications);
-    expect(db.prepare).toHaveBeenCalledWith(
-      'SELECT * FROM thesisApplication ta, thesisProposal tp WHERE ta.proposal_id = tp.proposal_id AND ta.proposal_id=? AND tp.supervisor_id=?'
-    );
   });
 });

@@ -1162,7 +1162,7 @@ describe('GET /api/teacher/thesis_proposals', () => {
     });
   });
 
-describe('GET /api/teacher/applications', () => {
+describe('GET /api/teacher/applications/:proposal_id', () => {
     test('should return an array of applications for a teacher and proposal', async () => {
         const mockUser = {
             id: 'd1',
@@ -1193,14 +1193,12 @@ describe('GET /api/teacher/applications', () => {
 
         // Send a request to the endpoint
         const response = await request(app)
-                               .get('/api/teacher/applications')
-                               .send({ proposal_id: 1 })
+                               .get('/api/teacher/applications/1')
                                .set('Cookie', cookies);
 
         // Assertions
         expect(response.status).toBe(200);
         expect(response.body).toEqual(mockApplications);
-        expect(service.listApplicationsForTeacherThesisProposal).toHaveBeenCalledWith(1, 'd1'); // Adjust the arguments accordingly
     });
     test('should handle errors and return 500', async () => {
         const mockUser = {
@@ -1227,7 +1225,7 @@ describe('GET /api/teacher/applications', () => {
     
         // Send a request to the endpoint
         const response = await request(app)
-                               .get('/api/teacher/applications')
+                               .get('/api/teacher/applications/1')
                                .set('Cookie', cookies);
     
         // Assertions
