@@ -79,6 +79,7 @@ function App() {
     setIsTeacher(false);
     setUser(undefined);
     setLoginLoading(false);
+    
   }
 
   return (

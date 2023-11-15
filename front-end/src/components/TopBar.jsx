@@ -76,6 +76,11 @@ function IsLoggedInForm() {
   const { isTeacher, doLogOut } = useAuth();
   const navigate = useNavigate();
 
+  const logOutAndNavigate = () => {
+    doLogOut();
+    navigate("/");
+  }
+
   return (
     <div>
       {
@@ -88,7 +93,7 @@ function IsLoggedInForm() {
       <Avatar size="large" style={{ backgroundColor: '#1677ff', marginRight: '30px', verticalAlign: 'middle' }}>
         <UserOutlined />
       </Avatar>
-      <LogoutOutlined style={{ fontSize: '20px', verticalAlign: 'middle' }} onClick={doLogOut}/>
+      <LogoutOutlined style={{ fontSize: '20px', verticalAlign: 'middle' }} onClick={logOutAndNavigate}/>
     </div>
   )
 }
