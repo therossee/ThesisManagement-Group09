@@ -1,9 +1,10 @@
 import React, { useState, useEffect, Row } from "react";
 import { useNavigate } from "react-router-dom";
-import { DatePicker, FloatButton, Button, Form, Input, Select, Steps, Spin, Result } from "antd";
+import { DatePicker, FloatButton, Button, Form, Input, Select, Steps, Spin, Result, Typography, Table, Tag } from "antd";
 import API from "../API.jsx";
 
 const { Option } = Select;
+const { Title } = Typography;
 const steps = [
   {
     title: "Insert Thesis Proposal",
@@ -139,26 +140,32 @@ function InsertThesisProposal(props) {
         items={items}
         style={{ paddingRight: "20%", paddingLeft: "20%" }}
       />
-      <div style={{ marginLeft: "15%", marginRight: "15%", marginTop: "3%" }}>
+      <div style={{ marginLeft: "16%", marginRight: "15%", marginTop: "3%" }}>
         <div>
           {current === 0 && (
             <InsertBody saveData={saveFormData} intCoSupervisors={intCoSupervisors} extCoSupervisors={extCoSupervisors} keywords={keywords} degrees={degrees} form={form}/>
           )} 
           {current === 1 && (
-            <>
+            <div style={{marginLeft: "10%"}}>
             <ReviewProposal formData={formData} intCoSupervisors={intCoSupervisors} extCoSupervisors={extCoSupervisors} degrees={degrees}/>
+            <div style={{paddingLeft: "35%"}}>
             <Button
               style={{
                 margin: "0 8px",
+                marginTop: "3%"
               }}
               onClick={() => prev()}
             >
               Previous
             </Button>
-              <Button type="primary" onClick={addProposal}>
+              <Button type="primary" onClick={addProposal}style={{
+                margin: "0 8px",
+                marginTop: "3%"
+              }}>
                 Next
               </Button>
-            </>
+              </div>
+            </div>
           )}
         </div>
         <div>
@@ -358,9 +365,11 @@ function InsertBody(props) {
           </Select>  
         </Form.Item>
         <Form.Item>
+          <div style={{paddingLeft: "45%"}}>
           <Button type="primary" htmlType="submit">
             Submit
           </Button>
+          </div>
         </Form.Item>
       </Form>
   );
@@ -372,40 +381,68 @@ function ReviewProposal(props) {
   const {intCoSupervisors, extCoSupervisors, degrees} = props;
   const deg = degrees.find((x) => x.cod_degree === formData.cds);
   const level = formData.degreeLevel === "L" ? "L - Bachelor Degree" : "LM - Master Degree";
-  let intCoSup, extCoSup;
+  let intCoSup = [], extCoSup = [];
   if(formData.intCoSupervisors !== undefined){
     intCoSup = intCoSupervisors.filter((x) => formData.intCoSupervisors.includes(x.id));
   }
   if(formData.extCoSupervisors !== undefined){
     extCoSup = extCoSupervisors.filter((x) => formData.extCoSupervisors.includes(x.id));
   }
+  const data = [
+    { field: "Title", value: formData.title },
+    {
+      field: "Internal co-Supervisors",
+      value: intCoSup.map((x) => `${x.name} ${x.surname}`).join(", "),
+    },
+    {
+      field: "External co-Supervisors",
+      value: extCoSup.map((x) => `${x.name} ${x.surname}`).join(", "),
+    },
+    {
+      field: "Keywords",
+      value: formData.keywords.map((keyword) => <Tag key={keyword}>{keyword}</Tag>),
+    },
+    { field: "Type", value: formData.type },
+    { field: "Description", value: formData.description },
+    { field: "Required Knowledge", value: formData.requiredKnowledge },
+    { field: "Notes", value: formData.notes },
+    {
+      field: "Expiration Date",
+      value: formData.expirationDate
+        ? formData.expirationDate.format("YYYY-MM-DD")
+        : "",
+    },
+    { field: "Level", value: level },
+    { field: "CdS", value: `${formData.cds} - ${deg.title_degree}` },
+  ];
+
+  const columns = [
+    {
+      title: "Field",
+      dataIndex: "field",
+      key: "field",
+      width: "35%",
+      render: (value) => (value === "Field" ? null : <Typography.Text strong>{value}</Typography.Text>),
+    },
+    {
+      title: "Value",
+      dataIndex: "value",
+      key: "value",
+      render: (value) => (Array.isArray(value) ? value : <span>{value}</span>),
+    },
+  ];
+
   return (
-    <div>
-      <h2>Review Proposal</h2>
-      <p>Title: {formData.title}</p>
-      {formData.intCoSupervisors !== undefined ?
-      <p>Internal co-Supervisors: {intCoSup.map((x) => {
-        return `${x.name} ${x.surname}`;
-      }).join(", ")}</p> : <p>Internal co-Supervisors: </p>}
-      {formData.intCoSupervisors !== undefined ?
-      <p>External co-Supervisors: {extCoSup.map((x) => {
-        return `${x.name} ${x.surname}`;
-      }).join(", ")}</p> : <p>External co-Supervisors: </p>}
-      {formData.keywords ? 
-        <p>Keywords: {formData.keywords.join(", ")}</p> : <p>Keywords: </p>}
-      <p>Type: {formData.type}</p>
-      <p>Description: {formData.description}</p>
-      <p>Required Knowledge: {formData.requiredKnowledge}</p>
-      <p>Notes: {formData.notes}</p>
-      <p>
-        Expiration Date:{" "}
-        {formData.expirationDate
-          ? formData.expirationDate.format("YYYY-MM-DD")
-          : ""}
-      </p>
-      <p>Level: {level}</p>
-      <p>CdS: {formData.cds} - {deg.title_degree}</p>
-    </div>
+    <>
+      <Title level={2} style={{paddingLeft: "32%"}}>Review Proposal</Title>
+      <Table
+        dataSource={data}
+        columns={columns}
+        size="middle"
+        showHeader={false}
+        pagination={false}
+      />
+    </>
   );
 }
 
@@ -419,11 +456,11 @@ function Done(props) {
       status="success"
       title="Proposal added succesfully!"
       subTitle={`ID of the proposal: ${id}`}
-      extra={[
+      extra={
       <Button ghost type="primary" onClick={() => navigate("/")}>
         Back Home
       </Button>
-    ]}
+    }
   />
     );
   }else{
