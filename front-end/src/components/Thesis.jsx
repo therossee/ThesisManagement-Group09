@@ -248,6 +248,8 @@ function ThesisProposals() {
       />
   });
 
+  const [messageApi, messageBox] = message.useMessage();
+
   useEffect(() => {
     API.getStudentThesisProposals()
       .then((x) => {
@@ -268,8 +270,6 @@ function ThesisProposals() {
 
   // Drawer for viewing more filters
   const [isOpen, setIsOpen] = useState(false);
-
-  const [messageApi, contextHolder] = message.useMessage();
 
   const navigate = useNavigate();
 
@@ -558,6 +558,7 @@ function ThesisProposals() {
 
   return (
     <>
+      {messageBox}
       <MoreFilters />
       <Table {...tableProps} columns={columns} dataSource={filteredData}
         title={() => <Button type="link" size="small" onClick={() => setIsOpen(true)}>Show even more filters...</Button>} />
@@ -567,7 +568,7 @@ function ThesisProposals() {
 
 function ViewThesisProposal() {
 
-  const [messageApi, contextHolder] = message.useMessage();
+  const [messageApi, messageBox] = message.useMessage();
 
   const { id } = useParams();
   const { Text } = Typography;
@@ -668,7 +669,7 @@ function ViewThesisProposal() {
 
   return (
     <>
-      <contextHolder />
+      {messageBox}
       <Button type="link" onClick={() => navigate("/proposals")}>&lt; Back to Thesis Proposals</Button>
       <Descriptions title={data.title} layout="vertical" items={items} style={{ marginLeft: "2%", marginRight: "2%" }} />
     </>
