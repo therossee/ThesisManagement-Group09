@@ -3,12 +3,13 @@
 }
 
 .content-style {
-  margin: 12px 24px 12px 24px;
+  margin: 12px 24px 89px 24px;
   background-color: white;
 }
 
 .footer-style {
-  position: sticky;
+  position: fixed;
+  width: 100%;
   bottom: 0;
   text-align: center;
   background-color: white;

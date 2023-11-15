@@ -52,6 +52,7 @@ async function getStudentThesisProposals() {
     if (response.ok) {
         return proposals.items.map((x) => ({
             id: x.id,
+            key: x.id,
             title: x.title,
             supervisor: x.supervisor,
             internalCoSupervisors: x.coSupervisors.internal,
@@ -79,6 +80,7 @@ async function getThesisProposalbyId(id) {
     if (response.ok) {
         return {
             id: thesisProposal.id,
+            key: thesisProposal.id,
             title: thesisProposal.title,
             supervisor: thesisProposal.supervisor,
             internalCoSupervisors: thesisProposal.coSupervisors.internal,
