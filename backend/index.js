@@ -196,6 +196,7 @@ async (req,res) => {
       });
   })
   .catch((error) => {
+    console.error(error);
     res.status(500).json(`Failed to create thesis proposal. ${error.message || error}`);
   });
 });
@@ -212,6 +213,7 @@ async(req, res) => {
 
     res.json({ teachers: teacherList });
   } catch (error) {
+    console.error(error);
     res.status(500).json('Internal Server Error');
   }
 });
@@ -227,6 +229,7 @@ async(req, res) => {
 
     res.json({ externalCoSupervisors: externalCoSupervisorList });
   } catch (error) {
+    console.error(error);
     res.status(500).json('Internal Server Error');
   }
 });
@@ -287,6 +290,8 @@ app.get('/api/thesis-proposals',
       res.status(500).json('Internal Server Error');
     }
   });
+
+  
 app.get('/api/thesis-proposals/:id',
   isLoggedIn,
   isStudent,
@@ -328,7 +333,7 @@ async (req, res) => {
 });
 
 // 7. List all applications for a teacher's thesis proposal
-// GET api/teacher/applications
+// GET api/teacher/applications/:proposal_id
 app.get('/api/teacher/applications/:proposal_id',
 isLoggedIn,
 isTeacher,
@@ -343,7 +348,6 @@ async (req, res) => {
     res.status(500).json('Internal Server Error');
   }
 });
-
 // 8. Reject an application
 // PATCH api/teacher/:id/applications/:id
 
