@@ -65,31 +65,23 @@ GET http://localhost:3000/api/degrees HTTP/1.1
 ###
 
 // 4. Search for thesis proposals
-// GET api/student/:id/thesis_proposals?title=...&supervisor=...&co-supervisor=...&tags=...&keywords=...&type=...
+// GET api/thesis_proposals
 
-// 5. Apply for a thesis proposal
-// POST api/student/:id/applications
+## 5. Apply for a thesis proposal
+POST http://localhost:3000/api/student/applications HTTP/1.1
+Content-Type: application/json
+
+{
+    "thesis_proposal_id": 1
+}
+### 
+
 
 ## 6. List all thesis proposals of a tearcher (supervisor)
-GET http://localhost:3000/api/teacher/thesis_proposals HTTP/1.1
+GET http://localhost:3000/api/teacher/thesis_proposals/1 HTTP/1.1
 ###
 
 ## 7. List all applications for a teacher's thesis proposal
 GET http://localhost:3000/api/teacher/applications/1 HTTP/1.1
 Content-Type: application/json
 ###
-
-// 8. Accept an application
-// PATCH api/teacher/:id/applications/:id
-
-// 9. Reject an application
-// PATCH api/teacher/:id/applications/:id
-
-// 10. List student's application decisions
-// GET api/student/:id/applications
-
-// 11. List professor's active thesis proposala
-// GET api/teacher/:id/thesis_proposals
-
-// 12. Update a thesis proposal
-// PATCH api/teacher/:id/thesis_proposals/:id
