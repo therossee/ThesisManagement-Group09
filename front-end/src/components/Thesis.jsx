@@ -271,6 +271,29 @@ function ThesisProposals() {
 
   const navigate = useNavigate();
 
+  // Store more filters data
+  const [moreFiltersData, setMoreFiltersData] = useState({
+    description: "",
+    knowledge: "",
+    notes: ""
+  });
+
+  // Data after filtering with moreFilterData values
+  const [filteredData, setFilteredData] = useState([]);
+
+  useEffect(() => {
+    if (data) {
+      const filtered = data.filter(item => {
+        return (
+          item.description.includes(moreFiltersData.description) &&
+          item.requiredKnowledge.includes(moreFiltersData.knowledge) &&
+          item.notes.includes(moreFiltersData.notes)
+        )
+      });
+      setFilteredData(filtered);
+    }
+  }, [data, moreFiltersData]);
+
   // Columns of the table
   const columns = [
     {
@@ -480,17 +503,63 @@ function ThesisProposals() {
 
   function MoreFilters() {
 
+    const [form] = Form.useForm();
+
+    const savemoreFiltersData = () => {
+      setMoreFiltersData({
+        description: form.getFieldsValue().description,
+        knowledge: form.getFieldsValue().knowledge,
+        notes: form.getFieldsValue().notes
+      });
+    };
+
+    const handleSubmit = () => {
+      setIsOpen(false);
+      savemoreFiltersData();
+    };
+
+    const handleReset = () => {
+      form.setFieldsValue({
+        description: "",
+        knowledge: "",
+        notes: ""
+      });
+    };
+
     return (
-      <Drawer size="large" open={isOpen} onClose={() => setIsOpen(false)}>
-        "add"
+      <Drawer
+        size="large"
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        extra={
+          <Space>
+            <Button onClick={() => handleReset()}>Reset Fields</Button>
+            <Button type="primary" onClick={handleSubmit}>
+              Submit Filters
+            </Button>
+          </Space>
+        }
+      >
+        <Form layout="vertical" form={form} initialValues={moreFiltersData}>
+          <Form.Item name="description" label="Description:">
+            <Input.TextArea rows={6} />
+          </Form.Item>
+          <Form.Item name="knowledge" label="Required Knowledge:">
+            <Input.TextArea rows={2} />
+          </Form.Item>
+          <Form.Item name="notes" label="Notes:">
+            <Input.TextArea rows={2} />
+          </Form.Item>
+        </Form>
       </Drawer>
-    )
+
+    );
   }
 
   return (
     <>
       <MoreFilters />
-      <Table {...tableProps} columns={columns} dataSource={data}
+      <Table {...tableProps} columns={columns} dataSource={filteredData}
         title={() => <Button type="link" size="small" onClick={() => setIsOpen(true)}>Show even more filters...</Button>} />
     </>
   )
