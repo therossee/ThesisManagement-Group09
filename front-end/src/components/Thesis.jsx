@@ -1,7 +1,10 @@
-import React, { useState, useEffect, Row } from "react";
-import { useNavigate } from "react-router-dom";
-import { DatePicker, FloatButton, Button, Form, Input, Select, Steps, Spin, Result, Typography, Table, Tag, message } from "antd";
+import { React, useState, useEffect, Row, useEffect } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
+import Highlighter from 'react-highlight-words';
+import { DatePicker, FloatButton, Button, Descriptions, Drawer, Form, Input, Select, Skeleton, Space, Steps, Spin, Result, Typography, Table, Tag, message, Table, Tag, Tooltip, Typography } from "antd";
 import API from "../API.jsx";
+import { EyeOutlined, SearchOutlined } from '@ant-design/icons';
+import API from "../API";
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -486,4 +489,407 @@ function Done(props) {
   }
 }
 
-export { InsertThesisProposal };
+function ThesisProposals() {
+
+  const filterTitle = () => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+      <div style={{ padding: 8 }}>
+        <Input
+          placeholder="Search Title"
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys, confirm)}
+          style={{ width: '100%', marginBottom: 8, display: 'block' }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Search
+          </Button>
+          <Button onClick={() => handleReset(clearFilters)} size="small" style={{ width: 90 }}>
+            Reset
+          </Button>
+          <Button type="link" size="small" onClick={() => close()}>
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => (
+      <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
+    ),
+    onFilter: (value, record) =>
+      record['title'].toLowerCase().includes(value.toLowerCase()),
+    render: (text) =>
+      <Highlighter
+        highlightStyle={{
+          backgroundColor: '#ffc069',
+          padding: 0
+        }}
+        searchWords={[searchTitle]}
+        autoEscape
+        textToHighlight={text ? text : ''}
+      />
+  });
+
+  useEffect(() => {
+    API.getStudentThesisProposals()
+      .then((x) => {
+        setData(handleReceivedData(x));
+        setIsLoadingTable(false);
+      })
+      .catch((err) => {/*err handling w message*/ });
+  }, []);
+
+  // Array of objs for storing table data
+  const [data, setData] = useState([])
+
+  // Loading table data fetching
+  const [isLoadingTable, setIsLoadingTable] = useState(true);
+
+  // Storing Title Search filter
+  const [searchTitle, setSearchTitle] = useState('');
+
+  // Drawer for viewing more filters
+  const [isOpen, setIsOpen] = useState(false);
+
+  const navigate = useNavigate();
+
+  // Columns of the table
+  const columns = [
+    {
+      title: 'Title',
+      dataIndex: 'title',
+      fixed: 'left',
+      ...filterTitle(),
+      render: (text, record) => (
+        <Tooltip title="View Proposal">
+          <Link to={`/view-proposal/${record.id}`}>
+            {text}
+          </Link>
+        </Tooltip>
+      )
+    },
+    {
+      title: 'Level',
+      dataIndex: 'level',
+      sorter: (a, b) => a.level.localeCompare(b.level),
+      onFilter: (value, record) => record.level === value,
+      filters: data.reduce((accumulator, x) => {
+        // Check if there is alreadythe obj
+        const existingObject = accumulator.find(item => item.value === x.level);
+        // If not found add it
+        if (!existingObject) {
+          accumulator.push({
+            text: x.level,
+            value: x.level,
+          });
+        }
+        return accumulator;
+      }, []),
+    },
+    {
+      title: 'Supervisor',
+      dataIndex: 'supervisor',
+      // Search in the table is implemented usign uinique ids (for homonymy)
+      onFilter: (value, record) => record.supervisor.id === value,
+      filterSearch: (input, record) => (
+        // Search for id or for name/surname
+        record.value.toLowerCase().includes(input.toLowerCase()) ||
+        input.toLowerCase().split(" ").every(term => record.text.toLowerCase().includes(term))
+      ),
+      filters: data.reduce((accumulator, x) => {
+        // Check if there is already the obj
+        const existingObject = accumulator.find(item => item.value === x.supervisor.id);
+        // If not add it
+        if (!existingObject) {
+          accumulator.push({
+            text: x.supervisor.name + " " + x.supervisor.surname,
+            value: x.supervisor.id,
+          });
+        }
+        return accumulator;
+      }, []),
+      render: (_, x) => (
+        <Tag color="blue">
+          {x.supervisor.name + " " + x.supervisor.surname}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Co-Supervisors',
+      dataIndex: 'coSupervisors',
+      onFilter: (value, record) => record.coSupervisors.some(cosupervisor => cosupervisor.id === value),
+      filterSearch: (input, record) => (
+        // Search for id or for name/surname
+        // toString needed because externalCoSupervisors (put inside coSupervisors) has an int id
+        record.value.toString().toLowerCase().includes(input.toLowerCase()) ||
+        input.toLowerCase().split(" ").every(term => record.text.toLowerCase().includes(term))
+      ),
+      filters: data.reduce((accumulator, x) => {
+        x.coSupervisors.forEach(cosupervisor => {
+          // Check if there is already the obj
+          const existingObject = accumulator.find(item => item.value === cosupervisor.id);
+          // If not add it
+          if (!existingObject) {
+            accumulator.push({
+              text: cosupervisor.name + " " + cosupervisor.surname,
+              value: cosupervisor.id,
+            });
+          }
+        });
+        return accumulator;
+      }, []),
+      render: (_, x) => x.coSupervisors.map((cosupervisor, i) => (
+        <Tag color="blue" key={i}>
+          {cosupervisor.name + " " + cosupervisor.surname}
+        </Tag>
+      )),
+    },
+    {
+      title: 'Keywords',
+      dataIndex: 'keywords',
+      onFilter: (value, record) => record.keywords.includes(value),
+      filterSearch: true,
+      filters: data.reduce((accumulator, x) => {
+        x.keywords.forEach(keyword => {
+          // Check if there is already the obj
+          const existingObject = accumulator.find(item => item.value === keyword);
+          // If not add it
+          if (!existingObject) {
+            accumulator.push({
+              text: keyword,
+              value: keyword,
+            });
+          }
+        });
+        return accumulator;
+      }, []),
+      render: (_, x) => x.keywords.map((keyword, i) => (
+        <Tag color="blue" key={i}>
+          {keyword}
+        </Tag>
+      )),
+    },
+    {
+      title: 'Type',
+      dataIndex: 'type',
+      sorter: (a, b) => a.type.localeCompare(b.type),
+      onFilter: (value, record) => record.type === value,
+      filters: data.reduce((accumulator, x) => {
+        // Check if there is alreadythe obj
+        const existingObject = accumulator.find(item => item.value === x.type);
+        // If not found add it
+        if (!existingObject) {
+          accumulator.push({
+            text: x.type,
+            value: x.type,
+          });
+        }
+        return accumulator;
+      }, []),
+    },
+    {
+      title: 'Groups',
+      dataIndex: 'groups',
+      onFilter: (value, record) => record.groups.includes(value),
+      filterSearch: true,
+      filters: data.reduce((accumulator, x) => {
+        x.groups.forEach(group => {
+          // Check if there is already the obj
+          const existingObject = accumulator.find(item => item.value === group);
+          // If not add it
+          if (!existingObject) {
+            accumulator.push({
+              text: group,
+              value: group,
+            });
+          }
+        });
+        return accumulator;
+      }, []),
+      render: (_, x) => x.groups.map((group, i) => (
+        <Tag color="blue" key={i}>
+          {group}
+        </Tag>
+      )),
+    },
+    {
+      title: 'Expiration',
+      dataIndex: 'expiration',
+      sorter: (a, b) => new Date(a.expiration) - new Date(b.expiration),
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      fixed: 'right',
+      render: (record) => (
+        <Space size="middle">
+          <Tooltip title="View Proposal">
+            <EyeOutlined style={{ fontSize: '20px' }} onClick={() => navigate(`/view-proposal/${record.id}`)} />
+          </Tooltip>
+        </Space>
+      ),
+    },
+  ];
+
+  // Some props regarding the table
+  const tableProps = {
+    bordered: false,
+    scroll: { x: true },
+    loading: isLoadingTable,
+  };
+
+  const handleSearch = (selectedKeys, confirm) => {
+    confirm();
+    setSearchTitle(selectedKeys[0]);
+  };
+
+  const handleReset = (clearFilters) => {
+    clearFilters();
+    setSearchTitle('');
+  };
+
+  function handleReceivedData(data) {
+
+    const formattedData = data.map((x) => ({
+      // Take all fields from API.jsx
+      ...x,
+      // Concatenate internal/external co-supervisors
+      coSupervisors: [].concat(x.internalCoSupervisors, x.externalCoSupervisors),
+    }));
+
+    return formattedData;
+  }
+
+  function MoreFilters() {
+
+    return (
+      <Drawer size="large" open={isOpen} onClose={() => setIsOpen(false)}>
+        "add"
+      </Drawer>
+    )
+  }
+
+  return (
+    <>
+      <MoreFilters />
+      <Table {...tableProps} columns={columns} dataSource={data}
+        title={() => <Button type="link" size="small" onClick={() => setIsOpen(true)}>Show even more filters...</Button>} />
+    </>
+  )
+}
+
+function ViewThesisProposal() {
+
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { Text } = Typography;
+
+  // Storing all Thesis Proposal Information
+  const [data, setData] = useState();
+
+  useEffect(() => {
+    API.getThesisProposalbyId(id)
+      .then((x) => {
+        setData(x);
+      })
+      .catch((err) => {/* handle error*/ });
+  }, []);
+
+  // If data is still empty
+  if (!data) {
+    return <Skeleton active />;
+  }
+
+  // Description fields
+  const items = [
+    {
+      key: '1',
+      label: 'Level',
+      span: 1,
+      children: <Text copyable>{data.level}</Text>
+    },
+    {
+      key: '2',
+      label: 'Type',
+      span: 1,
+      children: <Text copyable>{data.type}</Text>
+    },
+    {
+      key: '3',
+      label: 'Expiration Date',
+      span: 1,
+      children: <Text copyable>{data.expiration}</Text>
+    },
+    {
+      key: '4',
+      label: 'Description',
+      span: 3,
+      children: <Text copyable>{data.description}</Text>
+    },
+    {
+      key: '5',
+      label: 'Required Knowledge',
+      span: 3,
+      children: <Text copyable>{data.requiredKnowledge}</Text>
+    },
+    {
+      key: '6',
+      label: 'Supervisor',
+      span: 3,
+      children: <Tag color="blue">{data.supervisor.name + " " + data.supervisor.surname}</Tag>
+    },
+    {
+      key: '7',
+      label: 'Co-Supervisors',
+      span: 3,
+      children:
+        [].concat(data.internalCoSupervisors, data.externalCoSupervisors)
+          .map((x, index, array) => (
+            x.name + " " + x.surname + `${index !== array.length - 1 ? ", " : ""}`
+          ))
+    },
+    {
+      key: '8',
+      label: 'Groups',
+      span: 3,
+      children:
+        data.groups.map((x, index, array) => (
+          x + `${index !== array.length - 1 ? ", " : ""}`
+        ))
+    },
+    {
+      key: '9',
+      label: 'Notes',
+      span: 3,
+      children:
+        <Text copyable>
+          {data.notes}
+        </Text>
+    },
+    {
+      key: '10',
+      label: 'Keywords',
+      span: 3,
+      children:
+        data.keywords.map((x, index, array) => (
+          x + `${index !== array.length - 1 ? ", " : ""}`
+        ))
+    }
+  ];
+
+  return (
+    <>
+      <Button type="link" onClick={() => navigate("/proposals")}>&lt; Back to Thesis Proposals</Button>
+      <Descriptions title={data.title} layout="vertical" items={items} style={{ marginLeft: "2%", marginRight: "2%" }} />
+    </>
+  )
+}
+
+export { InsertThesisProposal, ThesisProposals, ViewThesisProposal };
