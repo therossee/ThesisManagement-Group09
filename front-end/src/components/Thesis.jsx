@@ -1,7 +1,7 @@
 import { React, useState, useEffect } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Highlighter from 'react-highlight-words';
-import { DatePicker, FloatButton, Button, Descriptions, Drawer, Form, Input, Select, Skeleton, Space, Steps, Table, Tag, Tooltip, Typography } from "antd";
+import { DatePicker, FloatButton, Button, Descriptions, Drawer, Form, Input, Select, Skeleton, Space, Steps, Table, Tag, Tooltip, Typography, message } from "antd";
 import { EyeOutlined, SearchOutlined } from '@ant-design/icons';
 import API from "../API";
 
@@ -254,7 +254,7 @@ function ThesisProposals() {
         setData(handleReceivedData(x));
         setIsLoadingTable(false);
       })
-      .catch((err) => {/*err handling w message*/ });
+      .catch((err) => { messageApi.error(err) });
   }, []);
 
   // Array of objs for storing table data
@@ -268,6 +268,8 @@ function ThesisProposals() {
 
   // Drawer for viewing more filters
   const [isOpen, setIsOpen] = useState(false);
+
+  const [messageApi, contextHolder] = message.useMessage();
 
   const navigate = useNavigate();
 
@@ -303,9 +305,7 @@ function ThesisProposals() {
       ...filterTitle(),
       render: (text, record) => (
         <Tooltip title="View Proposal">
-          <Link to={`/view-proposal/${record.id}`}>
-            {text}
-          </Link>
+          {text}
         </Tooltip>
       )
     },
@@ -567,9 +567,11 @@ function ThesisProposals() {
 
 function ViewThesisProposal() {
 
+  const [messageApi, contextHolder] = message.useMessage();
+
   const { id } = useParams();
-  const navigate = useNavigate();
   const { Text } = Typography;
+  const navigate = useNavigate();
 
   // Storing all Thesis Proposal Information
   const [data, setData] = useState();
@@ -579,7 +581,7 @@ function ViewThesisProposal() {
       .then((x) => {
         setData(x);
       })
-      .catch((err) => {/* handle error*/ });
+      .catch((err) => { messageApi.error(err) });
   }, []);
 
   // If data is still empty
@@ -666,6 +668,7 @@ function ViewThesisProposal() {
 
   return (
     <>
+      <contextHolder />
       <Button type="link" onClick={() => navigate("/proposals")}>&lt; Back to Thesis Proposals</Button>
       <Descriptions title={data.title} layout="vertical" items={items} style={{ marginLeft: "2%", marginRight: "2%" }} />
     </>
