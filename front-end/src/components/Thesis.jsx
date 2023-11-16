@@ -246,7 +246,7 @@ function InsertBody(props) {
   };
 
   function disabledDate(current) {
-    return current && current.valueOf() < Date.now();
+    return current && current.valueOf() < date;
   }
 
   const onFinish = (values) => {
