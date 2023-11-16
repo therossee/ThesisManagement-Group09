@@ -67,24 +67,3 @@ GET http://localhost:3000/api/degrees
 ## SEARCH FOR THESIS PROPOSALS
 GET http://localhost:3000/api/thesis-proposals
 ###
-
-// 5. Apply for a thesis proposal
-// POST api/student/:id/applications
-
-// 6. List all applications for a teacher's thesis proposals
-// GET api/teacher/:id/applications
-
-// 7. Accept an application
-// PATCH api/teacher/:id/applications/:id
-
-// 8. Reject an application
-// PATCH api/teacher/:id/applications/:id
-
-// 9. List student's application decisions
-// GET api/student/:id/applications
-
-// 10. List professor's active thesis proposala
-// GET api/teacher/:id/thesis_proposals
-
-// 11. Update a thesis proposal
-// PATCH api/teacher/:id/thesis_proposals/:id

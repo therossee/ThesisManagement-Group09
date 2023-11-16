@@ -43,7 +43,104 @@ async function getUserInfo() {
 
 /****** End APIs for auth ******/
 
+// GET Student's Thesis Proposals
+async function getStudentThesisProposals() {
+    const response = await fetch(URL + '/thesis-proposals', {
+        credentials: 'include',
+    });
+    const proposals = await response.json();
+    if (response.ok) {
+        return proposals.items.map((x) => ({
+            id: x.id,
+            title: x.title,
+            supervisor: x.supervisor,
+            internalCoSupervisors: x.coSupervisors.internal,
+            externalCoSupervisors: x.coSupervisors.external,
+            type: x.type,
+            description: x.description,
+            requiredKnowledge: x.requiredKnowledge,
+            notes: x.notes,
+            expiration: x.expiration,
+            level: x.level,
+            groups: x.groups,
+            keywords: x.keywords
+        }))
+    } else {
+        throw proposals;
+    }
+}
+
+// GET Thesis Proposals by given id
+async function getThesisProposalbyId(id) {
+    const response = await fetch(URL + `/thesis-proposals/${id}`, {
+        credentials: 'include',
+    });
+    const thesisProposal = await response.json();
+    if (response.ok) {
+        return {
+            id: thesisProposal.id,
+            title: thesisProposal.title,
+            supervisor: thesisProposal.supervisor,
+            internalCoSupervisors: thesisProposal.coSupervisors.internal,
+            externalCoSupervisors: thesisProposal.coSupervisors.external,
+            type: thesisProposal.type,
+            description: thesisProposal.description,
+            requiredKnowledge: thesisProposal.requiredKnowledge,
+            notes: thesisProposal.notes,
+            expiration: thesisProposal.expiration,
+            level: thesisProposal.level,
+            groups: thesisProposal.groups,
+            keywords: thesisProposal.keywords
+        }
+    } else {
+        throw thesisProposal;
+    }
+}
+
+// GET Thesis Proposals of a Teacher
+async function getTeacherThesisProposals() {
+    const response = await fetch(URL + '/teacher/thesis_proposals', {
+        credentials: 'include',
+    });
+    const proposals = await response.json();
+    if (response.ok) {
+        return proposals.map((x) => ({
+            id: x.proposal_id,
+            title: x.title,
+            supervisor: x.supervisor_id,
+            type: x.type,
+            description: x.description,
+            requiredKnowledge: x.required_knowledge,
+            notes: x.notes,
+            expiration: x.expiration,
+            level: x.level,
+            cds: x.cds
+        }))
+    } else {
+        throw proposals;
+    }
+}
+
+// GET Student Applications on a Thesis Proposal of a Teacher
+async function getTeacherThesisApplications(proposalId) {
+    const response = await fetch(URL + `/teacher/applications/${proposalId}`, {
+        credentials: 'include',
+    });
+
+    const applications = await response.json();
+
+    if (response.ok) {
+        return applications.map((x) => ({
+            name: x.name,
+            surname: x.surname,
+            status: x.status
+        }));
+    } else {
+        throw applications;
+    }
+}
+
 const API = {
-    logIn, logOut, getUserInfo
+    logIn, logOut, getUserInfo, getStudentThesisProposals, getThesisProposalbyId, getTeacherThesisProposals, getTeacherThesisApplications
 };
 export default API;
