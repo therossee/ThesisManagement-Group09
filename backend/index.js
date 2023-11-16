@@ -301,7 +301,6 @@ app.get('/api/thesis-proposals/:id',
     }
 });
 
-// POST api/student/applications
 app.post('/api/student/applications',
 isLoggedIn,
 isStudent,
@@ -323,7 +322,6 @@ async(req,res) => {
   });
 });
 
-// GET api/teacher/thesis_proposals
 app.get('/api/teacher/thesis_proposals',
 isLoggedIn,
 isTeacher,
