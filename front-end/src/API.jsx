@@ -152,7 +152,7 @@ async function applyForProposal(id) {
         return apply;
     } else {
         const errDetail = await response.json();
-        throw {status: response.status, msg: errDetail};
+        throw {status: response.status, message: errDetail};
     }
 }
 

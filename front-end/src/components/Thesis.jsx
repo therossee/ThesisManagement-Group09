@@ -24,7 +24,7 @@ const steps = [
   },
   {
     title: "Upload",
-    content: <Done/>,
+    content: <Done />,
   },
 ];
 
@@ -48,47 +48,48 @@ function InsertThesisProposal() {
 
   useEffect(() => {
     API.getTeachers()
-    .then((obj) => {
-      setIntCoSupervisors(obj.teachers);
-    })
-    .catch((err) => {
-      messageApi.error("Failed to fetch teachers!");
-    });
+      .then((obj) => {
+        setIntCoSupervisors(obj.teachers);
+      })
+      .catch((err) => {
+        messageApi.error("Failed to fetch teachers!");
+      });
     API.getExtCoSupervisors()
-    .then((obj) => {
-      setExtCoSupervisors(obj.externalCoSupervisors);
-    })
-    .catch((err) => {
-      messageApi.error("Failed to fetch external co-supervisors!");
-    });
+      .then((obj) => {
+        setExtCoSupervisors(obj.externalCoSupervisors);
+      })
+      .catch((err) => {
+        messageApi.error("Failed to fetch external co-supervisors!");
+      });
     API.getAllDegrees()
-    .then((obj) => {
-      setDegrees(obj);
-    })
-    .catch((err) => {
-      messageApi.error("Failed to fetch degrees!");
-    });
+      .then((obj) => {
+        setDegrees(obj);
+      })
+      .catch((err) => {
+        messageApi.error("Failed to fetch degrees!");
+      });
     API.getAllKeywords()
-    .then((obj) => {
-      setKeywords(obj.keywords);
-    })
-    .catch((err) => {
-      messageApi.error("Failed to fetch keywords!");
-    });
+      .then((obj) => {
+        setKeywords(obj.keywords);
+      })
+      .catch((err) => {
+        messageApi.error("Failed to fetch keywords!");
+      });
     API.getClock()
-    .then((clock) => {
-      setDate(dayjs().add(clock.offset, 'ms'));
-    })
-    .catch((err) => {
-      messageApi.error("Failed to fetch virtual clock!");})
-    .finally(() => {
-      setLoading(false);
-    })
+      .then((clock) => {
+        setDate(dayjs().add(clock.offset, 'ms'));
+      })
+      .catch((err) => {
+        messageApi.error("Failed to fetch virtual clock!");
+      })
+      .finally(() => {
+        setLoading(false);
+      })
   }, [current]);
 
   useEffect(() => {
-    if(insert){
-      const proposal = {
+    if (insert) {
+      const proposal = {
         title: formData.title,
         internal_co_supervisors_id: formData.intCoSupervisors ?? [],
         external_co_supervisors_id: formData.extCoSupervisors ?? [],
@@ -102,15 +103,15 @@ function InsertThesisProposal() {
         level: formData.degreeLevel
       }
       API.insertProposal(proposal)
-      .then((obj) => {
-        setProposalId(obj.id);
-        next();
-      })
-      .catch((err) => {
-        setProposalId(-1);
-        setError(err.status);
-        next();
-      });
+        .then((obj) => {
+          setProposalId(obj.id);
+          next();
+        })
+        .catch((err) => {
+          setProposalId(-1);
+          setError(err.status);
+          next();
+        });
       setInsert(false);
     }
   }, [insert]);
@@ -118,7 +119,7 @@ function InsertThesisProposal() {
   const addProposal = () => {
     setInsert(true);
   }
-  
+
   const items = steps.map((item) => ({
     key: item.title,
     title: item.title,
@@ -140,58 +141,58 @@ function InsertThesisProposal() {
 
   return (
     <>
-    {loading ?
-      <div style={{ marginLeft: "49%", marginRight: "25%", marginTop: "25%"}}>
-        <Spin tip="Loading" size="large" />
-      </div>
-      :
-    <>
-     {contextHolder}
-      <Steps
-        current={current}
-        items={items}
-        style={{ paddingRight: "20%", paddingLeft: "20%" }}
-      />
-      <div style={{ marginLeft: "16%", marginRight: "15%", marginTop: "3%" }}>
-        <div>
-          {current === 0 && (
-            <InsertBody saveData={saveFormData} intCoSupervisors={intCoSupervisors} extCoSupervisors={extCoSupervisors} keywords={keywords} degrees={degrees} form={form} date={date}/>
-          )} 
-          {current === 1 && (
-            <div style={{marginLeft: "10%"}}>
-            <ReviewProposal formData={formData} intCoSupervisors={intCoSupervisors} extCoSupervisors={extCoSupervisors} degrees={degrees}/>
-            <div style={{paddingLeft: "35%"}}>
-            <Button
-              style={{
-                margin: "0 8px",
-                marginTop: "3%"
-              }}
-              onClick={() => prev()}
-            >
-              Previous
-            </Button>
-              <Button type="primary" onClick={addProposal}style={{
-                margin: "0 8px",
-                marginTop: "3%"
-              }}>
-                Next
-              </Button>
-              </div>
+      {loading ?
+        <div style={{ marginLeft: "49%", marginRight: "25%", marginTop: "25%" }}>
+          <Spin tip="Loading" size="large" />
+        </div>
+        :
+        <>
+          {contextHolder}
+          <Steps
+            current={current}
+            items={items}
+            style={{ paddingRight: "20%", paddingLeft: "20%" }}
+          />
+          <div style={{ marginLeft: "16%", marginRight: "15%", marginTop: "3%" }}>
+            <div>
+              {current === 0 && (
+                <InsertBody saveData={saveFormData} intCoSupervisors={intCoSupervisors} extCoSupervisors={extCoSupervisors} keywords={keywords} degrees={degrees} form={form} date={date} />
+              )}
+              {current === 1 && (
+                <div style={{ marginLeft: "10%" }}>
+                  <ReviewProposal formData={formData} intCoSupervisors={intCoSupervisors} extCoSupervisors={extCoSupervisors} degrees={degrees} />
+                  <div style={{ paddingLeft: "35%" }}>
+                    <Button
+                      style={{
+                        margin: "0 8px",
+                        marginTop: "3%"
+                      }}
+                      onClick={() => prev()}
+                    >
+                      Previous
+                    </Button>
+                    <Button type="primary" onClick={addProposal} style={{
+                      margin: "0 8px",
+                      marginTop: "3%"
+                    }}>
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        <div>
-          {current === steps.length - 1 && 
-            <Done proposalId={proposalId} error={error}/>
-          }
-        </div>
-      </div>
-      <Tooltip title="Back to Top">
-        <FloatButton.BackTop style={{ marginBottom: "40px" }} >
-        </FloatButton.BackTop>
-      </Tooltip>
-    </>
-    }
+            <div>
+              {current === steps.length - 1 &&
+                <Done proposalId={proposalId} error={error} />
+              }
+            </div>
+          </div>
+          <Tooltip title="Back to Top">
+            <FloatButton.BackTop style={{ marginBottom: "40px" }} >
+            </FloatButton.BackTop>
+          </Tooltip>
+        </>
+      }
     </>
   );
 }
@@ -203,7 +204,7 @@ function InsertBody(props) {
   const [newKeyword, setNewKeyword] = useState("");
   const [lev, setSelLev] = useState("");
   const [selDegrees, setSelDegrees] = useState([]);
-  const {keywords, intCoSupervisors, extCoSupervisors, degrees, form, date} = props;
+  const { keywords, intCoSupervisors, extCoSupervisors, degrees, form, date } = props;
   const unselectedInt = intCoSupervisors.filter((x) => !selectedInt.includes(x));
   const unselectedExt = extCoSupervisors.filter((x) => !selectedExt.includes(x));
 
@@ -251,16 +252,16 @@ function InsertBody(props) {
   };
 
   return (
-      <Form form={form} layout="vertical" onFinish={onFinish}>
-        <Form.Item label="Title" name="title" rules={[
-          {
-            required: true,
-            message: 'Please input a title!',
-          },
-        ]}>
-          <Input />
-        </Form.Item>
-        <Form.Item label="Internal co-Supervisors" name="intCoSupervisors">
+    <Form form={form} layout="vertical" onFinish={onFinish}>
+      <Form.Item label="Title" name="title" rules={[
+        {
+          required: true,
+          message: 'Please input a title!',
+        },
+      ]}>
+        <Input />
+      </Form.Item>
+      <Form.Item label="Internal co-Supervisors" name="intCoSupervisors">
         <Select
           mode="multiple"
           placeholder="Select internal co-Supervisors"
@@ -275,8 +276,8 @@ function InsertBody(props) {
             option.searchValue.toLowerCase().includes(input.toLowerCase())
           }
         />
-        </Form.Item>
-        <Form.Item label="External co-Supervisors" name="extCoSupervisors">
+      </Form.Item>
+      <Form.Item label="External co-Supervisors" name="extCoSupervisors">
         <Select
           mode="multiple"
           placeholder="Select external co-Supervisors"
@@ -291,124 +292,124 @@ function InsertBody(props) {
             option.searchValue.toLowerCase().includes(input.toLowerCase())
           }
         />
-        </Form.Item>
-        <Form.Item label="Keywords" name="keywords" rules={[
-          {
-            required: true,
-            message: 'Please input keywords!',
-          },
-        ]}>
+      </Form.Item>
+      <Form.Item label="Keywords" name="keywords" rules={[
+        {
+          required: true,
+          message: 'Please input keywords!',
+        },
+      ]}>
         <Select
-        mode="multiple"
-        placeholder="Select keywords"
-        value={selectedKw}
-        onChange={handleSelectKwChange}
-        onInputKeyDown={handleKeyDown}
-        onSearch={handleInputChange}
-        optionLabelProp="label"
+          mode="multiple"
+          placeholder="Select keywords"
+          value={selectedKw}
+          onChange={handleSelectKwChange}
+          onInputKeyDown={handleKeyDown}
+          onSearch={handleInputChange}
+          optionLabelProp="label"
+        >
+          {keywords.map((kw) => (
+            <Option key={kw} value={kw} label={kw}>
+              {kw}
+            </Option>
+          ))}
+          {newKeyword.trim() !== '' && !keywords.includes(newKeyword) && (
+            <Option key={newKeyword} value={newKeyword} label={newKeyword}>
+              {newKeyword}
+            </Option>
+          )}
+        </Select>
+      </Form.Item>
+      <Form.Item label="Type" name="type" rules={[
+        {
+          required: true,
+          message: 'Please input a type!',
+        },
+      ]}>
+        <Input />
+      </Form.Item>
+      <Form.Item label="Description" name="description" rules={[
+        {
+          required: true,
+          message: 'Please insert a description for this thesis!',
+        },
+      ]}>
+        <Input.TextArea rows={6} />
+      </Form.Item>
+      <Form.Item label="Required Knowledge" name="requiredKnowledge" >
+        <Input.TextArea rows={4} />
+      </Form.Item>
+      <Form.Item label="Notes" name="notes">
+        <Input.TextArea rows={4} />
+      </Form.Item>
+      <Form.Item label="Expiration Date" name="expirationDate" rules={[
+        {
+          required: true,
+          message: 'Please select an expiration date!',
+        },
+      ]}>
+        <DatePicker defaultValue={date} disabledDate={disabledDate} />
+      </Form.Item>
+      <Form.Item
+        name="degreeLevel"
+        label="Degree Level"
+        rules={[
+          {
+            required: true,
+            message: 'Please select a degree level!',
+          },
+        ]}
       >
-        {keywords.map((kw) => (
-          <Option key={kw} value={kw} label={kw}>
-            {kw}
-          </Option>
-        ))}
-        {newKeyword.trim() !== '' && !keywords.includes(newKeyword) && (
-          <Option key={newKeyword} value={newKeyword} label={newKeyword}>
-            {newKeyword}
-          </Option>
-        )}
-      </Select>
-        </Form.Item>
-        <Form.Item label="Type" name="type" rules={[
-          {
-            required: true,
-            message: 'Please input a type!',
-          },
-        ]}>
-          <Input />
-        </Form.Item>
-        <Form.Item label="Description" name="description" rules={[
-          {
-            required: true,
-            message: 'Please insert a description for this thesis!',
-          },
-        ]}>
-          <Input.TextArea rows={6} />
-        </Form.Item>
-        <Form.Item label="Required Knowledge" name="requiredKnowledge" >
-          <Input.TextArea rows={4} />
-        </Form.Item>
-        <Form.Item label="Notes" name="notes">
-          <Input.TextArea rows={4} />
-        </Form.Item>
-        <Form.Item label="Expiration Date" name="expirationDate" rules={[
-          {
-            required: true,
-            message: 'Please select an expiration date!',
-          },
-        ]}>
-          <DatePicker defaultValue={date} disabledDate={disabledDate} />
-        </Form.Item>
-        <Form.Item
-          name="degreeLevel"
-          label="Degree Level"
-          rules={[
-            {
-              required: true,
-              message: 'Please select a degree level!',
-            },
-          ]}
+        <Select
+          placeholder="Select a degree level"
+          allowClear
+          onChange={handleDegreeSelection}
         >
-          <Select
-            placeholder="Select a degree level"
-            allowClear
-            onChange={handleDegreeSelection}
-          >
-            <Select.Option value="L">L - Bachelor Degree</Select.Option>
-            <Select.Option value="LM">LM - Master Degree</Select.Option>
-          </Select>
-        </Form.Item>
-        <Form.Item
-          name="cds"
-          label="CdS"
-          rules={[
-            {
-              required: true,
-              message: 'Please select a CdS!',
-            },
-          ]}
-        >
-          <Select placeholder="Select a CdS" allowClear disabled={lev === ""}>
-            {selDegrees.map((d) => (d.cod_degree.includes(lev) ?
-              <Select.Option key={d.title_degree} value={d.cod_degree}>
-                {d.title_degree}
-              </Select.Option>
-              : null
-            ))}
-          </Select>  
-        </Form.Item>
-        <Form.Item>
-          <div style={{paddingLeft: "45%"}}>
+          <Select.Option value="L">L - Bachelor Degree</Select.Option>
+          <Select.Option value="LM">LM - Master Degree</Select.Option>
+        </Select>
+      </Form.Item>
+      <Form.Item
+        name="cds"
+        label="CdS"
+        rules={[
+          {
+            required: true,
+            message: 'Please select a CdS!',
+          },
+        ]}
+      >
+        <Select placeholder="Select a CdS" allowClear disabled={lev === ""}>
+          {selDegrees.map((d) => (d.cod_degree.includes(lev) ?
+            <Select.Option key={d.title_degree} value={d.cod_degree}>
+              {d.title_degree}
+            </Select.Option>
+            : null
+          ))}
+        </Select>
+      </Form.Item>
+      <Form.Item>
+        <div style={{ paddingLeft: "45%" }}>
           <Button type="primary" htmlType="submit">
             Submit
           </Button>
-          </div>
-        </Form.Item>
-      </Form>
+        </div>
+      </Form.Item>
+    </Form>
   );
 }
 
 function ReviewProposal(props) {
   //Function to retrieve the data of the form inserted in insert body
   const formData = props.formData;
-  const {intCoSupervisors, extCoSupervisors, degrees} = props;
+  const { intCoSupervisors, extCoSupervisors, degrees } = props;
   const deg = degrees.find((x) => x.cod_degree === formData.cds);
   const level = formData.degreeLevel === "L" ? "L - Bachelor Degree" : "LM - Master Degree";
   let intCoSup = [], extCoSup = [];
-  if(formData.intCoSupervisors !== undefined){
+  if (formData.intCoSupervisors !== undefined) {
     intCoSup = intCoSupervisors.filter((x) => formData.intCoSupervisors.includes(x.id));
   }
-  if(formData.extCoSupervisors !== undefined){
+  if (formData.extCoSupervisors !== undefined) {
     extCoSup = extCoSupervisors.filter((x) => formData.extCoSupervisors.includes(x.id));
   }
   const data = [
@@ -457,7 +458,7 @@ function ReviewProposal(props) {
 
   return (
     <>
-      <Title level={2} style={{paddingLeft: "32%"}}>Review Proposal</Title>
+      <Title level={2} style={{ paddingLeft: "32%" }}>Review Proposal</Title>
       <Table
         dataSource={data}
         columns={columns}
@@ -473,30 +474,30 @@ function Done(props) {
   const navigate = useNavigate();
   const id = props.proposalId;
   const error = props.error;
-  if(id !== -1){
-    return (
-    <Result
-      status="success"
-      title="Proposal added succesfully!"
-      subTitle={`ID of the proposal: ${id}`}
-      extra={
-      <Button ghost type="primary" onClick={() => navigate("/")}>
-        Back Home
-      </Button>
-    }
-  />
-    );
-  }else{
+  if (id !== -1) {
     return (
       <Result
-          status={`${error}`}
-          title={`${error}`}
-          subTitle="Sorry, something went wrong."
-          extra={
-            <Button ghost type="primary" onClick={() => navigate("/")}>
-              Back Home
-            </Button>
-          }
+        status="success"
+        title="Proposal added succesfully!"
+        subTitle={`ID of the proposal: ${id}`}
+        extra={
+          <Button ghost type="primary" onClick={() => navigate("/")}>
+            Back Home
+          </Button>
+        }
+      />
+    );
+  } else {
+    return (
+      <Result
+        status={`${error}`}
+        title={`${error}`}
+        subTitle="Sorry, something went wrong."
+        extra={
+          <Button ghost type="primary" onClick={() => navigate("/")}>
+            Back Home
+          </Button>
+        }
       />
     );
   }
@@ -949,14 +950,14 @@ function ViewThesisProposal() {
             setClock(actual);
           })
           .catch((err) => { messageApi.error(err.message ? err.message : err) });
+        API.getStudentApplications()
+          .then((x) => {
+            const dis = x.includes(parseInt(id));
+            setDisabled(dis);
+          })
+          .catch((err) => { messageApi.error(err.message ? err.message : err) });
       })
       .catch((err) => { messageApi.error(err.message ? err.message : err) })
-    API.getStudentApplications()
-      .then((x) => {
-        const dis = x.includes(parseInt(id));
-        setDisabled(dis);
-      })
-      .catch((err) => { messageApi.error(err.message ? err.message : err) });
   }, []);
 
   // If data is still empty
