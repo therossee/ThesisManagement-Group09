@@ -4,10 +4,9 @@
 
 const db = require('./db');
 
-// 1. Function to create a new thesis proposal
 exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id, external_co_supervisors_id, type, groups, description, required_knowledge, notes, expiration, level, cds, keywords) => {
     return new Promise((resolve, reject) => {
-      try{
+      
         const insertThesisProposalQuery = `
         INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?); `;
@@ -55,14 +54,13 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
           });
 
           resolve(proposalId)
-        })();
-    } catch(err){
-      reject(err)
-    }
-  })
+        })()
+    .catch((err) => {
+      reject(err);
+    });
+  });
 };
 
-// 2. Function to get list of teachers not logged
 exports.getTeacherListExcept = (id) => {
   return new Promise((resolve)=>{
       const query = `SELECT * FROM teacher WHERE id <> ?; `;
@@ -71,7 +69,6 @@ exports.getTeacherListExcept = (id) => {
   })
 };
 
-// 3. Function to get list of external co-supervisors
 exports.getExternalCoSupervisorList = () => {
   return new Promise((resolve)=>{
       const query = `SELECT * FROM externalCoSupervisor;`;
@@ -80,7 +77,6 @@ exports.getExternalCoSupervisorList = () => {
   })
 };
 
-// 4. Function to retrieve the cod_group of a teacher
 exports.getGroup = (teacherId) => {
   return new Promise((resolve) => {
       const getGroupQuery = `SELECT cod_group FROM teacher WHERE id=? `;
@@ -89,7 +85,6 @@ exports.getGroup = (teacherId) => {
   })
 };
 
-// Function to retrieve all the keywords
 exports.getAllKeywords = () => {
   return new Promise((resolve) => {
       const getKeywords = `SELECT DISTINCT(keyword) FROM proposalKeyword`;
@@ -100,13 +95,10 @@ exports.getAllKeywords = () => {
   })
 };
 
-// Function to retrieve all the degrees
 exports.getDegrees = () => {
   return new Promise((resolve) => {
       const getDegrees = `SELECT * FROM degree`;
       const res = db.prepare(getDegrees).all();
-      // Extracting the degree property from each row
-      //const keywords = res.map(row => row.keyword);
       resolve(res)
   })
 };
@@ -257,7 +249,17 @@ exports.getSupervisorOfProposal = (proposalId) => {
  * @property {string} email
  */
 
-// 6. Function to list all thesis proposals of a tearcher (supervisor)
+exports.applyForProposal = (proposal_id, student_id) => {
+  return new Promise((resolve, reject) => {
+    const insertApplicationQuery = `
+    INSERT INTO thesisApplication (proposal_id, student_id)
+    VALUES (?, ?); `; // at first the application has default status 'waiting for approval'
+
+    const res = db.prepare(insertApplicationQuery).run(proposal_id, student_id);
+    resolve(res.lastInsertRowid);
+  })
+}
+
 exports.listThesisProposalsTeacher = (teacherId) => {
   return new Promise((resolve) => {
       const getProposals = `SELECT * FROM thesisProposal WHERE supervisor_id=?`;
@@ -267,8 +269,6 @@ exports.listThesisProposalsTeacher = (teacherId) => {
   })
 };
 
-
-// 7. Function to list all applications for a teacher's thesis proposals
 exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
   return new Promise((resolve) => {
     
@@ -282,7 +282,14 @@ exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
   })
 };
 
-// 8. Function to accept an application
+exports.getStudentApplications = (student_id) => {
+  return new Promise((resolve) => {
+      const query = `SELECT proposal_id FROM thesisApplication WHERE student_id=?`;
+      const res = db.prepare(query).all(student_id);
+      resolve(res)
+  })
+};
+
 exports.updateApplicationStatus = (studentId, proposalId, status) =>{
   return new Promise((resolve,reject)=>{
       const query = `
@@ -296,9 +303,8 @@ exports.updateApplicationStatus = (studentId, proposalId, status) =>{
 
   resolve(rowCount);
   })
-}
+};
 
-//9. Function to reject all others applications
 exports.rejectOtherApplications = (studentId,proposalId) => {
   return new Promise((resolve,reject)=>{
     const query = `
@@ -312,4 +318,4 @@ exports.rejectOtherApplications = (studentId,proposalId) => {
 
   resolve(rowCount);
   })
-}
+};

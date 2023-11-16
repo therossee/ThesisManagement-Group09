@@ -7,7 +7,7 @@ describe('getUser function', () => {
         beforeEach(() => {
             db.prepare('INSERT INTO degree (cod_degree, title_degree) VALUES (?, ?)').run('L-01', 'Mock Degree Name');
             db.prepare('INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
-              .run('s1', 'mockStudentSurname', 'mockStudentName', 'MALE', 'Italian', 'mockStudentEmail@email.com', 'L-01', '2020');
+              .run('s1', 'mockStudentSurname', 'mockStudentName', 'MALE', 'Italian', 'mockStudentEmail@email.com', 'L-01', 2020);
             db.prepare('INSERT INTO teacher (id, surname, name, email, cod_group, cod_department) VALUES (?, ?, ?, ?, ?, ?)')
               .run('d1', 'mockTeacherSurname', 'mockTeacherName', 'mockTeacherEmail@email.com', 'Group1', 'Dep1');
 

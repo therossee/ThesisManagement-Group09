@@ -41,7 +41,45 @@ async function getUserInfo() {
     }
 }
 
+
 /****** End APIs for auth ******/
+
+async function getClock() {
+    return fetch(URL + '/system/virtual-clock')
+        .then( async response => {
+            const body = await response.json();
+
+            if (response.ok) {
+                return {
+                    date: new Date(body.date),
+                    offset: body.offset
+                };
+            } else {
+                throw body;
+            }
+        });
+}
+async function updateClock(date) {
+    return fetch(URL + '/system/virtual-clock', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ newDate: date })
+    })
+        .then( async response => {
+            const body = await response.json();
+
+            if (response.ok) {
+                return {
+                    date: new Date(body.date),
+                    offset: body.offset
+                };
+            } else {
+                throw body;
+            }
+        });
+}
 
 // GET Student's Thesis Proposals
 async function getStudentThesisProposals() {
@@ -52,6 +90,7 @@ async function getStudentThesisProposals() {
     if (response.ok) {
         return proposals.items.map((x) => ({
             id: x.id,
+            key: x.id,
             title: x.title,
             supervisor: x.supervisor,
             internalCoSupervisors: x.coSupervisors.internal,
@@ -79,6 +118,7 @@ async function getThesisProposalbyId(id) {
     if (response.ok) {
         return {
             id: thesisProposal.id,
+            key: thesisProposal.id,
             title: thesisProposal.title,
             supervisor: thesisProposal.supervisor,
             internalCoSupervisors: thesisProposal.coSupervisors.internal,
@@ -94,6 +134,37 @@ async function getThesisProposalbyId(id) {
         }
     } else {
         throw thesisProposal;
+    }
+}
+
+async function applyForProposal(thesis_proposal_id) {
+    let response = await fetch(URL + '/student/applications', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(thesis_proposal_id),
+    });
+    if (response.ok) {
+        const apply = await response.json();
+        return apply;
+    } else {
+        const errDetail = await response.json();
+        throw {status: response.status, msg: errDetail};
+    }
+}
+
+// GET Student's Thesis Applications
+async function getStudentApplications() {
+    const response = await fetch(URL + '/student/applications', {
+        credentials: 'include',
+    });
+    const applications = await response.json();
+    if (response.ok) {
+        return applications.map(x => x.proposal_id);
+    } else {
+        throw applications;
     }
 }
 
@@ -184,6 +255,9 @@ async function rejectThesisApplications(proposalId,studentId) {
 
 
 const API = {
-    logIn, logOut, getUserInfo, getStudentThesisProposals, getThesisProposalbyId, getTeacherThesisProposals, getTeacherThesisApplications, acceptThesisApplications, rejectThesisApplications
+    logIn, logOut, getUserInfo,
+    getClock, updateClock,
+    getStudentThesisProposals, getThesisProposalbyId, getTeacherThesisProposals, getTeacherThesisApplications,
+    applyForProposal, getStudentApplications, acceptThesisApplications, rejectThesisApplications
 };
 export default API;
