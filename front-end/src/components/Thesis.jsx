@@ -477,7 +477,7 @@ function ThesisProposals() {
               >
                 Search
               </Button>
-              <Button size="small" onClick={() => { clearFilters(); setDateRange([]); }}>
+              <Button size="small" onClick={() => { clearFilters(); setSelectedKeys([]); }}>
                 Reset
               </Button>
               <Button type="link" size="small" onClick={() => close()}>
@@ -605,19 +605,27 @@ function ViewThesisProposal() {
   const { Text } = Typography;
   const navigate = useNavigate();
   const [disabled, setDisabled] = useState(false);
+  const [loading, setLoading] = useState(false);
 
 
   // Storing all Thesis Proposal Information
   const [data, setData] = useState();
 
   const applyForProposal = () => {
+    setLoading(true);
+    addApplication();
+  }
+
+  async function addApplication() {
     try{
-      API.applyForProposal(id);
+      await API.applyForProposal(id);
       messageApi.success("Applied for proposal");
       setDisabled(true);
+      setLoading(false);
     }catch(err){
       messageApi.error(err.message ? err.message : err);
       setDisabled(false);
+      setLoading(false);
     }
   }
 
@@ -724,7 +732,7 @@ function ViewThesisProposal() {
       <Button type="link" onClick={() => navigate("/proposals")}>&lt; Back to Thesis Proposals</Button>
       <Descriptions title={data.title} layout="vertical" items={items} style={{ marginLeft: "2%", marginRight: "2%" }} />
       <div style={{ paddingLeft: "2%" }}>
-        <Button type="primary" disabled={disabled} onClick={applyForProposal}>Apply for this proposal</Button>
+        <Button type="primary" disabled={disabled} loading={loading} onClick={applyForProposal}>Apply for this proposal</Button>
       </div>
     </>
   )

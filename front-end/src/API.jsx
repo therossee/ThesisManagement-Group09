@@ -100,7 +100,7 @@ async function getThesisProposalbyId(id) {
 }
 
 async function applyForProposal(id) {
-    let response = await fetch(URL + '/student/applications', {
+    const response = await fetch(URL + '/student/applications', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -110,6 +110,7 @@ async function applyForProposal(id) {
     });
     if (response.ok) {
         const apply = await response.json();
+        console.log(apply);
         return apply;
     } else {
         const errDetail = await response.json();
