@@ -41,7 +41,45 @@ async function getUserInfo() {
     }
 }
 
+
 /****** End APIs for auth ******/
+
+async function getClock() {
+    return fetch(URL + '/system/virtual-clock')
+        .then( async response => {
+            const body = await response.json();
+
+            if (response.ok) {
+                return {
+                    date: new Date(body.date),
+                    offset: body.offset
+                };
+            } else {
+                throw body;
+            }
+        });
+}
+async function updateClock(date) {
+    return fetch(URL + '/system/virtual-clock', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ newDate: date })
+    })
+        .then( async response => {
+            const body = await response.json();
+
+            if (response.ok) {
+                return {
+                    date: new Date(body.date),
+                    offset: body.offset
+                };
+            } else {
+                throw body;
+            }
+        });
+}
 
 // GET Student's Thesis Proposals
 async function getStudentThesisProposals() {
@@ -174,6 +212,9 @@ async function getTeacherThesisApplications(proposalId) {
 }
 
 const API = {
-    logIn, logOut, getUserInfo, getStudentThesisProposals, getThesisProposalbyId, applyForProposal, getStudentApplications, getTeacherThesisProposals, getTeacherThesisApplications
+    logIn, logOut, getUserInfo,
+    getClock, updateClock,
+    getStudentThesisProposals, getThesisProposalbyId, getTeacherThesisProposals, getTeacherThesisApplications,
+    applyForProposal, getStudentApplications
 };
 export default API;
