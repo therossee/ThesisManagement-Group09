@@ -7,8 +7,6 @@ import API from "../API";
 
 const { Option } = Select;
 
-const OPTIONS_COSUPERVISORS = ["Apples", "Nails", "Bananas", "Helicopters"];
-
 const steps = [
   {
     title: "Insert Thesis Proposal",
@@ -23,6 +21,7 @@ const steps = [
     content: <Done />,
   },
 ];
+
 
 function InsertThesisProposal() {
 
@@ -247,12 +246,18 @@ function ThesisProposals() {
   });
 
   const [messageApi, messageBox] = message.useMessage();
+  const [applications, setApplications] = useState([]);
 
   useEffect(() => {
     API.getStudentThesisProposals()
       .then((x) => {
         setData(handleReceivedData(x));
         setIsLoadingTable(false);
+      })
+      .catch((err) => { messageApi.error(err.message ? err.message : err)  });
+    API.getStudentApplications()
+      .then((x) => {
+        setApplications(x);
       })
       .catch((err) => { messageApi.error(err.message ? err.message : err)  });
   }, []);
@@ -571,28 +576,41 @@ function ViewThesisProposal() {
   const { id } = useParams();
   const { Text } = Typography;
   const navigate = useNavigate();
-  const [applications, setApplications] = useState([]);
   const [disabled, setDisabled] = useState(false);
+
 
   // Storing all Thesis Proposal Information
   const [data, setData] = useState();
 
-  async function applyForProposal() {
-    try {
-      await API.applyForProposal(id);
-      messageApi.success("Applied for proposal successfully");
-      setDisabled(true);
-    } catch (err) {
-      messageApi.error(err);
-    }
+  const applyForProposal = () => {
+    setDisabled(true);
   }
+
+  useEffect(() => {
+    if(disabled) {
+      API.applyForProposal(parseInt(id))
+      .then(() => {
+        messageApi.success("Application sent!");
+      })
+      .catch((err) => { 
+        setDisabled(false);
+        messageApi.error(err.message ? err.message : err)  
+      });
+    }
+
+  }, [disabled]);
 
   useEffect(() => {
     API.getThesisProposalbyId(id)
       .then((x) => {
         setData(x);
       })
-      .catch((err) => { messageApi.error(err.message ? err.message : err)  });
+      .catch((err) => { messageApi.error(err.message ? err.message : err)  })
+    API.getStudentApplications()
+    .then((x) => {
+      setDisabled(x.includes(id));
+    })
+    .catch((err) => { messageApi.error(err.message ? err.message : err)  });
   }, []);
 
   // If data is still empty

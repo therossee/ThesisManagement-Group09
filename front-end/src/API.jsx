@@ -99,14 +99,14 @@ async function getThesisProposalbyId(id) {
     }
 }
 
-async function applyForProposal(proposal_id) {
+async function applyForProposal(thesis_proposal_id) {
     let response = await fetch(URL + '/student/applications', {
         method: 'POST',
         credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(proposal_id),
+        body: JSON.stringify(thesis_proposal_id),
     });
     if (response.ok) {
         const apply = await response.json();
@@ -119,16 +119,14 @@ async function applyForProposal(proposal_id) {
 
 // GET Student's Thesis Applications
 async function getStudentApplications() {
-    const response = await fetch(URL + '/thesis-proposals', {
+    const response = await fetch(URL + '/student/applications', {
         credentials: 'include',
     });
-    const proposals = await response.json();
+    const applications = await response.json();
     if (response.ok) {
-        return proposals.items.map((x) => ({
-            x
-        }))
+        return applications.map(x => x.proposal_id);
     } else {
-        throw proposals;
+        throw applications;
     }
 }
 
