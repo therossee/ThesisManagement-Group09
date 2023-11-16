@@ -12,13 +12,15 @@ This is the front end of the project. It is a mobile/web interface  developed us
 - Route `/proposals`: display the active proposals of a teacher
 - Route `/insert-proposal/:id`: Displays the proposal form for the teacher to insert a new thesis proposal.
 - Route `/view-proposal/:id`: Displays the specific proposal to view.
+- Route `/applications`: Displays all the applications of students for thesis created by the logged-in teacher.
 
 ## routes
 - `Errors.jsx` :  React component for displaying different error messages based on a provided error code.
 - `Home.jsx` : React component for the home page.
 - `InsertProposal.jsx` : React conditional component to filter if a teacher enters InsertThesisProposal, otherwise error.
-- `Proposals.jsx` : React conditional component to filter if a teacher enters ThesisProposals, otherwise error.
+- `Proposals.jsx` : React conditional component to filter if a logged-in user is a student. In this case enters ThesisProposals, otherwise error.
 - `ViewProposal.jsx` : React component for viewThesisProposal.
+- `Applications.jsx` : React conditional component to filter if a logged-in user is a teacher. In this case enters ApplicationsProposals, otherwise error.
   
 ## components
 - `SideBar.jsx` : Definition of the Side bar.
@@ -32,6 +34,9 @@ This is the front end of the project. It is a mobile/web interface  developed us
 - `TopBar.jsx` : Definition for the TopBar with:
       -`LoginForm` : Form for the login inserted in the topbar.
       -`IsLoggedInForm` : Form when the user has alredy logged in.
+- `Applications.jsx` : Definition of the main functions of the frontend related to the Application of a Thesis as:
+      -`ThesisApplications`: Shows all applications of the thesis created by the logged-in tacher and the students that made an application request to a thesis.
+
 ## Main React Components
 - `API.jsx` : Main API functions as:
       APIs for auth:
