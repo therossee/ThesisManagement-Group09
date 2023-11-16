@@ -198,8 +198,6 @@ function Done() {
   );
 }
 
-
-
 function ThesisProposals() {
 
   const filterTitle = () => ({

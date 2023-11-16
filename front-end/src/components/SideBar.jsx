@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { HomeOutlined, FileTextOutlined } from '@ant-design/icons';
+import { HomeOutlined, FileTextOutlined, AuditOutlined } from '@ant-design/icons';
 import { Layout, Menu } from 'antd';
 import { useAuth } from '../App';
 import '../css/style.css';
@@ -15,6 +15,7 @@ function SideBar() {
   const navigation = [
     { label: "Home", key: "/", icon: <HomeOutlined /> },
     (isLoggedIn && !isTeacher) && { label: "Thesis Proposals", key: "/proposals", icon: <FileTextOutlined /> },
+    (isLoggedIn && isTeacher) && { label: "Thesis Applications", key: "/applications", icon: <AuditOutlined /> },
     { type: 'divider' },
   ];
 

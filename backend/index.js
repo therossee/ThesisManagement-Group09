@@ -147,8 +147,6 @@ app.post('/api/system/virtual-clock', (req, res, next) => {
   }
 });
 
-// 1. Insert a new thesis proposal
-// POST api/teacher/thesis_proposals
 app.post('/api/teacher/thesis_proposals',
 isLoggedIn,
 isTeacher,
@@ -201,8 +199,6 @@ async (req,res) => {
   });
 });
 
-// 2. Get list of teachers not logged
-//GET /api/teachers
 app.get('/api/teachers',
 isLoggedIn,
 isTeacher,
@@ -218,8 +214,6 @@ async(req, res) => {
   }
 });
 
-// 3. Get list of external co-supervisors
-//GET /api/externalCoSupervisors
 app.get('/api/externalCoSupervisors',
 isLoggedIn,
 isTeacher,
@@ -234,7 +228,6 @@ async(req, res) => {
   }
 });
 
-//GET /api/keywords
 app.get('/api/keywords',
 isLoggedIn,
 isTeacher,
@@ -248,7 +241,6 @@ async(req, res) => {
   }
 });
 
-//GET /api/degrees
 app.get('/api/degrees',
 isLoggedIn,
 isTeacher,
@@ -262,8 +254,6 @@ async(req, res) => {
   }
 });
 
-// 4. Search for thesis proposals
-// GET api/thesis-proposals
 app.get('/api/thesis-proposals',
   isLoggedIn,
   isStudent,
@@ -289,7 +279,9 @@ app.get('/api/thesis-proposals',
       console.error(e);
       res.status(500).json('Internal Server Error');
     }
-  });
+
+});
+
 app.get('/api/thesis-proposals/:id',
   isLoggedIn,
   isStudent,
@@ -308,9 +300,8 @@ app.get('/api/thesis-proposals/:id',
       console.error(e);
       res.status(500).json('Internal Server Error');
     }
-  });
+});
 
-// 5. Apply for a thesis proposal
 // POST api/student/applications
 app.post('/api/student/applications',
 isLoggedIn,
@@ -333,23 +324,36 @@ async(req,res) => {
   });
 });
 
-// 6. List all applications for a teacher's thesis proposals
-// GET api/teacher/:id/applications
+// GET api/teacher/thesis_proposals
+app.get('/api/teacher/thesis_proposals',
+isLoggedIn,
+isTeacher,
+async (req, res) => {
+  try {
+    const teacherId = req.user.id;
+    const thesisProposals = await thesisDao.listThesisProposalsTeacher(teacherId);
 
-// 7. Accept an application
-// PATCH api/teacher/:id/applications/:id
+    res.json(thesisProposals);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json('Internal Server Error');
+  }
+});
 
-// 8. Reject an application
-// PATCH api/teacher/:id/applications/:id
-
-// 9. List student's application decisions
-// GET api/student/:id/applications
-
-// 10. List professor's active thesis proposala
-// GET api/teacher/:id/thesis_proposals
-
-// 11. Update a thesis proposal
-// PATCH api/teacher/:id/thesis_proposals/:id
+app.get('/api/teacher/applications/:proposal_id',
+isLoggedIn,
+isTeacher,
+async (req, res) => {
+  try {
+    const proposal_id=req.params.proposal_id;
+    const teacherId = req.user.id;
+    const applications = await thesisDao.listApplicationsForTeacherThesisProposal(proposal_id, teacherId);
+    res.json(applications);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json('Internal Server Error');
+  }
+});
 
 const PORT = 3000;
 const server = app.listen(PORT, () => {
