@@ -1,8 +1,7 @@
-import { React, useState, useEffect, Row, useEffect } from "react";
+import { React, useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import Highlighter from 'react-highlight-words';
-import { DatePicker, FloatButton, Button, Descriptions, Drawer, Form, Input, Select, Skeleton, Space, Steps, Spin, Result, Typography, Table, Tag, message, Table, Tag, Tooltip, Typography } from "antd";
-import API from "../API.jsx";
+import { DatePicker, FloatButton, Button, Descriptions, Drawer, Form, Input, Select, Skeleton, Space, Steps, Spin, Result, Typography, Table, Tag, message, Tooltip } from "antd";
 import { EyeOutlined, SearchOutlined } from '@ant-design/icons';
 import API from "../API";
 

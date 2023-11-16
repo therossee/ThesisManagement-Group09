@@ -35,8 +35,8 @@ function ThesisApplications() {
     return (
         <>
             {data.map((item) => (
-                <div key={item.id}>
-                    <Divider orientation="left">{item.title}</Divider>
+                <div key={item.id} style={{marginBottom: "3%"}}>
+                    <Divider orientation="left"><h2>{item.title}</h2></Divider>
                     <List
                         className="demo-loadmore-list"
                         loading={isLoadingTable}
@@ -51,8 +51,8 @@ function ThesisApplications() {
                                         description={student.status}
                                     />
                                     <Flex wrap="wrap" gap="small">
-                                        <Button type="primary">Approva</Button>
-                                        <Button danger>Rifiuta</Button>
+                                        <Button type="primary">Approve</Button>
+                                        <Button danger>Reject</Button>
                                     </Flex>
 
                                 </Skeleton>
