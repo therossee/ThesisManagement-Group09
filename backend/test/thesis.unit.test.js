@@ -606,3 +606,79 @@ describe('getStudentApplications', () => {
   });
 
 });
+
+describe('updateApplicationStatus', () => {
+  // Restore mocks after each test
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('should update the application status and return the row count', async () => {
+    // Arrange
+    const studentId = 1;
+    const proposalId = 1;
+    const status = 'accepted';
+    const expectedRowCount = 1;
+
+    // Mock the run function to return a mock result
+    jest.spyOn(require('../db').prepare(), 'run').mockReturnValueOnce({ changes: expectedRowCount });
+
+    // Act
+    const result = await thesis.updateApplicationStatus(studentId, proposalId, status);
+
+    // Assert
+    expect(result).toEqual(expectedRowCount);
+  });
+
+  test('should handle errors and reject with an error message', async () => {
+    // Arrange
+    const studentId = 2;
+    const proposalId = 2;
+    const status = 'accepted';
+
+    // Mock the run function to throw an error
+    jest.spyOn(require('../db').prepare(), 'run').mockImplementationOnce(() => {
+      throw new Error('Some error');
+    });
+
+    // Act and Assert
+    await expect(thesis.updateApplicationStatus(studentId, proposalId, status)).rejects.toThrow('Some error');
+  });
+});
+
+describe('rejectOtherApplications', () => {
+  // Restore mocks after each test
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('should reject other applications and return the row count', async () => {
+    // Arrange
+    const studentId = 1;
+    const proposalId = 1;
+    const expectedRowCount = 2;
+
+    // Mock the run function to return a mock result
+    jest.spyOn(require('../db').prepare(), 'run').mockReturnValueOnce({ changes: expectedRowCount });
+
+    // Act
+    const result = await thesis.rejectOtherApplications(studentId, proposalId);
+
+    // Assert
+    expect(result).toEqual(expectedRowCount);
+  });
+
+  test('should handle errors and reject with an error message', async () => {
+    // Arrange
+    const studentId = 2;
+    const proposalId = 2;
+
+    // Mock the run function to throw an error
+    jest.spyOn(require('../db').prepare(), 'run').mockImplementationOnce(() => {
+      throw new Error('Some error');
+    });
+
+    // Act and Assert
+    await expect(thesis.rejectOtherApplications(studentId, proposalId)).rejects.toThrow('Some error');
+  });
+});

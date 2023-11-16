@@ -386,7 +386,8 @@ app.patch('/api/teacher/applications/accept/:proposal_id',
       res.status(200).json({ message: 'Thesis accepted and others rejected successfully' });
 
     } catch (error) {
-      res.status(500).json(`Internal Server Error: ${error.message || error}`);
+      console.error(error);
+      res.status(500).json(`Internal Server Error`);
     }
 
   })
@@ -404,12 +405,11 @@ async (req, res) => {
 
   try {
     await thesisDao.updateApplicationStatus(student_id, proposal_id, "rejected");
-
-
     res.status(200).json({ message: 'Thesis successfully rejected' });
 
   } catch (error) {
-    res.status(500).json(`Internal Server Error: ${error.message || error}`);
+    console.error(error);
+    res.status(500).json(`Internal Server Error`);
   }
 
 })
