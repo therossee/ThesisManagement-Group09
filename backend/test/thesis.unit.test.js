@@ -447,17 +447,6 @@ describe('applyForProposal', () => {
   });
 });
 
-// 6. Test function to list all applications for a teacher's thesis proposals
-
-// 7. Test function to accept an application
-
-// 8. Test function to reject an application
-
-// 9. Test function to list student's application decisions
-
-// 10. Test function to list professor's active thesis proposals
-
-// 11. Test function to update a thesis proposal
 describe('listThesisProposalsTeacher', () => {
   test('should return an array of thesis proposals for a teacher', async () => {
     // Mock the response from the database
@@ -495,4 +484,41 @@ describe('listApplicationsForTeacherThesisProposal', () => {
     // Assertions
     expect(result).toEqual(mockApplications);
   });
+});
+
+describe('getStudentApplications', () => {
+  
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('should retrieve applications of a student', async () => {
+    
+    const student_id = 1;
+    const expectedResult = [ { proposal_id: 1 }, { proposal_id: 2 } ];
+
+    // Mock the all function to return a mock result
+    jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce(expectedResult);
+
+    // Act
+    const result = await thesis.getStudentApplications(student_id);
+
+    // Assert
+    expect(result).toEqual(expectedResult);
+  });
+
+  test('should handle an empty result set', async () => {
+    // Arrange
+    const student_id = 2;
+
+    // Mock the all function to return an empty array
+    jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce([]);
+
+    // Act
+    const result = await thesis.getStudentApplications(student_id);
+
+    // Assert
+    expect(result).toEqual([]);
+  });
+
 });

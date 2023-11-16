@@ -302,7 +302,6 @@ app.get('/api/thesis-proposals/:id',
     }
 });
 
-// POST api/student/applications
 app.post('/api/student/applications',
 isLoggedIn,
 isStudent,
@@ -324,7 +323,6 @@ async(req,res) => {
   });
 });
 
-// GET api/teacher/thesis_proposals
 app.get('/api/teacher/thesis_proposals',
 isLoggedIn,
 isTeacher,
@@ -349,6 +347,20 @@ async (req, res) => {
     const teacherId = req.user.id;
     const applications = await thesisDao.listApplicationsForTeacherThesisProposal(proposal_id, teacherId);
     res.json(applications);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json('Internal Server Error');
+  }
+});
+
+app.get('/api/student/applications',
+isLoggedIn,
+isStudent,
+async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    const studentApplications = await thesisDao.getStudentApplications(studentId)
+    res.json(studentApplications);
   } catch (e) {
     console.error(e);
     res.status(500).json('Internal Server Error');
