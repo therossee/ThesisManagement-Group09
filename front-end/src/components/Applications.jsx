@@ -51,8 +51,8 @@ function ThesisApplications() {
                                         description={student.status}
                                     />
                                     <Flex wrap="wrap" gap="small">
-                                        <Button type="primary">Approva</Button>
-                                        <Button danger>Rifiuta</Button>
+                                        <Button type="primary">Approve</Button>
+                                        <Button danger>Reject</Button>
                                     </Flex>
 
                                 </Skeleton>

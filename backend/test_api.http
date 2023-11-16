@@ -69,7 +69,7 @@ GET http://localhost:3000/api/thesis-proposals HTTP/1.1
 ###
 
 ## GET THESIS PROPOSAL BY ID (for student belonging to the same cds of the proposal)
-GET http://localhost:3000/api/thesis-proposals/4 HTTP/1.1
+GET http://localhost:3000/api/thesis-proposals/1 HTTP/1.1
 ###
 
 ## APPLY FOR THESIS PROPOSAL
