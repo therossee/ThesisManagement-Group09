@@ -353,6 +353,20 @@ async (req, res) => {
   }
 });
 
+app.get('/api/student/applications',
+isLoggedIn,
+isStudent,
+async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    const studentApplications = await thesisDao.getStudentApplications(studentId)
+    res.json(studentApplications);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json('Internal Server Error');
+  }
+});
+
 const PORT = 3000;
 const server = app.listen(PORT, () => {
   console.log(`Server started on http://localhost:${PORT}/`);
