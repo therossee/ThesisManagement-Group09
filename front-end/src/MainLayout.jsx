@@ -2,6 +2,7 @@ import { Layout } from 'antd';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './routes/Home';
 import NotFound from './routes/NotFound'
+import VirtualClock from "./routes/VirtualClock.jsx";
 import SideBar from './components/SideBar';
 import TopBar from './components/TopBar';
 import './css/style.css';
@@ -19,6 +20,7 @@ function MainLayout() {
                     <Content className="content-style">
                         <Routes>
                             <Route path="/" element={<Home />} />
+                            <Route path="/admin/virtual-clock" element={<VirtualClock />} />
                             <Route path="/*" element={<NotFound />} />
                         </Routes>
                     </Content>

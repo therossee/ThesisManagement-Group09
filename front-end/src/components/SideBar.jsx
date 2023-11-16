@@ -9,6 +9,7 @@ const { Sider } = Layout;
 const navigation = [
   { label: "Home", key: "/", icon: <HomeOutlined /> },
   { type: 'divider' },
+  { label: "Administration", key: "/admin/virtual-clock", icon: <HomeOutlined /> }
 ];
 
 function SideBar() {
@@ -28,6 +29,6 @@ function SideBar() {
       <Menu className="menu-style" mode="inline" items={navigation} selectedKeys={[window.location.pathname]} onClick={handleMenuClick} />
     </Sider>
   );
-};
+}
 
 export default SideBar;

@@ -41,9 +41,47 @@ async function getUserInfo() {
     }
 }
 
+async function getClock() {
+    return fetch(URL + '/system/virtual-clock')
+        .then( async response => {
+            const body = await response.json();
+
+            if (response.ok) {
+                return {
+                    date: new Date(body.date),
+                    offset: body.offset
+                };
+            } else {
+                throw body;
+            }
+        });
+}
+async function updateClock(date) {
+    return fetch(URL + '/system/virtual-clock', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ newDate: date })
+    })
+        .then( async response => {
+            const body = await response.json();
+
+            if (response.ok) {
+                return {
+                    date: new Date(body.date),
+                    offset: body.offset
+                };
+            } else {
+                throw body;
+            }
+        });
+}
+
 /****** End APIs for auth ******/
 
 const API = {
-    logIn, logOut, getUserInfo
+    logIn, logOut, getUserInfo,
+    getClock, updateClock
 };
 export default API;
