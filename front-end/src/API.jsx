@@ -99,14 +99,14 @@ async function getThesisProposalbyId(id) {
     }
 }
 
-async function applyForProposal(thesis_proposal_id) {
+async function applyForProposal(id) {
     let response = await fetch(URL + '/student/applications', {
         method: 'POST',
         credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(thesis_proposal_id),
+        body: JSON.stringify({thesis_proposal_id: id}),
     });
     if (response.ok) {
         const apply = await response.json();

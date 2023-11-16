@@ -611,22 +611,16 @@ function ViewThesisProposal() {
   const [data, setData] = useState();
 
   const applyForProposal = () => {
-    setDisabled(true);
+    try{
+      API.applyForProposal(id);
+      messageApi.success("Applied for proposal");
+      setDisabled(true);
+    }catch(err){
+      messageApi.error(err.message ? err.message : err);
+      setDisabled(false);
+    }
   }
 
-  useEffect(() => {
-    if (disabled) {
-      API.applyForProposal(parseInt(id))
-        .then(() => {
-          messageApi.success("Application sent!");
-        })
-        .catch((err) => {
-          setDisabled(false);
-          messageApi.error(err.message ? err.message : err)
-        });
-    }
-
-  }, [disabled]);
 
   useEffect(() => {
     API.getThesisProposalbyId(id)
@@ -636,7 +630,8 @@ function ViewThesisProposal() {
       .catch((err) => { messageApi.error(err.message ? err.message : err) })
     API.getStudentApplications()
       .then((x) => {
-        setDisabled(x.includes(id));
+        const dis = x.includes(parseInt(id));
+        setDisabled(dis);
       })
       .catch((err) => { messageApi.error(err.message ? err.message : err) });
   }, []);
