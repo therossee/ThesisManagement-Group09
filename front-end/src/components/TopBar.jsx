@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, Badge, Button, Form, Input, Layout } from "antd";
-import { UserOutlined, BellOutlined, KeyOutlined, LogoutOutlined } from '@ant-design/icons';
+import { UserOutlined, BellOutlined, FileAddOutlined, KeyOutlined, LogoutOutlined } from '@ant-design/icons';
 import { useAuth } from '../App';
 import '../css/style.css';
 
@@ -85,10 +85,10 @@ function IsLoggedInForm() {
     <div>
       {
         isTeacher &&
-        <Button ghost type="primary" style={{marginRight: "20px"}} onClick={() => navigate("/insert-proposal")}>Add Proposal</Button>
+        <FileAddOutlined style={{ fontSize: '22px', verticalAlign: 'middle', marginRight: "20px" }} onClick={() => navigate("/insert-proposal")} />
       }
       <Badge count={1} style={{ marginRight: '22px' }}>
-        <BellOutlined style={{ fontSize: '24px', marginRight: '22px', verticalAlign: 'middle' }} />
+        <BellOutlined style={{ fontSize: '22px', marginRight: '22px', verticalAlign: 'middle' }} />
       </Badge>
       <Avatar size="large" style={{ backgroundColor: '#1677ff', marginRight: '30px', verticalAlign: 'middle' }}>
         <UserOutlined />

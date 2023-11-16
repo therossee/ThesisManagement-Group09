@@ -242,7 +242,74 @@ describe('getDegrees', () => {
   });
 });
 
-// 4. Test functions to search for thesis proposals
+describe('getThesisProposal', () => {
+  // Restore mocks after each test
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('should return a thesis proposal when it exists for the given proposalId and studentId', async () => {
+    // Arrange
+    const proposalId = 1;
+    const studentId = 1;
+    const expectedResult = 
+    {
+      "id": 1,
+      "title": "Test Proposal",
+      "status": "ACTIVE",
+      "supervisor": {
+        "id":1,
+        "name": "mockSupervisorName",
+        "surname": "mockSupervisorSurname",
+      },
+      "cosupervisors":{
+        "internal": [
+          {
+            "id":"s12345",
+            "name":"internalCoSupervisorName",
+            "surname":"internalCoSupervisorSurname"
+          }
+        ],
+        "external": [
+          {
+            "id": 2,
+            "name": "externalCoSupervisorName",
+            "surname": "externalCoSupervisorSurname"
+          }
+        ]
+      },
+      "type": "Test Type",
+      "description": "Test Description",
+      "expiration": "2023-12-31",
+      "level": "Test Level",
+    };
+
+    // Mock the get function to return a mock result
+    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(expectedResult);
+
+    // Act
+    const result = await thesis.getThesisProposal(proposalId, studentId);
+
+    // Assert
+    expect(result).toEqual(expectedResult);
+  });
+
+  test('should return null when the thesis proposal does not exist for the given proposalId and studentId', async () => {
+    // Arrange
+    const proposalId = 2;
+    const studentId = 2;
+
+    // Mock the get function to return undefined (indicating no thesis proposal)
+    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(undefined);
+
+    // Act
+    const result = await thesis.getThesisProposal(proposalId, studentId);
+
+    // Assert
+    expect(result).toBeNull();
+  });
+});
+
 describe('listThesisProposalsFromStudent', () => {
   afterEach(() => {
       jest.restoreAllMocks()
@@ -432,7 +499,6 @@ describe('getProposalGroups', () => {
   })
 });
 
-// 5. Test function to apply for a thesis proposal
 describe('applyForProposal', () => {
   test('applies for a proposal and resolves with applicationId', async () => {
       // Mock data
@@ -447,17 +513,6 @@ describe('applyForProposal', () => {
   });
 });
 
-// 6. Test function to list all applications for a teacher's thesis proposals
-
-// 7. Test function to accept an application
-
-// 8. Test function to reject an application
-
-// 9. Test function to list student's application decisions
-
-// 10. Test function to list professor's active thesis proposals
-
-// 11. Test function to update a thesis proposal
 describe('listThesisProposalsTeacher', () => {
   test('should return an array of thesis proposals for a teacher', async () => {
     // Mock the response from the database
@@ -475,6 +530,20 @@ describe('listThesisProposalsTeacher', () => {
     // Assertions
     expect(result).toEqual(mockProposals);
     expect(db.prepare).toHaveBeenCalledWith('SELECT * FROM thesisProposal WHERE supervisor_id=?');
+  });
+  test('should return null when the thesis proposal does not exist for the given proposalId and studentId', async () => {
+    // Arrange
+    const proposalId = 2;
+    const studentId = 2;
+
+    // Mock the get function to return undefined (indicating no thesis proposal)
+    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(undefined);
+
+    // Act
+    const result = await thesis.getThesisProposal(proposalId, studentId);
+
+    // Assert
+    expect(result).toBeNull();
   });
 });
 
@@ -494,5 +563,46 @@ describe('listApplicationsForTeacherThesisProposal', () => {
 
     // Assertions
     expect(result).toEqual(mockApplications);
+    expect(db.prepare).toHaveBeenCalledWith(`SELECT s.name, s.surname, ta.status, s.id
+    FROM thesisApplication ta, thesisProposal tp, student s
+    WHERE ta.proposal_id = tp.proposal_id AND s.id = ta.student_id AND ta.proposal_id=? AND tp.supervisor_id= ?`);
   });
+});
+
+describe('getStudentApplications', () => {
+  
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('should retrieve applications of a student', async () => {
+    
+    const student_id = 1;
+    const expectedResult = [ { proposal_id: 1 }, { proposal_id: 2 } ];
+
+    // Mock the all function to return a mock result
+    jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce(expectedResult);
+
+    // Act
+    const result = await thesis.getStudentApplications(student_id);
+
+    // Assert
+    expect(result).toEqual(expectedResult);
+    expect(db.prepare).toHaveBeenCalledWith('SELECT proposal_id FROM thesisApplication WHERE student_id=?');
+  });
+
+  test('should handle an empty result set', async () => {
+    // Arrange
+    const student_id = 2;
+
+    // Mock the all function to return an empty array
+    jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce([]);
+
+    // Act
+    const result = await thesis.getStudentApplications(student_id);
+
+    // Assert
+    expect(result).toEqual([]);
+  });
+
 });

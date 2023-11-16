@@ -1,11 +1,17 @@
 import { React, useState, useEffect } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
-import Highlighter from 'react-highlight-words';
+import { useNavigate, useParams } from "react-router-dom";
 import { DatePicker, FloatButton, Button, Descriptions, Drawer, Form, Input, Select, Skeleton, Space, Steps, Spin, Result, Typography, Table, Tag, message, Tooltip } from "antd";
 import { EyeOutlined, SearchOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import API from "../API";
 
 const { Option } = Select;
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
+
+
 const { Title } = Typography;
 const steps = [
   {
@@ -37,6 +43,7 @@ function InsertThesisProposal() {
   const [form] = Form.useForm();
   const [proposalId, setProposalId] = useState(-1);
   const [messageApi, contextHolder] = message.useMessage();
+  const [date, setDate] = useState(dayjs());
 
 
   useEffect(() => {
@@ -67,7 +74,14 @@ function InsertThesisProposal() {
     })
     .catch((err) => {
       messageApi.error("Failed to fetch keywords!");
+    });
+    API.getClock()
+    .then((clock) => {
+      setDate(dayjs().add(clock.offset, 'ms'));
+      console.log(date);
     })
+    .catch((err) => {
+      messageApi.error("Failed to fetch virtual clock!");})
     .finally(() => {
       setLoading(false);
     })
@@ -130,10 +144,10 @@ function InsertThesisProposal() {
   return (
     <>
     {loading ?
-    <div style={{ marginLeft: "49%", marginRight: "25%", marginTop: "25%"}}>
-      <Spin tip="Loading" size="large" />
-    </div>
-    :
+      <div style={{ marginLeft: "49%", marginRight: "25%", marginTop: "25%"}}>
+        <Spin tip="Loading" size="large" />
+      </div>
+      :
     <>
      {contextHolder}
       <Steps
@@ -144,7 +158,7 @@ function InsertThesisProposal() {
       <div style={{ marginLeft: "16%", marginRight: "15%", marginTop: "3%" }}>
         <div>
           {current === 0 && (
-            <InsertBody saveData={saveFormData} intCoSupervisors={intCoSupervisors} extCoSupervisors={extCoSupervisors} keywords={keywords} degrees={degrees} form={form}/>
+            <InsertBody saveData={saveFormData} intCoSupervisors={intCoSupervisors} extCoSupervisors={extCoSupervisors} keywords={keywords} degrees={degrees} form={form} date={date}/>
           )} 
           {current === 1 && (
             <div style={{marginLeft: "10%"}}>
@@ -175,10 +189,13 @@ function InsertThesisProposal() {
           }
         </div>
       </div>
-      <FloatButton.BackTop style={{ marginBottom: "40px" }} tooltip={<div>Back to Top</div>} />
+      <Tooltip title="Back to Top">
+        <FloatButton.BackTop style={{ marginBottom: "40px" }} >
+        </FloatButton.BackTop>
+      </Tooltip>
     </>
     }
-  </>
+    </>
   );
 }
 
@@ -189,7 +206,7 @@ function InsertBody(props) {
   const [newKeyword, setNewKeyword] = useState("");
   const [lev, setSelLev] = useState("");
   const [selDegrees, setSelDegrees] = useState([]);
-  const {keywords, intCoSupervisors, extCoSupervisors, degrees, form} = props;
+  const {keywords, intCoSupervisors, extCoSupervisors, degrees, form, date} = props;
   const unselectedInt = intCoSupervisors.filter((x) => !selectedInt.includes(x));
   const unselectedExt = extCoSupervisors.filter((x) => !selectedExt.includes(x));
 
@@ -333,7 +350,7 @@ function InsertBody(props) {
             message: 'Please select an expiration date!',
           },
         ]}>
-          <DatePicker disabledDate={disabledDate} />
+          <DatePicker defaultValue={date} disabledDate={disabledDate} />
         </Form.Item>
         <Form.Item
           name="degreeLevel"
@@ -523,18 +540,11 @@ function ThesisProposals() {
       <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
     ),
     onFilter: (value, record) =>
-      record['title'].toLowerCase().includes(value.toLowerCase()),
-    render: (text) =>
-      <Highlighter
-        highlightStyle={{
-          backgroundColor: '#ffc069',
-          padding: 0
-        }}
-        searchWords={[searchTitle]}
-        autoEscape
-        textToHighlight={text ? text : ''}
-      />
+      record.title.toLowerCase().includes(value.toLowerCase()),
   });
+
+  const [messageApi, messageBox] = message.useMessage();
+  const [applications, setApplications] = useState([]);
 
   useEffect(() => {
     API.getStudentThesisProposals()
@@ -542,7 +552,12 @@ function ThesisProposals() {
         setData(handleReceivedData(x));
         setIsLoadingTable(false);
       })
-      .catch((err) => {/*err handling w message*/ });
+      .catch((err) => { messageApi.error(err.message ? err.message : err) });
+    API.getStudentApplications()
+      .then((x) => {
+        setApplications(x);
+      })
+      .catch((err) => { messageApi.error(err.message ? err.message : err) });
   }, []);
 
   // Array of objs for storing table data
@@ -557,7 +572,33 @@ function ThesisProposals() {
   // Drawer for viewing more filters
   const [isOpen, setIsOpen] = useState(false);
 
+  // Store filter date range
+  const [dateRange, setDateRange] = useState([]);
+
   const navigate = useNavigate();
+
+  // Store more filters data
+  const [moreFiltersData, setMoreFiltersData] = useState({
+    description: "",
+    knowledge: "",
+    notes: ""
+  });
+
+  // Data after filtering with moreFilterData values
+  const [filteredData, setFilteredData] = useState([]);
+
+  useEffect(() => {
+    if (data) {
+      const filtered = data.filter(item => {
+        return (
+          item.description.includes(moreFiltersData.description) &&
+          item.requiredKnowledge.includes(moreFiltersData.knowledge) &&
+          item.notes.includes(moreFiltersData.notes)
+        )
+      });
+      setFilteredData(filtered);
+    }
+  }, [data, moreFiltersData]);
 
   // Columns of the table
   const columns = [
@@ -566,13 +607,6 @@ function ThesisProposals() {
       dataIndex: 'title',
       fixed: 'left',
       ...filterTitle(),
-      render: (text, record) => (
-        <Tooltip title="View Proposal">
-          <Link to={`/view-proposal/${record.id}`}>
-            {text}
-          </Link>
-        </Tooltip>
-      )
     },
     {
       title: 'Level',
@@ -722,6 +756,39 @@ function ThesisProposals() {
       title: 'Expiration',
       dataIndex: 'expiration',
       sorter: (a, b) => new Date(a.expiration) - new Date(b.expiration),
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => {
+        const onDateChange = (dates) => {
+          setDateRange(dates);
+          setSelectedKeys(dates);
+        };
+
+        return (
+          <div style={{ padding: 8 }}>
+            <DatePicker.RangePicker
+              value={selectedKeys}
+              onChange={onDateChange}
+              format="YYYY-MM-DD"
+            />
+            <Space style={{ marginLeft: "8px" }}>
+              <Button
+                type="primary"
+                size="small"
+                icon={<SearchOutlined />}
+                onClick={() => { confirm() }}
+              >
+                Search
+              </Button>
+              <Button size="small" onClick={() => { clearFilters(); setDateRange([]); }}>
+                Reset
+              </Button>
+              <Button type="link" size="small" onClick={() => close()}>
+                close
+              </Button>
+            </Space>
+          </div>
+        );
+      },
+      onFilter: (value, record) => (dayjs(record.expiration).isSameOrAfter(dateRange[0], 'day') && dayjs(record.expiration).isSameOrBefore(dateRange[1], 'day')),
     },
     {
       title: 'Actions',
@@ -768,17 +835,64 @@ function ThesisProposals() {
 
   function MoreFilters() {
 
+    const [form] = Form.useForm();
+
+    const savemoreFiltersData = () => {
+      setMoreFiltersData({
+        description: form.getFieldsValue().description,
+        knowledge: form.getFieldsValue().knowledge,
+        notes: form.getFieldsValue().notes
+      });
+    };
+
+    const handleSubmit = () => {
+      setIsOpen(false);
+      savemoreFiltersData();
+    };
+
+    const handleReset = () => {
+      form.setFieldsValue({
+        description: "",
+        knowledge: "",
+        notes: ""
+      });
+    };
+
     return (
-      <Drawer size="large" open={isOpen} onClose={() => setIsOpen(false)}>
-        "add"
+      <Drawer
+        size="large"
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        extra={
+          <Space>
+            <Button onClick={() => handleReset()}>Reset Fields</Button>
+            <Button type="primary" onClick={handleSubmit}>
+              Submit Filters
+            </Button>
+          </Space>
+        }
+      >
+        <Form layout="vertical" form={form} initialValues={moreFiltersData}>
+          <Form.Item name="description" label="Description:">
+            <Input.TextArea rows={6} />
+          </Form.Item>
+          <Form.Item name="knowledge" label="Required Knowledge:">
+            <Input.TextArea rows={2} />
+          </Form.Item>
+          <Form.Item name="notes" label="Notes:">
+            <Input.TextArea rows={2} />
+          </Form.Item>
+        </Form>
       </Drawer>
-    )
+
+    );
   }
 
   return (
     <>
+      {messageBox}
       <MoreFilters />
-      <Table {...tableProps} columns={columns} dataSource={data}
+      <Table {...tableProps} columns={columns} dataSource={filteredData}
         title={() => <Button type="link" size="small" onClick={() => setIsOpen(true)}>Show even more filters...</Button>} />
     </>
   )
@@ -786,19 +900,46 @@ function ThesisProposals() {
 
 function ViewThesisProposal() {
 
+  const [messageApi, messageBox] = message.useMessage();
+
   const { id } = useParams();
-  const navigate = useNavigate();
   const { Text } = Typography;
+  const navigate = useNavigate();
+  const [disabled, setDisabled] = useState(false);
+
 
   // Storing all Thesis Proposal Information
   const [data, setData] = useState();
+
+  const applyForProposal = () => {
+    setDisabled(true);
+  }
+
+  useEffect(() => {
+    if (disabled) {
+      API.applyForProposal(parseInt(id))
+        .then(() => {
+          messageApi.success("Application sent!");
+        })
+        .catch((err) => {
+          setDisabled(false);
+          messageApi.error(err.message ? err.message : err)
+        });
+    }
+
+  }, [disabled]);
 
   useEffect(() => {
     API.getThesisProposalbyId(id)
       .then((x) => {
         setData(x);
       })
-      .catch((err) => {/* handle error*/ });
+      .catch((err) => { messageApi.error(err.message ? err.message : err) })
+    API.getStudentApplications()
+      .then((x) => {
+        setDisabled(x.includes(id));
+      })
+      .catch((err) => { messageApi.error(err.message ? err.message : err) });
   }, []);
 
   // If data is still empty
@@ -885,8 +1026,12 @@ function ViewThesisProposal() {
 
   return (
     <>
+      {messageBox}
       <Button type="link" onClick={() => navigate("/proposals")}>&lt; Back to Thesis Proposals</Button>
       <Descriptions title={data.title} layout="vertical" items={items} style={{ marginLeft: "2%", marginRight: "2%" }} />
+      <div style={{ paddingLeft: "2%" }}>
+        <Button type="primary" disabled={disabled} onClick={applyForProposal}>Apply for this proposal</Button>
+      </div>
     </>
   )
 }

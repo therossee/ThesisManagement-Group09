@@ -23,7 +23,8 @@ jest.mock('../thesis_dao', () => ({
     getDegrees: jest.fn(),
     listThesisProposalsTeacher: jest.fn(),
     listApplicationsForTeacherThesisProposal: jest.fn(),
-    applyForProposal: jest.fn()
+    applyForProposal: jest.fn(),
+    getStudentApplications: jest.fn(),
 }));
 
 jest.mock('../users_dao', () => ({
@@ -1283,7 +1284,7 @@ describe('POST /api/student/applications', () => {
             .send(mockRequestBody);
         
         expect(response.status).toBe(500);
-        expect(response.body).toEqual(`Failed to apply for thesis proposal. ${mockError.message || mockError}`);
+        expect(response.body).toEqual(`Failed to apply for proposal. ${mockError.message || mockError}`);
         expect(service.applyForProposal).toHaveBeenCalledWith(
             mockRequestBody.thesis_proposal_id,
             mockUser.id
@@ -1434,4 +1435,73 @@ describe('GET /api/teacher/applications/:proposal_id', () => {
         expect(response.body).toEqual('Internal Server Error');
         expect(service.listApplicationsForTeacherThesisProposal).toHaveBeenCalled();
     });
-});  
+}); 
+
+describe('GET /api/student/applications', () => {
+    test('should return student applications', async () => {
+        const mockUser = {
+            id: 's1',
+            surname: 'R',
+            name: 'M',
+            gender: 'MALE',
+            nationality: 'Italian',
+            email: 'r.m@email.com',
+            cod_degree: 'L-31',
+            enrollment_year: '2018',
+        };
+
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 's1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+  
+        const expectedApplications = [{proposal_id: 1}, {proposal_id: 2}]
+        service.getStudentApplications.mockResolvedValueOnce(expectedApplications);
+        // Perform the request
+        const response = await request(app)
+                               .get('/api/student/applications')
+                               .set('Cookie', cookies);
+    
+        // Assertions
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(expectedApplications);
+    });
+  
+    test('should return 500 if an error occurs', async () => {
+
+        const mockUser = {
+            id: 's1',
+            surname: 'R',
+            name: 'M',
+            gender: 'MALE',
+            nationality: 'Italian',
+            email: 'r.m@email.com',
+            cod_degree: 'L-31',
+            enrollment_year: '2018',
+        };
+
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 's1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+
+        const mockError = new Error('Mocked error during getStudentApplications');
+        service.getStudentApplications.mockRejectedValueOnce(mockError);
+  
+        // Perform the request
+        const response = await request(app)
+                               .get('/api/student/applications')
+                               .set('Cookie', cookies);
+    
+        // Assertions
+        expect(response.status).toBe(500);
+    });
+});
