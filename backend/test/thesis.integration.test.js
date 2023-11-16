@@ -1284,7 +1284,7 @@ describe('POST /api/student/applications', () => {
             .send(mockRequestBody);
         
         expect(response.status).toBe(500);
-        expect(response.body).toEqual(`Failed to apply for thesis proposal. ${mockError.message || mockError}`);
+        expect(response.body).toEqual(`Failed to apply for proposal. ${mockError.message || mockError}`);
         expect(service.applyForProposal).toHaveBeenCalledWith(
             mockRequestBody.thesis_proposal_id,
             mockUser.id
