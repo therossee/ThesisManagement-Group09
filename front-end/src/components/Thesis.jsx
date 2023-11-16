@@ -1,11 +1,15 @@
 import { React, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Highlighter from 'react-highlight-words';
 import { DatePicker, FloatButton, Button, Descriptions, Drawer, Form, Input, Select, Skeleton, Space, Steps, Table, Tag, Tooltip, Typography, message } from "antd";
 import { EyeOutlined, SearchOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import API from "../API";
 
 const { Option } = Select;
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
 
 const steps = [
   {
@@ -85,7 +89,10 @@ function InsertThesisProposal() {
           )}
         </div>
       </div>
-      <FloatButton.BackTop style={{ marginBottom: "40px" }} tooltip={<div>Back to Top</div>} />
+      <Tooltip title="Back to Top">
+        <FloatButton.BackTop style={{ marginBottom: "40px" }} >
+        </FloatButton.BackTop>
+      </Tooltip>
     </>
   );
 }
@@ -232,17 +239,7 @@ function ThesisProposals() {
       <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
     ),
     onFilter: (value, record) =>
-      record['title'].toLowerCase().includes(value.toLowerCase()),
-    render: (text) =>
-      <Highlighter
-        highlightStyle={{
-          backgroundColor: '#ffc069',
-          padding: 0
-        }}
-        searchWords={[searchTitle]}
-        autoEscape
-        textToHighlight={text ? text : ''}
-      />
+      record.title.toLowerCase().includes(value.toLowerCase()),
   });
 
   const [messageApi, messageBox] = message.useMessage();
@@ -254,12 +251,12 @@ function ThesisProposals() {
         setData(handleReceivedData(x));
         setIsLoadingTable(false);
       })
-      .catch((err) => { messageApi.error(err.message ? err.message : err)  });
+      .catch((err) => { messageApi.error(err.message ? err.message : err) });
     API.getStudentApplications()
       .then((x) => {
         setApplications(x);
       })
-      .catch((err) => { messageApi.error(err.message ? err.message : err)  });
+      .catch((err) => { messageApi.error(err.message ? err.message : err) });
   }, []);
 
   // Array of objs for storing table data
@@ -273,6 +270,9 @@ function ThesisProposals() {
 
   // Drawer for viewing more filters
   const [isOpen, setIsOpen] = useState(false);
+
+  // Store filter date range
+  const [dateRange, setDateRange] = useState([]);
 
   const navigate = useNavigate();
 
@@ -306,11 +306,6 @@ function ThesisProposals() {
       dataIndex: 'title',
       fixed: 'left',
       ...filterTitle(),
-      render: (text, record) => (
-        <Tooltip title="View Proposal">
-          {text}
-        </Tooltip>
-      )
     },
     {
       title: 'Level',
@@ -460,6 +455,39 @@ function ThesisProposals() {
       title: 'Expiration',
       dataIndex: 'expiration',
       sorter: (a, b) => new Date(a.expiration) - new Date(b.expiration),
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => {
+        const onDateChange = (dates) => {
+          setDateRange(dates);
+          setSelectedKeys(dates);
+        };
+
+        return (
+          <div style={{ padding: 8 }}>
+            <DatePicker.RangePicker
+              value={selectedKeys}
+              onChange={onDateChange}
+              format="YYYY-MM-DD"
+            />
+            <Space style={{ marginLeft: "8px" }}>
+              <Button
+                type="primary"
+                size="small"
+                icon={<SearchOutlined />}
+                onClick={() => { confirm() }}
+              >
+                Search
+              </Button>
+              <Button size="small" onClick={() => { clearFilters(); setDateRange([]); }}>
+                Reset
+              </Button>
+              <Button type="link" size="small" onClick={() => close()}>
+                close
+              </Button>
+            </Space>
+          </div>
+        );
+      },
+      onFilter: (value, record) => (dayjs(record.expiration).isSameOrAfter(dateRange[0], 'day') && dayjs(record.expiration).isSameOrBefore(dateRange[1], 'day')),
     },
     {
       title: 'Actions',
@@ -587,15 +615,15 @@ function ViewThesisProposal() {
   }
 
   useEffect(() => {
-    if(disabled) {
+    if (disabled) {
       API.applyForProposal(parseInt(id))
-      .then(() => {
-        messageApi.success("Application sent!");
-      })
-      .catch((err) => { 
-        setDisabled(false);
-        messageApi.error(err.message ? err.message : err)  
-      });
+        .then(() => {
+          messageApi.success("Application sent!");
+        })
+        .catch((err) => {
+          setDisabled(false);
+          messageApi.error(err.message ? err.message : err)
+        });
     }
 
   }, [disabled]);
@@ -605,12 +633,12 @@ function ViewThesisProposal() {
       .then((x) => {
         setData(x);
       })
-      .catch((err) => { messageApi.error(err.message ? err.message : err)  })
+      .catch((err) => { messageApi.error(err.message ? err.message : err) })
     API.getStudentApplications()
-    .then((x) => {
-      setDisabled(x.includes(id));
-    })
-    .catch((err) => { messageApi.error(err.message ? err.message : err)  });
+      .then((x) => {
+        setDisabled(x.includes(id));
+      })
+      .catch((err) => { messageApi.error(err.message ? err.message : err) });
   }, []);
 
   // If data is still empty
@@ -700,7 +728,7 @@ function ViewThesisProposal() {
       {messageBox}
       <Button type="link" onClick={() => navigate("/proposals")}>&lt; Back to Thesis Proposals</Button>
       <Descriptions title={data.title} layout="vertical" items={items} style={{ marginLeft: "2%", marginRight: "2%" }} />
-      <div style={{paddingLeft: "2%"}}>
+      <div style={{ paddingLeft: "2%" }}>
         <Button type="primary" disabled={disabled} onClick={applyForProposal}>Apply for this proposal</Button>
       </div>
     </>
