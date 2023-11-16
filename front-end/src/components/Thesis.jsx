@@ -206,6 +206,8 @@ function Done() {
 
 function ThesisProposals() {
 
+  const [clock, setClock] = useState(dayjs());
+
   const filterTitle = () => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
       <div style={{ padding: 8 }}>
@@ -246,6 +248,11 @@ function ThesisProposals() {
   const [applications, setApplications] = useState([]);
 
   useEffect(() => {
+    API.getClock()
+      .then((x) => {
+        setClock(dayjs().add(x.offset, 'ms'));
+      })
+      .catch((err) => { messageApi.error(err.message ? err.message : err) });
     API.getStudentThesisProposals()
       .then((x) => {
         setData(handleReceivedData(x));
@@ -466,6 +473,7 @@ function ThesisProposals() {
             <DatePicker.RangePicker
               value={selectedKeys}
               onChange={onDateChange}
+              defaultValue={[clock, clock]}
               format="YYYY-MM-DD"
             />
             <Space style={{ marginLeft: "8px" }}>
@@ -477,7 +485,7 @@ function ThesisProposals() {
               >
                 Search
               </Button>
-              <Button size="small" onClick={() => { clearFilters(); setDateRange([]); }}>
+              <Button size="small" onClick={() => { clearFilters(); setSelectedKeys([]); }}>
                 Reset
               </Button>
               <Button type="link" size="small" onClick={() => close()}>
@@ -605,38 +613,50 @@ function ViewThesisProposal() {
   const { Text } = Typography;
   const navigate = useNavigate();
   const [disabled, setDisabled] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [clock, setClock] = useState(dayjs());
 
 
   // Storing all Thesis Proposal Information
   const [data, setData] = useState();
 
   const applyForProposal = () => {
-    setDisabled(true);
+    setLoading(true);
+    addApplication();
   }
 
-  useEffect(() => {
-    if (disabled) {
-      API.applyForProposal(parseInt(id))
-        .then(() => {
-          messageApi.success("Application sent!");
-        })
-        .catch((err) => {
-          setDisabled(false);
-          messageApi.error(err.message ? err.message : err)
-        });
+  async function addApplication() {
+    try {
+      await API.applyForProposal(id);
+      messageApi.success("Applied for proposal");
+      setDisabled(true);
+      setLoading(false);
+    } catch (err) {
+      messageApi.error(err.message ? err.message : err);
+      setDisabled(false);
+      setLoading(false);
     }
+  }
 
-  }, [disabled]);
 
   useEffect(() => {
     API.getThesisProposalbyId(id)
       .then((x) => {
         setData(x);
+        API.getClock()
+          .then((y) => {
+            const actual = dayjs().add(y.offset, 'ms')
+            const expDate = dayjs(x.expiration);
+            expDate.isBefore(actual) ? setDisabled(true) : setDisabled(false);
+            setClock(actual);
+          })
+          .catch((err) => { messageApi.error(err.message ? err.message : err) });
       })
       .catch((err) => { messageApi.error(err.message ? err.message : err) })
     API.getStudentApplications()
       .then((x) => {
-        setDisabled(x.includes(id));
+        const dis = x.includes(parseInt(id));
+        setDisabled(dis);
       })
       .catch((err) => { messageApi.error(err.message ? err.message : err) });
   }, []);
@@ -729,7 +749,7 @@ function ViewThesisProposal() {
       <Button type="link" onClick={() => navigate("/proposals")}>&lt; Back to Thesis Proposals</Button>
       <Descriptions title={data.title} layout="vertical" items={items} style={{ marginLeft: "2%", marginRight: "2%" }} />
       <div style={{ paddingLeft: "2%" }}>
-        <Button type="primary" disabled={disabled} onClick={applyForProposal}>Apply for this proposal</Button>
+        <Button type="primary" disabled={disabled} loading={loading} onClick={applyForProposal}>Apply for this proposal</Button>
       </div>
     </>
   )
