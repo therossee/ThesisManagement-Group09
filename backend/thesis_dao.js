@@ -307,3 +307,12 @@ exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
   })
 };
 
+// Function that retrieve all the applications of a student
+exports.getStudentApplications = (student_id) => {
+  return new Promise((resolve) => {
+      const query = `SELECT proposal_id FROM thesisApplication WHERE student_id=?`;
+      const res = db.prepare(query).all(student_id);
+      resolve(res)
+  })
+}
+
