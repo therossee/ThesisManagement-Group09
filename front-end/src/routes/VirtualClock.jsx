@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { Button, DatePicker, Flex, Space, Typography } from 'antd';
+import { Button, DatePicker, Flex, message, Space, Typography } from 'antd';
 import { EditOutlined, RollbackOutlined, SaveOutlined, UndoOutlined } from '@ant-design/icons';
 import '../css/style.css';
 import API from "../API.jsx";
@@ -8,6 +8,8 @@ import API from "../API.jsx";
 const { Title, Text } = Typography;
 
 function VirtualClock() {
+    const [messageApi, contextHolder] = message.useMessage();
+
     // Clock from server
     const [offset, setOffset] = useState(0);
     const [date, setDate] = useState(dayjs.tz());
@@ -56,7 +58,7 @@ function VirtualClock() {
                 setEditMode(false);
             })
             .catch( error => {
-                console.log(error);
+                messageApi.error('An error occurred while updating the clock: ' + error.message);
             });
     };
     const resetOffset = () => {
@@ -78,8 +80,9 @@ function VirtualClock() {
             })
             .catch( error => {
                 console.log(error);
+                messageApi.error('An error occurred while getting the clock: ' + error.message);
             });
-    }, []);
+    }, [messageApi]);
     /**
      * Register a timer to update the date displayed every second
      */
@@ -117,7 +120,6 @@ function VirtualClock() {
                     </Flex>
                 </Flex>
             }
-
             {editMode &&
                 <Flex vertical style={{ height: '100%' }} justify="center" gap="large">
                     <DatePicker
@@ -147,6 +149,8 @@ function VirtualClock() {
                     </Flex>
                 </Flex>
             }
+
+            {contextHolder}
         </Flex>
     )
 }
