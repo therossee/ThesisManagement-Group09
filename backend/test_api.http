@@ -28,8 +28,8 @@ GET http://localhost:3000/api/sessions/current HTTP/1.1
 DELETE http://localhost:3000/api/sessions/current HTTP/1.1
 ###
 
-## 1. Insert a new thesis proposal
-POST http://localhost:3000/api/teacher/thesis_proposals
+## INSERT A NEW THESIS PROPOSAL
+POST http://localhost:3000/api/teacher/thesis_proposals HTTP/1.1
 Content-Type: application/json
 
 {
@@ -48,23 +48,23 @@ Content-Type: application/json
 }
 ###
 
-## 2. Get list of teachers not logged
+## GET LIST OF TEACHERS NOT LOGGED
 GET http://localhost:3000/api/teachers
 ###
 
-## 3. Get list of external co-supervisors
+## GET LIST OF EXTERNAL CO-SUPERVISORS
 GET http://localhost:3000/api/externalCoSupervisors
 ###
 
-## Get all keywords
+## GET ALL KEYWORDS
 GET http://localhost:3000/api/keywords
 ###
 
-## Get degrees
+## GET DEGREES
 GET http://localhost:3000/api/degrees
 ###
 
-## 4. Search for thesis proposals
+## SEARCH FOR THESIS PROPOSALS
 GET http://localhost:3000/api/thesis-proposals
 ###
 
