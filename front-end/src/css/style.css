@@ -36,6 +36,7 @@
   justify-content: flex-end;
   overflow: auto;
   /*Not amazing from mobile*/
+  /*Becomes scrollable when logged in on PC*/
 }
 
 .logo-style {

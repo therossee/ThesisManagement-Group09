@@ -27,7 +27,7 @@ function MainLayout() {
                             <Route path="/admin/virtual-clock" element={<VirtualClock />} />
                             <Route path="/proposals" element={<Proposals />} />
                             <Route path="/applications" element={<Applications />} />
-                            <Route path="/insert-proposal" element={<InsertProposal />} />
+                            <Route path="/insert-proposal" element={<InsertProposal/>} />
                             <Route path="/view-proposal/:id" element={<ViewProposal />} />
                             <Route path="/*" element={<Errors code="404"/>} />
                         </Routes>

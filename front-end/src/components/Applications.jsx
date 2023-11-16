@@ -91,8 +91,8 @@ function ThesisApplications() {
     return (
         <>
             {data.map((item) => (
-                <div key={item.id}>
-                    <Divider orientation="left">{item.title}</Divider>
+                <div key={item.id} style={{marginBottom: "3%"}}>
+                    <Divider orientation="left"><h2>{item.title}</h2></Divider>
                     <List
                         className="demo-loadmore-list"
                         loading={isLoadingTable}

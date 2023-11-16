@@ -93,12 +93,12 @@ async function getStudentThesisProposals() {
             key: x.id,
             title: x.title,
             supervisor: x.supervisor,
-            internalCoSupervisors: x.coSupervisors.internal,
-            externalCoSupervisors: x.coSupervisors.external,
+            internalCoSupervisors: x.coSupervisors.internal ?? [],
+            externalCoSupervisors: x.coSupervisors.external ?? [],
             type: x.type,
             description: x.description,
-            requiredKnowledge: x.requiredKnowledge,
-            notes: x.notes,
+            requiredKnowledge: x.requiredKnowledge ?? "",
+            notes: x.notes ?? "",
             expiration: x.expiration,
             level: x.level,
             groups: x.groups,
@@ -213,6 +213,90 @@ async function getTeacherThesisApplications(proposalId) {
     }
 }
 
+async function insertProposal(proposal) {
+    let response = await fetch(URL + '/teacher/thesis_proposals', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(proposal),
+    });
+    if (response.ok) {
+        const prop = await response.json();
+        return prop;
+    } else {
+        const errDetail = await response.json();
+        throw {status: response.status, msg: errDetail};
+    }
+}
+
+async function getExtCoSupervisors() {
+    const response = await fetch(URL + '/externalCoSupervisors', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    const coSup = await response.json();
+    if (response.ok) {
+        return coSup;
+    } else {
+        throw coSup;
+    }
+}
+
+async function getTeachers() {
+    const response = await fetch(URL + '/teachers', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    const teachers = await response.json();
+    if (response.ok) {
+        return teachers;
+    } else {
+        throw teachers;
+    }
+}
+
+async function getAllKeywords() {
+    const response = await fetch(URL + '/keywords', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    const keywords = await response.json();
+    if (response.ok) {
+        return keywords;
+    } else {
+        throw keywords;
+    }
+}
+
+async function getAllDegrees() {
+    const response = await fetch(URL + '/degrees', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    const degrees = await response.json();
+    if (response.ok) {
+        return degrees;
+    } else {
+        throw degrees;
+    }
+}
+
+
+
 // Accept Student Applications on a Thesis Proposal 
 async function acceptThesisApplications(proposalId,studentId) {
     const response = await fetch(URL + `/teacher/applications/accept/${proposalId}`, {
@@ -258,7 +342,7 @@ async function rejectThesisApplications(proposalId,studentId) {
 const API = {
     logIn, logOut, getUserInfo,
     getClock, updateClock,
-    getStudentThesisProposals, getThesisProposalbyId, getTeacherThesisProposals, getTeacherThesisApplications,
+    insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getStudentThesisProposals, getThesisProposalbyId, getTeacherThesisProposals, getTeacherThesisApplications,
     applyForProposal, getStudentApplications, acceptThesisApplications, rejectThesisApplications
 };
 export default API;
