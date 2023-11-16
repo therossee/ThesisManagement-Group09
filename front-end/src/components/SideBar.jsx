@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { HomeOutlined, FileTextOutlined, AuditOutlined } from '@ant-design/icons';
+import { HomeOutlined, FileTextOutlined, AuditOutlined, SettingOutlined } from '@ant-design/icons';
 import { Layout, Menu } from 'antd';
 import { useAuth } from '../App';
 import '../css/style.css';
@@ -17,7 +17,7 @@ function SideBar() {
     (isLoggedIn && !isTeacher) && { label: "Thesis Proposals", key: "/proposals", icon: <FileTextOutlined /> },
     (isLoggedIn && isTeacher) && { label: "Thesis Applications", key: "/applications", icon: <AuditOutlined /> },
     { type: 'divider' },
-    { label: "Administration", key: "/admin/virtual-clock", icon: <HomeOutlined /> }
+    { label: "Administration", key: "/admin/virtual-clock", icon: <SettingOutlined /> }
   ];
 
   // Handle menu item clicks
