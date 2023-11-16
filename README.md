@@ -17,14 +17,15 @@
 - Route `/insert-proposal`: Displays the proposal form for the teacher to insert a new thesis proposal.
 
 ## API SERVER
-### Login
+
+### LOGIN
 - HTTP Method: `POST` URL `/api/sessions`
 - Description: Validates Login information for the user.
 - Request body:
 ```
         {
-        "username": "rossi.marco@email.com",
-        "password": "d279620"
+          "username": "rossi.marco@email.com",
+          "password": "d279620"
         }
 ```
 - Response: `201 CREATED` (success)
@@ -124,7 +125,7 @@
     - `400 Bad Request` ("Missing required fields")
     - `500 Internal Server Error` ("Failed to create thesis proposal.")
   
-### LIST OF TEACHERS NOT LOGGED
+### GET LIST OF TEACHERS NOT LOGGED
 - HTTP Method: `GET` URL `/api/teachers`
 - Description: Retrieves list of teachers not logged.
 - Details: Route only for logged teachers
@@ -132,8 +133,9 @@
 - Response: `200 OK` (success)
 - Response body: An array of objects, each one containing information on the teacher.
 ```
-       {
-          "teachers": [
+        {
+          "teachers": 
+          [
             {
               "id": "d370335",
               "surname": "Bianchi",
@@ -150,8 +152,8 @@
               "cod_group": "Group3",
               "cod_department": "Dep3"
             }
-            ]
-    }
+          ]
+        }
 ```
 Error Responses: 
     - `401 Unauthorized` ("Not authorized")
@@ -167,7 +169,8 @@ Error Responses:
 - Response body: An array of objects, contains the information of the external co-supervisors.
 ```
        {
-          "externalCoSupervisors": [
+          "externalCoSupervisors": 
+          [
             {
               "id": 1,
               "surname": "Amato",
@@ -180,8 +183,8 @@ Error Responses:
               "name": "Benjamin",
               "email": "benjamin.bianchi@email.com"
             }
-            ]
-    }
+          ]
+        }
 ```
 Error Responses: 
     - `401 Unauthorized` ("Not authorized")
@@ -191,13 +194,14 @@ Error Responses:
 ### GET ALL KEYWORDS
 - HTTP Method: `GET` URL `/api/keywords`
 - Description: Obtains list of all the keywords of a thesis.
-- Details: Routes only for logged teacher
+- Details: Routes only for logged teachers
 - Request body: _None_
 - Response: `200 OK` (success)
 - Response body: An array of string (keywords).
 ```
         {
-          "keywords": [
+          "keywords": 
+          [
             "chemistry",
             "sustainable",
             "fibers",
@@ -213,7 +217,7 @@ Error Responses:
 ### GET ALL DEGREES
 - HTTP Method: `GET` URL `/api/degrees`
 - Description: Obtains list of all the degrees.
-- Details: Routes only for logged teacher
+- Details: Routes only for logged teachers
 - Request body: _None_
 - Response: `200 OK` (success)
 - Response body: An array of objects, each one containing info on the degrees.
@@ -237,7 +241,7 @@ Error responses:
 ### SEARCH FOR THESIS PROPOSALS
 - HTTP Method: `GET` URL `/api/thesis-proposals`
 - Description: Obtains list of all the thesis proposals for the course of study of the logged student.
-- Details: Routes only for logged student
+- Details: Routes only for logged students
 - Request body: _None_
 - Response: `200 OK` (success)
 - Response body: Some metadata (number of proposals found) and an array of objects, each one containing info on a proposal.
@@ -271,46 +275,173 @@ Error responses:
     - `403 Forbidden` ("Unauthorized")
     - `500 Internal Server Error` 
 
+### GET THESIS PROPOSAL BY ID (for student belonging to the same cds of the proposal)
+- HTTP Method: `GET` URL `/api/thesis-proposals/:id`
+- Description: Return the proposal with the given id related to a student degree (if exists).
+- Details: Routes only for logged students
+- Request body: _None_
+- Response: `200 OK` (success)
+- Response body: an object containing info on the proposal.
+```
+{
+  "id": 1,
+  "title": "AI-GUIDED WEB CRAWLER FOR AUTOMATIC DETECTION OF MALICIOUS SITES",
+  "status": "ACTIVE",
+  "supervisor": {
+    "id": "d279620",
+    "name": "Marco",
+    "surname": "Rossi",
+    "email": "rossi.marco@email.com",
+    "codGroup": "Group1",
+    "codDepartment": "Dep1"
+  },
+  "coSupervisors": {
+    "internal": [
+      {
+        "id": "d226682",
+        "name": "Giulia",
+        "surname": "Mancini",
+        "email": "mancini.giulia@email.com",
+        "codGroup": "Group1",
+        "codDepartment": "Dep1"
+      }
+    ],
+    "external": [
+      {
+        "proposal_id": 1,
+        "co_supervisor_id": "1",
+        "id": 1,
+        "surname": "Amato",
+        "name": "Alice",
+        "email": "alice.amato@email.com"
+      }
+    ]
+  },
+  "type": "research project",
+  "description": "This thesis focuses on developing an AI-guided web crawler for the automatic detection of malicious sites.",
+  "expiration": "2024-11-10",
+  "level": "LM",
+  "cds": {
+    "code": "LM-32",
+    "title": "Ingegneria Informatica"
+  },
+  "keywords": [
+    "AI",
+    "research",
+    "web development"
+  ],
+  "groups": [
+    "Group1",
+    "Group2",
+    "Group3"
+  ]
+}
+```
+Error responses:
+    - `401 Unauthorized` ("Not authorized")
+    - `403 Forbidden` ("Unauthorized")
+    - `404 Not Found` 
+    - `500 Internal Server Error` 
+
 ### APPLY FOR THESIS PROPOSAL
-
-### LIST ALL APPLICATIONS FOR A TEACHER'S THESIS PROPOSAL
-
-### ACCEPT AN APPLICATION
-
-### LIST ALL THESIS PROPOSALS OF A TEACHER (supervisor)
-- HTTP Method: `GET` URL `/api/thesis_proposals`
-- Description: Obtains list of all the thesis proposals of a teacher.
-- Request body: _None_
-- Response: `200 OK` (success)
-- Response body: An array of objects, contains the proposals.
+- HTTP Method: `POST` URL `/api/student/applications`
+- Description: A student apply for a thesis proposal.
+- Details: Routes only for logged students
+- Request body: 
+  ```
+  {
+      "thesis_proposal_id": 2
+  }
+  ```
+- Response: `201 CREATED` (success)
+- Response body: An object containting the details of the application.
 ```
         {
-            "proposal_id": 2,
-            "title": "TitoloTesi",
+          "thesis_proposal_id": 2,
+          "student_id": "s304580",
+          "status": "waiting for approval"
+        }
+```
+Error Responses: 
+    - `401 Unauthorized` ("Not authorized")
+    - `403 Forbidden` ("Unauthorized")
+    - `500 Internal Server Error` 
+
+
+
+### LIST ALL APPLICATIONS FOR A TEACHER'S THESIS PROPOSAL
+- HTTP Method: `POST` URL `/api/teacher/thesis_proposals`
+- Description: Get the list of proposals of the logged teacher.
+- Details: Routes only for logged teachers
+- Request body: _None_
+- Response: `200 OK` (success)
+- Response body: An array containting all the proposals of the logged teacher.
+```
+        [
+          {
+            "proposal_id": 1,
+            "title": "AI-GUIDED WEB CRAWLER FOR AUTOMATIC DETECTION OF MALICIOUS SITES",
             "supervisor_id": "d279620",
-            "type": "compilativa",
-            "description": "description",
-            "required_knowledge": "required knowledge",
-            "notes": "notes",
-            "expiration": "28/11/2023",
-            "level": "Bachelor's",
-            "cds": "LM-29"
+            "type": "research project",
+            "description": "This thesis focuses on developing an AI-guided web crawler for the automatic detection of malicious sites.",
+            "expiration": "2024-11-10",
+            "level": "LM",
+            "cds": "LM-32"
           }
+        ]
 ```
-- Error Response: `401 Unauthorized` ("Not authorized")
+Error Responses: 
+    - `401 Unauthorized` ("Not authorized")
+    - `403 Forbidden` ("Unauthorized")
+    - `500 Internal Server Error` 
 
 ### LIST ALL APPLICATIONS FOR A TEACHER'S THESIS PROPOSAL
-- HTTP Method: `GET` URL `/api/teacher/applications`
-- Description: Obtains list of all applications for a teacher's proposal.
+- HTTP Method: `POST` URL `/api/teacher/applications/:id`
+- Description: Get the list of applications for the proposal of the logged teacher.
+- Details: Routes only for logged teachers
 - Request body: _None_
 - Response: `200 OK` (success)
-- Response body: An array of objects, contains the applications.
+- Response body: An array containting all the applications for the proposal of the logged teacher.
 ```
-        {
-        (not implemented yet)
+        [
+          {
+            "name": "Abenzio",
+            "surname": "Esposito",
+            "status": "waiting for approval",
+            "id": "s288327"
+          },
+          {
+            "name": "Abbondanzio",
+            "surname": "Rossi",
+            "status": "waiting for approval",
+            "id": "s294301"
           }
+        ]
 ```
-- Error Response: `401 Unauthorized` ("Not authorized")
+Error Responses: 
+    - `401 Unauthorized` ("Not authorized")
+    - `403 Forbidden` ("Unauthorized")
+    - `500 Internal Server Error` 
+
+### GET STUDENT APPLICATIONS
+- HTTP Method: `POST` URL `/api/student/applications`
+- Description: Get the list of applications of the logged student.
+- Details: Routes only for logged students
+- Request body: _None_
+- Response: `200 OK` (success)
+- Response body: An array containting all the applications of the logged user.
+```
+        [
+          {
+            "proposal_id": 2
+          }
+        ]
+```
+Error Responses: 
+    - `401 Unauthorized` ("Not authorized")
+    - `403 Forbidden` ("Unauthorized")
+    - `500 Internal Server Error` 
+
 
 ## Database Tables
 
