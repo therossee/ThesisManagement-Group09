@@ -99,7 +99,40 @@ async function getThesisProposalbyId(id) {
     }
 }
 
+async function applyForProposal(proposal_id) {
+    let response = await fetch(URL + '/student/applications', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(proposal_id),
+    });
+    if (response.ok) {
+        const apply = await response.json();
+        return apply;
+    } else {
+        const errDetail = await response.json();
+        throw {status: response.status, msg: errDetail};
+    }
+}
+
+// GET Student's Thesis Applications
+async function getStudentApplications() {
+    const response = await fetch(URL + '/thesis-proposals', {
+        credentials: 'include',
+    });
+    const proposals = await response.json();
+    if (response.ok) {
+        return proposals.items.map((x) => ({
+            x
+        }))
+    } else {
+        throw proposals;
+    }
+}
+
 const API = {
-    logIn, logOut, getUserInfo, getStudentThesisProposals, getThesisProposalbyId
+    logIn, logOut, getUserInfo, getStudentThesisProposals, getThesisProposalbyId, applyForProposal, getStudentApplications
 };
 export default API;

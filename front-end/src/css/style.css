@@ -34,7 +34,7 @@
   -webkit-backdrop-filter: blur(7px);
   display: flex;
   justify-content: flex-end;
-  overflow: scroll;
+  overflow: auto;
   /*Not amazing from mobile*/
 }
 

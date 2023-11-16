@@ -256,7 +256,7 @@ function ThesisProposals() {
         setData(handleReceivedData(x));
         setIsLoadingTable(false);
       })
-      .catch((err) => { messageApi.error(err) });
+      .catch((err) => { messageApi.error(err.message ? err.message : err)  });
   }, []);
 
   // Array of objs for storing table data
@@ -573,16 +573,28 @@ function ViewThesisProposal() {
   const { id } = useParams();
   const { Text } = Typography;
   const navigate = useNavigate();
+  const [applications, setApplications] = useState([]);
+  const [disabled, setDisabled] = useState(false);
 
   // Storing all Thesis Proposal Information
   const [data, setData] = useState();
+
+  async function applyForProposal() {
+    try {
+      await API.applyForProposal(id);
+      messageApi.success("Applied for proposal successfully");
+      setDisabled(true);
+    } catch (err) {
+      messageApi.error(err);
+    }
+  }
 
   useEffect(() => {
     API.getThesisProposalbyId(id)
       .then((x) => {
         setData(x);
       })
-      .catch((err) => { messageApi.error(err) });
+      .catch((err) => { messageApi.error(err.message ? err.message : err)  });
   }, []);
 
   // If data is still empty
@@ -672,6 +684,9 @@ function ViewThesisProposal() {
       {messageBox}
       <Button type="link" onClick={() => navigate("/proposals")}>&lt; Back to Thesis Proposals</Button>
       <Descriptions title={data.title} layout="vertical" items={items} style={{ marginLeft: "2%", marginRight: "2%" }} />
+      <div style={{paddingLeft: "2%"}}>
+        <Button type="primary" disabled={disabled} onClick={applyForProposal}>Apply for this proposal</Button>
+      </div>
     </>
   )
 }
