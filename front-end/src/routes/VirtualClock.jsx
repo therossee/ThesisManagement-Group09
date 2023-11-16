@@ -79,7 +79,6 @@ function VirtualClock() {
                 setDate(dayjs.tz().add(clock.offset, 'milliseconds'));
             })
             .catch( error => {
-                console.log(error);
                 messageApi.error('An error occurred while getting the clock: ' + error.message);
             });
     }, [messageApi]);

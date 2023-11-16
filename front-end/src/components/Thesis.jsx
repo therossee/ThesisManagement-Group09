@@ -78,7 +78,6 @@ function InsertThesisProposal() {
     API.getClock()
     .then((clock) => {
       setDate(dayjs().add(clock.offset, 'ms'));
-      console.log(date);
     })
     .catch((err) => {
       messageApi.error("Failed to fetch virtual clock!");})
@@ -104,12 +103,10 @@ function InsertThesisProposal() {
       }
       API.insertProposal(proposal)
       .then((obj) => {
-        console.log(obj);
         setProposalId(obj.id);
         next();
       })
       .catch((err) => {
-        console.log(err);
         setProposalId(-1);
         setError(err.status);
         next();
