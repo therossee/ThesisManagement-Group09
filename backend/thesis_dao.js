@@ -282,32 +282,6 @@ exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
   })
 };
 
-// 6. Function to list all thesis proposals of a tearcher (supervisor)
-exports.listThesisProposalsTeacher = (teacherId) => {
-  return new Promise((resolve) => {
-      const getProposals = `SELECT * FROM thesisProposal WHERE supervisor_id=?`;
-      const proposals = db.prepare(getProposals).all(teacherId);
-      resolve(proposals)
-    
-  })
-};
-
-
-// 7. Function to list all applications for a teacher's thesis proposals
-exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
-  return new Promise((resolve) => {
-    
-    const getApplications = `SELECT s.name, s.surname, ta.status, s.id
-    FROM thesisApplication ta, thesisProposal tp, student s
-    WHERE ta.proposal_id = tp.proposal_id AND s.id = ta.student_id AND ta.proposal_id=? AND tp.supervisor_id= ?`;
-
-    const applications = db.prepare(getApplications).all(proposal_id, teacherId);    
-    resolve(applications)
-    
-  })
-};
-
-// Function that retrieve all the applications of a student
 exports.getStudentApplications = (student_id) => {
   return new Promise((resolve) => {
       const query = `SELECT proposal_id FROM thesisApplication WHERE student_id=?`;

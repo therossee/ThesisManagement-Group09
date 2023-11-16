@@ -319,7 +319,7 @@ async(req,res) => {
     })
   .catch((error) => {
     console.error(error); 
-    res.status(500).json(`Failed to apply for thesis proposal. ${error.message || error}`);
+    res.status(500).json(`Failed to apply for proposal. ${error.message || error}`);
   });
 });
 
