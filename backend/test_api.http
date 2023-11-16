@@ -81,16 +81,29 @@ GET http://localhost:3000/api/teacher/applications/1 HTTP/1.1
 GET http://localhost:3000/api/thesis-proposals HTTP/1.1
 ###
 // 7. Accept an application
-// PATCH api/teacher/:id/applications/:id
+PATCH http://localhost:3000/api/teacher/applications/accept/1
+Content-Type: application/json
 
-// 8. Reject an application
-// PATCH api/teacher/:id/applications/:id
+{
+  "student_id": "s299119"
+}
 
-// 9. List student's application decisions
+###
+
+// 7. Reject an application
+PATCH http://localhost:3000/api/teacher/applications/reject/1
+Content-Type: application/json
+
+{
+  "student_id": "s299119"
+}
+
+###
+// 8. List student's application decisions
 // GET api/student/:id/applications
 
-// 10. List professor's active thesis proposala
+// 9. List professor's active thesis proposala
 // GET api/teacher/:id/thesis_proposals
 
-// 11. Update a thesis proposal
+// 10. Update a thesis proposal
 // PATCH api/teacher/:id/thesis_proposals/:id

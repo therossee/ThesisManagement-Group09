@@ -344,8 +344,56 @@ async (req, res) => {
   }
 });
 
-// 8. Reject an application
-// PATCH api/teacher/:id/applications/:id
+// 8. Accept an application
+// PATCH api/teacher/applications/accept/:proposal_id
+app.patch('/api/teacher/applications/accept/:proposal_id',
+  isLoggedIn,
+  isTeacher,
+  async (req, res) => {
+    const { proposal_id } = req.params;
+    const { student_id } = req.body;
+
+    if (!student_id ) {
+      return res.status(400).json({ error: 'Missing required fields.' });
+    }
+
+    try {
+      await thesisDao.updateApplicationStatus(student_id, proposal_id, "accepted");
+
+      const rejected = await thesisDao.rejectOtherApplications(student_id, proposal_id);
+
+      res.status(200).json({ message: 'Thesis accepted and others rejected successfully' });
+
+    } catch (error) {
+      res.status(500).json(`Internal Server Error: ${error.message || error}`);
+    }
+
+  })
+
+// 9. Reject an application
+// PATCH api/teacher/applications/reject/:proposal_id
+app.patch('/api/teacher/applications/reject/:proposal_id',
+isLoggedIn,
+isTeacher,
+async (req, res) => {
+  const { proposal_id } = req.params;
+  const { student_id } = req.body;
+
+  if (!student_id ) {
+    return res.status(400).json({ error: 'Missing required fields.' });
+  }
+
+  try {
+    await thesisDao.updateApplicationStatus(student_id, proposal_id, "rejected");
+
+
+    res.status(200).json({ message: 'Thesis successfully rejected' });
+
+  } catch (error) {
+    res.status(500).json(`Internal Server Error: ${error.message || error}`);
+  }
+
+})
 
 // 9. List student's application decisions
 // GET api/student/:id/applications

@@ -281,3 +281,35 @@ exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
     
   })
 };
+
+// 8. Function to accept an application
+exports.updateApplicationStatus = (studentId, proposalId, status) =>{
+  return new Promise((resolve,reject)=>{
+      const query = `
+      UPDATE thesisApplication
+      SET status = ?
+      WHERE student_id = ? AND proposal_id = ?
+    `
+    const res = db.prepare(query).run(status,studentId,proposalId);
+
+    const rowCount = res.changes;
+
+  resolve(rowCount);
+  })
+}
+
+//9. Function to reject all others applications
+exports.rejectOtherApplications = (studentId,proposalId) => {
+  return new Promise((resolve,reject)=>{
+    const query = `
+      UPDATE thesisApplication
+      SET status = 'rejected'
+      WHERE student_id <> ? AND proposal_id = ?
+    `
+    const res = db.prepare(query).run(studentId,proposalId);
+
+    const rowCount = res.changes;
+
+  resolve(rowCount);
+  })
+}

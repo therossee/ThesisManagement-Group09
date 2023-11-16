@@ -30,7 +30,63 @@ function ThesisApplications() {
         };
 
         fetchData();
-    }, []);
+    }, [isLoadingTable]);
+
+    const acceptApplication = async (proposalId, studentId) => {
+        console.log('Accepting application for proposal_id:', proposalId, 'and student_id:', studentId);
+        try {
+            setIsLoadingTable(true)
+            const response = await API.acceptThesisApplications(proposalId, studentId);
+            console.log('API response:', response);
+            if (response.success) {
+                setIsLoadingTable(false)
+            } else {
+                const rowElement = document.getElementById(`student-row-${studentId}`);
+                rowElement.classList.add('error-row');
+
+                setTimeout(() => {
+                    rowElement.classList.remove('error-row');
+                }, 1000);
+            }
+        } catch (error) {
+            console.error('API error:', error);
+            const rowElement = document.getElementById(`student-row-${studentId}`);
+            rowElement.classList.add('error-row');
+
+            setTimeout(() => {
+                rowElement.classList.remove('error-row');
+            }, 1000);
+        }
+    };
+
+    const rejectApplication = async (proposalId, studentId) => {
+        console.log('Rejecting application for proposal_id:', proposalId, 'and student_id:', studentId);
+        try {
+            setIsLoadingTable(true)
+            const response = await API.rejectThesisApplications(proposalId, studentId);
+            console.log('API response:', response);
+            if (response.success) {
+                setIsLoadingTable(false)
+            } else {
+                const rowElement = document.getElementById(`student-row-${studentId}`);
+                rowElement.classList.add('error-row');
+
+                setTimeout(() => {
+                    rowElement.classList.remove('error-row');
+                }, 1000);
+            }
+        } catch (error) {
+            console.error('API error:', error);
+            const rowElement = document.getElementById(`student-row-${studentId}`);
+            rowElement.classList.add('error-row');
+
+            setTimeout(() => {
+                rowElement.classList.remove('error-row');
+            }, 1000);
+        }
+    };
+
+
 
     return (
         <>
@@ -43,18 +99,20 @@ function ThesisApplications() {
                         itemLayout="horizontal"
                         dataSource={studentApplications[item.id] || []}
                         renderItem={(student) => (
-                            <List.Item key={student.id}>
+                            <List.Item key={student.id} id={`student-row-${student.id}`} style={{ backgroundColor: student.status === 'accepted' ? 'lightgreen' : 'inherit' }}>
                                 <Skeleton loading={isLoadingTable} avatar title={true} active>
                                     <List.Item.Meta
                                         avatar={<Avatar icon={<UserOutlined />} />}
                                         title={`${student.surname} ${student.name}`}
                                         description={student.status}
                                     />
-                                    <Flex wrap="wrap" gap="small">
-                                        <Button type="primary">Approva</Button>
-                                        <Button danger>Rifiuta</Button>
-                                    </Flex>
+                                    {student.status === 'waiting for approval' ? (
+                                        <Flex wrap="wrap" gap="small">
+                                            <Button onClick={() => acceptApplication(item.id, student.id)} type="primary">Approve</Button>
 
+                                            <Button onClick={() => rejectApplication(item.id, student.id)} danger>Reject</Button>
+                                        </Flex>
+                                    ): null}
                                 </Skeleton>
                             </List.Item>
                         )}
