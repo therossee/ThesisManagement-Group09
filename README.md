@@ -443,6 +443,52 @@ Error Responses:
     - `500 Internal Server Error` 
 
 
+### ACCEPT AN APPLICATION
+- HTTP Method: `PATCH` URL `api/teacher/applications/accept/:proposal_id`
+- Description: A teacher accepts an application for a thesis proposal.
+- Details: Routes only for logged teachers
+- Request body: 
+  ```
+  {
+      "student_id": "s299119"
+  }
+  ```
+- Response: `200 OK` (success)
+- Response body: A message.
+```
+        {
+          "message": "Thesis accepted and others rejected successfully"
+        }
+```
+Error Responses: 
+    - `400 Bad Request` ("Missing required fields")
+    - `401 Unauthorized` ("Not authorized")
+    - `403 Forbidden` ("Unauthorized")
+    - `500 Internal Server Error` 
+
+###  REJECT AN APPLICATION
+- HTTP Method: `PATCH` URL `api/teacher/applications/reject/:proposal_id`
+- Description: A teacher rejects an application for a thesis proposal.
+- Details: Routes only for logged teachers
+- Request body: 
+  ```
+  {
+      "student_id": "s299119"
+  }
+  ```
+- Response: `200 OK` (success)
+- Response body: A message.
+```
+        {
+          "message": "Thesis successfully rejected"
+        }
+```
+Error Responses: 
+    - `400 Bad Request` ("Missing required fields")
+    - `401 Unauthorized` ("Not authorized")
+    - `403 Forbidden` ("Unauthorized")
+    - `500 Internal Server Error` 
+
 ## Database Tables
 
 - Table `student`:

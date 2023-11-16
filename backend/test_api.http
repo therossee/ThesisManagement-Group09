@@ -94,7 +94,7 @@ GET http://localhost:3000/api/student/applications HTTP/1.1
 ###
 
 ## FUNCTION TO ACCEPT AN APPLICATION
-PATCH http://localhost:3000/api/teacher/applications/accept/1
+PATCH http://localhost:3000/api/teacher/applications/accept/1 HTTP/1.1
 Content-Type: application/json
 
 {
@@ -103,8 +103,8 @@ Content-Type: application/json
 
 ###
 
-// FUNCTION TO REJECT ALL THE OTHER APPLICATIONS
-PATCH http://localhost:3000/api/teacher/applications/reject/1
+// FUNCTION TO REJECT AN APPLICATION
+PATCH http://localhost:3000/api/teacher/applications/reject/1 HTTP/1.1
 Content-Type: application/json
 
 {
