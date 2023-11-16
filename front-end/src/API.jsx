@@ -204,17 +204,60 @@ async function getTeacherThesisApplications(proposalId) {
         return applications.map((x) => ({
             name: x.name,
             surname: x.surname,
-            status: x.status
+            status: x.status,
+            id: x.id
         }));
     } else {
         throw applications;
     }
 }
 
+// Accept Student Applications on a Thesis Proposal 
+async function acceptThesisApplications(proposalId,studentId) {
+    const response = await fetch(URL + `/teacher/applications/accept/${proposalId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          student_id: studentId,
+        }),
+      });
+      if (response.ok) {
+        return { success: true, status: response.status };
+      } else {
+        const errorData = await response.json();
+        return { success: false, status: response.status, error: errorData.error || 'Unknown error' };
+      }
+}
+
+// Reject Student Applications on a Thesis Proposal 
+async function rejectThesisApplications(proposalId,studentId) {
+    const response = await fetch(URL + `/teacher/applications/reject/${proposalId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          student_id: studentId,
+        }),
+      });
+      if (response.ok) {
+        return { success: true, status: response.status };
+      } else {
+        const errorData = await response.json();
+        return { success: false, status: response.status, error: errorData.error || 'Unknown error' };
+      }
+}
+  
+
+
 const API = {
     logIn, logOut, getUserInfo,
     getClock, updateClock,
     getStudentThesisProposals, getThesisProposalbyId, getTeacherThesisProposals, getTeacherThesisApplications,
-    applyForProposal, getStudentApplications
+    applyForProposal, getStudentApplications, acceptThesisApplications, rejectThesisApplications
 };
 export default API;

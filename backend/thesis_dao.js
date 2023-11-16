@@ -288,5 +288,34 @@ exports.getStudentApplications = (student_id) => {
       const res = db.prepare(query).all(student_id);
       resolve(res)
   })
-}
+};
 
+exports.updateApplicationStatus = (studentId, proposalId, status) =>{
+  return new Promise((resolve,reject)=>{
+      const query = `
+      UPDATE thesisApplication
+      SET status = ?
+      WHERE student_id = ? AND proposal_id = ?
+    `
+    const res = db.prepare(query).run(status,studentId,proposalId);
+
+    const rowCount = res.changes;
+
+  resolve(rowCount);
+  })
+};
+
+exports.rejectOtherApplications = (studentId,proposalId) => {
+  return new Promise((resolve,reject)=>{
+    const query = `
+      UPDATE thesisApplication
+      SET status = 'rejected'
+      WHERE student_id <> ? AND proposal_id = ?
+    `
+    const res = db.prepare(query).run(studentId,proposalId);
+
+    const rowCount = res.changes;
+
+  resolve(rowCount);
+  })
+};

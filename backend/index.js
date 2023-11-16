@@ -367,6 +367,53 @@ async (req, res) => {
   }
 });
 
+app.patch('/api/teacher/applications/accept/:proposal_id',
+  isLoggedIn,
+  isTeacher,
+  async (req, res) => {
+    const { proposal_id } = req.params;
+    const { student_id } = req.body;
+
+    if (!student_id ) {
+      return res.status(400).json({ error: 'Missing required fields.' });
+    }
+
+    try {
+      await thesisDao.updateApplicationStatus(student_id, proposal_id, "accepted");
+
+      const rejected = await thesisDao.rejectOtherApplications(student_id, proposal_id);
+
+      res.status(200).json({ message: 'Thesis accepted and others rejected successfully' });
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).json(`Internal Server Error`);
+    }
+
+  })
+
+app.patch('/api/teacher/applications/reject/:proposal_id',
+isLoggedIn,
+isTeacher,
+async (req, res) => {
+  const { proposal_id } = req.params;
+  const { student_id } = req.body;
+
+  if (!student_id ) {
+    return res.status(400).json({ error: 'Missing required fields.' });
+  }
+
+  try {
+    await thesisDao.updateApplicationStatus(student_id, proposal_id, "rejected");
+    res.status(200).json({ message: 'Thesis successfully rejected' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(`Internal Server Error`);
+  }
+
+})
+
 const PORT = 3000;
 const server = app.listen(PORT, () => {
   console.log(`Server started on http://localhost:${PORT}/`);
