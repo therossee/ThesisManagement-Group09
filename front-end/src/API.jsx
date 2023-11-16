@@ -159,7 +159,7 @@ async function acceptThesisApplications(proposalId,studentId) {
         const errorData = await response.json();
         return { success: false, status: response.status, error: errorData.error || 'Unknown error' };
       }
-    };
+}
 
 // Reject Student Applications on a Thesis Proposal 
 async function rejectThesisApplications(proposalId,studentId) {
@@ -179,7 +179,7 @@ async function rejectThesisApplications(proposalId,studentId) {
         const errorData = await response.json();
         return { success: false, status: response.status, error: errorData.error || 'Unknown error' };
       }
-    };
+}
   
 
 
