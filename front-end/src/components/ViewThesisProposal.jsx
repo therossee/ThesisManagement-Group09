@@ -2,7 +2,6 @@ import { React, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button, Descriptions, Skeleton, Typography, Tag, message } from "antd";
 import dayjs from 'dayjs';
-
 import API from "../API";
 
 function ViewThesisProposal() {
