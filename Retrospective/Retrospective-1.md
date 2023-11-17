@@ -1,8 +1,7 @@
-TEMPLATE FOR RETROSPECTIVE (Team ##)
+RETROSPECTIVE (Team 09)
 =====================================
 
-The retrospective should include _at least_ the following
-sections:
+Sections:
 
 - [process measures](#process-measures)
 - [quality measures](#quality-measures)
