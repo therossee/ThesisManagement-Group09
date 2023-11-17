@@ -1,7 +1,7 @@
 RETROSPECTIVE-1 (Team 09)
 =====================================
 
-Sections:
+### Sections:
 
 - [process measures](#process-measures)
 - [quality measures](#quality-measures)
