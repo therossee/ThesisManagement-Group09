@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, message, Spin, Steps, Tooltip, FloatButton, Button, Typography } from 'antd';
+import { Form, message, Spin, Steps, Tooltip, FloatButton, Button } from 'antd';
 import dayjs from 'dayjs';
 import { ReviewProposal } from './insert_proposal_components/ReviewProposal.jsx';
 import { UploadResult } from './insert_proposal_components/UploadResult.jsx';
@@ -20,8 +20,6 @@ const steps = [
       content: <UploadResult />,
     },
   ];
-
-const { Title } = Typography;
 
 function InsertThesisProposal() {
 
