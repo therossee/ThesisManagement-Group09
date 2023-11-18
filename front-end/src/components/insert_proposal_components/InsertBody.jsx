@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Form, Input, Select, DatePicker, Button } from "antd";
 import { Option } from "antd/lib/mentions";
-import dayjs from "dayjs";
 
 function InsertBody(props) {
     const [selectedInt, setSelectedInt] = useState([]);
@@ -154,7 +153,7 @@ function InsertBody(props) {
             message: 'Please select an expiration date!',
           },
         ]}>
-          <DatePicker defaultValue={date} disabledDate={disabledDate} />
+          <DatePicker customDate={date} defaultPickerValue={date} disabledDate={disabledDate} />
         </Form.Item>
         <Form.Item
           name="degreeLevel"
@@ -204,5 +203,5 @@ function InsertBody(props) {
       </Form>
     );
   }
-
+  
   export { InsertBody };
