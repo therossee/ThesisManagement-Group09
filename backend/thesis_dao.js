@@ -320,14 +320,14 @@ exports.rejectOtherApplications = (studentId,proposalId) => {
   })
 };
 
-exports.listApplicationsDecisionsFromStudent = (proposal_id, studentId) => {
+exports.listApplicationsDecisionsFromStudent = (studentId) => {
   return new Promise((resolve) => {
     
-    const getApplications = `SELECT ta.status
+    const getApplications = `SELECT status
     FROM thesisApplication 
-    WHERE proposal_id = ? AND student_id = ?`;
+    WHERE student_id = ?`;
 
-    const applications = db.prepare(getApplications).all(proposal_id, studentId);    
+    const applications = db.prepare(getApplications).all(studentId);    
     resolve(applications)
     
   })

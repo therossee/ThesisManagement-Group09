@@ -414,14 +414,13 @@ async (req, res) => {
 
 })
 
-app.get('/api/student/applications-decision/:proposal_id',
+app.get('/api/student/applications-decision',
 isLoggedIn,
 isStudent,
 async (req, res) => {
   try {
-    const proposal_id=req.params.proposal_id;
     const studentId = req.user.id;
-    const applications = await thesisDao.listApplicationsDecisionsFromStudent(proposal_id, studentId);
+    const applications = await thesisDao.listApplicationsDecisionsFromStudent(studentId);
     res.json(applications);
   } catch (e) {
     console.error(e);
