@@ -1,5 +1,5 @@
 import Errors from "./Errors";
-import { ThesisProposals } from "../components/Thesis";
+import { ThesisProposals } from "../components/ThesisProposals";
 import { useAuth } from "../App";
 
 function Proposals() {

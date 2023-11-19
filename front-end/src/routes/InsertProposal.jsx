@@ -1,14 +1,13 @@
 import Errors from "./Errors";
-import { InsertThesisProposal } from "../components/Thesis"
+import { InsertThesisProposal } from "../components/InsertThesisProposal"
 import { useAuth } from "../App"
 
-function InsertProposal(props) {
-    const user = props.user;
+function InsertProposal() {
     const { isTeacher } = useAuth();
 
     return (
         <>
-            {isTeacher ? <InsertThesisProposal user={user}/> : <Errors code="403" />}
+            {isTeacher ? <InsertThesisProposal /> : <Errors code="403" />}
         </>
     )
 }

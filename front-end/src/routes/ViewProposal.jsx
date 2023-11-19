@@ -1,4 +1,4 @@
-import { ViewThesisProposal } from "../components/Thesis"
+import { ViewThesisProposal } from "../components/ViewThesisProposal"
 
 function ViewProposal() {
 
