@@ -128,7 +128,9 @@ function VirtualClock() {
                         showNow={false}
                         allowClear={false}
                         defaultValue={date}
+                        changeOnBlur={true}
                         onChange={ (date) => setDateSelection(date) }
+                        popupClassName="time-picker-hide-footer"
                     />
 
                     <Flex direction="row" justify="center" align="center" wrap="wrap" style={{ width: '100%', marginTop: '20px' }} gap="large">
