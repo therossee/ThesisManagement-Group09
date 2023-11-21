@@ -309,7 +309,7 @@ exports.rejectOtherApplications = (studentId,proposalId) => {
   return new Promise((resolve,reject)=>{
     const query = `
       UPDATE thesisApplication
-      SET status = 'rejected'
+      SET status = 'canceled'
       WHERE student_id <> ? AND proposal_id = ?
     `
     const res = db.prepare(query).run(studentId,proposalId);
