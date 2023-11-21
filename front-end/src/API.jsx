@@ -81,8 +81,8 @@ async function updateClock(date) {
         });
 }
 
-// GET Student's Thesis Proposals
-async function getStudentThesisProposals() {
+// GET Thesis Proposals
+async function getThesisProposals() {
     const response = await fetch(URL + '/thesis-proposals', {
         credentials: 'include',
     });
@@ -166,30 +166,6 @@ async function getStudentApplications() {
         return applications.map(x => x.proposal_id);
     } else {
         throw applications;
-    }
-}
-
-// GET Thesis Proposals of a Teacher
-async function getTeacherThesisProposals() {
-    const response = await fetch(URL + '/teacher/thesis_proposals', {
-        credentials: 'include',
-    });
-    const proposals = await response.json();
-    if (response.ok) {
-        return proposals.map((x) => ({
-            id: x.proposal_id,
-            title: x.title,
-            supervisor: x.supervisor_id,
-            type: x.type,
-            description: x.description,
-            requiredKnowledge: x.required_knowledge,
-            notes: x.notes,
-            expiration: x.expiration,
-            level: x.level,
-            cds: x.cds
-        }))
-    } else {
-        throw proposals;
     }
 }
 
@@ -342,7 +318,7 @@ async function rejectThesisApplications(proposalId,studentId) {
 const API = {
     logIn, logOut, getUserInfo,
     getClock, updateClock,
-    insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getStudentThesisProposals, getThesisProposalbyId, getTeacherThesisProposals, getTeacherThesisApplications,
+    insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
     applyForProposal, getStudentApplications, acceptThesisApplications, rejectThesisApplications
 };
 export default API;
