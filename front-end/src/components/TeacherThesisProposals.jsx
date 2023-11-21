@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { message, Space, Table, Tooltip } from 'antd';
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import API from '../API';
 
 function TeacherThesisProposals() {
@@ -69,6 +69,9 @@ function TeacherThesisProposals() {
             fixed: 'right',
             render: (record) => (
                 <Space size="middle">
+                    <Tooltip title="View Proposal">
+                        <EyeOutlined style={{ fontSize: '20px' }} onClick={() => navigate(`/view-proposal/${record.id}`)} />
+                    </Tooltip>
                     <Tooltip title="Edit Proposal">
                         <EditOutlined style={{ fontSize: '20px' }} onClick={() => navigate(`/edit-proposal/${record.id}`)} />
                     </Tooltip>
@@ -107,8 +110,8 @@ function TeacherThesisProposals() {
 
     return (
         <>
-        {messageBox}
-        <Table {...tableProps} columns={columns} dataSource={data} />
+            {messageBox}
+            <Table {...tableProps} columns={columns} dataSource={data} />
         </>
     )
 }
