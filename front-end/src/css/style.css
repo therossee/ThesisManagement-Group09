@@ -61,3 +61,7 @@
   min-width: 100%;
   min-height: 16px;
 }
+
+.time-picker-hide-footer .ant-picker-footer {
+  display: none;
+}
