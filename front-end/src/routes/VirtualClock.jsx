@@ -25,14 +25,19 @@ function VirtualClock() {
     const formatOffset = () => {
         const duration = dayjs.duration(Math.abs(offset), 'milliseconds');
 
+        const nbYears = duration.get('year');
+        const nbMonths = duration.get('month');
         const nbDays = duration.get('day');
         const nbHours = duration.get('hour');
         const nbMinutes = duration.get('minute');
         const nbSeconds = duration.get('second');
         const nbMilliseconds = duration.get('millisecond');
 
-        const dynamicFormats = [!!nbDays && "D [days]", !!nbHours && "H [hours]", !!nbMinutes && "m [minutes]", !!nbSeconds && "s [seconds]", !!nbMilliseconds && "SSS [milliseconds]"]
+
+
+        const dynamicFormats = [!!nbYears && "Y [years]", !!nbMonths && "M [months]", !!nbDays && "D [days]", !!nbHours && "H [hours]", !!nbMinutes && "m [minutes]", !!nbSeconds && "s [seconds]", !!nbMilliseconds && "SSS [milliseconds]"]
             .filter(Boolean)
+            .filter( (_, index) => index < 3)
             .join(' ');
 
         return duration.format(dynamicFormats)
