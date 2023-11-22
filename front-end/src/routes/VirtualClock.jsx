@@ -72,7 +72,7 @@ function VirtualClock() {
             .catch( error => {
                 messageApi.error('An error occurred while updating the clock: ' + error.message);
             });
-    }
+    };
 
     /*
      * Effect hooks
