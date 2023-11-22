@@ -21,7 +21,6 @@ function VirtualClock() {
     /*
      * Methods used in HTML rendering
      */
-
     const formatOffset = () => {
         const duration = dayjs.duration(Math.abs(offset), 'milliseconds');
 
@@ -56,7 +55,15 @@ function VirtualClock() {
      * Methods used in HTML events to call APIs
      */
     const updateClock = () => {
-        API.updateClock(dateSelected?.toISOString())
+        saveClockOnServer(dateSelected)
+    };
+    const resetOffset = () => {
+        setDateSelection(undefined);
+        saveClockOnServer(undefined);
+    };
+
+    const saveClockOnServer = (date) => {
+        API.updateClock(date?.toISOString())
             .then( clock => {
                 setOffset(clock.offset);
                 setDate(dayjs.tz().add(clock.offset, 'milliseconds'));
@@ -65,11 +72,7 @@ function VirtualClock() {
             .catch( error => {
                 messageApi.error('An error occurred while updating the clock: ' + error.message);
             });
-    };
-    const resetOffset = () => {
-        setDateSelection(undefined);
-        updateClock();
-    };
+    }
 
     /*
      * Effect hooks
@@ -149,7 +152,7 @@ function VirtualClock() {
                             </Button>
                         }
 
-                        <Button type="primary" shape="round" icon={<SaveOutlined />} size="large" onClick={() => updateClock()}>
+                        <Button type="primary" shape="round" icon={<SaveOutlined />} size="large" onClick={updateClock}>
                             SAVE NEW CLOCK
                         </Button>
                     </Flex>
