@@ -261,9 +261,10 @@ app.get('/api/thesis-proposals',
     try {
       const studentId = req.user.id;
       const proposals = await thesisDao.listThesisProposalsFromStudent(studentId);
+      const studentDegree = await usersDao.getStudentDegree(studentId);
       const proposalsPopulated = await Promise.all(
         proposals.map(async proposal => {
-          return await _populateProposal(proposal);
+          return await _populateProposal(proposal, studentDegree);
         })
       );
 
@@ -291,11 +292,12 @@ app.get('/api/thesis-proposals/:id',
       const proposalId = req.params.id;
 
       const proposal = await thesisDao.getThesisProposal(proposalId, studentId);
+      const studentDegree = await usersDao.getStudentDegree(studentId);
       if (!proposal) {
           return res.status(404).json({ message: `Thesis proposal with id ${proposalId} not found.` });
       }
 
-      res.json( await _populateProposal(proposal) );
+      res.json( await _populateProposal(proposal, studentDegree) );
     } catch (e) {
       console.error(e);
       res.status(500).json('Internal Server Error');
@@ -428,7 +430,7 @@ module.exports = { app, server };
  * @return {Promise<object>}
  * @private
  */
-async function _populateProposal(proposalData) {
+async function _populateProposal(proposalData, studentDegree) {
   return {
     id: proposalData.proposal_id,
     title: proposalData.title,
@@ -448,15 +450,7 @@ async function _populateProposal(proposalData) {
     notes: proposalData.notes,
     expiration: proposalData.expiration,
     level: proposalData.level,
-    cds: await degreeDao.getDegreeFromCode(proposalData.cds)
-        .then( degree => {
-          if (!degree) {
-            // Should never happen, but just in case
-            throw new Error(`Degree with code ${proposalData.cds} not found`);
-          }
-
-          return _serializeDegree(degree);
-        }),
+    cds: studentDegree,
     keywords: await thesisDao.getKeywordsOfProposal(proposalData.proposal_id),
     groups: await thesisDao.getProposalGroups(proposalData.proposal_id)
   };
@@ -478,20 +472,6 @@ function _getProposalStatus(proposalData) {
   }
 
   return 'ACTIVE';
-}
-
-/**
- * Serializes a degree object to a more compact format for the API
- *
- * @param {DegreeRow} degree
- * @return {{code: string, title: string}}
- * @private
- */
-function _serializeDegree(degree) {
-  return {
-    code: degree.cod_degree,
-    title: degree.title_degree
-  };
 }
 
 /**

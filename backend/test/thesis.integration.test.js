@@ -31,6 +31,7 @@ jest.mock('../thesis_dao', () => ({
 
 jest.mock('../users_dao', () => ({
     getUser: jest.fn(),
+    getStudentDegree: jest.fn(),
 }));
 
 jest.mock('../degree_dao', () => ({
@@ -690,7 +691,7 @@ describe('GET /api/thesis_proposals', () => {
                 description: 'Test description',
                 expiration: '2021-12-31',
                 level: 'Bachelor',
-                cds: 'Test CDS',
+                cds: 'mockCode',
                 supervisor_id: 'd1',
                 type: 'Bachelor',
                 required_knowledge: 'Test knowledge',
@@ -698,7 +699,7 @@ describe('GET /api/thesis_proposals', () => {
             }
         ];
         service.listThesisProposalsFromStudent.mockResolvedValue(mockThesisProposal);
-
+        usersService.getStudentDegree.mockResolvedValue({ cod_degree: 'mockCode', title_degree: 'mockTitle' });
         const supervisorMocked = {
             id: mockThesisProposal[0].supervisor_id,
             surname: 'R',
@@ -753,8 +754,8 @@ describe('GET /api/thesis_proposals', () => {
                     expiration: '2021-12-31',
                     level: 'Bachelor',
                     cds: {
-                        code: mockThesisProposal[0].cds,
-                        title: mockDegree.title_degree
+                        cod_degree: 'mockCode',
+                        title_degree: 'mockTitle'
                     },
                     supervisor: supervisorMocked,
                     coSupervisors: {
@@ -799,7 +800,7 @@ describe('GET /api/thesis_proposals', () => {
                 description: 'Test description',
                 expiration: '2051-12-31',
                 level: 'Bachelor',
-                cds: 'Test CDS',
+                cds: 'mockCode',
                 supervisor_id: 'd1',
                 type: 'Bachelor',
                 required_knowledge: 'Test knowledge',
@@ -807,7 +808,7 @@ describe('GET /api/thesis_proposals', () => {
             }
         ];
         service.listThesisProposalsFromStudent.mockResolvedValue(mockThesisProposal);
-
+        usersService.getStudentDegree.mockResolvedValue({ cod_degree: 'mockCode', title_degree: 'mockTitle' });
         const supervisorMocked = {
             id: mockThesisProposal[0].supervisor_id,
             surname: 'R',
@@ -841,7 +842,7 @@ describe('GET /api/thesis_proposals', () => {
 
         const mockDegree = {
             cod_degree: mockThesisProposal[0].cds,
-            title_degree: 'Ingegneria Informatica',
+            title_degree: 'mockTitle',
         };
         degreeService.getDegreeFromCode.mockResolvedValue(mockDegree);
 
@@ -868,8 +869,8 @@ describe('GET /api/thesis_proposals', () => {
                     expiration: '2051-12-31',
                     level: 'Bachelor',
                     cds: {
-                        code: mockThesisProposal[0].cds,
-                        title: mockDegree.title_degree
+                        cod_degree: mockThesisProposal[0].cds,
+                        title_degree: mockDegree.title_degree
                     },
                     supervisor: supervisorMocked,
                     coSupervisors: {
@@ -986,13 +987,14 @@ describe('GET /api/thesis_proposals/:id', () => {
             description: 'Test description',
             expiration: '2021-12-31',
             level: 'Bachelor',
-            cds: 'Test CDS',
+            cds: 'mockCode',
             supervisor_id: 'd1',
             type: 'Bachelor',
             required_knowledge: 'Test knowledge',
             notes: 'Test notes'
         };
         service.getThesisProposal.mockResolvedValue(mockThesisProposal);
+        usersService.getStudentDegree.mockResolvedValue({ cod_degree: 'mockCode', title_degree: 'mockTitle' });
 
         const supervisorMocked = {
             id: mockThesisProposal.supervisor_id,
@@ -1021,7 +1023,7 @@ describe('GET /api/thesis_proposals/:id', () => {
 
         const mockDegree = {
             cod_degree: mockThesisProposal.cds,
-            title_degree: 'Ingegneria Informatica',
+            title_degree: 'mockTitle',
         };
         degreeService.getDegreeFromCode.mockResolvedValue(mockDegree);
 
@@ -1040,8 +1042,8 @@ describe('GET /api/thesis_proposals/:id', () => {
             expiration: '2021-12-31',
             level: 'Bachelor',
             cds: {
-                code: mockThesisProposal.cds,
-                title: mockDegree.title_degree
+                cod_degree: mockThesisProposal.cds,
+                title_degree: mockDegree.title_degree
             },
             supervisor: supervisorMocked,
             coSupervisors: {
