@@ -660,7 +660,7 @@ describe('GET /api/degrees', () => {
     });
 });
 
-describe('GET /api/thesis_proposals', () => {
+describe('GET /api/thesis-proposals (student)', () => {
     test('should return the list of thesis proposals of a student', async () => {
         const mockUser = {
             id: 's1',
@@ -888,7 +888,7 @@ describe('GET /api/thesis_proposals', () => {
     });
     test('should return error 403 if not authorized', async () => {
         const mockUser = {
-            id: 'd1',
+            id: 'm1',
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
@@ -913,7 +913,7 @@ describe('GET /api/thesis_proposals', () => {
             .send();
 
         expect(response.status).toBe(403);
-        expect(response.text).toEqual("\"Unauthorized\"");
+        expect(response.body).toEqual("Unauthorized");
     });
     test('should return error 401 if not logged in', async () => {
         const response = await request(app)
@@ -922,7 +922,7 @@ describe('GET /api/thesis_proposals', () => {
             .send();
 
         expect(response.status).toBe(401);
-        expect(response.text).toEqual("\"Not authorized\"");
+        expect(response.body).toEqual("Not authorized");
     });
     test('should return error 500 if dao throws an error', async () => {
         const mockUser = {
@@ -1115,7 +1115,7 @@ describe('GET /api/thesis_proposals/:id', () => {
             .send();
 
         expect(response.status).toBe(403);
-        expect(response.text).toEqual("\"Unauthorized\"");
+        expect(response.body).toEqual("Unauthorized");
     });
     test('should return error 401 if not logged in', async () => {
         const response = await request(app)
@@ -1124,7 +1124,7 @@ describe('GET /api/thesis_proposals/:id', () => {
             .send();
 
         expect(response.status).toBe(401);
-        expect(response.text).toEqual("\"Not authorized\"");
+        expect(response.body).toEqual("Not authorized");
     });
     test('should return error 500 if dao throws an error', async () => {
         const mockUser = {
@@ -1296,7 +1296,7 @@ describe('POST /api/student/applications', () => {
     });
 });
 
-describe('GET /api/teacher/thesis_proposals', () => {
+describe('GET /api/thesis-proposals (teacher)', () => {
     test('should return an array of thesis proposals for a teacher', async () => {
         const mockUser = {
             id: 'd1',
@@ -1325,7 +1325,7 @@ describe('GET /api/teacher/thesis_proposals', () => {
 
         // Send a request to the endpoint
         const response = await request(app)
-                               .get('/api/teacher/thesis_proposals')
+                               .get('/api/thesis-proposals')
                                .set('Cookie', cookies);
 
         // Assertions
@@ -1358,7 +1358,7 @@ describe('GET /api/teacher/thesis_proposals', () => {
     
         // Send a request to the endpoint
         const response = await request(app)
-                               .get('/api/teacher/thesis_proposals')
+                               .get('/api/thesis-proposals')
                                .set('Cookie', cookies);
     
         // Assertions

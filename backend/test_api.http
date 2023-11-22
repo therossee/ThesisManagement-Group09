@@ -64,7 +64,7 @@ GET http://localhost:3000/api/keywords HTTP/1.1
 GET http://localhost:3000/api/degrees HTTP/1.1
 ###
 
-## SEARCH FOR THESIS PROPOSALS
+## SEARCH FOR THESIS PROPOSALS (for students)
 GET http://localhost:3000/api/thesis-proposals HTTP/1.1
 ###
 
@@ -82,7 +82,7 @@ Content-Type: application/json
 ### 
 
 ## LIST ALL THESIS PROPOSALS OF A PROFESSOR (supervisor)
-GET http://localhost:3000/api/teacher/thesis_proposals HTTP/1.1
+GET http://localhost:3000/api/thesis-proposals HTTP/1.1
 ###
 
 ## LIST ALL APPLICATIONS FOR A TEACHER'S THESIS PROPOSAL

@@ -256,31 +256,38 @@ async(req, res) => {
 
 app.get('/api/thesis-proposals',
   isLoggedIn,
-  isStudent,
   async (req, res) => {
     try {
-      const studentId = req.user.id;
-      const proposals = await thesisDao.listThesisProposalsFromStudent(studentId);
-      const studentDegree = await usersDao.getStudentDegree(studentId);
-      const proposalsPopulated = await Promise.all(
-        proposals.map(async proposal => {
-          return await _populateProposal(proposal, studentDegree);
-        })
-      );
+      if (req.user.id.startsWith('s')) {
+        const studentId = req.user.id;
+        const proposals = await thesisDao.listThesisProposalsFromStudent(studentId);
+        const studentDegree = await usersDao.getStudentDegree(studentId);
+        const proposalsPopulated = await Promise.all(
+          proposals.map(async proposal => {
+            return await _populateProposal(proposal, studentDegree);
+          })
+        );
 
-      // Not used right now, but it's here for potential future use
-      const metadata = {
-        index: 0,
-        count: proposals.length,
-        total: proposals.length,
-        currentPage: 1
-      };
-      res.json({ $metadata: metadata, items: proposalsPopulated });
+        // Not used right now, but it's here for potential future use
+        const metadata = {
+          index: 0,
+          count: proposals.length,
+          total: proposals.length,
+          currentPage: 1
+        };
+        res.json({ $metadata: metadata, items: proposalsPopulated });
+      } else if (req.user.id.startsWith('d')) {
+        const teacherId = req.user.id;
+        const thesisProposals = await thesisDao.listThesisProposalsTeacher(teacherId);
+        res.json(thesisProposals);
+      } else {
+        // Handle unauthorized case if neither student nor teacher
+        res.status(403).json('Unauthorized');
+      }
     } catch (e) {
       console.error(e);
       res.status(500).json('Internal Server Error');
     }
-
 });
 
 app.get('/api/thesis-proposals/:id',
@@ -323,21 +330,6 @@ async(req,res) => {
     console.error(error); 
     res.status(500).json(`Failed to apply for proposal. ${error.message || error}`);
   });
-});
-
-app.get('/api/teacher/thesis_proposals',
-isLoggedIn,
-isTeacher,
-async (req, res) => {
-  try {
-    const teacherId = req.user.id;
-    const thesisProposals = await thesisDao.listThesisProposalsTeacher(teacherId);
-
-    res.json(thesisProposals);
-  } catch (e) {
-    console.error(e);
-    res.status(500).json('Internal Server Error');
-  }
 });
 
 app.get('/api/teacher/applications/:proposal_id',
