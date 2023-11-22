@@ -382,11 +382,16 @@ VALUES
 INSERT INTO proposalGroup (proposal_id, cod_group)
 VALUES
     (1, 'Group1'),
-    (1, 'Group2'),
-    (1, 'Group3'),
+    (1, 'Group5'),
+    (2, 'Group1'),
     (2, 'Group2'),
-    (3, 'Group1'),
-    (2, 'Group1');
+    (3, 'Group3'),
+    (3, 'Group5'),
+    (3, 'Group6'),
+    (4, 'Group3'),
+    (4, 'Group4'),
+    (5, 'Group5');
+
 
 -- Insert into thesisApplication
 INSERT INTO thesisApplication (proposal_id, student_id)
