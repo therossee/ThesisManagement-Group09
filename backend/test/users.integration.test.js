@@ -2,6 +2,7 @@ require('jest');
 const request = require("supertest");
 const service = require("../users_dao");
 const {app, server} = require("../index");
+const passport = require('passport');
 
 jest.mock('../users_dao', () => ({
   getUser: jest.fn(),
@@ -134,6 +135,22 @@ describe('Integration Tests for Authentication APIs', () => {
           }
         );        
     });
+    test('should return an error for an authentication failure', async () => {
+      const authenticateSpy = jest.spyOn(passport, 'authenticate');
+      authenticateSpy.mockImplementation((strategy, callback) => {
+          const err = new Error('Authentication failed');
+          return (req, res, next) => callback(err, null, null, next);
+      });
+
+      const response = await request(app)
+          .post('/api/sessions')
+          .send({ username: 'invalid@example.com', password: 'invalidPassword' })
+          .set('Accept', 'application/json');
+
+      expect(response.status).toBe(500); 
+      
+      authenticateSpy.mockRestore();
+    });
     test('should return 204 for a successful logout', async () => {
         const logoutResponse = await request(app)
           .delete('/api/sessions/current')
@@ -148,5 +165,5 @@ describe('Integration Tests for Authentication APIs', () => {
     
         expect(getCurrentUserResponse.status).toBe(401);
         expect(getCurrentUserResponse.body).toEqual('Not authenticated');
-      });
-  });
+    });
+});

@@ -31,6 +31,7 @@ jest.mock('../thesis_dao', () => ({
 
 jest.mock('../users_dao', () => ({
     getUser: jest.fn(),
+    getStudentDegree: jest.fn(),
 }));
 
 jest.mock('../degree_dao', () => ({
@@ -659,7 +660,7 @@ describe('GET /api/degrees', () => {
     });
 });
 
-describe('GET /api/thesis_proposals', () => {
+describe('GET /api/thesis-proposals (student)', () => {
     test('should return the list of thesis proposals of a student', async () => {
         const mockUser = {
             id: 's1',
@@ -690,7 +691,7 @@ describe('GET /api/thesis_proposals', () => {
                 description: 'Test description',
                 expiration: '2021-12-31',
                 level: 'Bachelor',
-                cds: 'Test CDS',
+                cds: 'mockCode',
                 supervisor_id: 'd1',
                 type: 'Bachelor',
                 required_knowledge: 'Test knowledge',
@@ -698,7 +699,7 @@ describe('GET /api/thesis_proposals', () => {
             }
         ];
         service.listThesisProposalsFromStudent.mockResolvedValue(mockThesisProposal);
-
+        usersService.getStudentDegree.mockResolvedValue({ cod_degree: 'mockCode', title_degree: 'mockTitle' });
         const supervisorMocked = {
             id: mockThesisProposal[0].supervisor_id,
             surname: 'R',
@@ -753,8 +754,8 @@ describe('GET /api/thesis_proposals', () => {
                     expiration: '2021-12-31',
                     level: 'Bachelor',
                     cds: {
-                        code: mockThesisProposal[0].cds,
-                        title: mockDegree.title_degree
+                        cod_degree: 'mockCode',
+                        title_degree: 'mockTitle'
                     },
                     supervisor: supervisorMocked,
                     coSupervisors: {
@@ -799,7 +800,7 @@ describe('GET /api/thesis_proposals', () => {
                 description: 'Test description',
                 expiration: '2051-12-31',
                 level: 'Bachelor',
-                cds: 'Test CDS',
+                cds: 'mockCode',
                 supervisor_id: 'd1',
                 type: 'Bachelor',
                 required_knowledge: 'Test knowledge',
@@ -807,7 +808,7 @@ describe('GET /api/thesis_proposals', () => {
             }
         ];
         service.listThesisProposalsFromStudent.mockResolvedValue(mockThesisProposal);
-
+        usersService.getStudentDegree.mockResolvedValue({ cod_degree: 'mockCode', title_degree: 'mockTitle' });
         const supervisorMocked = {
             id: mockThesisProposal[0].supervisor_id,
             surname: 'R',
@@ -841,7 +842,7 @@ describe('GET /api/thesis_proposals', () => {
 
         const mockDegree = {
             cod_degree: mockThesisProposal[0].cds,
-            title_degree: 'Ingegneria Informatica',
+            title_degree: 'mockTitle',
         };
         degreeService.getDegreeFromCode.mockResolvedValue(mockDegree);
 
@@ -868,8 +869,8 @@ describe('GET /api/thesis_proposals', () => {
                     expiration: '2051-12-31',
                     level: 'Bachelor',
                     cds: {
-                        code: mockThesisProposal[0].cds,
-                        title: mockDegree.title_degree
+                        cod_degree: mockThesisProposal[0].cds,
+                        title_degree: mockDegree.title_degree
                     },
                     supervisor: supervisorMocked,
                     coSupervisors: {
@@ -887,7 +888,7 @@ describe('GET /api/thesis_proposals', () => {
     });
     test('should return error 403 if not authorized', async () => {
         const mockUser = {
-            id: 'd1',
+            id: 'm1',
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
@@ -912,7 +913,7 @@ describe('GET /api/thesis_proposals', () => {
             .send();
 
         expect(response.status).toBe(403);
-        expect(response.text).toEqual("\"Unauthorized\"");
+        expect(response.body).toEqual("Unauthorized");
     });
     test('should return error 401 if not logged in', async () => {
         const response = await request(app)
@@ -921,7 +922,7 @@ describe('GET /api/thesis_proposals', () => {
             .send();
 
         expect(response.status).toBe(401);
-        expect(response.text).toEqual("\"Not authorized\"");
+        expect(response.body).toEqual("Not authorized");
     });
     test('should return error 500 if dao throws an error', async () => {
         const mockUser = {
@@ -986,13 +987,14 @@ describe('GET /api/thesis_proposals/:id', () => {
             description: 'Test description',
             expiration: '2021-12-31',
             level: 'Bachelor',
-            cds: 'Test CDS',
+            cds: 'mockCode',
             supervisor_id: 'd1',
             type: 'Bachelor',
             required_knowledge: 'Test knowledge',
             notes: 'Test notes'
         };
         service.getThesisProposal.mockResolvedValue(mockThesisProposal);
+        usersService.getStudentDegree.mockResolvedValue({ cod_degree: 'mockCode', title_degree: 'mockTitle' });
 
         const supervisorMocked = {
             id: mockThesisProposal.supervisor_id,
@@ -1021,7 +1023,7 @@ describe('GET /api/thesis_proposals/:id', () => {
 
         const mockDegree = {
             cod_degree: mockThesisProposal.cds,
-            title_degree: 'Ingegneria Informatica',
+            title_degree: 'mockTitle',
         };
         degreeService.getDegreeFromCode.mockResolvedValue(mockDegree);
 
@@ -1040,8 +1042,8 @@ describe('GET /api/thesis_proposals/:id', () => {
             expiration: '2021-12-31',
             level: 'Bachelor',
             cds: {
-                code: mockThesisProposal.cds,
-                title: mockDegree.title_degree
+                cod_degree: mockThesisProposal.cds,
+                title_degree: mockDegree.title_degree
             },
             supervisor: supervisorMocked,
             coSupervisors: {
@@ -1113,7 +1115,7 @@ describe('GET /api/thesis_proposals/:id', () => {
             .send();
 
         expect(response.status).toBe(403);
-        expect(response.text).toEqual("\"Unauthorized\"");
+        expect(response.body).toEqual("Unauthorized");
     });
     test('should return error 401 if not logged in', async () => {
         const response = await request(app)
@@ -1122,7 +1124,7 @@ describe('GET /api/thesis_proposals/:id', () => {
             .send();
 
         expect(response.status).toBe(401);
-        expect(response.text).toEqual("\"Not authorized\"");
+        expect(response.body).toEqual("Not authorized");
     });
     test('should return error 500 if dao throws an error', async () => {
         const mockUser = {
@@ -1294,7 +1296,7 @@ describe('POST /api/student/applications', () => {
     });
 });
 
-describe('GET /api/teacher/thesis_proposals', () => {
+describe('GET /api/thesis-proposals (teacher)', () => {
     test('should return an array of thesis proposals for a teacher', async () => {
         const mockUser = {
             id: 'd1',
@@ -1323,7 +1325,7 @@ describe('GET /api/teacher/thesis_proposals', () => {
 
         // Send a request to the endpoint
         const response = await request(app)
-                               .get('/api/teacher/thesis_proposals')
+                               .get('/api/thesis-proposals')
                                .set('Cookie', cookies);
 
         // Assertions
@@ -1356,7 +1358,7 @@ describe('GET /api/teacher/thesis_proposals', () => {
     
         // Send a request to the endpoint
         const response = await request(app)
-                               .get('/api/teacher/thesis_proposals')
+                               .get('/api/thesis-proposals')
                                .set('Cookie', cookies);
     
         // Assertions
