@@ -111,8 +111,12 @@ app.get('/api/sessions/current', (req, res) => {
 
 // DELETE /api/sessions/current
 app.delete('/api/sessions/current', (req, res) => {
-  req.logout();
-  res.status(204).end();
+  req.logout((err) => {
+    if (err) {
+      return res.status(500).json({ error: 'Logout failed' });
+    }
+    res.status(204).end();
+  });
 });
 
 
