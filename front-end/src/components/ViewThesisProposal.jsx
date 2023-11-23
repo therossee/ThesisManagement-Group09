@@ -40,17 +40,9 @@ function ViewThesisProposal() {
     API.getThesisProposalbyId(id)
       .then((x) => {
         setData(x);
-        let actual;
-        API.getClock()
-          .then((y) => {
-            actual = dayjs().add(y.offset, 'ms');
-            const expDate = dayjs(x.expiration);
-            expDate.isBefore(actual) ? setDisabled(true) : setDisabled(false);
-          })
-          .catch((err) => { messageApi.error(err.message ? err.message : err) });
         API.getStudentApplications()
           .then((z) => {
-              if(dayjs(actual).isBefore(x.expiration)) {
+              if(x.status === "ACTIVE") {
                 const dis = z.includes(parseInt(id));
                 setDisabled(dis);
               }
