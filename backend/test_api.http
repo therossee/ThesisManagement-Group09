@@ -41,9 +41,9 @@ Content-Type: application/json
   "description": "description",
   "required_knowledge": "required knowledge",
   "notes": "notes",
-  "expiration": "28/11/2023",
+  "expiration": "2025-11-10",
   "level": "Bachelor's",
-  "cds" : "LM-29",
+  "cds" : ["LM-29", "LM-32"],
   "keywords": ["keyword"]
 }
 ###
@@ -64,12 +64,12 @@ GET http://localhost:3000/api/keywords HTTP/1.1
 GET http://localhost:3000/api/degrees HTTP/1.1
 ###
 
-## SEARCH FOR THESIS PROPOSALS
+## SEARCH FOR THESIS PROPOSALS (for students)
 GET http://localhost:3000/api/thesis-proposals HTTP/1.1
 ###
 
 ## GET THESIS PROPOSAL BY ID (for student belonging to the same cds of the proposal)
-GET http://localhost:3000/api/thesis-proposals/1 HTTP/1.1
+GET http://localhost:3000/api/thesis-proposals/6 HTTP/1.1
 ###
 
 ## APPLY FOR THESIS PROPOSAL
@@ -82,7 +82,7 @@ Content-Type: application/json
 ### 
 
 ## LIST ALL THESIS PROPOSALS OF A PROFESSOR (supervisor)
-GET http://localhost:3000/api/teacher/thesis_proposals HTTP/1.1
+GET http://localhost:3000/api/thesis-proposals HTTP/1.1
 ###
 
 ## LIST ALL APPLICATIONS FOR A TEACHER'S THESIS PROPOSAL

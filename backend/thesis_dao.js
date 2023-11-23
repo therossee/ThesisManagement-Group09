@@ -3,54 +3,63 @@
 /* Data Access Object (DAO) module for accessing thesis data */
 
 const db = require('./db');
+const AdvancedDate = require('./AdvancedDate');
 
 exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id, external_co_supervisors_id, type, groups, description, required_knowledge, notes, expiration, level, cds, keywords) => {
     return new Promise((resolve, reject) => {
       
         const insertThesisProposalQuery = `
-        INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?); `;
+        INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, expiration, level)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?); `;
 
-        const insertProposalKeywordQuery = `
+    const insertProposalKeywordQuery = `
         INSERT INTO proposalKeyword (proposal_id, keyword)
         VALUES (?, ?); `;
 
-        const insertInternalCoSupervisorsQuery = `
+    const insertInternalCoSupervisorsQuery = `
         INSERT INTO thesisInternalCoSupervisor (proposal_id, co_supervisor_id)
         VALUES (?, ?); `;
 
-        const insertExternalCoSupervisorsQuery = `
+    const insertExternalCoSupervisorsQuery = `
         INSERT INTO thesisExternalCoSupervisor (proposal_id, co_supervisor_id)
         VALUES (?, ?); `;
 
-        const insertGroupsQuery = `
+    const insertGroupsQuery = `
         INSERT INTO proposalGroup (proposal_id, cod_group)
+        VALUES (?, ?); `;
+
+        const insertCdsQuery = `
+        INSERT INTO proposalCds (proposal_id, cod_degree)
         VALUES (?, ?); `;
 
         // Self-called transaction
         db.transaction(() => {
-          const res = db.prepare(insertThesisProposalQuery).run(title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds);
+          const res = db.prepare(insertThesisProposalQuery).run(title, supervisor_id, type, description, required_knowledge, notes, expiration, level);
           const proposalId = res.lastInsertRowid;
 
-          // Keywords insertion
-          keywords.forEach(keyword => {
-            db.prepare(insertProposalKeywordQuery).run(proposalId, keyword);
-          });
+      // Keywords insertion
+      keywords.forEach(keyword => {
+        db.prepare(insertProposalKeywordQuery).run(proposalId, keyword);
+      });
 
-          if(internal_co_supervisors_id.length > 0){
-            internal_co_supervisors_id.forEach(internal_co_supervisor_id => {
-              db.prepare(insertInternalCoSupervisorsQuery).run(proposalId, internal_co_supervisor_id);
-            });
-          }
+      if (internal_co_supervisors_id.length > 0) {
+        internal_co_supervisors_id.forEach(internal_co_supervisor_id => {
+          db.prepare(insertInternalCoSupervisorsQuery).run(proposalId, internal_co_supervisor_id);
+        });
+      }
 
-          if(external_co_supervisors_id.length > 0){
-            external_co_supervisors_id.forEach(external_co_supervisor_id => {
-              db.prepare(insertExternalCoSupervisorsQuery).run(proposalId, external_co_supervisor_id);
-            });
-          }
+      if (external_co_supervisors_id.length > 0) {
+        external_co_supervisors_id.forEach(external_co_supervisor_id => {
+          db.prepare(insertExternalCoSupervisorsQuery).run(proposalId, external_co_supervisor_id);
+        });
+      }
 
-          groups.forEach(group => {
-            db.prepare(insertGroupsQuery).run(proposalId, group);
+      groups.forEach(group => {
+        db.prepare(insertGroupsQuery).run(proposalId, group);
+      });
+
+          cds.forEach(cod_degree => {
+            db.prepare(insertCdsQuery).run(proposalId, cod_degree);
           });
 
           resolve(proposalId)
@@ -62,44 +71,44 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
 };
 
 exports.getTeacherListExcept = (id) => {
-  return new Promise((resolve)=>{
-      const query = `SELECT * FROM teacher WHERE id <> ?; `;
-      const teachers = db.prepare(query).all(id);
-      resolve(teachers);
+  return new Promise((resolve) => {
+    const query = `SELECT * FROM teacher WHERE id <> ?; `;
+    const teachers = db.prepare(query).all(id);
+    resolve(teachers);
   })
 };
 
 exports.getExternalCoSupervisorList = () => {
-  return new Promise((resolve)=>{
-      const query = `SELECT * FROM externalCoSupervisor;`;
-      const externalCoSupervisors = db.prepare(query).all();
-      resolve(externalCoSupervisors);
+  return new Promise((resolve) => {
+    const query = `SELECT * FROM externalCoSupervisor;`;
+    const externalCoSupervisors = db.prepare(query).all();
+    resolve(externalCoSupervisors);
   })
 };
 
 exports.getGroup = (teacherId) => {
   return new Promise((resolve) => {
-      const getGroupQuery = `SELECT cod_group FROM teacher WHERE id=? `;
-      const res = db.prepare(getGroupQuery).get(teacherId);
-      resolve(res.cod_group)
+    const getGroupQuery = `SELECT cod_group FROM teacher WHERE id=? `;
+    const res = db.prepare(getGroupQuery).get(teacherId);
+    resolve(res.cod_group)
   })
 };
 
 exports.getAllKeywords = () => {
   return new Promise((resolve) => {
-      const getKeywords = `SELECT DISTINCT(keyword) FROM proposalKeyword`;
-      const res = db.prepare(getKeywords).all();
-      // Extracting the keyword property from each row
-      const keywords = res.map(row => row.keyword);
-      resolve(keywords)
+    const getKeywords = `SELECT DISTINCT(keyword) FROM proposalKeyword`;
+    const res = db.prepare(getKeywords).all();
+    // Extracting the keyword property from each row
+    const keywords = res.map(row => row.keyword);
+    resolve(keywords)
   })
 };
 
 exports.getDegrees = () => {
   return new Promise((resolve) => {
-      const getDegrees = `SELECT * FROM degree`;
-      const res = db.prepare(getDegrees).all();
-      resolve(res)
+    const getDegrees = `SELECT * FROM degree`;
+    const res = db.prepare(getDegrees).all();
+    resolve(res)
   })
 };
 
@@ -114,13 +123,14 @@ exports.getDegrees = () => {
 exports.getThesisProposal = (proposalId, studentId) => {
     return new Promise((resolve) => {
         const query = `SELECT * FROM thesisProposal P
-            JOIN degree D ON P.cds = D.cod_degree
-            JOIN student S ON S.cod_degree = D.cod_degree
-            WHERE P.proposal_id = ? AND S.id = ?`;
+        JOIN proposalCds PC ON P.proposal_id = PC.proposal_id
+        JOIN degree D ON PC.cod_degree = D.cod_degree
+        JOIN student S ON S.cod_degree = D.cod_degree
+        WHERE P.proposal_id = ? AND S.id = ?`;
 
-        const thesisProposal = db.prepare(query).get(proposalId, studentId);
-        resolve(thesisProposal ?? null);
-    })
+    const thesisProposal = db.prepare(query).get(proposalId, studentId);
+    resolve(thesisProposal ?? null);
+  })
 };
 
 /**
@@ -130,15 +140,25 @@ exports.getThesisProposal = (proposalId, studentId) => {
  * @return {Promise<ThesisProposalRow[]>}
  */
 exports.listThesisProposalsFromStudent = (studentId) => {
-    return new Promise((resolve) => {
-        const query = `SELECT * FROM thesisProposal P
-            JOIN degree D ON P.cds = D.cod_degree
-            JOIN student S ON S.cod_degree = D.cod_degree
-            WHERE S.id = ?`;
+  return new Promise((resolve) => {
+    const currentDate = new AdvancedDate().toISOString();
+    const query = `SELECT *
+        FROM thesisProposal P
+        JOIN proposalCds C ON C.proposal_id = P.proposal_id
+        JOIN degree D ON C.cod_degree = D.cod_degree
+        JOIN student S ON S.cod_degree = D.cod_degree
+        WHERE S.id = ?
+        AND NOT EXISTS (
+            SELECT 1
+            FROM thesisApplication A
+            WHERE A.proposal_id = P.proposal_id
+            AND A.status = 'accepted'
+        )
+        AND P.expiration > ?;`;
 
-        const thesisProposals = db.prepare(query).all(studentId);
-        resolve(thesisProposals);
-    })
+    const thesisProposals = db.prepare(query).all(studentId,currentDate);
+    resolve(thesisProposals);
+  })
 };
 
 /**
@@ -148,11 +168,11 @@ exports.listThesisProposalsFromStudent = (studentId) => {
  * @return {Promise<string[]>}
  */
 exports.getKeywordsOfProposal = (proposalId) => {
-    return new Promise((resolve) => {
-        const query = `SELECT keyword FROM proposalKeyword WHERE proposal_id = ?`;
-        const data = db.prepare(query).all(proposalId);
-        resolve(data.map( row => row.keyword ));
-    })
+  return new Promise((resolve) => {
+    const query = `SELECT keyword FROM proposalKeyword WHERE proposal_id = ?`;
+    const data = db.prepare(query).all(proposalId);
+    resolve(data.map(row => row.keyword));
+  })
 };
 
 /**
@@ -162,12 +182,12 @@ exports.getKeywordsOfProposal = (proposalId) => {
  * @return {Promise<string[]>}
  */
 exports.getProposalGroups = (proposalId) => {
-    return new Promise((resolve) => {
-        const query = `SELECT cod_group FROM proposalGroup WHERE proposal_id = ?`;
-        const data = db.prepare(query).all(proposalId);
+  return new Promise((resolve) => {
+    const query = `SELECT cod_group FROM proposalGroup WHERE proposal_id = ?`;
+    const data = db.prepare(query).all(proposalId);
 
-        resolve(data.map( row => row.cod_group ));
-    })
+    resolve(data.map(row => row.cod_group));
+  })
 };
 
 /**
@@ -178,11 +198,11 @@ exports.getProposalGroups = (proposalId) => {
  * @return {Promise<TeacherRow[]>}
  */
 exports.getInternalCoSupervisorsOfProposal = (proposalId) => {
-    return new Promise((resolve) => {
-        const query = `SELECT * FROM thesisInternalCoSupervisor I JOIN teacher T ON I.co_supervisor_id = T.id WHERE I.proposal_id = ?`;
-        const data = db.prepare(query).all(proposalId);
-        resolve(data);
-    })
+  return new Promise((resolve) => {
+    const query = `SELECT * FROM thesisInternalCoSupervisor I JOIN teacher T ON I.co_supervisor_id = T.id WHERE I.proposal_id = ?`;
+    const data = db.prepare(query).all(proposalId);
+    resolve(data);
+  })
 };
 
 /**
@@ -192,11 +212,11 @@ exports.getInternalCoSupervisorsOfProposal = (proposalId) => {
  * @return {Promise<ExternalCoSupervisorRow[]>}
  */
 exports.getExternalCoSupervisorsOfProposal = (proposalId) => {
-    return new Promise((resolve) => {
-        const query = `SELECT * FROM thesisExternalCoSupervisor E JOIN externalCoSupervisor C ON E.co_supervisor_id = C.id WHERE E.proposal_id = ?`;
-        const data = db.prepare(query).all(proposalId);
-        resolve(data);
-    })
+  return new Promise((resolve) => {
+    const query = `SELECT * FROM thesisExternalCoSupervisor E JOIN externalCoSupervisor C ON E.co_supervisor_id = C.id WHERE E.proposal_id = ?`;
+    const data = db.prepare(query).all(proposalId);
+    resolve(data);
+  })
 };
 
 /**
@@ -206,11 +226,11 @@ exports.getExternalCoSupervisorsOfProposal = (proposalId) => {
  * @return {Promise<TeacherRow>}
  */
 exports.getSupervisorOfProposal = (proposalId) => {
-    return new Promise((resolve) => {
-        const query = `SELECT T.id, T.surname, T.name, T.email, T.cod_group, T.cod_department FROM thesisProposal P JOIN teacher T ON P.supervisor_id = T.id WHERE P.proposal_id = ?`;
-        const data = db.prepare(query).get(proposalId);
-        resolve(data);
-    })
+  return new Promise((resolve) => {
+    const query = `SELECT T.id, T.surname, T.name, T.email, T.cod_group, T.cod_department FROM thesisProposal P JOIN teacher T ON P.supervisor_id = T.id WHERE P.proposal_id = ?`;
+    const data = db.prepare(query).get(proposalId);
+    resolve(data);
+  })
 };
 
 
@@ -262,61 +282,61 @@ exports.applyForProposal = (proposal_id, student_id) => {
 
 exports.listThesisProposalsTeacher = (teacherId) => {
   return new Promise((resolve) => {
-      const getProposals = `SELECT * FROM thesisProposal WHERE supervisor_id=?`;
-      const proposals = db.prepare(getProposals).all(teacherId);
-      resolve(proposals)
-    
+    const getProposals = `SELECT * FROM thesisProposal WHERE supervisor_id=?`;
+    const proposals = db.prepare(getProposals).all(teacherId);
+    resolve(proposals)
+
   })
 };
 
 exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
   return new Promise((resolve) => {
-    
+
     const getApplications = `SELECT s.name, s.surname, ta.status, s.id
     FROM thesisApplication ta, thesisProposal tp, student s
     WHERE ta.proposal_id = tp.proposal_id AND s.id = ta.student_id AND ta.proposal_id=? AND tp.supervisor_id= ?`;
 
-    const applications = db.prepare(getApplications).all(proposal_id, teacherId);    
+    const applications = db.prepare(getApplications).all(proposal_id, teacherId);
     resolve(applications)
-    
+
   })
 };
 
 exports.getStudentApplications = (student_id) => {
   return new Promise((resolve) => {
-      const query = `SELECT proposal_id FROM thesisApplication WHERE student_id=?`;
-      const res = db.prepare(query).all(student_id);
-      resolve(res)
+    const query = `SELECT proposal_id FROM thesisApplication WHERE student_id=?`;
+    const res = db.prepare(query).all(student_id);
+    resolve(res)
   })
 };
 
-exports.updateApplicationStatus = (studentId, proposalId, status) =>{
-  return new Promise((resolve,reject)=>{
-      const query = `
+exports.updateApplicationStatus = (studentId, proposalId, status) => {
+  return new Promise((resolve, reject) => {
+    const query = `
       UPDATE thesisApplication
       SET status = ?
       WHERE student_id = ? AND proposal_id = ?
     `
-    const res = db.prepare(query).run(status,studentId,proposalId);
+    const res = db.prepare(query).run(status, studentId, proposalId);
 
     const rowCount = res.changes;
 
-  resolve(rowCount);
+    resolve(rowCount);
   })
 };
 
-exports.rejectOtherApplications = (studentId,proposalId) => {
-  return new Promise((resolve,reject)=>{
+exports.rejectOtherApplications = (studentId, proposalId) => {
+  return new Promise((resolve, reject) => {
     const query = `
       UPDATE thesisApplication
-      SET status = 'rejected'
+      SET status = 'canceled'
       WHERE student_id <> ? AND proposal_id = ?
     `
-    const res = db.prepare(query).run(studentId,proposalId);
+    const res = db.prepare(query).run(studentId, proposalId);
 
     const rowCount = res.changes;
 
-  resolve(rowCount);
+    resolve(rowCount);
   })
 };
 
