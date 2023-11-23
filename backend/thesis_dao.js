@@ -8,8 +8,8 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
     return new Promise((resolve, reject) => {
       
         const insertThesisProposalQuery = `
-        INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?); `;
+        INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, expiration, level)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?); `;
 
         const insertProposalKeywordQuery = `
         INSERT INTO proposalKeyword (proposal_id, keyword)
@@ -27,9 +27,13 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
         INSERT INTO proposalGroup (proposal_id, cod_group)
         VALUES (?, ?); `;
 
+        const insertCdsQuery = `
+        INSERT INTO proposalCds (proposal_id, cod_degree)
+        VALUES (?, ?); `;
+
         // Self-called transaction
         db.transaction(() => {
-          const res = db.prepare(insertThesisProposalQuery).run(title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds);
+          const res = db.prepare(insertThesisProposalQuery).run(title, supervisor_id, type, description, required_knowledge, notes, expiration, level);
           const proposalId = res.lastInsertRowid;
 
           // Keywords insertion
@@ -51,6 +55,10 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
 
           groups.forEach(group => {
             db.prepare(insertGroupsQuery).run(proposalId, group);
+          });
+
+          cds.forEach(cod_degree => {
+            db.prepare(insertCdsQuery).run(proposalId, cod_degree);
           });
 
           resolve(proposalId)
@@ -114,9 +122,10 @@ exports.getDegrees = () => {
 exports.getThesisProposal = (proposalId, studentId) => {
     return new Promise((resolve) => {
         const query = `SELECT * FROM thesisProposal P
-            JOIN degree D ON P.cds = D.cod_degree
-            JOIN student S ON S.cod_degree = D.cod_degree
-            WHERE P.proposal_id = ? AND S.id = ?`;
+        JOIN proposalCds PC ON P.proposal_id = PC.proposal_id
+        JOIN degree D ON PC.cod_degree = D.cod_degree
+        JOIN student S ON S.cod_degree = D.cod_degree
+        WHERE P.proposal_id = ? AND S.id = ?`;
 
         const thesisProposal = db.prepare(query).get(proposalId, studentId);
         resolve(thesisProposal ?? null);
@@ -132,9 +141,10 @@ exports.getThesisProposal = (proposalId, studentId) => {
 exports.listThesisProposalsFromStudent = (studentId) => {
     return new Promise((resolve) => {
         const query = `SELECT * FROM thesisProposal P
-            JOIN degree D ON P.cds = D.cod_degree
-            JOIN student S ON S.cod_degree = D.cod_degree
-            WHERE S.id = ?`;
+        JOIN proposalCds PC ON P.proposal_id = PC.proposal_id
+        JOIN degree D ON PC.cod_degree = D.cod_degree
+        JOIN student S ON S.cod_degree = D.cod_degree
+        WHERE S.id = ?`;
 
         const thesisProposals = db.prepare(query).all(studentId);
         resolve(thesisProposals);
