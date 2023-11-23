@@ -290,6 +290,20 @@ exports.applyForProposal = (proposal_id, student_id) => {
     if(!proposal_correct){
       reject("The proposal doesn't belong to the student degree");
     }
+
+    // Check if the proposal is active
+    const checkProposalActive = `SELECT * FROM thesisProposal P WHERE P.proposal_id=? AND P.expiration > ? AND P.creation_date < ? 
+                                 AND NOT EXISTS (
+                                    SELECT 1
+                                    FROM thesisApplication A
+                                    WHERE A.proposal_id = P.proposal_id
+                                    AND A.status = 'accepted'
+                                )`;
+    console.log('Proposta attiva: '+checkProposalActive);
+    const proposal_active = db.prepare(checkProposalActive).get(proposal_id, currentDate, currentDate);
+    if(!proposal_active){
+      reject("The proposal is not active");
+    }
     
     const insertApplicationQuery = `
     INSERT INTO thesisApplication (proposal_id, student_id, creation_date)

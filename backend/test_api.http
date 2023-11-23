@@ -90,7 +90,7 @@ GET http://localhost:3000/api/thesis-proposals HTTP/1.1
 ###
 
 ## LIST ALL APPLICATIONS FOR A TEACHER'S THESIS PROPOSAL
-GET http://localhost:3000/api/teacher/applications/4 HTTP/1.1
+GET http://localhost:3000/api/teacher/applications/1 HTTP/1.1
 ###
 
 ## FUNCTION TO GET ALL APPLICATION OF A STUDENT
@@ -102,7 +102,7 @@ PATCH http://localhost:3000/api/teacher/applications/accept/1 HTTP/1.1
 Content-Type: application/json
 
 {
-  "student_id": "s299119"
+  "student_id": "s294301"
 }
 
 ###
