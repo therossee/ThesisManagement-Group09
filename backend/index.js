@@ -440,6 +440,7 @@ async function _populateProposal(proposalData, studentDegree) {
     description: proposalData.description,
     requiredKnowledge: proposalData.required_knowledge,
     notes: proposalData.notes,
+    creation_date: proposalData.creation_date,
     expiration: proposalData.expiration,
     level: proposalData.level,
     cds: studentDegree,
