@@ -261,10 +261,10 @@ app.get('/api/thesis-proposals',
       if (req.user.id.startsWith('s')) {
         const studentId = req.user.id;
         const proposals = await thesisDao.listThesisProposalsFromStudent(studentId);
-        const studentDegree = await usersDao.getStudentDegree(studentId);
+        const cds = await usersDao.getStudentDegree(studentId);
         const proposalsPopulated = await Promise.all(
           proposals.map(async proposal => {
-            return await _populateProposal(proposal, studentDegree);
+            return await _populateProposal(proposal, cds);
           })
         );
 
@@ -279,7 +279,21 @@ app.get('/api/thesis-proposals',
       } else if (req.user.id.startsWith('d')) {
         const teacherId = req.user.id;
         const thesisProposals = await thesisDao.listThesisProposalsTeacher(teacherId);
-        res.json(thesisProposals);
+        const proposalsPopulated = await Promise.all(
+          thesisProposals.map(async proposal => {
+            const cds = await thesisDao.getThesisProposalCds(proposal.proposal_id);
+            return await _populateProposal(proposal, cds);
+          })
+        );
+
+        // Not used right now, but it's here for potential future use
+        const metadata = {
+          index: 0,
+          count: thesisProposals.length,
+          total: thesisProposals.length,
+          currentPage: 1
+        };
+        res.json({ $metadata: metadata, items: proposalsPopulated });
       } else {
         // Handle unauthorized case if neither student nor teacher
         res.status(403).json('Unauthorized');
@@ -384,7 +398,7 @@ app.patch('/api/teacher/applications/accept/:proposal_id',
       res.status(500).json(`Internal Server Error`);
     }
 
-  })
+})
 
 app.patch('/api/teacher/applications/reject/:proposal_id',
 isLoggedIn,
@@ -422,7 +436,7 @@ module.exports = { app, server };
  * @return {Promise<object>}
  * @private
  */
-async function _populateProposal(proposalData, studentDegree) {
+async function _populateProposal(proposalData, cds) {
   return {
     id: proposalData.proposal_id,
     title: proposalData.title,
@@ -443,7 +457,7 @@ async function _populateProposal(proposalData, studentDegree) {
     creation_date: proposalData.creation_date,
     expiration: proposalData.expiration,
     level: proposalData.level,
-    cds: studentDegree,
+    cds: cds,
     keywords: await thesisDao.getKeywordsOfProposal(proposalData.proposal_id),
     groups: await thesisDao.getProposalGroups(proposalData.proposal_id)
   };
