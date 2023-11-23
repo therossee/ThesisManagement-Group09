@@ -71,7 +71,7 @@ CREATE TABLE thesisProposal (
     description TEXT NOT NULL,
     required_knowledge TEXT,
     notes TEXT,
-    creation_date DATE DEFAULT CURRENT_DATE NOT NULL,
+    creation_date DATE NOT NULL,
     expiration DATE NOT NULL,
     level TEXT NOT NULL,
     FOREIGN KEY(supervisor_id) REFERENCES teacher(id)
@@ -123,7 +123,7 @@ CREATE TABLE proposalCds(
 CREATE TABLE thesisApplication (
     proposal_id INTEGER NOT NULL,
     student_id TEXT NOT NULL,
-    creation_date DATE DEFAULT CURRENT_DATE NOT NULL,
+    creation_date DATE NOT NULL,
     status TEXT DEFAULT 'waiting for approval',
     FOREIGN KEY(proposal_id) REFERENCES thesisProposal(proposal_id),
     FOREIGN KEY(student_id) REFERENCES student(id),
