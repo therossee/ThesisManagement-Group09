@@ -6,12 +6,14 @@ function InsertBody(props) {
     const [selectedInt, setSelectedInt] = useState([]);
     const [selectedExt, setSelectedExt] = useState([]);
     const [selectedKw, setSelectedKw] = useState([]);
+    const [selectedCds, setSelectedCds] = useState([]);
     const [newKeyword, setNewKeyword] = useState("");
     const [lev, setSelLev] = useState("");
     const [selDegrees, setSelDegrees] = useState([]);
     const { keywords, intCoSupervisors, extCoSupervisors, degrees, form, date } = props;
     const unselectedInt = intCoSupervisors.filter((x) => !selectedInt.includes(x));
     const unselectedExt = extCoSupervisors.filter((x) => !selectedExt.includes(x));
+    const unselectedCds = selDegrees.filter((x) => !selectedCds.includes(x));
   
     useEffect(() => {
       if (form.getFieldValue("degreeLevel") === "L") {
@@ -43,7 +45,7 @@ function InsertBody(props) {
   
     const handleDegreeSelection = (lev) => {
       setSelLev(lev);
-      form.setFieldValue("cds", "");
+      form.setFieldValue("cds", []);
       const str = lev === "L" ? "L-" : "LM-";
       setSelDegrees(degrees.filter((x) => x.cod_degree.includes(str)));
     };
@@ -57,7 +59,12 @@ function InsertBody(props) {
     };
   
     return (
-      <Form form={form} layout="vertical" onFinish={onFinish}>
+      <Form form={form} layout="vertical" onFinish={onFinish}
+      onValuesChange={(changedValues) => {
+        if (changedValues.degreeLevel) {
+          form.setFieldsValue({ cds: [] });
+        }
+      }}>
         <Form.Item label="Title" name="title" rules={[
           {
             required: true,
@@ -175,23 +182,29 @@ function InsertBody(props) {
           </Select>
         </Form.Item>
         <Form.Item
-          name="cds"
-          label="CdS"
-          rules={[
-            {
-              required: true,
-              message: 'Please select a CdS!',
-            },
-          ]}
-        >
-          <Select placeholder="Select a CdS" allowClear disabled={lev === ""}>
-            {selDegrees.map((d) => (d.cod_degree.includes(lev) ?
-              <Select.Option key={d.title_degree} value={d.cod_degree}>
-                {d.title_degree}
-              </Select.Option>
-              : null
-            ))}
-          </Select>
+        name="cds"
+        label="CdS"
+        rules={[
+          {
+            required: true,
+            message: 'Please select at least one CdS!',
+          },
+        ]}>
+        <Select
+            mode="multiple"
+            placeholder="Select one or more CdS"
+            value={selectedCds}
+            onChange={setSelectedCds}
+            options={unselectedCds.map((x) => ({
+              value: x.cod_degree, // assuming x.id is a string or number
+              label: `${x.title_degree}`, // assuming x.name and x.surname are strings
+              searchValue: `${x.cod_degree} ${x.title_degree}`, // combine id, name, and surname for search
+            }))}
+            disabled={lev === ""}
+            filterOption={(input, option) =>
+              option.searchValue.toLowerCase().includes(input.toLowerCase())
+            }
+          />
         </Form.Item>
         <Form.Item>
           <div style={{ paddingLeft: "45%" }}>
