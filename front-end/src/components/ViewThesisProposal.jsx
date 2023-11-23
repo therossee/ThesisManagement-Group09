@@ -1,7 +1,6 @@
 import { React, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button, Descriptions, Skeleton, Typography, Tag, message } from "antd";
-import dayjs from 'dayjs';
 import API from "../API";
 
 function ViewThesisProposal() {
@@ -40,17 +39,12 @@ function ViewThesisProposal() {
     API.getThesisProposalbyId(id)
       .then((x) => {
         setData(x);
-        API.getClock()
-          .then((y) => {
-            const actual = dayjs().add(y.offset, 'ms')
-            const expDate = dayjs(x.expiration);
-            expDate.isBefore(actual) ? setDisabled(true) : setDisabled(false);
-          })
-          .catch((err) => { messageApi.error(err.message ? err.message : err) });
         API.getStudentApplications()
-          .then((x) => {
-            const dis = x.includes(parseInt(id));
-            setDisabled(dis);
+          .then((z) => {
+              if(x.status === "ACTIVE") {
+                const dis = z.includes(parseInt(id));
+                setDisabled(dis);
+              }
           })
           .catch((err) => { messageApi.error(err.message ? err.message : err) });
       })

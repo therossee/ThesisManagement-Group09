@@ -1,4 +1,5 @@
 import { Table, Typography, Tag } from "antd";
+import { Fragment } from "react";
 
 const { Title } = Typography;
 
@@ -6,7 +7,6 @@ function ReviewProposal(props) {
     //Function to retrieve the data of the form inserted in insert body
     const formData = props.formData;
     const { intCoSupervisors, extCoSupervisors, degrees } = props;
-    const deg = degrees.find((x) => x.cod_degree === formData.cds);
     const level = formData.degreeLevel === "L" ? "L - Bachelor Degree" : "LM - Master Degree";
     let intCoSup = [], extCoSup = [];
     if (formData.intCoSupervisors !== undefined) {
@@ -15,6 +15,7 @@ function ReviewProposal(props) {
     if (formData.extCoSupervisors !== undefined) {
       extCoSup = extCoSupervisors.filter((x) => formData.extCoSupervisors.includes(x.id));
     }
+    const selCds = degrees.filter((x) => formData.cds.includes(x.cod_degree));
     const data = [
       { field: "Title", value: formData.title },
       {
@@ -40,7 +41,13 @@ function ReviewProposal(props) {
           : "",
       },
       { field: "Level", value: level },
-      { field: "CdS", value: `${formData.cds} - ${deg.title_degree}` },
+      { field: "CdS", 
+      value: selCds.map((x, i) => 
+      <Fragment key={i}>
+        {`${x.cod_degree} - ${x.title_degree}`}
+        {i < selCds.length - 1 && <br />}
+      </Fragment>
+    ), },
     ];
   
     const columns = [
