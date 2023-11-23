@@ -6,11 +6,11 @@ const db = require('./db');
 const AdvancedDate = require('./AdvancedDate');
 
 exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id, external_co_supervisors_id, type, groups, description, required_knowledge, notes, expiration, level, cds, keywords) => {
-  return new Promise((resolve, reject) => {
-
-    const insertThesisProposalQuery = `
-        INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?); `;
+    return new Promise((resolve, reject) => {
+      
+        const insertThesisProposalQuery = `
+        INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, expiration, level)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?); `;
 
     const insertProposalKeywordQuery = `
         INSERT INTO proposalKeyword (proposal_id, keyword)
@@ -28,10 +28,14 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
         INSERT INTO proposalGroup (proposal_id, cod_group)
         VALUES (?, ?); `;
 
-    // Self-called transaction
-    db.transaction(() => {
-      const res = db.prepare(insertThesisProposalQuery).run(title, supervisor_id, type, description, required_knowledge, notes, expiration, level, cds);
-      const proposalId = res.lastInsertRowid;
+        const insertCdsQuery = `
+        INSERT INTO proposalCds (proposal_id, cod_degree)
+        VALUES (?, ?); `;
+
+        // Self-called transaction
+        db.transaction(() => {
+          const res = db.prepare(insertThesisProposalQuery).run(title, supervisor_id, type, description, required_knowledge, notes, expiration, level);
+          const proposalId = res.lastInsertRowid;
 
       // Keywords insertion
       keywords.forEach(keyword => {
@@ -54,11 +58,15 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
         db.prepare(insertGroupsQuery).run(proposalId, group);
       });
 
-      resolve(proposalId)
-    })()
-      .catch((err) => {
-        reject(err);
-      });
+          cds.forEach(cod_degree => {
+            db.prepare(insertCdsQuery).run(proposalId, cod_degree);
+          });
+
+          resolve(proposalId)
+        })()
+    .catch((err) => {
+      reject(err);
+    });
   });
 };
 
@@ -113,11 +121,12 @@ exports.getDegrees = () => {
  * @return {Promise<ThesisProposalRow | null>}
  */
 exports.getThesisProposal = (proposalId, studentId) => {
-  return new Promise((resolve) => {
-    const query = `SELECT * FROM thesisProposal P
-            JOIN degree D ON P.cds = D.cod_degree
-            JOIN student S ON S.cod_degree = D.cod_degree
-            WHERE P.proposal_id = ? AND S.id = ?`;
+    return new Promise((resolve) => {
+        const query = `SELECT * FROM thesisProposal P
+        JOIN proposalCds PC ON P.proposal_id = PC.proposal_id
+        JOIN degree D ON PC.cod_degree = D.cod_degree
+        JOIN student S ON S.cod_degree = D.cod_degree
+        WHERE P.proposal_id = ? AND S.id = ?`;
 
     const thesisProposal = db.prepare(query).get(proposalId, studentId);
     resolve(thesisProposal ?? null);
