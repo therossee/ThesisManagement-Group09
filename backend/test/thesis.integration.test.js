@@ -257,7 +257,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
             description: 'Test description',
             required_knowledge: 'Test knowledge',
             notes: 'Test notes',
-            expiration: '2023-12-31',
+            expiration: '2023-12-31T23:59:59.999Z',
             level: 'Bachelor',
             cds: 'Test CDS',
             groups: [
@@ -325,7 +325,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
             description: 'Test description',
             required_knowledge: 'Test knowledge',
             notes: 'Test notes',
-            expiration: '2023-12-31',
+            expiration: '2023-12-31T23:59:59.999Z',
             level: 'Bachelor',
             cds: 'Test CDS',
             groups: [
