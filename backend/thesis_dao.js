@@ -299,7 +299,7 @@ exports.applyForProposal = (proposal_id, student_id) => {
                                     WHERE A.proposal_id = P.proposal_id
                                     AND A.status = 'accepted'
                                 )`;
-    console.log('Proposta attiva: '+checkProposalActive);
+    
     const proposal_active = db.prepare(checkProposalActive).get(proposal_id, currentDate, currentDate);
     if(!proposal_active){
       reject("The proposal is not active");
