@@ -304,6 +304,13 @@ exports.applyForProposal = (proposal_id, student_id) => {
     if(!proposal_active){
       reject("The proposal is not active");
     }
+
+    // Check if the user has already applied for other proposals
+    const checkAlreadyApplied = `SELECT * FROM thesisApplication WHERE student_id=? AND status='waiting for approval' OR status='accepted'`;
+    const already_applied = db.prepare(checkAlreadyApplied).get(student_id);
+    if(already_applied){
+      reject("The user has already applied for other proposals");
+    }
     
     const insertApplicationQuery = `
     INSERT INTO thesisApplication (proposal_id, student_id, creation_date)
