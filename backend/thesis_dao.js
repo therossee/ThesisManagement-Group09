@@ -381,7 +381,6 @@ exports.getThesisProposalCds = (proposalId) => {
   return new Promise((resolve) => {
     const query = `SELECT d.cod_degree, d.title_degree FROM proposalCds p, degree d WHERE proposal_id = ? AND p.cod_degree = d.cod_degree`;
     const res = db.prepare(query).all(proposalId);
-    console.log(res);
     resolve(res);
   })
 };
