@@ -6,36 +6,44 @@ const db = require('./db');
 const AdvancedDate = require('./AdvancedDate');
 
 exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id, external_co_supervisors_id, type, groups, description, required_knowledge, notes, expiration, level, cds, keywords) => {
-    return new Promise((resolve, reject) => {
-      
-        const insertThesisProposalQuery = `
-        INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, expiration, level)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?); `;
+  return new Promise((resolve, reject) => {
+
+    let currentDate = new AdvancedDate();
+    const exp = new AdvancedDate(expiration);
+    if(exp.isBefore(currentDate)){
+      reject("The expiration date must be after the creation date");
+    }
+
+    currentDate = currentDate.toISOString();
+
+    const insertThesisProposalQuery = `
+      INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?); `;
 
     const insertProposalKeywordQuery = `
-        INSERT INTO proposalKeyword (proposal_id, keyword)
-        VALUES (?, ?); `;
+      INSERT INTO proposalKeyword (proposal_id, keyword)
+      VALUES (?, ?); `;
 
     const insertInternalCoSupervisorsQuery = `
-        INSERT INTO thesisInternalCoSupervisor (proposal_id, co_supervisor_id)
-        VALUES (?, ?); `;
+      INSERT INTO thesisInternalCoSupervisor (proposal_id, co_supervisor_id)
+      VALUES (?, ?); `;
 
     const insertExternalCoSupervisorsQuery = `
-        INSERT INTO thesisExternalCoSupervisor (proposal_id, co_supervisor_id)
-        VALUES (?, ?); `;
+      INSERT INTO thesisExternalCoSupervisor (proposal_id, co_supervisor_id)
+      VALUES (?, ?); `;
 
     const insertGroupsQuery = `
-        INSERT INTO proposalGroup (proposal_id, cod_group)
-        VALUES (?, ?); `;
+      INSERT INTO proposalGroup (proposal_id, cod_group)
+      VALUES (?, ?); `;
 
-        const insertCdsQuery = `
-        INSERT INTO proposalCds (proposal_id, cod_degree)
-        VALUES (?, ?); `;
+    const insertCdsQuery = `
+      INSERT INTO proposalCds (proposal_id, cod_degree)
+      VALUES (?, ?); `;
 
-        // Self-called transaction
-        db.transaction(() => {
-          const res = db.prepare(insertThesisProposalQuery).run(title, supervisor_id, type, description, required_knowledge, notes, expiration, level);
-          const proposalId = res.lastInsertRowid;
+    // Self-called transaction
+    db.transaction(() => {
+      const res = db.prepare(insertThesisProposalQuery).run(title, supervisor_id, type, description, required_knowledge, notes, currentDate, expiration, level);
+      const proposalId = res.lastInsertRowid;
 
       // Keywords insertion
       keywords.forEach(keyword => {
@@ -58,15 +66,15 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
         db.prepare(insertGroupsQuery).run(proposalId, group);
       });
 
-          cds.forEach(cod_degree => {
-            db.prepare(insertCdsQuery).run(proposalId, cod_degree);
-          });
+      cds.forEach(cod_degree => {
+        db.prepare(insertCdsQuery).run(proposalId, cod_degree);
+      });
 
-          resolve(proposalId)
-        })()
-    .catch((err) => {
-      reject(err);
-    });
+      resolve(proposalId)
+    })()
+      .catch((err) => {
+        reject(err);
+      });
   });
 };
 
@@ -121,14 +129,16 @@ exports.getDegrees = () => {
  * @return {Promise<ThesisProposalRow | null>}
  */
 exports.getThesisProposal = (proposalId, studentId) => {
-    return new Promise((resolve) => {
-        const query = `SELECT * FROM thesisProposal P
+  return new Promise((resolve) => {
+    const currentDate = new AdvancedDate().toISOString();
+    const query = `SELECT * FROM thesisProposal P
         JOIN proposalCds PC ON P.proposal_id = PC.proposal_id
         JOIN degree D ON PC.cod_degree = D.cod_degree
         JOIN student S ON S.cod_degree = D.cod_degree
-        WHERE P.proposal_id = ? AND S.id = ?`;
+        WHERE P.proposal_id = ? AND S.id = ? 
+        AND P.expiration > ? AND P.creation_date < ?;`;
 
-    const thesisProposal = db.prepare(query).get(proposalId, studentId);
+    const thesisProposal = db.prepare(query).get(proposalId, studentId, currentDate, currentDate);
     resolve(thesisProposal ?? null);
   })
 };
@@ -154,9 +164,10 @@ exports.listThesisProposalsFromStudent = (studentId) => {
             WHERE A.proposal_id = P.proposal_id
             AND A.status = 'accepted'
         )
-        AND P.expiration > ?;`;
+        AND P.expiration > ?
+        AND P.creation_date < ?;`;
 
-    const thesisProposals = db.prepare(query).all(studentId,currentDate);
+    const thesisProposals = db.prepare(query).all(studentId, currentDate, currentDate);
     resolve(thesisProposals);
   })
 };
@@ -271,19 +282,43 @@ exports.getSupervisorOfProposal = (proposalId) => {
 
 exports.applyForProposal = (proposal_id, student_id) => {
   return new Promise((resolve, reject) => {
-    const insertApplicationQuery = `
-    INSERT INTO thesisApplication (proposal_id, student_id)
-    VALUES (?, ?); `; // at first the application has default status 'waiting for approval'
+    const currentDate = new AdvancedDate().toISOString();
 
-    const res = db.prepare(insertApplicationQuery).run(proposal_id, student_id);
+    //  Check if the proposal belong to the degree of the student
+    const checkProposalDegree = `SELECT * FROM proposalCds WHERE proposal_id=? AND cod_degree=(SELECT cod_degree FROM student WHERE id=?)`;
+    const proposal_correct = db.prepare(checkProposalDegree).get(proposal_id, student_id);
+    if(!proposal_correct){
+      reject("The proposal doesn't belong to the student degree");
+    }
+
+    // Check if the proposal is active
+    const checkProposalActive = `SELECT * FROM thesisProposal P WHERE P.proposal_id=? AND P.expiration > ? AND P.creation_date < ? 
+                                 AND NOT EXISTS (
+                                    SELECT 1
+                                    FROM thesisApplication A
+                                    WHERE A.proposal_id = P.proposal_id
+                                    AND A.status = 'accepted'
+                                )`;
+    console.log('Proposta attiva: '+checkProposalActive);
+    const proposal_active = db.prepare(checkProposalActive).get(proposal_id, currentDate, currentDate);
+    if(!proposal_active){
+      reject("The proposal is not active");
+    }
+    
+    const insertApplicationQuery = `
+    INSERT INTO thesisApplication (proposal_id, student_id, creation_date)
+    VALUES (?, ?, ?); `; // at first the application has default status 'waiting for approval'
+
+    const res = db.prepare(insertApplicationQuery).run(proposal_id, student_id, currentDate);
     resolve(res.lastInsertRowid);
   })
 }
 
 exports.listThesisProposalsTeacher = (teacherId) => {
   return new Promise((resolve) => {
-    const getProposals = `SELECT * FROM thesisProposal WHERE supervisor_id=?`;
-    const proposals = db.prepare(getProposals).all(teacherId);
+    const currentDate = new AdvancedDate().toISOString();
+    const getProposals = `SELECT * FROM thesisProposal WHERE supervisor_id=? AND expiration > ? AND creation_date < ?`;
+    const proposals = db.prepare(getProposals).all(teacherId, currentDate, currentDate);
     resolve(proposals)
 
   })
@@ -291,12 +326,13 @@ exports.listThesisProposalsTeacher = (teacherId) => {
 
 exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
   return new Promise((resolve) => {
-
+    const currentDate = new AdvancedDate().toISOString();
     const getApplications = `SELECT s.name, s.surname, ta.status, s.id
     FROM thesisApplication ta, thesisProposal tp, student s
-    WHERE ta.proposal_id = tp.proposal_id AND s.id = ta.student_id AND ta.proposal_id=? AND tp.supervisor_id= ?`;
+    WHERE ta.proposal_id = tp.proposal_id AND s.id = ta.student_id AND ta.proposal_id=? AND tp.supervisor_id= ? 
+    AND ta.creation_date < ? AND tp.expiration > ? AND tp.creation_date < ?`;
 
-    const applications = db.prepare(getApplications).all(proposal_id, teacherId);
+    const applications = db.prepare(getApplications).all(proposal_id, teacherId, currentDate, currentDate, currentDate);
     resolve(applications)
 
   })
@@ -304,8 +340,9 @@ exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
 
 exports.getStudentApplications = (student_id) => {
   return new Promise((resolve) => {
-    const query = `SELECT proposal_id FROM thesisApplication WHERE student_id=?`;
-    const res = db.prepare(query).all(student_id);
+    const currentDate = new AdvancedDate().toISOString();
+    const query = `SELECT proposal_id FROM thesisApplication WHERE student_id=? AND creation_date < ?`;
+    const res = db.prepare(query).all(student_id, currentDate);
     resolve(res)
   })
 };
@@ -337,5 +374,13 @@ exports.rejectOtherApplications = (studentId, proposalId) => {
     const rowCount = res.changes;
 
     resolve(rowCount);
+  })
+};
+
+exports.getThesisProposalCds = (proposalId) => {
+  return new Promise((resolve) => {
+    const query = `SELECT d.cod_degree, d.title_degree FROM proposalCds p, degree d WHERE proposal_id = ? AND p.cod_degree = d.cod_degree`;
+    const res = db.prepare(query).all(proposalId);
+    resolve(res);
   })
 };

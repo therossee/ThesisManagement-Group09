@@ -27,6 +27,7 @@ jest.mock('../thesis_dao', () => ({
     getStudentApplications: jest.fn(),
     updateApplicationStatus: jest.fn(),
     rejectOtherApplications: jest.fn(),
+    getThesisProposalCds: jest.fn(),
 }));
 
 jest.mock('../users_dao', () => ({
@@ -256,7 +257,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
             description: 'Test description',
             required_knowledge: 'Test knowledge',
             notes: 'Test notes',
-            expiration: '2023-12-31',
+            expiration: '2023-12-31T23:59:59.999Z',
             level: 'Bachelor',
             cds: 'Test CDS',
             groups: [
@@ -324,7 +325,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
             description: 'Test description',
             required_knowledge: 'Test knowledge',
             notes: 'Test notes',
-            expiration: '2023-12-31',
+            expiration: '2023-12-31T23:59:59.999Z',
             level: 'Bachelor',
             cds: 'Test CDS',
             groups: [
@@ -1315,22 +1316,95 @@ describe('GET /api/thesis-proposals (teacher)', () => {
             .set('Accept', 'application/json');
 
         const cookies = loginResponse.headers['set-cookie'];
-        const mockThesisProposals = [
-            { proposal_id: 1, title: 'Proposal1' },
-            { proposal_id: 2, title: 'Proposal2' },
+        const mockThesisProposal = [
+            {
+                proposal_id: '1',
+                title: 'Test Thesis',
+                description: 'Test description',
+                expiration: '2021-12-31',
+                level: 'Bachelor',
+                cds: 'mockCode',
+                supervisor_id: 'd1',
+                type: 'Bachelor',
+                required_knowledge: 'Test knowledge',
+                notes: 'Test notes'
+            }
         ];
 
         // Mock the function call
-        service.listThesisProposalsTeacher.mockResolvedValueOnce(mockThesisProposals);
+        service.listThesisProposalsTeacher.mockResolvedValueOnce(mockThesisProposal);
+        service.getThesisProposalCds.mockResolvedValue([{ cod_degree: 'mockCode', title_degree: 'mockTitle' }]);
+        
+        const supervisorMocked = {
+            id: mockThesisProposal[0].supervisor_id,
+            surname: 'R',
+            name: 'M',
+            email: 'd1@polito.com'
+        };
+        service.getSupervisorOfProposal.mockResolvedValue(supervisorMocked);
+
+        service.getInternalCoSupervisorsOfProposal.mockResolvedValue([]);
+
+        const externalCoSupervisorsMocked = [
+            {
+                id: '1',
+                name: 'ExternalCoSupervisor1',
+                email: 'extern@polito.com'
+            }
+        ];
+        service.getExternalCoSupervisorsOfProposal.mockResolvedValue(externalCoSupervisorsMocked);
+
+        const keywordsMocked = [
+            "keyword1",
+            "keyword2"
+        ];
+        service.getKeywordsOfProposal.mockResolvedValue(keywordsMocked);
+
+        const mockDegree = {
+            cod_degree: mockThesisProposal[0].cds,
+            title_degree: 'Ingegneria Informatica',
+        };
+        degreeService.getDegreeFromCode.mockResolvedValue(mockDegree);
 
         // Send a request to the endpoint
         const response = await request(app)
                                .get('/api/thesis-proposals')
-                               .set('Cookie', cookies);
+                               .set('Cookie', cookies)
+                               .send();
 
         // Assertions
         expect(response.status).toBe(200);
-        expect(response.body).toEqual(mockThesisProposals);
+        expect(response.body).toEqual({
+            $metadata: {
+                index: 0,
+                count: mockThesisProposal.length,
+                total: mockThesisProposal.length,
+                currentPage: 1
+            },
+            items: [
+                {
+                    id: '1',
+                    status: 'EXPIRED',
+                    title: 'Test Thesis',
+                    description: 'Test description',
+                    expiration: '2021-12-31',
+                    level: 'Bachelor',
+                    cds: [{
+                        cod_degree: 'mockCode',
+                        title_degree: 'mockTitle'
+                    }],
+                    supervisor: supervisorMocked,
+                    coSupervisors: {
+                        internal: [],
+                        external: externalCoSupervisorsMocked
+                    },
+                    type: 'Bachelor',
+                    requiredKnowledge: 'Test knowledge',
+                    notes: 'Test notes',
+                    keywords: keywordsMocked
+                }
+            ]
+        });
         expect(service.listThesisProposalsTeacher).toHaveBeenCalledWith('d1'); 
     });
     test('should handle errors and return 500', async () => {
@@ -1366,7 +1440,7 @@ describe('GET /api/thesis-proposals (teacher)', () => {
         expect(response.body).toEqual('Internal Server Error');
         expect(service.listThesisProposalsTeacher).toHaveBeenCalled();
     });
-  });
+});
 
 describe('GET /api/teacher/applications/:proposal_id', () => {
     test('should return an array of applications for a teacher and proposal', async () => {
