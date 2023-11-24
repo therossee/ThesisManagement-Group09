@@ -156,11 +156,14 @@ isLoggedIn,
 isTeacher,
 async (req,res) => {
   const supervisor_id  = req.user.id;
-  const {title, internal_co_supervisors_id, external_co_supervisors_id, type, description, required_knowledge, notes, expiration, level, cds, keywords} = req.body;
+  const {title, internal_co_supervisors_id, external_co_supervisors_id, type, description, required_knowledge, notes, level, cds, keywords} = req.body;
+  let expiration = req.body.expiration;
+  expiration = expiration + 'T23:59:59.999Z';
 
   if (!title || !type || !description || !expiration || !level || !cds || !keywords ) {
     return res.status(400).json('Missing required fields.');
   }
+
 
   // Set to store all grous
   const unique_groups = new Set();
