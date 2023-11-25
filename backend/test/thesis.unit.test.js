@@ -28,9 +28,9 @@ describe('createThesisProposal', () => {
       description: 'Test Description',
       required_knowledge: 'Test Knowledge',
       notes: 'Test Notes',
-      expiration: '2023-12-31',
+      expiration: '2025-12-31',
       level: 'Test Level',
-      cds: 'Test CDS',
+      cds: ['Test CDS1', 'Test CDS2'],
       keywords: ['Keyword1', 'Keyword2'],
     };
 
@@ -51,7 +51,7 @@ describe('createThesisProposal', () => {
     );
 
     expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
-    expect(db.prepare).toHaveBeenCalledTimes(10); // 10 queries
+    expect(db.prepare).toHaveBeenCalledTimes(12); // 12 queries
   });
   test('create a thesis proposal without cosupervisors', async () => {
     const proposalData = {
@@ -64,9 +64,9 @@ describe('createThesisProposal', () => {
       description: 'Test Description',
       required_knowledge: 'Test Knowledge',
       notes: 'Test Notes',
-      expiration: '2023-12-31',
+      expiration: '2025-12-31',
       level: 'Test Level',
-      cds: 'Test CDS',
+      cds: ['Test CDS1', 'Test CDS2'],
       keywords: ['Keyword1', 'Keyword2'],
     };
 
@@ -87,8 +87,74 @@ describe('createThesisProposal', () => {
     );
 
     expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
-    expect(db.prepare).toHaveBeenCalledTimes(4); 
+    expect(db.prepare).toHaveBeenCalledTimes(6); 
   });
+  test('create a thesis proposal with passed expiration date', async () => {
+    const proposalData = {
+      title: 'Test Proposal',
+      supervisor_id: 1,
+      internal_co_supervisors_id: [],
+      external_co_supervisors_id: [],
+      type: 'Test Type',
+      groups: ['Group1'],
+      description: 'Test Description',
+      required_knowledge: 'Test Knowledge',
+      notes: 'Test Notes',
+      expiration: '2020-12-31',
+      level: 'Test Level',
+      cds: ['Test CDS1', 'Test CDS2'],
+      keywords: ['Keyword1', 'Keyword2'],
+    };
+  
+    // Mocking the rejection behavior
+    jest.spyOn(thesis, 'createThesisProposal').mockRejectedValue('The expiration date must be after the creation date');
+  
+    try {
+      // Call the function and expect it to throw
+      await thesis.createThesisProposal(
+        proposalData.title,
+        proposalData.supervisor_id,
+        proposalData.internal_co_supervisors_id,
+        proposalData.external_co_supervisors_id,
+        proposalData.type,
+        proposalData.groups,
+        proposalData.description,
+        proposalData.required_knowledge,
+        proposalData.notes,
+        proposalData.expiration,
+        proposalData.level,
+        proposalData.cds,
+        proposalData.keywords
+      );
+  
+      // If the function does not throw, fail the test
+      fail('Expected createThesisProposal to throw an error');
+    } catch (error) {
+      // Expect the error message to match
+      expect(error).toBe('The expiration date must be after the creation date');
+    }
+  
+    // Ensure that createThesisProposal was called with the correct arguments
+    expect(thesis.createThesisProposal).toHaveBeenCalledWith(
+      proposalData.title,
+      proposalData.supervisor_id,
+      proposalData.internal_co_supervisors_id,
+      proposalData.external_co_supervisors_id,
+      proposalData.type,
+      proposalData.groups,
+      proposalData.description,
+      proposalData.required_knowledge,
+      proposalData.notes,
+      proposalData.expiration,
+      proposalData.level,
+      proposalData.cds,
+      proposalData.keywords
+    );
+  });
+  
+  
+  
+  
 });
 
 // 2. Test Function to get list of teachers not logged
