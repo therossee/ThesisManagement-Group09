@@ -394,8 +394,10 @@ exports.getThesisProposalCds = (proposalId) => {
 
 exports.getThesisProposalTeacher = (proposalId, teacherId) => {
   return new Promise((resolve) => {
-    const query = `SELECT * FROM thesisProposal WHERE proposal_id = ? AND supervisor_id = ?`;
-    const res = db.prepare(query).get(proposalId, teacherId);
+    const currentDate = new AdvancedDate().toISOString();
+    const query = `SELECT * FROM thesisProposal WHERE proposal_id = ? AND supervisor_id = ? 
+                   AND expiration > ? AND creation_date < ?;`;
+    const res = db.prepare(query).get(proposalId, teacherId, currentDate, currentDate);
     resolve(res);
   })
 }
