@@ -313,19 +313,36 @@ app.get('/api/thesis-proposals',
 
 app.get('/api/thesis-proposals/:id',
   isLoggedIn,
-  isStudent,
   async (req, res) => {
     try {
-      const studentId = req.user.id;
-      const proposalId = req.params.id;
+      if (req.user.id.startsWith('s')) {
+        const studentId = req.user.id;
+        const proposalId = req.params.id;
 
-      const proposal = await thesisDao.getThesisProposal(proposalId, studentId);
-      const studentDegree = await usersDao.getStudentDegree(studentId);
-      if (!proposal) {
-          return res.status(404).json({ message: `Thesis proposal with id ${proposalId} not found.` });
+        const proposal = await thesisDao.getThesisProposal(proposalId, studentId);
+        const studentDegree = await usersDao.getStudentDegree(studentId);
+        if (!proposal) {
+            return res.status(404).json({ message: `Thesis proposal with id ${proposalId} not found.` });
+        }
+
+        res.json( await _populateProposal(proposal, studentDegree) );
       }
+      else if (req.user.id.startsWith('d')) {
+        const teacherId = req.user.id;
+        const proposalId = req.params.id;
 
-      res.json( await _populateProposal(proposal, studentDegree) );
+        const proposal = await thesisDao.getThesisProposalTeacher(proposalId, teacherId);
+        const cds = await thesisDao.getThesisProposalCds(proposalId);
+        if (!proposal) {
+          return res.status(404).json({ message: `Thesis proposal with id ${proposalId} not found.` });
+        }
+
+        res.json( await _populateProposal(proposal, cds) );
+      }
+      else{
+        // Handle unauthorized case if neither student nor teacher
+        res.status(403).json('Unauthorized');
+      }
     } catch (e) {
       console.error(e);
       res.status(500).json('Internal Server Error');

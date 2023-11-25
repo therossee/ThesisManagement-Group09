@@ -12,6 +12,7 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
     const exp = new AdvancedDate(expiration);
     if(exp.isBefore(currentDate)){
       reject("The expiration date must be after the creation date");
+      return;
     }
 
     currentDate = currentDate.toISOString();
@@ -131,6 +132,16 @@ exports.getDegrees = () => {
 exports.getThesisProposal = (proposalId, studentId) => {
   return new Promise((resolve) => {
     const currentDate = new AdvancedDate().toISOString();
+    
+    // Check is the proposal is not already assigned
+    const checkProposalAssigned = `SELECT * FROM thesisApplication WHERE proposal_id=? AND status='accepted'`;
+    const proposal_assigned = db.prepare(checkProposalAssigned).get(proposalId);
+
+    if(proposal_assigned){
+      resolve(null);
+      return;
+    }
+    
     const query = `SELECT * FROM thesisProposal P
         JOIN proposalCds PC ON P.proposal_id = PC.proposal_id
         JOIN degree D ON PC.cod_degree = D.cod_degree
@@ -289,6 +300,7 @@ exports.applyForProposal = (proposal_id, student_id) => {
     const proposal_correct = db.prepare(checkProposalDegree).get(proposal_id, student_id);
     if(!proposal_correct){
       reject("The proposal doesn't belong to the student degree");
+      return;
     }
 
     // Check if the proposal is active
@@ -391,3 +403,23 @@ exports.getThesisProposalCds = (proposalId) => {
     resolve(res);
   })
 };
+
+exports.getThesisProposalTeacher = (proposalId, teacherId) => {
+  return new Promise((resolve) => {
+    const currentDate = new AdvancedDate().toISOString();
+
+    // Check is the proposal is not already assigned
+    const checkProposalAssigned = `SELECT * FROM thesisApplication WHERE proposal_id=? AND status='accepted'`;
+    const proposal_assigned = db.prepare(checkProposalAssigned).get(proposalId);
+
+    if(proposal_assigned){
+      resolve(null);
+      return;
+    }
+
+    const query = `SELECT * FROM thesisProposal WHERE proposal_id = ? AND supervisor_id = ? 
+                   AND expiration > ? AND creation_date < ?;`;
+    const res = db.prepare(query).get(proposalId, teacherId, currentDate, currentDate);
+    resolve(res);
+  })
+}
