@@ -391,3 +391,11 @@ exports.getThesisProposalCds = (proposalId) => {
     resolve(res);
   })
 };
+
+exports.getThesisProposalTeacher = (proposalId, teacherId) => {
+  return new Promise((resolve) => {
+    const query = `SELECT * FROM thesisProposal WHERE proposal_id = ? AND supervisor_id = ?`;
+    const res = db.prepare(query).get(proposalId, teacherId);
+    resolve(res);
+  })
+}

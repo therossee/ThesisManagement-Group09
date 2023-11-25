@@ -116,3 +116,7 @@ Content-Type: application/json
 }
 
 ###
+
+## FUNCTION TO GET A TEACHER THESIS PROPOSAL BY ID
+GET http://localhost:3000/api/thesis-proposals/2 HTTP/1.1
+###
