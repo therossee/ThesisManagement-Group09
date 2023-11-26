@@ -29,6 +29,7 @@ jest.mock('../thesis_dao', () => ({
     rejectOtherApplications: jest.fn(),
     getThesisProposalCds: jest.fn(),
     getThesisProposalTeacher: jest.fn(),
+    listApplicationsDecisionsFromStudent: jest.fn(),
 }));
 
 jest.mock('../users_dao', () => ({
@@ -2012,6 +2013,92 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
           .send({ student_id: studentId })
   
         // Assert
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Internal Server Error');
+    });
+});
+
+describe('GET /api/student/applications-decision', () => {
+    test('should return a list of applications for the student', async () => {
+      
+        const mockUser = {
+            id: 's1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 's1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+        expect(cookies).toBeDefined();
+        expect(loginResponse.status).toBe(201);
+  
+        // Mock the response data that you expect from your database
+        const mockApplications = [
+            {
+            proposal_id: 1,
+            title: 'Sample Proposal',
+            level: 'Master',
+            teacher_name: 'John',
+            teacher_surname: 'Doe',
+            status: 'Accepted',
+            expiration: '2023-12-01T23:59:59.999Z',
+            },
+            // Add more mock data as needed
+        ];
+    
+        service.listApplicationsDecisionsFromStudent.mockResolvedValue(mockApplications);
+        
+        // Make the request to your API
+        const response = await request(app)
+            .get('/api/student/applications-decision')
+            .set('Accept', 'application/json')
+            .set('Cookie', cookies) 
+            .send();
+    
+        // Assert the response
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(mockApplications);
+    });
+  
+    test('should handle errors and return 500 status', async () => {
+     
+        const mockUser = {
+            id: 's1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 's1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+        expect(cookies).toBeDefined();
+        expect(loginResponse.status).toBe(201);
+  
+        service.listApplicationsDecisionsFromStudent.mockRejectedValueOnce(new Error('Database error'));
+  
+        // Make the request to your API
+        const response = await request(app)
+            .get('/api/student/applications-decision')
+            .set('Accept', 'application/json')
+            .set('Cookie', cookies) 
+            .send();
+    
+        // Assert the response
         expect(response.status).toBe(500);
         expect(response.body).toEqual('Internal Server Error');
     });
