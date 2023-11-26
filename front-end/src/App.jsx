@@ -19,8 +19,8 @@ function App() {
 
   // Keep track in the client if user is isLoggedIn or not
   // Could also use instead user === undefined but isLoggedIn is used for better comprehension
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isTeacher, setIsTeacher] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(undefined);
+  const [isTeacher, setIsTeacher] = useState(undefined);
 
   // Handle the login loading state
   const [loginLoading, setLoginLoading] = useState(false);
@@ -58,6 +58,8 @@ function App() {
     setIsLoggedIn(true);
     if (user.id.startsWith("d"))
       setIsTeacher(true);
+    else
+      setIsTeacher(false);
   }
 
   const doLogIn = (credentials) => {
@@ -75,11 +77,11 @@ function App() {
 
   const doLogOut = async () => {
     await API.logOut();
-    setIsLoggedIn(false);
-    setIsTeacher(false);
+    setIsLoggedIn(undefined);
+    setIsTeacher(undefined);
     setUser(undefined);
     setLoginLoading(false);
-    
+
   }
 
   return (

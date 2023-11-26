@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { message, Space, Table, Tooltip } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { message, Space, Table, Tag, Tooltip } from 'antd';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import API from '../API';
 
@@ -13,6 +14,8 @@ function TeacherThesisProposals() {
 
     // Storing message errors
     const [messageApi, messageBox] = message.useMessage();
+
+    const navigate = useNavigate();
 
     // Columns of the table
     const columns = [
@@ -55,6 +58,15 @@ function TeacherThesisProposals() {
             render: (_, x) => x.groups.map((group, i) => (
                 <Tag color="blue" key={i}>
                     {group}
+                </Tag>
+            )),
+        },
+        {
+            title: 'CdS',
+            dataIndex: 'CdS',
+            render: (_, x) => x.cds.map((cds, i) => (
+                <Tag color="blue" key={i}>
+                    {cds.title_degree}
                 </Tag>
             )),
         },
