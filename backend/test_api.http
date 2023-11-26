@@ -28,6 +28,10 @@ GET http://localhost:3000/api/sessions/current HTTP/1.1
 DELETE http://localhost:3000/api/sessions/current HTTP/1.1
 ###
 
+## GET SYSTEM VIRTUAL CLOCK
+GET http://localhost:3000/api/system/virtual-clock HTTP/1.1
+###
+
 ## INSERT A NEW THESIS PROPOSAL
 POST http://localhost:3000/api/teacher/thesis_proposals HTTP/1.1
 Content-Type: application/json
@@ -69,7 +73,7 @@ GET http://localhost:3000/api/thesis-proposals HTTP/1.1
 ###
 
 ## GET THESIS PROPOSAL BY ID (for student belonging to the same cds of the proposal)
-GET http://localhost:3000/api/thesis-proposals/6 HTTP/1.1
+GET http://localhost:3000/api/thesis-proposals/4 HTTP/1.1
 ###
 
 ## APPLY FOR THESIS PROPOSAL
@@ -77,7 +81,7 @@ POST http://localhost:3000/api/student/applications HTTP/1.1
 Content-Type: application/json
 
 {
-    "thesis_proposal_id": 2
+    "thesis_proposal_id": 6
 }
 ### 
 
@@ -98,7 +102,7 @@ PATCH http://localhost:3000/api/teacher/applications/accept/1 HTTP/1.1
 Content-Type: application/json
 
 {
-  "student_id": "s299119"
+  "student_id": "s294301"
 }
 
 ###
@@ -111,4 +115,8 @@ Content-Type: application/json
   "student_id": "s299119"
 }
 
+###
+
+## FUNCTION TO GET A TEACHER THESIS PROPOSAL BY ID
+GET http://localhost:3000/api/thesis-proposals/2 HTTP/1.1
 ###

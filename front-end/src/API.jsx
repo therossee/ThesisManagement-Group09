@@ -130,7 +130,8 @@ async function getThesisProposalbyId(id) {
             expiration: thesisProposal.expiration,
             level: thesisProposal.level,
             groups: thesisProposal.groups,
-            keywords: thesisProposal.keywords
+            keywords: thesisProposal.keywords,
+            status: thesisProposal.status
         }
     } else {
         throw thesisProposal;
