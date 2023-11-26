@@ -79,6 +79,90 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
   });
 };
 
+/**
+ * Update all the fields of a thesis proposal
+ *
+ * @param {string} proposal_id
+ * @param {string} supervisor_id
+ * @param thesis
+ * @return {Promise<string>}
+ */
+exports.updateThesisProposal = (proposal_id, supervisor_id, thesis) => {
+  return new Promise((resolve, reject) => {
+    const now = new AdvancedDate();
+
+    db.transaction(() => {
+      const updateThesisProposalQuery = `
+        UPDATE thesisProposal
+        SET title = ?, type = ?, description = ?, required_knowledge = ?, notes = ?, expiration = ?, level = ?
+        WHERE proposal_id = ? AND supervisor_id = ? AND creation_date < ?;`;
+
+      const res = db.prepare(updateThesisProposalQuery).run(thesis.title, thesis.type, thesis.description, thesis.required_knowledge, thesis.notes, thesis.expiration, thesis.level, proposal_id, supervisor_id, now.toISOString());
+      if (res.changes === 0) {
+        resolve(null);
+        return;
+      }
+
+      const deleteProposalKeywordQuery = `
+        DELETE FROM proposalKeyword
+        WHERE proposal_id = ?;`;
+      db.prepare(deleteProposalKeywordQuery).run(proposal_id);
+      const insertProposalKeywordQuery = `
+        INSERT INTO proposalKeyword (proposal_id, keyword)
+        VALUES (?, ?); `;
+      for (const keyword of thesis.keywords) {
+        db.prepare(insertProposalKeywordQuery).run(proposal_id, keyword);
+      }
+
+      const deleteInternalCoSupervisorsQuery = `
+            DELETE FROM thesisInternalCoSupervisor
+            WHERE proposal_id = ?;`;
+      db.prepare(deleteInternalCoSupervisorsQuery).run(proposal_id);
+      const insertInternalCoSupervisorsQuery = `
+            INSERT INTO thesisInternalCoSupervisor (proposal_id, co_supervisor_id)
+            VALUES (?, ?); `;
+      for (const internal_co_supervisor_id of thesis.internal_co_supervisors_id) {
+        db.prepare(insertInternalCoSupervisorsQuery).run(proposal_id, internal_co_supervisor_id);
+      }
+
+      const deleteExternalCoSupervisorsQuery = `
+            DELETE FROM thesisExternalCoSupervisor
+            WHERE proposal_id = ?;`;
+      db.prepare(deleteExternalCoSupervisorsQuery).run(proposal_id);
+      const insertExternalCoSupervisorsQuery = `
+            INSERT INTO thesisExternalCoSupervisor (proposal_id, co_supervisor_id)
+            VALUES (?, ?); `;
+      for (const external_co_supervisor_id of thesis.external_co_supervisors_id) {
+        db.prepare(insertExternalCoSupervisorsQuery).run(proposal_id, external_co_supervisor_id);
+      }
+
+      const deleteGroupsQuery = `
+            DELETE FROM proposalGroup
+            WHERE proposal_id = ?;`;
+      db.prepare(deleteGroupsQuery).run(proposal_id);
+      const insertGroupsQuery = `
+            INSERT INTO proposalGroup (proposal_id, cod_group)
+            VALUES (?, ?); `;
+      for (const group of thesis.groups) {
+        db.prepare(insertGroupsQuery).run(proposal_id, group);
+      }
+
+      const deleteCdsQuery = `
+            DELETE FROM proposalCds
+            WHERE proposal_id = ?;`;
+      db.prepare(deleteCdsQuery).run(proposal_id);
+      const insertCdsQuery = `
+            INSERT INTO proposalCds (proposal_id, cod_degree)
+            VALUES (?, ?); `;
+      for (const cod_degree of thesis.cds) {
+        db.prepare(insertCdsQuery).run(proposal_id, cod_degree);
+      }
+
+      resolve(proposal_id)
+    })()
+  })
+};
+
 exports.getTeacherListExcept = (id) => {
   return new Promise((resolve) => {
     const query = `SELECT * FROM teacher WHERE id <> ?; `;
@@ -132,7 +216,7 @@ exports.getDegrees = () => {
 exports.getThesisProposal = (proposalId, studentId) => {
   return new Promise((resolve) => {
     const currentDate = new AdvancedDate().toISOString();
-    
+
     // Check is the proposal is not already assigned
     const checkProposalAssigned = `SELECT * FROM thesisApplication WHERE proposal_id=? AND status='accepted'`;
     const proposal_assigned = db.prepare(checkProposalAssigned).get(proposalId);
@@ -141,7 +225,7 @@ exports.getThesisProposal = (proposalId, studentId) => {
       resolve(null);
       return;
     }
-    
+
     const query = `SELECT * FROM thesisProposal P
         JOIN proposalCds PC ON P.proposal_id = PC.proposal_id
         JOIN degree D ON PC.cod_degree = D.cod_degree
@@ -150,6 +234,24 @@ exports.getThesisProposal = (proposalId, studentId) => {
         AND P.expiration > ? AND P.creation_date < ?;`;
 
     const thesisProposal = db.prepare(query).get(proposalId, studentId, currentDate, currentDate);
+    resolve(thesisProposal ?? null);
+  })
+};
+
+/**
+ * Return the proposal with the given id without performing any check
+ *
+ * @param {string} proposalId
+ * @return {Promise<ThesisProposalRow | null>}
+ */
+exports.getThesisProposalById = (proposalId) => {
+  return new Promise((resolve) => {
+    const query = `SELECT * FROM thesisProposal P
+        JOIN proposalCds PC ON P.proposal_id = PC.proposal_id
+        JOIN degree D ON PC.cod_degree = D.cod_degree
+        WHERE P.proposal_id = ?;`;
+
+    const thesisProposal = db.prepare(query).get(proposalId);
     resolve(thesisProposal ?? null);
   })
 };
@@ -311,7 +413,7 @@ exports.applyForProposal = (proposal_id, student_id) => {
                                     WHERE A.proposal_id = P.proposal_id
                                     AND A.status = 'accepted'
                                 )`;
-    
+
     const proposal_active = db.prepare(checkProposalActive).get(proposal_id, currentDate, currentDate);
     if(!proposal_active){
       reject("The proposal is not active");
@@ -323,7 +425,7 @@ exports.applyForProposal = (proposal_id, student_id) => {
     if(already_applied){
       reject("The user has already applied for other proposals");
     }
-    
+
     const insertApplicationQuery = `
     INSERT INTO thesisApplication (proposal_id, student_id, creation_date)
     VALUES (?, ?, ?); `; // at first the application has default status 'waiting for approval'
