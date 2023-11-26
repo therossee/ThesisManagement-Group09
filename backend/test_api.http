@@ -15,8 +15,8 @@ POST http://localhost:3000/api/sessions HTTP/1.1
 Content-Type: application/json
 
 {
-    "username": "rizzo.amerigo@email.com",
-    "password": "s304580"
+    "username": "rossi.abbondanzio@email.com",
+    "password": "s294301"
 }
 ### 
 
@@ -93,8 +93,8 @@ GET http://localhost:3000/api/thesis-proposals HTTP/1.1
 GET http://localhost:3000/api/teacher/applications/1 HTTP/1.1
 ###
 
-## FUNCTION TO GET ALL APPLICATION OF A STUDENT
-GET http://localhost:3000/api/student/applications HTTP/1.1
+## FUNCTION TO GET ALL ACTIVE APPLICATION OF A STUDENT
+GET http://localhost:3000/api/student/active-application HTTP/1.1
 ###
 
 ## FUNCTION TO ACCEPT AN APPLICATION

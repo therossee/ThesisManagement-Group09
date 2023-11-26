@@ -367,10 +367,10 @@ exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
   })
 };
 
-exports.getStudentApplications = (student_id) => {
+exports.getStudentActiveApplication = (student_id) => {
   return new Promise((resolve) => {
     const currentDate = new AdvancedDate().toISOString();
-    const query = `SELECT proposal_id FROM thesisApplication WHERE student_id=? AND creation_date < ?`;
+    const query = `SELECT proposal_id FROM thesisApplication WHERE student_id=? AND creation_date < ? AND ( status='waiting for approval' OR status='accepted')`;
     const res = db.prepare(query).all(student_id, currentDate);
     resolve(res)
   })

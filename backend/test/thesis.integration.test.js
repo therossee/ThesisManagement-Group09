@@ -24,7 +24,7 @@ jest.mock('../thesis_dao', () => ({
     listThesisProposalsTeacher: jest.fn(),
     listApplicationsForTeacherThesisProposal: jest.fn(),
     applyForProposal: jest.fn(),
-    getStudentApplications: jest.fn(),
+    getStudentActiveApplication: jest.fn(),
     updateApplicationStatus: jest.fn(),
     rejectOtherApplications: jest.fn(),
     getThesisProposalCds: jest.fn(),
@@ -1717,8 +1717,8 @@ describe('GET /api/teacher/applications/:proposal_id', () => {
     });
 }); 
 
-describe('GET /api/student/applications', () => {
-    test('should return student applications', async () => {
+describe('GET /api/student/active-application', () => {
+    test('should return student active application', async () => {
         const mockUser = {
             id: 's1',
             surname: 'R',
@@ -1739,16 +1739,16 @@ describe('GET /api/student/applications', () => {
 
         const cookies = loginResponse.headers['set-cookie'];
   
-        const expectedApplications = [{proposal_id: 1}, {proposal_id: 2}]
-        service.getStudentApplications.mockResolvedValueOnce(expectedApplications);
+        const expectedApplication = [{proposal_id: 1}]
+        service.getStudentActiveApplication.mockResolvedValueOnce(expectedApplication);
         // Perform the request
         const response = await request(app)
-                               .get('/api/student/applications')
+                               .get('/api/student/active-application')
                                .set('Cookie', cookies);
     
         // Assertions
         expect(response.status).toBe(200);
-        expect(response.body).toEqual(expectedApplications);
+        expect(response.body).toEqual(expectedApplication);
     });
   
     test('should return 500 if an error occurs', async () => {
@@ -1774,11 +1774,11 @@ describe('GET /api/student/applications', () => {
         const cookies = loginResponse.headers['set-cookie'];
 
         const mockError = new Error('Mocked error during getStudentApplications');
-        service.getStudentApplications.mockRejectedValueOnce(mockError);
+        service.getStudentActiveApplication.mockRejectedValueOnce(mockError);
   
         // Perform the request
         const response = await request(app)
-                               .get('/api/student/applications')
+                               .get('/api/student/active-application')
                                .set('Cookie', cookies);
     
         // Assertions
