@@ -357,6 +357,11 @@ app.put('/api/thesis-proposals/:id',
         const proposal_id = req.params.id;
         const supervisor_id  = req.user.id;
 
+        const applications = await thesisDao.listApplicationsForTeacherThesisProposal(proposal_id, supervisor_id);
+        if (applications.some( application => application.status === 'accepted' )) {
+            return res.status(403).json({ message: 'Cannot edit a proposal with accepted applications.' });
+        }
+
         const thesis = schemas.APIThesisProposalSchema.parse(req.body);
 
         // Set to store all grous
