@@ -59,10 +59,11 @@ function ViewThesisProposal() {
     // Exclude teachers from Application fetch
     // Explanation: If ((isTeacher is computed and user is not a teacher) or (user is logged in and not a teacher (even if not yet computed)))
     if ((isTeacher !== undefined && !isTeacher) || (isLoggedIn && !isTeacher)) {
-      API.getStudentActiveApplications()
+      API.getStudentActiveApplication()
         .then((x) => {
-          // Disabled if there's already at least 1 application pending
-          setDisabled(x.length > 0);
+          if (x.length > 0)
+            // Disabled if there's already an application pending
+            setDisabled(true);
         })
         .catch((err) => { message.error(err.message ? err.message : err) });
     }

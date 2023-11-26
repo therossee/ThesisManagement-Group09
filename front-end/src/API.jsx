@@ -159,8 +159,8 @@ async function applyForProposal(id) {
 }
 
 // GET Student's Thesis Applications
-async function getStudentActiveApplications() {
-    const response = await fetch(URL + '/student/active-applications', {
+async function getStudentActiveApplication() {
+    const response = await fetch(URL + '/student/active-application', {
         credentials: 'include',
     });
     const applications = await response.json();
@@ -321,6 +321,6 @@ const API = {
     logIn, logOut, getUserInfo,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplications, acceptThesisApplications, rejectThesisApplications
+    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications
 };
 export default API;
