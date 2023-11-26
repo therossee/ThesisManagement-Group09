@@ -57,9 +57,9 @@ function ViewThesisProposal() {
   // Another Useffect needed because isTeacher needs time to be computed. It is initialized as undefined so we can actually check when it is computed.
   useEffect(() => {
     // Exclude teachers from Application fetch
-    // Explanation: If ((isTeacher is computed and user is not a teacher) or (user is logged in and not a teacher (even if not yet compued)))
+    // Explanation: If ((isTeacher is computed and user is not a teacher) or (user is logged in and not a teacher (even if not yet computed)))
     if ((isTeacher !== undefined && !isTeacher) || (isLoggedIn && !isTeacher)) {
-      API.getStudentApplications()
+      API.getStudentActiveApplications()
         .then((x) => {
           // Disabled if there's already at least 1 application pending
           setDisabled(x.length > 0);

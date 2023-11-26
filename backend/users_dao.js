@@ -40,6 +40,21 @@ exports.getUser = (email, password) => {
   });
 };
 
+// This function is used to retrieve the degree of a student
+exports.getStudentDegree = (id) => {
+    return new Promise((resolve, reject) => {
+        const sql = 'SELECT * FROM student s, degree d WHERE id = ? AND s.cod_degree = d.cod_degree';
+        const row = db.prepare(sql).get(id);
+        if(!row){
+            resolve(null);
+        }
+        else{
+            let degree = { cod_degree: row.cod_degree, title_degree: row.title_degree };
+            resolve(degree);
+        }    
+    });
+}
+
 
 
   

@@ -111,8 +111,12 @@ app.get('/api/sessions/current', (req, res) => {
 
 // DELETE /api/sessions/current
 app.delete('/api/sessions/current', (req, res) => {
-  req.logout();
-  res.status(204).end();
+  req.logout((err) => {
+    if (err) {
+      return res.status(500).json({ error: 'Logout failed' });
+    }
+    res.status(204).end();
+  });
 });
 
 
@@ -152,11 +156,14 @@ isLoggedIn,
 isTeacher,
 async (req,res) => {
   const supervisor_id  = req.user.id;
-  const {title, internal_co_supervisors_id, external_co_supervisors_id, type, description, required_knowledge, notes, expiration, level, cds, keywords} = req.body;
+  const {title, internal_co_supervisors_id, external_co_supervisors_id, type, description, required_knowledge, notes, level, cds, keywords} = req.body;
+  let expiration = req.body.expiration;
 
   if (!title || !type || !description || !expiration || !level || !cds || !keywords ) {
     return res.status(400).json('Missing required fields.');
   }
+
+  expiration = expiration + 'T23:59:59.999Z';
 
   // Set to store all grous
   const unique_groups = new Set();
@@ -256,46 +263,86 @@ async(req, res) => {
 
 app.get('/api/thesis-proposals',
   isLoggedIn,
-  isStudent,
   async (req, res) => {
     try {
-      const studentId = req.user.id;
-      const proposals = await thesisDao.listThesisProposalsFromStudent(studentId);
-      const proposalsPopulated = await Promise.all(
-        proposals.map(async proposal => {
-          return await _populateProposal(proposal);
-        })
-      );
+      if (req.user.id.startsWith('s')) {
+        const studentId = req.user.id;
+        const proposals = await thesisDao.listThesisProposalsFromStudent(studentId);
+        const cds = await usersDao.getStudentDegree(studentId);
+        const proposalsPopulated = await Promise.all(
+          proposals.map(async proposal => {
+            return await _populateProposal(proposal, cds);
+          })
+        );
 
-      // Not used right now, but it's here for potential future use
-      const metadata = {
-        index: 0,
-        count: proposals.length,
-        total: proposals.length,
-        currentPage: 1
-      };
-      res.json({ $metadata: metadata, items: proposalsPopulated });
+        // Not used right now, but it's here for potential future use
+        const metadata = {
+          index: 0,
+          count: proposals.length,
+          total: proposals.length,
+          currentPage: 1
+        };
+        res.json({ $metadata: metadata, items: proposalsPopulated });
+      } else if (req.user.id.startsWith('d')) {
+        const teacherId = req.user.id;
+        const thesisProposals = await thesisDao.listThesisProposalsTeacher(teacherId);
+        const proposalsPopulated = await Promise.all(
+          thesisProposals.map(async proposal => {
+            const cds = await thesisDao.getThesisProposalCds(proposal.proposal_id);
+            return await _populateProposal(proposal, cds);
+          })
+        );
+
+        // Not used right now, but it's here for potential future use
+        const metadata = {
+          index: 0,
+          count: thesisProposals.length,
+          total: thesisProposals.length,
+          currentPage: 1
+        };
+        res.json({ $metadata: metadata, items: proposalsPopulated });
+      } else {
+        // Handle unauthorized case if neither student nor teacher
+        res.status(403).json('Unauthorized');
+      }
     } catch (e) {
       console.error(e);
       res.status(500).json('Internal Server Error');
     }
-
 });
 
 app.get('/api/thesis-proposals/:id',
   isLoggedIn,
-  isStudent,
   async (req, res) => {
     try {
-      const studentId = req.user.id;
-      const proposalId = req.params.id;
+      if (req.user.id.startsWith('s')) {
+        const studentId = req.user.id;
+        const proposalId = req.params.id;
 
-      const proposal = await thesisDao.getThesisProposal(proposalId, studentId);
-      if (!proposal) {
-          return res.status(404).json({ message: `Thesis proposal with id ${proposalId} not found.` });
+        const proposal = await thesisDao.getThesisProposal(proposalId, studentId);
+        const studentDegree = await usersDao.getStudentDegree(studentId);
+        if (!proposal) {
+            return res.status(404).json({ message: `Thesis proposal with id ${proposalId} not found.` });
+        }
+
+        res.json( await _populateProposal(proposal, studentDegree) );
       }
+      else if (req.user.id.startsWith('d')) {
+        const teacherId = req.user.id;
+        const proposalId = req.params.id;
 
-      res.json( await _populateProposal(proposal) );
+        const proposal = await thesisDao.getThesisProposalTeacher(proposalId, teacherId);
+        const cds = await thesisDao.getThesisProposalCds(proposalId);
+        if (!proposal) {
+          return res.status(404).json({ message: `Thesis proposal with id ${proposalId} not found.` });
+        }
+
+        res.json( await _populateProposal(proposal, cds) );
+      }
+      else{
+        // Handle unauthorized case if neither student nor teacher
+        res.status(403).json('Unauthorized');
+      }
     } catch (e) {
       console.error(e);
       res.status(500).json('Internal Server Error');
@@ -321,21 +368,6 @@ async(req,res) => {
     console.error(error); 
     res.status(500).json(`Failed to apply for proposal. ${error.message || error}`);
   });
-});
-
-app.get('/api/teacher/thesis_proposals',
-isLoggedIn,
-isTeacher,
-async (req, res) => {
-  try {
-    const teacherId = req.user.id;
-    const thesisProposals = await thesisDao.listThesisProposalsTeacher(teacherId);
-
-    res.json(thesisProposals);
-  } catch (e) {
-    console.error(e);
-    res.status(500).json('Internal Server Error');
-  }
 });
 
 app.get('/api/teacher/applications/:proposal_id',
@@ -390,7 +422,7 @@ app.patch('/api/teacher/applications/accept/:proposal_id',
       res.status(500).json(`Internal Server Error`);
     }
 
-  })
+})
 
 app.patch('/api/teacher/applications/reject/:proposal_id',
 isLoggedIn,
@@ -428,7 +460,7 @@ module.exports = { app, server };
  * @return {Promise<object>}
  * @private
  */
-async function _populateProposal(proposalData) {
+async function _populateProposal(proposalData, cds) {
   return {
     id: proposalData.proposal_id,
     title: proposalData.title,
@@ -446,17 +478,10 @@ async function _populateProposal(proposalData) {
     description: proposalData.description,
     requiredKnowledge: proposalData.required_knowledge,
     notes: proposalData.notes,
+    creation_date: proposalData.creation_date,
     expiration: proposalData.expiration,
     level: proposalData.level,
-    cds: await degreeDao.getDegreeFromCode(proposalData.cds)
-        .then( degree => {
-          if (!degree) {
-            // Should never happen, but just in case
-            throw new Error(`Degree with code ${proposalData.cds} not found`);
-          }
-
-          return _serializeDegree(degree);
-        }),
+    cds: cds,
     keywords: await thesisDao.getKeywordsOfProposal(proposalData.proposal_id),
     groups: await thesisDao.getProposalGroups(proposalData.proposal_id)
   };
@@ -478,20 +503,6 @@ function _getProposalStatus(proposalData) {
   }
 
   return 'ACTIVE';
-}
-
-/**
- * Serializes a degree object to a more compact format for the API
- *
- * @param {DegreeRow} degree
- * @return {{code: string, title: string}}
- * @private
- */
-function _serializeDegree(degree) {
-  return {
-    code: degree.cod_degree,
-    title: degree.title_degree
-  };
 }
 
 /**

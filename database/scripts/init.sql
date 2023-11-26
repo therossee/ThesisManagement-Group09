@@ -71,6 +71,7 @@ CREATE TABLE thesisProposal (
     description TEXT NOT NULL,
     required_knowledge TEXT,
     notes TEXT,
+    creation_date DATE NOT NULL,
     expiration DATE NOT NULL,
     level TEXT NOT NULL,
     FOREIGN KEY(supervisor_id) REFERENCES teacher(id)
@@ -122,6 +123,7 @@ CREATE TABLE proposalCds(
 CREATE TABLE thesisApplication (
     proposal_id INTEGER NOT NULL,
     student_id TEXT NOT NULL,
+    creation_date DATE NOT NULL,
     status TEXT DEFAULT 'waiting for approval',
     FOREIGN KEY(proposal_id) REFERENCES thesisProposal(proposal_id),
     FOREIGN KEY(student_id) REFERENCES student(id),
@@ -304,37 +306,37 @@ VALUES
     ('s309429', '01URTOV', 'Machine learning and pattern recognition', 6, 29, '2/12/2022');
 
 -- Insert data into the thesisProposal table
-INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, expiration, level)
+INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)
 VALUES
     ('AI-GUIDED WEB CRAWLER FOR AUTOMATIC DETECTION OF MALICIOUS SITES', 'd279620', 'research project',
     'This thesis focuses on developing an AI-guided web crawler for the automatic detection of malicious sites. The research aims to leverage artificial intelligence to enhance the efficiency and accuracy of web crawling in identifying and cataloging potentially harmful websites.',
     'web development, cybersecurity, and machine learning',
     'The project involves implementing machine learning algorithms for pattern recognition, collaborating with cybersecurity experts, and optimizing web crawling algorithms for real-time detection',
-    '2024-11-10', 'LM'),
+    '2023-10-10T10:45:50.121Z', '2024-11-10T23:59:59.999Z', 'LM'),
 
     ('PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API', 'd370335', 'research project',
     'This thesis focuses on the performance evaluation of Kafka clients using a reactive API. The research aims to assess and enhance the efficiency of Kafka clients by implementing a reactive programming approach. The study explores how a reactive API can improve responsiveness and scalability in real-time data streaming applications.',
     'networking protocols, congestion control algorithms, and familiarity with QUIC',
     'The study involves simulations, performance evaluations, and an in-depth analysis of the effectiveness of different congestion control schemes in QUIC',
-    '2025-12-24', 'LM'),
+    '2023-08-22T13:43:56.236Z', '2025-12-24T23:59:59.999Z', 'LM'),
 
     ('A STUDY OF CONGESTION CONTROL SCHEMES ON QUIC', 'd350985', 'research project',
     'This research paper delves into a comprehensive study of congestion control schemes on QUIC (Quick UDP Internet Connections). The investigation aims to analyze and compare various congestion control strategies within the QUIC protocol, shedding light on their impact on network performance and efficiency.',
     'Strong understanding of web development principles, Proficiency in cybersecurity concepts and best practices, Familiarity with machine learning algorithms and pattern recognition, Knowledge of data structures and algorithms for efficient web crawling.',
     'The project involves implementing cutting-edge machine learning algorithms to enhance the accuracy of malicious site detection. Collaboration with cybersecurity experts is essential to ensure the crawlers effectiveness against evolving threats. Optimization of web crawling algorithms for real-time detection requires a deep understanding of both web technologies and performance optimization techniques.',
-    '2026-04-01', 'LM'),
+    '2023-09-17T21:37:01.176Z', '2026-04-01T23:59:59.999Z', 'LM'),
 
     ('ULTRA-LOW-POWER ACOUSTIC SENSOR FRONTEND A DIGITAL TRANSCONDUCTANCE AMPLIFIER APPROACH', 'd255269', 'dissertation',
     'This dissertation focuses on the design and implementation of an ultra-low-power acoustic sensor frontend using a digital transconductance amplifier approach. The research aims to explore novel methods in signal processing and circuit design to achieve highly efficient and low-power acoustic sensing capabilities.',
     'analog and digital circuit design, signal processing, and low-power electronics',
     'The project involves the development of a digital transconductance amplifier, integration with an acoustic sensor frontend, and extensive testing for ultra-low-power performance',
-    '2027-09-29', 'LM'),
+    '2023-11-01T23:59:32.155Z', '2027-09-29T23:59:59.999Z', 'LM'),
 
     ('PRELIMINARY DESIGN OF AN ARCJET IN THE 1KW CLASS FOR SPACE APPLICATION', 'd357587', 'engineering project',
     'This engineering project involves the preliminary design of an arcjet in the 1kW class for space applications. The research aims to conceptualize and outline the key parameters, components, and specifications required for the development of a high-powered arcjet propulsion system suitable for space missions.',
     'propulsion systems, plasma physics, and aerospace engineering',
     'The project includes conceptual design, performance modeling, and consideration of thermal management aspects for the arcjet propulsion system.',
-    '2025-03-23', 'LM');
+    '2023-11-15T22:44:51.199Z', '2025-03-23T23:59:59.999Z', 'LM');
 
 
 -- Insert data into the proposalKeyword table
@@ -382,24 +384,29 @@ VALUES
 INSERT INTO proposalGroup (proposal_id, cod_group)
 VALUES
     (1, 'Group1'),
-    (1, 'Group2'),
-    (1, 'Group3'),
+    (1, 'Group5'),
+    (2, 'Group1'),
     (2, 'Group2'),
-    (3, 'Group1'),
-    (2, 'Group1');
+    (3, 'Group3'),
+    (3, 'Group5'),
+    (3, 'Group6'),
+    (4, 'Group3'),
+    (4, 'Group4'),
+    (5, 'Group5');
+
 
 -- Insert into thesisApplication
-INSERT INTO thesisApplication (proposal_id, student_id)
+INSERT INTO thesisApplication (proposal_id, student_id, creation_date)
 VALUES
-    (1, 's294301'), 
-    (1, 's309429'), 
-    (1, 's322044'),
-    (2, 's309429'),
-    (2, 's295416'),
-    (2, 's318894'),
-    (1, 's288327'),
-    (4, 's297117'),
-    (1, 's304823');
+    (1, 's294301', '2023-10-15T08:08:16.123Z'), 
+    (1, 's309429', '2023-10-23T12:45:58.200Z'), 
+    (1, 's322044', '2023-11-05T13:01:22.156Z'),
+    (2, 's309429', '2023-08-27T20:20:20.144Z'),
+    (2, 's295416', '2023-09-09T09:35:21.132Z'),
+    (2, 's318894', '2023-10-10T18:56:39.186Z'),
+    (1, 's288327', '2023-10-30T16:30:00.171Z'),
+    (4, 's297117', '2023-11-20T19:05:01.200Z'),
+    (1, 's304823', '2023-11-21T15:41:35.199Z');
 
 INSERT INTO proposalCds(proposal_id, cod_degree)
 VALUES
