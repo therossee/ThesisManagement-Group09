@@ -19,12 +19,7 @@ root.render(
 <Auth0Provider
     domain="thesis-management-09.eu.auth0.com"
     clientId="o5I1QNTABwbX6g1xc2lxota9aZQEsOvA"
-    authorizationParams={{
-      redirect_uri: window.location.origin,
-      audience: 'https://thesis-management-9.eu.auth0.com/api/v2/',
-			scope: 'read:current_user update:current_user_metadata',
-    }}
-    cacheLocation='localstorage'
+    redirectUri={window.location.origin}
   >
     <App />
   </Auth0Provider>,
