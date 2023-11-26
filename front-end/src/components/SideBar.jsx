@@ -14,7 +14,7 @@ function SideBar() {
   // Define the menu items, using directly the route path as key
   const navigation = [
     { label: "Home", key: "/", icon: <HomeOutlined /> },
-    (isLoggedIn && !isTeacher) && { label: "Thesis Proposals", key: "/proposals", icon: <FileTextOutlined /> },
+    isLoggedIn && { label: "Thesis Proposals", key: "/proposals", icon: <FileTextOutlined /> },
     (isLoggedIn && isTeacher) && { label: "Thesis Applications", key: "/applications", icon: <AuditOutlined /> },
     { type: 'divider' },
     { label: "Administration", key: "/admin/virtual-clock", icon: <SettingOutlined /> }
