@@ -336,7 +336,17 @@ exports.applyForProposal = (proposal_id, student_id) => {
 exports.listThesisProposalsTeacher = (teacherId) => {
   return new Promise((resolve) => {
     const currentDate = new AdvancedDate().toISOString();
-    const getProposals = `SELECT * FROM thesisProposal WHERE supervisor_id=? AND expiration > ? AND creation_date < ?`;
+    const getProposals = `SELECT * 
+      FROM thesisProposal P
+      WHERE P.supervisor_id=?
+      AND NOT EXISTS (
+        SELECT 1
+        FROM thesisApplication A
+        WHERE A.proposal_id = P.proposal_id
+        AND A.status = 'accepted'
+    )
+    AND P.expiration > ?
+    AND creation_date < ?;`;
     const proposals = db.prepare(getProposals).all(teacherId, currentDate, currentDate);
     resolve(proposals)
 
