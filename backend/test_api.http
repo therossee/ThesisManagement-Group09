@@ -93,6 +93,10 @@ GET http://localhost:3000/api/thesis-proposals HTTP/1.1
 GET http://localhost:3000/api/teacher/applications/1 HTTP/1.1
 ###
 
+## LIST ALL APPLICATIONS DECISIONS FROM A STUDENT
+GET http://localhost:3000/api/student/applications-decision HTTP/1.1
+###
+
 ## FUNCTION TO GET ALL ACTIVE APPLICATION OF A STUDENT
 GET http://localhost:3000/api/student/active-application HTTP/1.1
 ###

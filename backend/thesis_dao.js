@@ -508,6 +508,18 @@ exports.rejectOtherApplications = (studentId, proposalId) => {
   })
 };
 
+exports.listApplicationsDecisionsFromStudent = (studentId) => {
+  return new Promise((resolve) => {
+    
+    const getApplications = `SELECT ta.proposal_id, tp.title,  tp.level, t.name AS "teacher_name" , t.surname AS "teacher_surname" ,ta.status, tp.expiration
+    FROM thesisApplication ta, thesisProposal tp, teacher t
+    WHERE ta.proposal_id = tp.proposal_id AND ta.student_id = ? AND t.id = tp.supervisor_id`;
+
+    const applications = db.prepare(getApplications).all(studentId);    
+    resolve(applications)
+    
+  })
+};
 exports.getThesisProposalCds = (proposalId) => {
   return new Promise((resolve) => {
     const query = `SELECT d.cod_degree, d.title_degree FROM proposalCds p, degree d WHERE proposal_id = ? AND p.cod_degree = d.cod_degree`;
