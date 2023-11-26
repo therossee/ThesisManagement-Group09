@@ -89,13 +89,15 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
  */
 exports.updateThesisProposal = (proposal_id, supervisor_id, thesis) => {
   return new Promise((resolve, reject) => {
+    const now = new AdvancedDate();
+
     db.transaction(() => {
       const updateThesisProposalQuery = `
         UPDATE thesisProposal
         SET title = ?, type = ?, description = ?, required_knowledge = ?, notes = ?, expiration = ?, level = ?
-        WHERE proposal_id = ? AND supervisor_id = ?;`;
+        WHERE proposal_id = ? AND supervisor_id = ? AND creation_date < ?;`;
 
-      const res = db.prepare(updateThesisProposalQuery).run(thesis.title, thesis.type, thesis.description, thesis.required_knowledge, thesis.notes, thesis.expiration, thesis.level, proposal_id, supervisor_id);
+      const res = db.prepare(updateThesisProposalQuery).run(thesis.title, thesis.type, thesis.description, thesis.required_knowledge, thesis.notes, thesis.expiration, thesis.level, proposal_id, supervisor_id, now.toISOString());
       if (res.changes === 0) {
         resolve(null);
         return;
