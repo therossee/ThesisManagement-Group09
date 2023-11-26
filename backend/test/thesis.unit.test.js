@@ -106,12 +106,9 @@ describe('createThesisProposal', () => {
       keywords: ['Keyword1', 'Keyword2'],
     };
   
-    // Mocking the rejection behavior
-    jest.spyOn(thesis, 'createThesisProposal').mockRejectedValue('The expiration date must be after the creation date');
-  
-    try {
-      // Call the function and expect it to throw
-      await thesis.createThesisProposal(
+    // Adding "await" before the thesis.createThesisProposal
+    await expect(
+      thesis.createThesisProposal(
         proposalData.title,
         proposalData.supervisor_id,
         proposalData.internal_co_supervisors_id,
@@ -125,36 +122,9 @@ describe('createThesisProposal', () => {
         proposalData.level,
         proposalData.cds,
         proposalData.keywords
-      );
-  
-      // If the function does not throw, fail the test
-      fail('Expected createThesisProposal to throw an error');
-    } catch (error) {
-      // Expect the error message to match
-      expect(error).toBe('The expiration date must be after the creation date');
-    }
-  
-    // Ensure that createThesisProposal was called with the correct arguments
-    expect(thesis.createThesisProposal).toHaveBeenCalledWith(
-      proposalData.title,
-      proposalData.supervisor_id,
-      proposalData.internal_co_supervisors_id,
-      proposalData.external_co_supervisors_id,
-      proposalData.type,
-      proposalData.groups,
-      proposalData.description,
-      proposalData.required_knowledge,
-      proposalData.notes,
-      proposalData.expiration,
-      proposalData.level,
-      proposalData.cds,
-      proposalData.keywords
-    );
+      )
+    ).rejects.toEqual("The expiration date must be after the creation date");
   });
-  
-  
-  
-  
 });
 
 // 2. Test Function to get list of teachers not logged
