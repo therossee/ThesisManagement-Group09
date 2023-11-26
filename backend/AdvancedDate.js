@@ -59,7 +59,6 @@ class AdvancedDate {
              * @type {dayjs.Dayjs}
              */
             Object.defineProperty(this, 'date', { value: dayjs.utc(dateStr) });
-            console.log(dateStr, this.date.toISOString());
         } else {
             /**
              * @type {dayjs.Dayjs}
