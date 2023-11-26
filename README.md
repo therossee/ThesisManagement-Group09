@@ -11,6 +11,27 @@
 - ### 318952 Molinatto Sylvie
 - ### 319355 Schiavone Michele
 
+---
+
+## Docker
+This project supports the use of Docker to run the application. The following instructions assume that you have Docker
+correctly installed on your machine.
+### Build image
+```
+docker build -t apokalypt/09_thesis_management .
+```
+_N.B. A working image is available on Docker Hub at [this link](https://hub.docker.com/r/apokalypt/09_thesis_management)._
+### Run container
+```
+docker run -p 5173:5173 -p 3000:3000 --name thesis_management apokalypt/09_thesis_management
+```
+### External documentation
+- [Docker](https://docs.docker.com/)
+- [Docker Hub](https://hub.docker.com/)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop)
+
+---
+
 ## React Client Application Routes
 - Route `/`: Displays the home page
 - Route `/proposals`: Displays the proposals for a student
