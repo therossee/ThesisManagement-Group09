@@ -1,5 +1,6 @@
 import Errors from "./Errors";
-import { ThesisProposals } from "../components/ThesisProposals";
+import StudentThesisProposals from "../components/StudentThesisProposals";
+import TeacherThesisProposals from "../components/TeacherThesisProposals";
 import { useAuth } from "../App";
 
 function Proposals() {
@@ -10,9 +11,9 @@ function Proposals() {
         <>
             {isLoggedIn ? (
                 isTeacher ? (
-                    "Show there maybe another story like show and edit active proposals by the teacher"
+                    <TeacherThesisProposals />
                 ) : (
-                    <ThesisProposals />
+                    <StudentThesisProposals />
                 )
             ) : (
                 <Errors code="403" />

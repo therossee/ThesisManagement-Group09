@@ -1,11 +1,14 @@
 import { React, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button, Descriptions, Skeleton, Typography, Tag, message } from "antd";
+import { useAuth } from "../App";
+import dayjs from 'dayjs';
 import API from "../API";
+
 
 function ViewThesisProposal() {
 
-  const [messageApi, messageBox] = message.useMessage();
+  const { isTeacher, isLoggedIn } = useAuth();
 
   const { id } = useParams();
   const { Text } = Typography;
@@ -24,11 +27,11 @@ function ViewThesisProposal() {
   async function addApplication() {
     try {
       await API.applyForProposal(id);
-      messageApi.success("Applied for proposal");
+      message.success("Applied for proposal");
       setDisabled(true);
       setLoading(false);
     } catch (err) {
-      messageApi.error(err.message ? err.message : err);
+      message.error(err.message ? err.message : err);
       setDisabled(false);
       setLoading(false);
     }
@@ -39,17 +42,32 @@ function ViewThesisProposal() {
     API.getThesisProposalbyId(id)
       .then((x) => {
         setData(x);
-        API.getStudentApplications()
-          .then((z) => {
-              if(x.status === "ACTIVE") {
-                const dis = z.includes(parseInt(id));
-                setDisabled(dis);
-              }
+
+        API.getClock()
+          .then((y) => {
+            const actual = dayjs().add(y.offset, 'ms')
+            const expDate = dayjs(x.expiration);
+            expDate.isBefore(actual) ? setDisabled(true) : setDisabled(false);
           })
-          .catch((err) => { messageApi.error(err.message ? err.message : err) });
+          .catch((err) => { message.error(err.message ? err.message : err) });
       })
-      .catch((err) => { messageApi.error(err.message ? err.message : err) })
+      .catch((err) => { message.error(err.message ? err.message : err) })
   }, []);
+
+  // Another Useffect needed because isTeacher needs time to be computed. It is initialized as undefined so we can actually check when it is computed.
+  useEffect(() => {
+    // Exclude teachers from Application fetch
+    // Explanation: If ((isTeacher is computed and user is not a teacher) or (user is logged in and not a teacher (even if not yet computed)))
+    if ((isTeacher !== undefined && !isTeacher) || (isLoggedIn && !isTeacher)) {
+      API.getStudentActiveApplication()
+        .then((x) => {
+          if (x.length > 0)
+            // Disabled if there's already an application pending
+            setDisabled(true);
+        })
+        .catch((err) => { message.error(err.message ? err.message : err) });
+    }
+  }, [data, isTeacher, isLoggedIn]);
 
   // If data is still empty
   if (!data) {
@@ -82,28 +100,34 @@ function ViewThesisProposal() {
       span: 3,
       children: <Text copyable>{data.description}</Text>
     },
-    {
-      key: '5',
-      label: 'Required Knowledge',
-      span: 3,
-      children: <Text copyable>{data.requiredKnowledge}</Text>
-    },
+    data.requiredKnowledge
+      ? {
+        key: '5',
+        label: 'Required Knowledge',
+        span: 3,
+        children: <Text copyable>{data.requiredKnowledge}</Text>
+      }
+      :
+      undefined,
     {
       key: '6',
       label: 'Supervisor',
       span: 3,
       children: <Tag color="blue">{data.supervisor.name + " " + data.supervisor.surname}</Tag>
     },
-    {
-      key: '7',
-      label: 'Co-Supervisors',
-      span: 3,
-      children:
-        [].concat(data.internalCoSupervisors, data.externalCoSupervisors)
-          .map((x, index, array) => (
-            x.name + " " + x.surname + `${index !== array.length - 1 ? ", " : ""}`
-          ))
-    },
+    (data.internalCoSupervisors.length !== 0 || data.externalCoSupervisors.length !== 0)
+      ? {
+        key: '7',
+        label: 'Co-Supervisors',
+        span: 3,
+        children:
+          [].concat(data.internalCoSupervisors, data.externalCoSupervisors)
+            .map((x, index, array) => (
+              x.name + " " + x.surname + `${index !== array.length - 1 ? ", " : ""}`
+            ))
+      }
+      :
+      undefined,
     {
       key: '8',
       label: 'Groups',
@@ -113,15 +137,18 @@ function ViewThesisProposal() {
           x + `${index !== array.length - 1 ? ", " : ""}`
         ))
     },
-    {
-      key: '9',
-      label: 'Notes',
-      span: 3,
-      children:
-        <Text copyable>
-          {data.notes}
-        </Text>
-    },
+    data.notes
+      ? {
+        key: '9',
+        label: 'Notes',
+        span: 3,
+        children:
+          <Text copyable>
+            {data.notes}
+          </Text>
+      }
+      :
+      undefined,
     {
       key: '10',
       label: 'Keywords',
@@ -130,16 +157,27 @@ function ViewThesisProposal() {
         data.keywords.map((x, index, array) => (
           x + `${index !== array.length - 1 ? ", " : ""}`
         ))
-    }
-  ];
+    },
+    isTeacher
+      ? {
+        key: '11',
+        label: 'CdS',
+        span: 3,
+        children:
+          data.cds.map((x, index, array) => (
+            x.title_degree + `${index !== array.length - 1 ? ", " : ""}`
+          ))
+      }
+      :
+      undefined
+  ].filter(item => item !== undefined); // exclude some field for student view (without rendering useless whitespace)
 
   return (
     <>
-      {messageBox}
       <Button type="link" onClick={() => navigate("/proposals")}>&lt; Back to Thesis Proposals</Button>
-      <Descriptions title={data.title} layout="vertical" items={items} style={{ marginLeft: "2%", marginRight: "2%" }} />
-      <div style={{ paddingLeft: "2%" }}>
-        <Button type="primary" disabled={disabled} loading={loading} onClick={applyForProposal}>Apply for this proposal</Button>
+      <div style={{ paddingLeft: "2%", marginRight: "2%" }}>
+        <Descriptions title={data.title} layout="vertical" items={items} />
+        {!isTeacher && <Button ghost type="primary" disabled={disabled} loading={loading} onClick={applyForProposal}>Apply for proposal</Button>}
       </div>
     </>
   )

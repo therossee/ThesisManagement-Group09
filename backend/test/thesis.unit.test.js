@@ -569,26 +569,26 @@ describe('listApplicationsForTeacherThesisProposal', () => {
   });
 });
 
-describe('getStudentApplications', () => {
+describe('getStudentActiveApplication', () => {
   
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  test('should retrieve applications of a student', async () => {
+  test('should retrieve active application of a student', async () => {
     
     const student_id = 1;
-    const expectedResult = [ { proposal_id: 1 }, { proposal_id: 2 } ];
+    const expectedResult = [ { proposal_id: 1 } ];
 
     // Mock the all function to return a mock result
     jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce(expectedResult);
 
     // Act
-    const result = await thesis.getStudentApplications(student_id);
+    const result = await thesis.getStudentActiveApplication(student_id);
 
     // Assert
     expect(result).toEqual(expectedResult);
-    expect(db.prepare).toHaveBeenCalledWith('SELECT proposal_id FROM thesisApplication WHERE student_id=?');
+    expect(db.prepare).toHaveBeenCalledWith("SELECT proposal_id FROM thesisApplication WHERE student_id=? AND creation_date < ? AND ( status='waiting for approval' OR status='accepted')");
   });
 
   test('should handle an empty result set', async () => {
@@ -599,7 +599,7 @@ describe('getStudentApplications', () => {
     jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce([]);
 
     // Act
-    const result = await thesis.getStudentApplications(student_id);
+    const result = await thesis.getStudentActiveApplication(student_id);
 
     // Assert
     expect(result).toEqual([]);

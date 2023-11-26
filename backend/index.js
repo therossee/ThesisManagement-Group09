@@ -1,6 +1,7 @@
 'use strict';
 
 /*** Importing modules ***/
+const { ZodError } = require("zod");
 const express = require('express');
 const session = require('express-session');
 const morgan = require('morgan');
@@ -13,7 +14,6 @@ const usersDao = require('./users_dao.js');
 const degreeDao = require('./degree_dao.js');
 const AdvancedDate = require("./AdvancedDate");
 const schemas = require('./schemas.js');
-const {ZodError} = require("zod");
 
 /*** init express and setup the middlewares ***/
 const app = express();
@@ -349,6 +349,54 @@ app.get('/api/thesis-proposals/:id',
     }
 });
 
+app.put('/api/thesis-proposals/:id',
+    isLoggedIn,
+    isTeacher,
+    async (req, res) => {
+      try {
+        const proposal_id = req.params.id;
+        const supervisor_id  = req.user.id;
+
+        const applications = await thesisDao.listApplicationsForTeacherThesisProposal(proposal_id, supervisor_id);
+        if (applications.some( application => application.status === 'accepted' )) {
+            return res.status(403).json({ message: 'Cannot edit a proposal with accepted applications.' });
+        }
+
+        const thesis = schemas.APIThesisProposalSchema.parse(req.body);
+
+        // Set to store all grous
+        const unique_groups = new Set();
+        await thesisDao.getGroup(supervisor_id).then( group => unique_groups.add(group) );
+        await Promise.all(
+            thesis.internal_co_supervisors_id.map(async id => {
+              return thesisDao.getGroup(id).then( group => unique_groups.add(group) );
+            })
+        );
+        thesis.groups = [...unique_groups];
+
+        const id = await thesisDao.updateThesisProposal(proposal_id, supervisor_id, thesis);
+        if (!id) {
+          return res.status(404).json({ message: `Thesis proposal with id ${proposal_id} not found.` });
+        }
+
+        const proposal = await thesisDao.getThesisProposalById(proposal_id);
+        if (!proposal) {
+          return res.status(404).json({ message: `Thesis proposal with id ${proposal_id} not found.` });
+        }
+        const cds = await thesisDao.getThesisProposalCds(proposal_id);
+
+        res.status(200).send( await _populateProposal(proposal, cds) );
+      } catch (e) {
+        if (e instanceof ZodError) {
+          res.status(400).json({ message: 'Some properties are missing or invalid.', errors: e.issues });
+        } else {
+          console.error(e);
+          res.status(500).json('Internal Server Error');
+        }
+      }
+    }
+);
+
 app.post('/api/student/applications',
 isLoggedIn,
 isStudent,
@@ -356,16 +404,16 @@ async(req,res) => {
     const student_id = req.user.id; // logged in student
     const {thesis_proposal_id} = req.body;
     await thesisDao.applyForProposal(thesis_proposal_id, student_id).then
-    ((applicationId)=>{  
+    ((applicationId)=>{
       res.status(201).json(
-        { 
-          thesis_proposal_id: thesis_proposal_id, 
+        {
+          thesis_proposal_id: thesis_proposal_id,
           student_id: student_id,
           status: 'waiting for approval'
         });
     })
   .catch((error) => {
-    console.error(error); 
+    console.error(error);
     res.status(500).json(`Failed to apply for proposal. ${error.message || error}`);
   });
 });
@@ -385,13 +433,13 @@ async (req, res) => {
   }
 });
 
-app.get('/api/student/applications',
+app.get('/api/student/active-application',
 isLoggedIn,
 isStudent,
 async (req, res) => {
   try {
     const studentId = req.user.id;
-    const studentApplications = await thesisDao.getStudentApplications(studentId)
+    const studentApplications = await thesisDao.getStudentActiveApplication(studentId)
     res.json(studentApplications);
   } catch (e) {
     console.error(e);

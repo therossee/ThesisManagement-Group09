@@ -46,7 +46,7 @@ async function getUserInfo() {
 
 async function getClock() {
     return fetch(URL + '/system/virtual-clock')
-        .then( async response => {
+        .then(async response => {
             const body = await response.json();
 
             if (response.ok) {
@@ -67,7 +67,7 @@ async function updateClock(date) {
         },
         body: JSON.stringify({ newDate: date })
     })
-        .then( async response => {
+        .then(async response => {
             const body = await response.json();
 
             if (response.ok) {
@@ -81,8 +81,8 @@ async function updateClock(date) {
         });
 }
 
-// GET Student's Thesis Proposals
-async function getStudentThesisProposals() {
+// GET Thesis Proposals
+async function getThesisProposals() {
     const response = await fetch(URL + '/thesis-proposals', {
         credentials: 'include',
     });
@@ -99,10 +99,11 @@ async function getStudentThesisProposals() {
             description: x.description,
             requiredKnowledge: x.requiredKnowledge ?? "",
             notes: x.notes ?? "",
-            expiration: x.expiration,
+            expiration: x.expiration.substring(0, 10),
             level: x.level,
             groups: x.groups,
-            keywords: x.keywords
+            keywords: x.keywords,
+            cds: x.cds
         }))
     } else {
         throw proposals;
@@ -127,11 +128,11 @@ async function getThesisProposalbyId(id) {
             description: thesisProposal.description,
             requiredKnowledge: thesisProposal.requiredKnowledge,
             notes: thesisProposal.notes,
-            expiration: thesisProposal.expiration,
+            expiration: thesisProposal.expiration.substring(0, 10),
             level: thesisProposal.level,
             groups: thesisProposal.groups,
             keywords: thesisProposal.keywords,
-            status: thesisProposal.status
+            cds: thesisProposal.cds
         }
     } else {
         throw thesisProposal;
@@ -145,7 +146,7 @@ async function applyForProposal(id) {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({thesis_proposal_id: id}),
+        body: JSON.stringify({ thesis_proposal_id: id }),
     });
     if (response.ok) {
         const apply = await response.json();
@@ -153,13 +154,13 @@ async function applyForProposal(id) {
         return apply;
     } else {
         const errDetail = await response.json();
-        throw {status: response.status, message: errDetail};
+        throw { status: response.status, message: errDetail };
     }
 }
 
 // GET Student's Thesis Applications
-async function getStudentApplications() {
-    const response = await fetch(URL + '/student/applications', {
+async function getStudentActiveApplication() {
+    const response = await fetch(URL + '/student/active-application', {
         credentials: 'include',
     });
     const applications = await response.json();
@@ -167,30 +168,6 @@ async function getStudentApplications() {
         return applications.map(x => x.proposal_id);
     } else {
         throw applications;
-    }
-}
-
-// GET Thesis Proposals of a Teacher
-async function getTeacherThesisProposals() {
-    const response = await fetch(URL + '/teacher/thesis_proposals', {
-        credentials: 'include',
-    });
-    const proposals = await response.json();
-    if (response.ok) {
-        return proposals.map((x) => ({
-            id: x.proposal_id,
-            title: x.title,
-            supervisor: x.supervisor_id,
-            type: x.type,
-            description: x.description,
-            requiredKnowledge: x.required_knowledge,
-            notes: x.notes,
-            expiration: x.expiration,
-            level: x.level,
-            cds: x.cds
-        }))
-    } else {
-        throw proposals;
     }
 }
 
@@ -228,7 +205,7 @@ async function insertProposal(proposal) {
         return prop;
     } else {
         const errDetail = await response.json();
-        throw {status: response.status, msg: errDetail};
+        throw { status: response.status, msg: errDetail };
     }
 }
 
@@ -299,51 +276,51 @@ async function getAllDegrees() {
 
 
 // Accept Student Applications on a Thesis Proposal 
-async function acceptThesisApplications(proposalId,studentId) {
+async function acceptThesisApplications(proposalId, studentId) {
     const response = await fetch(URL + `/teacher/applications/accept/${proposalId}`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
+            'Content-Type': 'application/json',
         },
         credentials: 'include',
         body: JSON.stringify({
-          student_id: studentId,
+            student_id: studentId,
         }),
-      });
-      if (response.ok) {
+    });
+    if (response.ok) {
         return { success: true, status: response.status };
-      } else {
+    } else {
         const errorData = await response.json();
         return { success: false, status: response.status, error: errorData.error || 'Unknown error' };
-      }
+    }
 }
 
 // Reject Student Applications on a Thesis Proposal 
-async function rejectThesisApplications(proposalId,studentId) {
+async function rejectThesisApplications(proposalId, studentId) {
     const response = await fetch(URL + `/teacher/applications/reject/${proposalId}`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
+            'Content-Type': 'application/json',
         },
         credentials: 'include',
         body: JSON.stringify({
-          student_id: studentId,
+            student_id: studentId,
         }),
-      });
-      if (response.ok) {
+    });
+    if (response.ok) {
         return { success: true, status: response.status };
-      } else {
+    } else {
         const errorData = await response.json();
         return { success: false, status: response.status, error: errorData.error || 'Unknown error' };
-      }
+    }
 }
-  
+
 
 
 const API = {
     logIn, logOut, getUserInfo,
     getClock, updateClock,
-    insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getStudentThesisProposals, getThesisProposalbyId, getTeacherThesisProposals, getTeacherThesisApplications,
-    applyForProposal, getStudentApplications, acceptThesisApplications, rejectThesisApplications
+    insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
+    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications
 };
 export default API;
