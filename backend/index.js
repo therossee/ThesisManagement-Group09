@@ -433,13 +433,13 @@ async (req, res) => {
   }
 });
 
-app.get('/api/student/applications',
+app.get('/api/student/active-application',
 isLoggedIn,
 isStudent,
 async (req, res) => {
   try {
     const studentId = req.user.id;
-    const studentApplications = await thesisDao.getStudentApplications(studentId)
+    const studentApplications = await thesisDao.getStudentActiveApplication(studentId)
     res.json(studentApplications);
   } catch (e) {
     console.error(e);
