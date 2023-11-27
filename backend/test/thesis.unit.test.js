@@ -287,21 +287,21 @@ describe('getThesisProposal', () => {
   test('should return a thesis proposal when it exists for the given proposalId and studentId', async () => {
     // Arrange
     const proposalId = 1;
-    const studentId = 1;
+    const studentId = "1";
     const expectedResult = 
     {
       "id": 1,
       "title": "Test Proposal",
       "status": "ACTIVE",
       "supervisor": {
-        "id":1,
+        "id":"1",
         "name": "mockSupervisorName",
         "surname": "mockSupervisorSurname",
       },
       "cosupervisors":{
         "internal": [
           {
-            "id":"s12345",
+            "id": "1",
             "name":"internalCoSupervisorName",
             "surname":"internalCoSupervisorSurname"
           }
@@ -601,7 +601,8 @@ describe('listApplicationsForTeacherThesisProposal', () => {
     expect(result).toEqual(mockApplications);
     expect(db.prepare).toHaveBeenCalledWith(`SELECT s.name, s.surname, ta.status, s.id
     FROM thesisApplication ta, thesisProposal tp, student s
-    WHERE ta.proposal_id = tp.proposal_id AND s.id = ta.student_id AND ta.proposal_id=? AND tp.supervisor_id= ?`);
+    WHERE ta.proposal_id = tp.proposal_id AND s.id = ta.student_id AND ta.proposal_id=? AND tp.supervisor_id= ? 
+    AND ta.creation_date < ? AND tp.expiration > ? AND tp.creation_date < ?`);
   });
 });
 
@@ -624,7 +625,7 @@ describe('getStudentApplications', () => {
 
     // Assert
     expect(result).toEqual(expectedResult);
-    expect(db.prepare).toHaveBeenCalledWith('SELECT proposal_id FROM thesisApplication WHERE student_id=?');
+    expect(db.prepare).toHaveBeenCalledWith('SELECT proposal_id FROM thesisApplication WHERE student_id=? AND creation_date < ?');
   });
 
   test('should handle an empty result set', async () => {
