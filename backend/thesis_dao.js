@@ -493,18 +493,32 @@ exports.updateApplicationStatus = (studentId, proposalId, status) => {
   })
 };
 
+/**
+ * Reject all applications waiting for approval for a given proposal except the one of the student
+ *
+ * @param {string} studentId
+ * @param {string} proposalId
+ * @return {Promise<ThesisApplicationRow[]>}
+ */
 exports.rejectOtherApplications = (studentId, proposalId) => {
   return new Promise((resolve, reject) => {
-    const query = `
-      UPDATE thesisApplication
-      SET status = 'canceled'
-      WHERE student_id <> ? AND proposal_id = ?
-    `
-    const res = db.prepare(query).run(studentId, proposalId);
+    db.transaction(() => {
+      const selectQuery = `
+        SELECT *
+        FROM thesisApplication
+        WHERE student_id <> ? AND proposal_id = ? AND status = 'waiting for approval'
+      `;
+      const res = db.prepare(selectQuery).all(studentId, proposalId);
 
-    const rowCount = res.changes;
+      const updateQuery = `
+        UPDATE thesisApplication
+        SET status='cancelled'
+        WHERE student_id <> ? AND proposal_id = ? AND status = 'waiting for approval'
+      `;
+      db.prepare(updateQuery).run(studentId, proposalId);
 
-    resolve(rowCount);
+      resolve(res);
+    });
   })
 };
 
@@ -534,4 +548,14 @@ exports.getThesisProposalTeacher = (proposalId, teacherId) => {
     const res = db.prepare(query).get(proposalId, teacherId, currentDate, currentDate);
     resolve(res);
   })
-}
+};
+
+
+/**
+ * @typedef {Object} ThesisApplicationRow
+ *
+ * @property {string} proposal_id
+ * @property {string} student_id
+ * @property {string} status
+ * @property {string} creation_date
+ */

@@ -1,5 +1,8 @@
 'use strict';
 
+const dotenv = require("dotenv");
+dotenv.config({ DOTENV_KEY: process.env.TM_DOTENV_KEY ?? "" });
+
 /*** Importing modules ***/
 const { ZodError } = require("zod");
 const express = require('express');
@@ -14,6 +17,7 @@ const usersDao = require('./users_dao.js');
 const degreeDao = require('./degree_dao.js');
 const AdvancedDate = require("./AdvancedDate");
 const schemas = require('./schemas.js');
+const { sendEmailApplicationStatusChange } = require("./email");
 
 /*** init express and setup the middlewares ***/
 const app = express();
@@ -459,9 +463,17 @@ app.patch('/api/teacher/applications/accept/:proposal_id',
     }
 
     try {
-      await thesisDao.updateApplicationStatus(student_id, proposal_id, "accepted");
+      const status = "accepted";
+      await thesisDao.updateApplicationStatus(student_id, proposal_id, status);
+      setImmediate( async () => _notifyApplicationStatusChange(student_id, proposal_id, status) );
 
-      const rejected = await thesisDao.rejectOtherApplications(student_id, proposal_id);
+      const applicationsRejected = await thesisDao.rejectOtherApplications(student_id, proposal_id);
+      setImmediate(async () => {
+        const reason = 'Another student has been accepted for this thesis proposal.';
+        for (const application of applicationsRejected) {
+          _notifyApplicationStatusChange(application.student_id, application.proposal_id, application.status, reason);
+        }
+      });
 
       res.status(200).json({ message: 'Thesis accepted and others rejected successfully' });
 
@@ -469,8 +481,7 @@ app.patch('/api/teacher/applications/accept/:proposal_id',
       console.error(error);
       res.status(500).json(`Internal Server Error`);
     }
-
-})
+});
 
 app.patch('/api/teacher/applications/reject/:proposal_id',
 isLoggedIn,
@@ -484,9 +495,12 @@ async (req, res) => {
   }
 
   try {
-    await thesisDao.updateApplicationStatus(student_id, proposal_id, "rejected");
-    res.status(200).json({ message: 'Thesis successfully rejected' });
+    const status = "rejected";
+    await thesisDao.updateApplicationStatus(student_id, proposal_id, status);
 
+    setImmediate( async () => _notifyApplicationStatusChange(student_id, proposal_id, status) );
+
+    res.status(200).json({ message: 'Thesis successfully rejected' });
   } catch (error) {
     console.error(error);
     res.status(500).json(`Internal Server Error`);
@@ -569,4 +583,31 @@ function _serializeTeacher(teacher) {
     codGroup: teacher.cod_group,
     codDepartment: teacher.cod_department
   };
+}
+
+/**
+ * Notify the student that the status of his/her application has changed.
+ *
+ * @param {string} studentId
+ * @param {string} proposalId
+ * @param {string} status
+ * @param {string} [reason]
+ *
+ * @return {Promise<void>}
+ * @private
+ */
+async function _notifyApplicationStatusChange (studentId, proposalId, status, reason) {
+  const student = await usersDao.getStudentById(studentId);
+  if (!student) {
+    console.error(`Student with id "${studentId}" not found, cannot notify application status change.`);
+    return;
+  }
+
+  const thesis = await thesisDao.getThesisProposalById(proposalId);
+  if (!thesis) {
+    console.error(`Thesis proposal with id "${proposalId}" not found, cannot notify application status change.`);
+    return;
+  }
+
+  sendEmailApplicationStatusChange(student.email, thesis, status, reason);
 }
