@@ -198,106 +198,16 @@ VALUES
     ('Russo', 'Marco', 'marco.russo@email.com');
 
 -- Insert data into the student table
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s294301', 'Rossi', 'Abbondanzio', 'Male', 'Italian', 'rossi.abbondanzio@email.com', 'L-07', 2020);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s309429', 'Ferrari', 'Abbondio', 'Male', 'Italian', 'ferrari.abbondio@email.com', 'L-08', 2024);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s322044', 'Russo', 'Abelardo', 'Male', 'Italian', 'russo.abelardo@email.com', 'L-09', 2023);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s288327', 'Esposito', 'Abenzio', 'Male', 'Italian', 'esposito.abenzio@email.com', 'L-09', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s287107', 'Bianchi', 'Abramio', 'Male', 'Italian', 'bianchi.abramio@email.com', 'L-08', 2022);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s288512', 'Romano', 'Acacio', 'Male', 'Italian', 'romano.acacio@email.com', 'LM-22', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s318894', 'Gallo', 'Accursio', 'Male', 'Italian', 'gallo.accursio@email.com', 'LM-30', 2018);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s299838', 'Costa', 'Acilio', 'Male', 'Italian', 'costa.acilio@email.com', 'LM-33', 2023);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s301938', 'Fontana', 'Caldo', 'Male', 'Italian', 'fontana.caldo@email.com', 'LM-27', 2022);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s322276', 'Conti', 'Acrisio', 'Male', 'Italian', 'conti.acrisio@email.com', 'LM-34', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s317988', 'Ricci', 'Adalberto', 'Male', 'Italian', 'ricci.adalberto@email.com', 'LM-34', 2023);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s304823', 'Bruno', 'Adalgiso', 'Male', 'Italian', 'bruno.adalgiso@email.com', 'LM-28', 2019);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s289041', 'De Luca', 'Adamo', 'Male', 'Italian', 'de luca.adamo@email.com', 'LM-24', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s297117', 'Moretti', 'Adelardo', 'Male', 'Italian', 'moretti.adelardo@email.com', 'LM-21', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s293605', 'Marino', 'Adelchi', 'Male', 'Italian', 'marino.adelchi@email.com', 'LM-33', 2024);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s324327', 'Greco', 'Adelgardo', 'Male', 'Italian', 'greco.adelgardo@email.com', 'LM-21', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s289300', 'Barbieri', 'Adeodato', 'Male', 'Italian', 'barbieri.adeodato@email.com', 'LM-35', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s313395', 'Lombardi', 'Adone', 'Male', 'Italian', 'lombardi.adone@email.com', 'LM-30', 2019);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s313562', 'Giordano', 'Adrione', 'Male', 'Italian', 'giordano.adrione@email.com', 'LM-30', 2022);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s317577', 'Cassano', 'Agabio', 'Male', 'Italian', 'cassano.agabio@email.com', 'LM-23', 2024);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s329608', 'Colombo', 'Agapito', 'Male', 'Italian', 'colombo.agapito@email.com', 'LM-30', 2022);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s308631', 'Mancini', 'Agenore', 'Male', 'Italian', 'mancini.agenore@email.com', 'LM-31', 2022);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s291500', 'Longo', 'Agostino', 'Male', 'Italian', 'longo.agostino@email.com', 'LM-35', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s303712', 'Marchetti', 'Aiace', 'Male', 'Italian', 'marchetti.aiace@email.com', 'LM-35', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s296014', 'Martini', 'Aimone', 'Male', 'Italian', 'martini.aimone@email.com', 'LM-24', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s323519', 'Galli', 'Albano', 'Male', 'Italian', 'galli.albano@email.com', 'LM-25', 2024);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s290090', 'Gatti', 'Alamanno', 'Male', 'Italian', 'gatti.alamanno@email.com', 'LM-27', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s301590', 'Mariani', 'Alarico', 'Male', 'Italian', 'mariani.alarico@email.com', 'LM-24', 2023);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s313048', 'Ferrara', 'Alberico', 'Male', 'Italian', 'ferrara.alberico@email.com', 'LM-34', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s321096', 'Santoro', 'Albino', 'Male', 'Italian', 'santoro.albino@email.com', 'LM-27', 2024);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s314291', 'Marini', 'Albrico', 'Male', 'Italian', 'marini.albrico@email.com', 'LM-21', 2020);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s286993', 'Bianco', 'Alceste', 'Male', 'Italian', 'bianco.alceste@email.com', 'LM-25', 2024);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s290692', 'Conte', 'Alcide', 'Male', 'Italian', 'conte.alcide@email.com', 'LM-34', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s314288', 'Serra', 'Aldo', 'Male', 'Italian', 'serra.aldo@email.com', 'LM-26', 2024);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s325784', 'Farina', 'Aleandro', 'Male', 'Italian', 'farina.aleandro@email.com', 'LM-24', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s302797', 'Gentile', 'Aleramo', 'Male', 'Italian', 'gentile.aleramo@email.com', 'LM-23', 2018);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s304535', 'Caruso', 'Alessio', 'Male', 'Italian', 'caruso.alessio@email.com', 'LM-34', 2023);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s303129', 'Morelli', 'Alfonso', 'Male', 'Italian', 'morelli.alfonso@email.com', 'LM-21', 2024);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s290817', 'Ferri', 'Algiso', 'Male', 'Italian', 'ferri.algiso@email.com', 'LM-29', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s325645', 'Testa', 'Almerigo', 'Male', 'Italian', 'testa.almerigo@email.com', 'LM-28', 2019);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s298289', 'Ferraro', 'Aloisio', 'Male', 'Italian', 'ferraro.aloisio@email.com', 'LM-29', 2019);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s314494', 'Pellegrini', 'Alviero', 'Male', 'Italian', 'pellegrini.alviero@email.com', 'LM-25', 2022);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s316149', 'Grassi', 'Amelio', 'Male', 'Italian', 'grassi.amelio@email.com', 'LM-29', 2018);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s300790', 'Rossetti', 'Amabile', 'Male', 'Italian', 'rossetti.amabile@email.com', 'LM-29', 2024);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s318074', 'D''Angelo', 'Amando', 'Male', 'Italian', 'd''angelo.amando@email.com', 'LM-24', 2018);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s324576', 'Bernardi', 'Amaranto', 'Male', 'Italian', 'bernardi.amaranto@email.com', 'LM-28', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s294596', 'Mazza', 'Amatore', 'Male', 'Italian', 'mazza.amatore@email.com', 'LM-22', 2019);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s327923', 'Rizzi', 'Ambrogio', 'Male', 'Italian', 'rizzi.ambrogio@email.com', 'LM-34', 2022);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s319225', 'Natale', 'Amedeo', 'Male', 'Italian', 'natale.amedeo@email.com', 'LM-35', 2023);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s304580', 'Rizzo', 'Amerigo', 'Male', 'Italian', 'rizzo.amerigo@email.com', 'LM-32', 2023);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s322753', 'Seta', 'Amilcare', 'Male', 'Italian', 'seta.amilcare@email.com', 'LM-26', 2020);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s303116', 'Setaro', 'Amleto', 'Male', 'Italian', 'setaro.amleto@email.com', 'LM-28', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s313347', 'Severini', 'Barbara', 'Female', 'Italian', 'severini.barbara@email.com', 'LM-23', 2020);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s312234', 'Severino', 'Beatrice', 'Female', 'Italian', 'severino.beatrice@email.com', 'LM-32', 2024);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s316031', 'Severo', 'Bella', 'Female', 'Italian', 'severo.bella@email.com', 'LM-23', 2018);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s292717', 'Sferra', 'Benedetta', 'Female', 'Italian', 'sferra.benedetta@email.com', 'LM-26', 2022);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s318174', 'Sferrazza', 'Bianca', 'Female', 'Italian', 'sferrazza.bianca@email.com', 'LM-24', 2020);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s294228', 'Sforza', 'Jasmine', 'Female', 'Italian', 'sforza.jasmine@email.com', 'LM-23', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s298114', 'Sgambati', 'Jessica', 'Female', 'Italian', 'sgambati.jessica@email.com', 'LM-24', 2019);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s295800', 'Sgarlata', 'Rita', 'Female', 'Italian', 'sgarlata.rita@email.com', 'LM-32', 2020);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s306042', 'Sibilia', 'Roberta', 'Female', 'Italian', 'sibilia.roberta@email.com', 'LM-26', 2022);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s309619', 'Sica', 'Romina', 'Female', 'Italian', 'sica.romina@email.com', 'LM-30', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s295416', 'Sicignano', 'Rosa', 'Female', 'Italian', 'sicignano.rosa@email.com', 'LM-22', 2019);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s290387', 'Sicilia', 'Rosalba', 'Female', 'Italian', 'sicilia.rosalba@email.com', 'LM-27', 2023);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s296477', 'Pontarelli', 'Rosalinda', 'Female', 'Italian', 'pontarelli.rosalinda@email.com', 'LM-34', 2018);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s327367', 'Pontecorvo', 'Rosanna', 'Female', 'Italian', 'pontecorvo.rosanna@email.com', 'LM-28', 2019);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s324696', 'Ponti', 'Rosaria', 'Female', 'Italian', 'ponti.rosaria@email.com', 'LM-32', 2018);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s316864', 'Ponticello', 'Rossana', 'Female', 'Italian', 'ponticello.rossana@email.com', 'LM-34', 2024);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s308704', 'Pontillo', 'Nerina', 'Female', 'Italian', 'pontillo.nerina@email.com', 'LM-34', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s311745', 'Pontrelli', 'Nicoletta', 'Female', 'Italian', 'pontrelli.nicoletta@email.com', 'LM-33', 2018);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s323472', 'Ponzi', 'Nina', 'Female', 'Italian', 'ponzi.nina@email.com', 'LM-20', 2020);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s306020', 'Ponzio', 'Noemi', 'Female', 'Italian', 'ponzio.noemi@email.com', 'LM-35', 2019);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s315182', 'Ponzo', 'Nora', 'Female', 'Italian', 'ponzo.nora@email.com', 'LM-33', 2023);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s297229', 'Popolizio', 'Paola', 'Female', 'Italian', 'popolizio.paola@email.com', 'LM-24', 2022);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s323077', 'Poppa', 'Patrizia', 'Female', 'Italian', 'poppa.patrizia@email.com', 'LM-20', 2023);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s303285', 'Ventola', 'Penelope', 'Female', 'Italian', 'ventola.penelope@email.com', 'LM-33', 2024);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s323929', 'Ventre', 'Perla', 'Female', 'Italian', 'ventre.perla@email.com', 'LM-32', 2024);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s324883', 'Ventrella', 'Petra', 'Female', 'Italian', 'ventrella.petra@email.com', 'LM-30', 2018);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s326660', 'Ventresca', 'Piera', 'Female', 'Italian', 'ventresca.piera@email.com', 'LM-21', 2023);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s319815', 'Ventrone', 'Preziosa', 'Female', 'Italian', 'ventrone.preziosa@email.com', 'LM-35', 2024);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s294198', 'Ventura', 'Priscilla', 'Female', 'Italian', 'ventura.priscilla@email.com', 'LM-22', 2022);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s297502', 'Venturella', 'Licia', 'Female', 'Italian', 'venturella.licia@email.com', 'LM-25', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s286802', 'Venturelli', 'Lidia', 'Female', 'Italian', 'venturelli.lidia@email.com', 'LM-25', 2023);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s314576', 'Venturi', 'Liliana', 'Female', 'Italian', 'venturi.liliana@email.com', 'LM-20', 2024);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s305644', 'Venturini', 'Linda', 'Female', 'Italian', 'venturini.linda@email.com', 'LM-34', 2020);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s295137', 'Venturino', 'Lisa', 'Female', 'Italian', 'venturino.lisa@email.com', 'LM-34', 2019);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s300060', 'Venturo', 'Livia', 'Female', 'Italian', 'venturo.livia@email.com', 'LM-22', 2022);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s300558', 'Venuti', 'Loredana', 'Female', 'Italian', 'venuti.loredana@email.com', 'LM-30', 2023);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s308898', 'Venuto', 'Lorella', 'Female', 'Italian', 'venuto.lorella@email.com', 'LM-30', 2018);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s319332', 'Zarella', 'Lorena', 'Female', 'Italian', 'zarella.lorena@email.com', 'LM-20', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s308699', 'Zarlengo', 'Lorenza', 'Female', 'Italian', 'zarlengo.lorenza@email.com', 'LM-31', 2020);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s313316', 'Zaro', 'Luana', 'Female', 'Italian', 'zaro.luana@email.com', 'LM-31', 2022);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s319540', 'Zarrella', 'Emma', 'Female', 'Italian', 'zarrella.emma@email.com', 'LM-20', 2021);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s290157', 'Zarrilli', 'Enrica', 'Female', 'Italian', 'zarrilli.enrica@email.com', 'LM-25', 2023);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s299119', 'Zarro', 'Erica', 'Female', 'Italian', 'zarro.erica@email.com', 'LM-34', 2023);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s290592', 'Zavaglia', 'Ermenegilda', 'Female', 'Italian', 'zavaglia.ermenegilda@email.com', 'LM-22', 2022);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s315270', 'Zecca', 'Erminia', 'Female', 'Italian', 'zecca.erminia@email.com', 'LM-35', 2024);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s296510', 'Zegarelli', 'Ermione', 'Female', 'Italian', 'zegarelli.ermione@email.com', 'LM-28', 2019);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s290989', 'Giacomo', 'Ersilia', 'Female', 'Italian', 'giacomo.ersilia@email.com', 'LM-29', 2022);
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) VALUES ('s305475', 'Giacona', 'Eugenia', 'Female', 'Italian', 'giacona.eugenia@email.com', 'LM-23', 2024);
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) 
+VALUES 
+    ('s320213', 'Barbato', 'Luca', 'Male', 'Italian', 's320213@studenti.polito.it', 'LM-31', 2020),
+    ('s321607', 'Beltran', 'Juan Carlos', 'Male', 'Colombian', 's321607@studenti.polito.it', 'L-09', 2020),
+    ('s314796', 'De Rossi', 'Daniele', 'Male', 'Italian', 's314796@studenti.polito.it', 'LM-32', 2020),
+    ('s318771', 'Husanu', 'Diana', 'Female', 'Romanian', 's318771@studenti.polito.it', 'LM-33', 2020),
+    ('s321529', 'Ladrat', 'Matteo', 'Male', 'French', 's321529@studenti.polito.it', 'L-08', 2020),
+    ('s318952', 'Molinatto', 'Sylive', 'Female', 'Italian', 's318952@studenti.polito.it', 'LM-34', 2020),
+    ('s319355', 'Schiavone', 'Michele', 'Male', 'Italian', 's319355@studenti.polito.it', 'LM-35', 2020);
+
 
 -- Insert data into the career table
 INSERT INTO career (id, cod_course, title_course, cfu, grade, date)
@@ -336,7 +246,85 @@ VALUES
     'This engineering project involves the preliminary design of an arcjet in the 1kW class for space applications. The research aims to conceptualize and outline the key parameters, components, and specifications required for the development of a high-powered arcjet propulsion system suitable for space missions.',
     'propulsion systems, plasma physics, and aerospace engineering',
     'The project includes conceptual design, performance modeling, and consideration of thermal management aspects for the arcjet propulsion system.',
-    '2023-11-15T22:44:51.199Z', '2025-03-23T23:59:59.999Z', 'LM');
+    '2023-11-15T22:44:51.199Z', '2025-03-23T23:59:59.999Z', 'LM'),
+
+    ('OPTIMIZATION OF CHECK-IN PROCESSES IN AMAZON LOGISTICS', 'd292715', 'electronic pubblication',
+    'This thesis analyzes and proposes solutions for optimizing check-in processes in Amazon''s logistics, focusing on RFID technology. It compares the proposed solution with Amazon''s development, emphasizing efficiency and cost considerations.',
+    'logistics, RFID technology, process optimization',
+    'The project explores the use of RFID for check-in efficiency, considering costs and benefits. Amazon''s parallel development is discussed, highlighting economic and operational contrasts.',
+    '2023-11-27T22:44:51.199Z', '2026-05-29T23:59:59.999Z', 'L'),
+
+    ('PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFORMANCE OPTIMIZATION', 'd292715', 'electronic pubblication',
+    'This thesis addresses the challenge of sizing a system to meet specified requirements at the lowest possible cost, focusing on infotainment systems in automotive settings. The proposed predictive model, based on a novel formulation of performance improvement, factors in Voluntary and Unvoluntary Context Switches, providing insights into computational resource allocation and system cost optimization.',
+    'system sizing, predictive modeling, automotive systems, statistical analysis',
+    'The study introduces a statistical approach to gather insights into thread behavior within infotainment suites, proposing a method for generating "RUN-WAIT" sequences. Results indicate the feasibility of statistically modeling thread behavior, encouraging the application of this method to assess the impact of introducing computational capacity increments in infotainment systems.',
+    '2023-11-27T22:44:51.199Z', '2026-05-29T23:59:59.999Z', 'L'),
+
+    ('DESIGN AND IMPLEMENTATION OF ENTERPRISE SOFTWARE DEFINED DATACENTER NETWORKS', 'd292715', 'electronic pubblication',
+    'This work describes the high-level and domain-specific requirements for an Enterprise Software Defined Datacenter network. Then the practical design principles and technical solutions are introduced providing a high-level description of all the common features and tools that should be implemented in a modern Enterprise datacenter network. Finally, a service delivery model for the Enterprise DCN and three different designs implementing the requirements using the previously described technologies are presented and compared.',
+    'Enterprise networking, Software Defined Datacenter, network design, service delivery models',
+    'The study explores the design and implementation of an Enterprise Software Defined Datacenter network, emphasizing practical solutions and comparing different designs. It requires knowledge in networking, software-defined technologies, and datacenter architecture.',
+    '2023-11-27T22:44:51.199Z', '2026-05-29T23:59:59.999Z', 'L'),
+    
+    ('ROLE OF TECHNOLOGY IN ADVANCING E-COMMERCE SUPPLY CHAIN', 'd392000', 'research project',
+    'Over the last 30 years, the supply chain has played a pivotal role in various sectors, with increasing emphasis on operational processes driven by IT advancements. E-commerce platforms, where the supply chain is strategic, particularly impact customer experience, revenue generation, and cost reduction. This thesis explores the evolving expectations of customers, focusing on delivery speed, cost efficiency, and the crucial role of technology in supporting supply chain operations. Leading companies invest significantly in efficient and precise systems, and the challenges of sustainability and waste reduction are addressed. The study anticipates a growing use of e-commerce platforms, requiring the supply chain to adapt to increasing volumes. Artificial Intelligence is identified as a key enabler, enhancing flexibility and speed in the supply chain by automating daily operational decisions, optimizing supply procurement, network deployment, and reducing costs and consumption.',
+    'supply chain management, e-commerce, technology impact, sustainability, Artificial Intelligence',
+    'The research delves into the transformative role of technology in e-commerce supply chains, addressing operational challenges and the integration of Artificial Intelligence. Knowledge in supply chain management, e-commerce, and technology is essential for understanding and analyzing the proposed solutions.',
+    '2023-11-27T22:44:51.199Z', '2029-11-27T22:44:51.199Z', 'LM'),
+
+    ('CONTROL AND REINFORCEMENT LEARNING FOR INVERTED PENDULUM SYSTEMS', 'd392000', 'research project',
+    'The inverted pendulum system poses a classic control challenge, involving stabilizing a pendulum on a movable base. This thesis project addresses the problem from multiple angles. Firstly, an OpenAI Gym environment will be created, utilizing Proximal Policy Optimization (PPO) reinforcement learning to control the pendulum''s balance. Secondly, a MATLAB/Simulink mathematical model of the cartpole system will be developed using Lagrangian mechanics, enabling the design and implementation of control strategies such as PID and LQR. Thirdly, these control strategies will be tested on a real model with a dedicated HW/SW system using the PYNQ-Z1 FPGA board, integrating hardware and software components for real-time control. The project contributes to understanding control strategies and reinforcement learning applications in inverted pendulum systems, enhancing practical implementation knowledge.',
+    'control systems, reinforcement learning, MATLAB/Simulink, PID, LQR, FPGA programming',
+    'This research requires knowledge in control systems, reinforcement learning, MATLAB/Simulink, and FPGA programming. The integration of hardware and software components showcases practical implementation skills.',
+    '2023-11-27T22:44:51.199Z', '2025-12-20T22:44:51.199Z', 'LM'),
+
+    ('SEMANTIC EXTRACTION AND INDEXING OF ETHEREUM DATA WITH DGRAPH', 'd237188', 'company-based thesis',
+    'Blockchain technology, notably Ethereum, has gained prominence with decentralized applications and smart contracts. This thesis focuses on extracting and semantically indexing Ethereum data using Dgraph, an open-source distributed graph database. A custom Rust-based tool, eth2dgraph, was developed to optimize the extraction process, including smart contract ABI indexing. The project addresses the challenge of open and efficient analysis of blockchain data, providing an alternative solution. The open-source nature encourages collaborative development, and insights gained from analyzing indexed data highlight the need for distributed approaches in handling the growing volume of Ethereum blockchain data.',
+    'blockchain technology, Ethereum, smart contracts, Dgraph, Rust programming, data analysis',
+    'This research requires knowledge in blockchain technology, Ethereum, smart contracts, Dgraph, Rust programming, and data analysis. The project''s open-source nature allows for further collaboration and development.',
+    '2023-11-27T22:44:51.199Z', '2025-01-20T22:44:51.199Z', 'LM'),
+
+    ('VIRTUAL REALITY SIMULATION FOR CBRN OPERATOR TRAINING', 'd237188', 'research project',
+    'Virtual Reality (VR) is increasingly utilized for education and training, overcoming physical, economic, and safety limitations in traditional exercises. This thesis project aims to develop an immersive simulation replicating the RECCE (Reconnaissance) procedure used by the Italian Air Force Third Wing in Villafranca di Verona for Chemical, Biological, Radiological, and Nuclear (CBRN) risk management. The simulation provides realistic training and serves as a cost-effective, practical, and repeatable evaluation tool. The RECCE procedure involves preparation, agent detection, and contaminated area delimitation for creating a safe corridor for subsequent qualified operators. The project covers all phases from operator preparation to radiological hotspot containment, focusing on decision-making and activities in contaminated areas. The simulation, accessible in single-player and multi-player modes, offers five roles with varying tasks. Developed in the XR Lab at the LINKS Foundation with supervision from the VR@POLITO lab at Politecnico di Torino, the simulation replaces a previous version, emphasizing design, graphics, procedures, interactivity, and choice variety to align with Air Force requirements and become an official training tool.',
+    'Virtual Reality (VR), CBRN training, simulation development, XR Lab, VR@POLITO, procedural design, interaction design',
+    'This research requires knowledge in Virtual Reality, CBRN training procedures, simulation development, XR Lab technologies, VR@POLITO methodologies, procedural and interaction design. The project emphasizes alignment with Air Force requirements for official training recognition.',
+    '2023-11-27T22:44:51.199Z', '2025-02-25T22:44:51.199Z', 'LM'),
+
+    ('INTEGRATION OF LEAN, SIX SIGMA, AND INDUSTRY 4.0 IN MANUFACTURING', 'd258761', 'company-based thesis',
+    'This research project explores the integration of Lean Manufacturing, Six Sigma, and Industry 4.0 in the manufacturing sector. Industry 4.0, the fourth industrial revolution, leverages cyber-physical systems and IoT for smart production lines and intelligent devices. The study examines how the combination of Lean and Industry 4.0, known as Lean Industry 4.0, can enhance production processes, addressing the challenges posed by increasing operational complexity. Successful implementation of Lean Industry 4.0 is shown to potentially improve conversion costs by approximately 40% in five to ten years. Additionally, the study explores the application of Six Sigma, a statistical quality improvement approach, to handle big data generated by Industry 4.0. The goal is to maximize efficiency, process improvement, and quality orientation within the context of future manufacturing excellence.',
+    'Lean Manufacturing, Six Sigma, Industry 4.0, smart production, IoT, data analysis, DMAIC, process improvement',
+    'This study requires knowledge in Lean Manufacturing, Six Sigma methodology, Industry 4.0 technologies, data analysis, and process improvement. The integration of Lean, Six Sigma, and Industry 4.0 aims to make manufacturing processes more robust, quality-oriented, and capable of addressing future challenges.',
+    '2023-11-27T22:44:51.199Z', '2025-02-25T22:44:51.199Z', 'LM'),
+
+    ('METALLOGRAPHIC ASSESSMENT OF LIQUID METAL EMBRITTLEMENT IN RESISTANCE SPOT WELDING OF ADVANCED HIGH STRENGTH STEELS', 'd284435', 'research project',
+    'This research project focuses on the metallographic assessment of Liquid Metal Embrittlement (LME) in Resistance Spot Welding (RSW) joints of Advanced High Strength Steels (AHSS). Car manufacturers aim to reduce vehicle weight for improved fuel efficiency and lower carbon dioxide emissions while ensuring occupant safety. AHSS, known for its high strength and crash attributes, is commonly used in vehicle manufacturing. However, during RSW of zinc-coated AHSS, especially in dissimilar joining, the LME phenomenon occurs, leading to AHSS cracking and failure. The investigation aims to replicate LME in a laboratory environment, develop metallographic assessment methods for resulting cracks, illustrate cracking morphology, and identify vulnerable weld microstructures, considering various welding parameters.',
+    'Material science, metallurgy, welding technology, metallography, advanced high strength steels, liquid metal embrittlement, resistance spot welding',
+    'This study requires knowledge in material science, metallurgy, welding technology, and metallography. The investigation aims to enhance understanding of the processes behind LME in RSW joints, contributing to advancements in lightweight material development for vehicle manufacturing.',
+    '2023-11-27T22:44:51.199Z', '2025-02-25T22:44:51.199Z', 'LM'),
+
+    ('IMPACT OF AIRBNB ON THE LOCAL REAL ESTATE MARKET: A CASE STUDY OF TURIN', 'd320694', 'research project',
+    'This research project focuses on investigating the impact of Airbnb on the local real estate market in Turin. It begins with an introduction to the sharing economy, shifting to Airbnb, covering its business model, relationship with the hotel industry, and regulatory issues. The study then delves into the Italian real estate market, exploring homeownership habits, market trends, transactions, and prices. Literature review on the relationship between Airbnb and real estate markets sets the context. Data from AirDNA, Idealista, and OMI are used for analysis. Key statistics, findings, and econometric analyses are presented, examining factors influencing listing profitability and the impact on rent and sale prices in different neighborhoods. The final chapter summarizes main findings and conclusions.',
+    'Economics, real estate, econometrics, statistical analysis, data analysis, sharing economy, Airbnb, Turin real estate market',
+    'This study requires knowledge in economics, real estate, econometrics, statistical analysis, and data analysis. The research aims to contribute insights into the impact of Airbnb on the local real estate market in Turin, providing valuable information for policymakers and stakeholders.',
+    '2023-11-27T22:44:51.199Z', '2025-02-25T22:44:51.199Z', 'LM'),
+
+    ('EVALUATION OF E-ADVISOR IMPACT ON MRF REQUEST MANAGEMENT AT LORO PIANA & C. SPA', 'd258293', 'research project',
+    'This thesis focuses on the impact evaluation of Loro Piana & C. Spa\''s "E-advisor" project, which aims to provide online consultation services by a real salesperson. The specific case under consideration is the management of MRF (Material Request Form) requests. The study delves into how the introduction of the new service has modified the management processes, outlining the entire process structure. The primary objectives are to assess if the service, as designed, is adequately sized to meet the demand of incoming requests and to evaluate the performance of the new process. A performance measurement system has been designed for monitoring activities, utilizing the Balanced Scorecard as a conceptual model. This involves perspectives such as financial, customer, internal processes, and learning and growth. The study identifies 30 performance indicators, synthesizing them to 12 key indicators, of which only 8 are currently monitored by the company. Results obtained over a 6-month period from the project''s initiation are presented and discussed. The analysis and direct management of the process at the company have revealed limitations in the current method, particularly in terms of data tracking, leading to proposed improvement solutions for the near future.',
+    'Business process management, performance measurement, Balanced Scorecard, data analysis, project management, customer service',
+    'This research requires knowledge in business process management, performance measurement methodologies, Balanced Scorecard, data analysis techniques, project management, and customer service. The study aims to provide insights into the impact and performance of the "E-advisor" project at Loro Piana & C. Spa.',
+    '2023-11-27T22:44:51.199Z', '2025-05-27T22:44:51.199Z', 'LM'),
+
+    ('ANALYSIS OF RETURNABLE PACKAGING FOR OVERSEAS TRANSPORT IN THE AUTOMOTIVE SUPPLY CHAIN', 'd226682', 'electronic publication',
+    'This research project, conducted at the FCA company, focuses on analyzing the usage of returnable packaging (metal or plastic) for overseas transport, as a substitute for disposable packaging (wooden and cardboard). The study covers both standard dimension packaging and specific item packaging. The primary objective is to assess the advantages and challenges associated with implementing returnable packaging, particularly for overseas customers with long distances and lead times.',
+    'Supply chain management, packaging processes, returnable packaging, overseas transport logistics',
+    'The study requires a solid understanding of supply chain management, packaging processes, and logistics related to overseas transport. It provides insights into the feasibility and implications of adopting returnable packaging in the automotive supply chain for international shipments.',
+    '2023-11-27T22:44:51.199Z', '2026-12-31T23:59:59.199Z', 'LM'),
+
+    ('ENHANCING COCHLEAR IMPLANTATION OUTCOMES: A COMPREHENSIVE SOLUTION THROUGH INTERNATIONAL COLLABORATION', 'd370392', 'research project',
+    'This thesis project focuses on Cochlear Implants (CI) and their pivotal role in restoring hearing function for individuals who are profoundly deaf or severely hard of hearing. The project aims to provide a comprehensive overview of human hearing, covering the structural anatomy of the normal hearing system, the challenges in a deaf ear, and the Cochlear Implantation process. The primary objective is to assess existing complications and propose a comprehensive solution, including the establishment of an international agency for professionals, a telemedicine platform for continuity assistance, and a network of training and experiential exchanges to unify rehabilitation protocols.',
+    'Audiology, Cochlear Implants, Telemedicine, Rehabilitation Protocols, Human Hearing Anatomy',
+    'The study requires a background in audiology, cochlear implants, telemedicine, and an understanding of rehabilitation protocols. It aims to address the determinants of success in cochlear implantation, considering factors such as patients’ hearing history, post-lingual or pre-lingual status, age, learning ability, health and cochlear structure, and intelligence. The proposed solutions aim to enhance the rehabilitation process after CI surgery and address the lack of public information on this matter worldwide.',
+    '2023-11-27T22:44:51.199Z', '2024-06-30T23:59:59.199Z', 'LM');
 
 
 -- Insert data into the proposalKeyword table
@@ -392,27 +380,57 @@ VALUES
     (3, 'Group6'),
     (4, 'Group3'),
     (4, 'Group4'),
-    (5, 'Group5');
+    (5, 'Group5'),
+    (6, 'Group3'),
+    (7, 'Group3'),
+    (8, 'Group3'),
+    (9, 'Group5'),
+    (10, 'Group5'),
+    (11, 'Group6'),
+    (12, 'Group6'),
+    (13, 'Group5'),
+    (14, 'Group4'),
+    (15, 'Group3'),
+    (16, 'Group2'),
+    (17, 'Group1'),
+    (18, 'Group5');
 
 
 -- Insert into thesisApplication
 INSERT INTO thesisApplication (proposal_id, student_id, creation_date)
 VALUES
-    (1, 's294301', '2023-10-15T08:08:16.123Z'), 
-    (1, 's309429', '2023-10-23T12:45:58.200Z'), 
-    (1, 's322044', '2023-11-05T13:01:22.156Z'),
-    (2, 's309429', '2023-08-27T20:20:20.144Z'),
-    (2, 's295416', '2023-09-09T09:35:21.132Z'),
-    (2, 's318894', '2023-10-10T18:56:39.186Z'),
-    (1, 's288327', '2023-10-30T16:30:00.171Z'),
-    (4, 's297117', '2023-11-20T19:05:01.200Z'),
-    (1, 's304823', '2023-11-21T15:41:35.199Z');
+    (1, 's294301', '2023-11-28T08:08:16.123Z'), 
+    (2, 's309429', '2023-11-28T12:45:58.200Z'), 
+    (3, 's322044', '2023-11-28T13:01:22.156Z'),
+    (4, 's309429', '2023-11-28T20:20:20.144Z'),
+    (5, 's295416', '2023-11-28T09:35:21.132Z'),
+    (6, 's318894', '2023-11-28T18:56:39.186Z'),
+    (7, 's288327', '2023-11-28T16:30:00.171Z'),
+    (8, 's297117', '2023-11-28T19:05:01.200Z'),
+    (9, 's304823', '2023-11-28T15:41:35.199Z');
 
 INSERT INTO proposalCds(proposal_id, cod_degree)
 VALUES
-    (1, 'LM-29'),
-    (2, 'LM-29'),
-    (2, 'LM-30'),
-    (3, 'LM-31'),
-    (4, 'LM-32'),
-    (5, 'LM-32');
+    (1, 'LM-31'),
+    (2, 'LM-32'),
+    (2, 'LM-33'),
+    (3, 'LM-34'),
+    (4, 'LM-33'),
+    (5, 'LM-32'),
+    (6, 'L-08'),
+    (6, 'L-09'),
+    (7, 'L-08'),
+    (7, 'L-09'),
+    (8, 'L-08'),
+    (8, 'L-09'),
+    (9, 'LM-31'),
+    (10, 'LM-31'),
+    (11, 'LM-32'),
+    (12, 'LM-32'),
+    (13, 'LM-33'),
+    (14, 'LM-33'),
+    (15, 'LM-34'),
+    (16, 'LM-34'),
+    (16, 'LM-35'),
+    (17, 'LM-35'),
+    (18, 'LM-35');
