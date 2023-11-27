@@ -1,14 +1,14 @@
 import Errors from "./Errors";
 import { ThesisProposals } from "../components/ThesisProposals";
-import { useAuth } from "../App";
+import { useAuth0 } from "@auth0/auth0-react";
 
 function Proposals() {
 
-    const { isLoggedIn, isTeacher } = useAuth();
+    const { isAuthenticated, isTeacher } = useAuth0();
 
     return (
         <>
-            {isLoggedIn ? (
+            {isAuthenticated ? (
                 isTeacher ? (
                     "Show there maybe another story like show and edit active proposals by the teacher"
                 ) : (

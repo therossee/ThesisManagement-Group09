@@ -1,14 +1,14 @@
 import Errors from "./Errors";
 import { ThesisApplications } from "../components/Applications"
-import { useAuth } from "../App";
+import { useAuth0 } from "@auth0/auth0-react";
 
 function Applications() {
 
-    const { isLoggedIn, isTeacher } = useAuth();
+    const { isAuthenticated, isTeacher } = useAuth0();
 
     return (
         <>
-            {isLoggedIn ? (
+            {isAuthenticated ? (
                 isTeacher ? (
                     <ThesisApplications />
                 ) : (

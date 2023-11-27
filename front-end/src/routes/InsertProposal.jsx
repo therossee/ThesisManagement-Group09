@@ -1,9 +1,9 @@
 import Errors from "./Errors";
 import { InsertThesisProposal } from "../components/InsertThesisProposal"
-import { useAuth } from "../App"
+import { useAuth0 } from "@auth0/auth0-react";
 
 function InsertProposal() {
-    const { isTeacher } = useAuth();
+    const { isTeacher } = useAuth0();
 
     return (
         <>

@@ -1,19 +1,19 @@
 import { Typography } from 'antd';
-import { useAuth } from '../App';
+import { useAuth0 } from '@auth0/auth0-react';
 import '../css/style.css';
 
 const { Title, Paragraph } = Typography;
 
 function Home() {
 
-    const  { isLoggedIn, isTeacher, user } = useAuth();
+    const  { user, isAuthenticated, isTeacher, isStudent } = useAuth0();
 
     return (
         <>
         <Title className="home-title">Welcome to Thesis Management System!</Title>
         {(isTeacher) && <Paragraph style={{paddingLeft: "2%"}}>Welcome professor {user.surname}! You can insert a new proposal or take a look for all the application requests.</Paragraph>}
-        {(isLoggedIn && !isTeacher) && <Paragraph style={{paddingLeft: "2%"}}>Welcome {user.name}! You can insert a new application request or take a look for all the proposals.</Paragraph>}
-        {(!isLoggedIn) && <Paragraph style={{paddingLeft: "2%"}}>Welcome guest! Start with logging in.</Paragraph>}
+        {(isAuthenticated && !isTeacher) && <Paragraph style={{paddingLeft: "2%"}}>Welcome {user.name}! You can insert a new application request or take a look for all the proposals.</Paragraph>}
+        {(!isAuthenticated) && <Paragraph style={{paddingLeft: "2%"}}>Welcome guest! Start with logging in.</Paragraph>}
         </>
     )
 }
