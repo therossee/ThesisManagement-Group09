@@ -1,6 +1,8 @@
 import Errors from "./Errors";
-import { ThesisProposals } from "../components/ThesisProposals";
 import { useAuth0 } from "@auth0/auth0-react";
+import StudentThesisProposals from "../components/StudentThesisProposals";
+import TeacherThesisProposals from "../components/TeacherThesisProposals";
+import { useAuth } from "../App";
 
 function Proposals() {
 
@@ -10,9 +12,9 @@ function Proposals() {
         <>
             {isAuthenticated ? (
                 isTeacher ? (
-                    "Show there maybe another story like show and edit active proposals by the teacher"
+                    <TeacherThesisProposals />
                 ) : (
-                    <ThesisProposals />
+                    <StudentThesisProposals />
                 )
             ) : (
                 <Errors code="403" />

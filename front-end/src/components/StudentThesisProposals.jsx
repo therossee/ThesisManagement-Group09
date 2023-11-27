@@ -10,7 +10,7 @@ import API from '../API';
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 
-function ThesisProposals() {
+function StudentThesisProposals() {
 
     const [clock, setClock] = useState(dayjs());
     // Array of objs for storing table data
@@ -64,8 +64,8 @@ function ThesisProposals() {
             record.title.toLowerCase().includes(value.toLowerCase()),
     });
 
+    // Storing message errors
     const [messageApi, messageBox] = message.useMessage();
-    const [applications, setApplications] = useState([]);
 
     useEffect(() => {
         API.getClock()
@@ -73,15 +73,10 @@ function ThesisProposals() {
                 setClock(dayjs().add(x.offset, 'ms'));
             })
             .catch((err) => { messageApi.error(err.message ? err.message : err) });
-        API.getStudentThesisProposals()
+        API.getThesisProposals()
             .then((x) => {
                 setData(handleReceivedData(x));
                 setIsLoadingTable(false);
-            })
-            .catch((err) => { messageApi.error(err.message ? err.message : err) });
-        API.getStudentApplications()
-            .then((x) => {
-                setApplications(x);
             })
             .catch((err) => { messageApi.error(err.message ? err.message : err) });
     }, []);
@@ -410,4 +405,4 @@ function ThesisProposals() {
     )
 }
 
-export { ThesisProposals };
+export default StudentThesisProposals;
