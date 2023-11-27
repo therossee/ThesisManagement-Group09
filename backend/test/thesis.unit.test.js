@@ -321,7 +321,7 @@ describe('getThesisProposal', () => {
     };
 
     // Mock the get function to return a mock result
-    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(expectedResult);
+    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(undefined).mockReturnValueOnce(expectedResult);
 
     // Act
     const result = await thesis.getThesisProposal(proposalId, studentId);
@@ -333,10 +333,10 @@ describe('getThesisProposal', () => {
   test('should return null when the thesis proposal does not exist for the given proposalId and studentId', async () => {
     // Arrange
     const proposalId = 2;
-    const studentId = 2;
+    const studentId = "2";
 
     // Mock the get function to return undefined (indicating no thesis proposal)
-    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(undefined);
+    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(undefined).mockReturnValueOnce(undefined);
 
     // Act
     const result = await thesis.getThesisProposal(proposalId, studentId);
