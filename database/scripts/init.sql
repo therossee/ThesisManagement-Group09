@@ -283,6 +283,7 @@ VALUES
     'blockchain technology, Ethereum, smart contracts, Dgraph, Rust programming, data analysis',
     'This research requires knowledge in blockchain technology, Ethereum, smart contracts, Dgraph, Rust programming, and data analysis. The project''s open-source nature allows for further collaboration and development.',
     '2023-11-27T22:44:51.199Z', '2025-01-20T22:44:51.199Z', 'LM'),
+
     ('VIRTUAL REALITY SIMULATION FOR CBRN OPERATOR TRAINING', 'd237188', 'research project',
     'Virtual Reality (VR) is increasingly utilized for education and training, overcoming physical, economic, and safety limitations in traditional exercises. This thesis project aims to develop an immersive simulation replicating the RECCE (Reconnaissance) procedure used by the Italian Air Force Third Wing in Villafranca di Verona for Chemical, Biological, Radiological, and Nuclear (CBRN) risk management. The simulation provides realistic training and serves as a cost-effective, practical, and repeatable evaluation tool. The RECCE procedure involves preparation, agent detection, and contaminated area delimitation for creating a safe corridor for subsequent qualified operators. The project covers all phases from operator preparation to radiological hotspot containment, focusing on decision-making and activities in contaminated areas. The simulation, accessible in single-player and multi-player modes, offers five roles with varying tasks. Developed in the XR Lab at the LINKS Foundation with supervision from the VR@POLITO lab at Politecnico di Torino, the simulation replaces a previous version, emphasizing design, graphics, procedures, interactivity, and choice variety to align with Air Force requirements and become an official training tool.',
     'Virtual Reality (VR), CBRN training, simulation development, XR Lab, VR@POLITO, procedural design, interaction design',
@@ -311,10 +312,19 @@ VALUES
     'This thesis focuses on the impact evaluation of Loro Piana & C. Spa\''s "E-advisor" project, which aims to provide online consultation services by a real salesperson. The specific case under consideration is the management of MRF (Material Request Form) requests. The study delves into how the introduction of the new service has modified the management processes, outlining the entire process structure. The primary objectives are to assess if the service, as designed, is adequately sized to meet the demand of incoming requests and to evaluate the performance of the new process. A performance measurement system has been designed for monitoring activities, utilizing the Balanced Scorecard as a conceptual model. This involves perspectives such as financial, customer, internal processes, and learning and growth. The study identifies 30 performance indicators, synthesizing them to 12 key indicators, of which only 8 are currently monitored by the company. Results obtained over a 6-month period from the project''s initiation are presented and discussed. The analysis and direct management of the process at the company have revealed limitations in the current method, particularly in terms of data tracking, leading to proposed improvement solutions for the near future.',
     'Business process management, performance measurement, Balanced Scorecard, data analysis, project management, customer service',
     'This research requires knowledge in business process management, performance measurement methodologies, Balanced Scorecard, data analysis techniques, project management, and customer service. The study aims to provide insights into the impact and performance of the "E-advisor" project at Loro Piana & C. Spa.',
-    '2023-11-27T22:44:51.199Z', '2025-05-27T22:44:51.199Z', 'LM');
+    '2023-11-27T22:44:51.199Z', '2025-05-27T22:44:51.199Z', 'LM'),
 
+    ('ANALYSIS OF RETURNABLE PACKAGING FOR OVERSEAS TRANSPORT IN THE AUTOMOTIVE SUPPLY CHAIN', 'd226682', 'electronic publication',
+    'This research project, conducted at the FCA company, focuses on analyzing the usage of returnable packaging (metal or plastic) for overseas transport, as a substitute for disposable packaging (wooden and cardboard). The study covers both standard dimension packaging and specific item packaging. The primary objective is to assess the advantages and challenges associated with implementing returnable packaging, particularly for overseas customers with long distances and lead times.',
+    'Supply chain management, packaging processes, returnable packaging, overseas transport logistics',
+    'The study requires a solid understanding of supply chain management, packaging processes, and logistics related to overseas transport. It provides insights into the feasibility and implications of adopting returnable packaging in the automotive supply chain for international shipments.',
+    '2023-11-27T22:44:51.199Z', '2026-12-31T23:59:59.199Z', 'LM'),
 
-
+    ('ENHANCING COCHLEAR IMPLANTATION OUTCOMES: A COMPREHENSIVE SOLUTION THROUGH INTERNATIONAL COLLABORATION', 'd370392', 'research project',
+    'This thesis project focuses on Cochlear Implants (CI) and their pivotal role in restoring hearing function for individuals who are profoundly deaf or severely hard of hearing. The project aims to provide a comprehensive overview of human hearing, covering the structural anatomy of the normal hearing system, the challenges in a deaf ear, and the Cochlear Implantation process. The primary objective is to assess existing complications and propose a comprehensive solution, including the establishment of an international agency for professionals, a telemedicine platform for continuity assistance, and a network of training and experiential exchanges to unify rehabilitation protocols.',
+    'Audiology, Cochlear Implants, Telemedicine, Rehabilitation Protocols, Human Hearing Anatomy',
+    'The study requires a background in audiology, cochlear implants, telemedicine, and an understanding of rehabilitation protocols. It aims to address the determinants of success in cochlear implantation, considering factors such as patients’ hearing history, post-lingual or pre-lingual status, age, learning ability, health and cochlear structure, and intelligence. The proposed solutions aim to enhance the rehabilitation process after CI surgery and address the lack of public information on this matter worldwide.',
+    '2023-11-27T22:44:51.199Z', '2024-06-30T23:59:59.199Z', 'LM');
 
 
 -- Insert data into the proposalKeyword table
@@ -370,21 +380,34 @@ VALUES
     (3, 'Group6'),
     (4, 'Group3'),
     (4, 'Group4'),
-    (5, 'Group5');
+    (5, 'Group5'),
+    (6, 'Group3'),
+    (7, 'Group3'),
+    (8, 'Group3'),
+    (9, 'Group5'),
+    (10, 'Group5'),
+    (11, 'Group6'),
+    (12, 'Group6'),
+    (13, 'Group5'),
+    (14, 'Group4'),
+    (15, 'Group3'),
+    (16, 'Group2'),
+    (17, 'Group1'),
+    (18, 'Group5');
 
 
 -- Insert into thesisApplication
 INSERT INTO thesisApplication (proposal_id, student_id, creation_date)
 VALUES
-    (1, 's294301', '2023-10-15T08:08:16.123Z'), 
-    (1, 's309429', '2023-10-23T12:45:58.200Z'), 
-    (1, 's322044', '2023-11-05T13:01:22.156Z'),
-    (2, 's309429', '2023-08-27T20:20:20.144Z'),
-    (2, 's295416', '2023-09-09T09:35:21.132Z'),
-    (2, 's318894', '2023-10-10T18:56:39.186Z'),
-    (1, 's288327', '2023-10-30T16:30:00.171Z'),
-    (4, 's297117', '2023-11-20T19:05:01.200Z'),
-    (1, 's304823', '2023-11-21T15:41:35.199Z');
+    (1, 's294301', '2023-11-28T08:08:16.123Z'), 
+    (2, 's309429', '2023-11-28T12:45:58.200Z'), 
+    (3, 's322044', '2023-11-28T13:01:22.156Z'),
+    (4, 's309429', '2023-11-28T20:20:20.144Z'),
+    (5, 's295416', '2023-11-28T09:35:21.132Z'),
+    (6, 's318894', '2023-11-28T18:56:39.186Z'),
+    (7, 's288327', '2023-11-28T16:30:00.171Z'),
+    (8, 's297117', '2023-11-28T19:05:01.200Z'),
+    (9, 's304823', '2023-11-28T15:41:35.199Z');
 
 INSERT INTO proposalCds(proposal_id, cod_degree)
 VALUES
@@ -407,4 +430,7 @@ VALUES
     (13, 'LM-33'),
     (14, 'LM-33'),
     (15, 'LM-34'),
-    (16, 'LM-34');
+    (16, 'LM-34'),
+    (16, 'LM-35'),
+    (17, 'LM-35'),
+    (18, 'LM-35');
