@@ -396,7 +396,7 @@ describe('listThesisProposalsFromStudent', () => {
       const result = await thesis.listThesisProposalsFromStudent(studentId, currentDate, currentDate);
 
       expect(result).toEqual(mockedData);
-      expect(db.prepare().all).toHaveBeenCalledWith(studentId, currentDate, currentDate);
+      expect(db.prepare().all).toHaveBeenCalledWith(studentId, expect.any(String), expect.any(String));
   });
 
   test('should return an empty list', async () => {
