@@ -599,16 +599,16 @@ describe('listThesisProposalsTeacher', () => {
     const expectedQuery = `SELECT * 
       FROM thesisProposal P
       WHERE P.supervisor_id=?
-      AND NOT EXISTS (
-        SELECT 1
-        FROM thesisApplication A
-        WHERE A.proposal_id = P.proposal_id
-        AND A.status = 'accepted'
-    )
-    AND P.expiration > ?
-    AND creation_date < ?;`;
+        AND NOT EXISTS (
+          SELECT 1
+          FROM thesisApplication A
+          WHERE A.proposal_id = P.proposal_id
+            AND A.status = 'accepted'
+        )
+        AND P.expiration > ?
+        AND creation_date < ?;`;
     // Mock the SQLite database query
-    db.prepare.mockReturnValueOnce({ all: jest.fn(() => mockProposals) });
+    db.prepare.mockClear().mockReturnValueOnce({ all: jest.fn(() => mockProposals) });
 
     // Call the function
     const result = await thesis.listThesisProposalsTeacher(teacherId, currentDate, currentDate);
@@ -643,17 +643,22 @@ describe('listApplicationsForTeacherThesisProposal', () => {
       ];
 
     // Mock the SQLite database query
-    db.prepare.mockReturnValueOnce({ all: jest.fn(() => mockApplications) });
+    db.prepare.mockClear().mockReturnValueOnce({ all: jest.fn(() => mockApplications) });
 
     // Call the function
     const result = await thesis.listApplicationsForTeacherThesisProposal(1, 'd1');
-
+    const expectedQuery = `SELECT s.name, s.surname, ta.status, s.id
+    FROM thesisApplication ta, thesisProposal tp, student s
+    WHERE ta.proposal_id = tp.proposal_id 
+      AND s.id = ta.student_id
+      AND ta.proposal_id=?
+      AND tp.supervisor_id= ? 
+      AND ta.creation_date < ?
+      AND tp.expiration > ?
+      AND tp.creation_date < ?`;
     // Assertions
     expect(result).toEqual(mockApplications);
-    expect(db.prepare).toHaveBeenCalledWith(`SELECT s.name, s.surname, ta.status, s.id
-    FROM thesisApplication ta, thesisProposal tp, student s
-    WHERE ta.proposal_id = tp.proposal_id AND s.id = ta.student_id AND ta.proposal_id=? AND tp.supervisor_id= ? 
-    AND ta.creation_date < ? AND tp.expiration > ? AND tp.creation_date < ?`);
+    expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
   });
 });
 
@@ -673,10 +678,12 @@ describe('getStudentActiveApplication', () => {
 
     // Act
     const result = await thesis.getStudentActiveApplication(student_id);
+    const expectedQuery = `SELECT proposal_id FROM thesisApplication WHERE student_id=? AND creation_date < ? AND ( status='waiting for approval' OR status='accepted')`;
+
 
     // Assert
     expect(result).toEqual(expectedResult);
-    expect(db.prepare).toHaveBeenCalledWith('SELECT proposal_id FROM thesisApplication WHERE student_id=? AND creation_date < ?');
+    expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
   });
 
   test('should handle an empty result set', async () => {
