@@ -73,13 +73,18 @@ function StudentThesisProposals(props) {
                 setClock(dayjs().add(x.offset, 'ms'));
             })
             .catch((err) => { messageApi.error(err.message ? err.message : err) });
+        // Check if accessToken is now available
+        if (!props.accessToken) {
+            // Handle the case where accessToken is not yet available
+            return;
+        }
         API.getThesisProposals(props.accessToken)
             .then((x) => {
                 setData(handleReceivedData(x));
                 setIsLoadingTable(false);
             })
             .catch((err) => { messageApi.error(err.message ? err.message : err) });
-    }, [isLoadingTable, props.accessToken]);
+    }, [props.accessToken]);
 
     const navigate = useNavigate();
 
