@@ -34,22 +34,26 @@ const corsOptions = {
   };
 app.use(cors(corsOptions));
 
-const isStudent = (req, res, next) => {
-  if(req.user.id.startsWith('s')){
+const isStudent = async(req, res, next) => {
+  let userInfo = await usersDao.getUserInfo(req.auth);
+  if(userInfo.role==='student'){
     return next();
   }
   return res.status(403).json('Unauthorized');
 }
 
-const isTeacher = (req, res, next) => {
-  if(req.user.id.startsWith('d')){
+const isTeacher = async(req, res, next) => {
+  let userInfo = await usersDao.getUserInfo(req.auth);
+  if(userInfo.role==='teacher'){
     return next();
   }
   return res.status(403).json('Unauthorized');
 }
 
-app.get('/api/user', checkJwt, (req, res) => {
-	usersDao.getUserInfo(req.auth)
+app.get('/api/user', 
+checkJwt, 
+async(req, res) => {
+	await usersDao.getUserInfo(req.auth)
 		.then((userInfo) => res.status(200).json(userInfo))
 		.catch((err) => {
       console.error(err);
@@ -90,8 +94,10 @@ app.post('/api/system/virtual-clock', (req, res, next) => {
 
 app.post('/api/teacher/thesis_proposals',
 checkJwt,
+isTeacher,
 async (req,res) => {
-  const supervisor_id  = req.user.id;
+  let supervisor = await usersDao.getUserInfo(req.auth);
+  const supervisor_id = supervisor.id;
   const {title, internal_co_supervisors_id, external_co_supervisors_id, type, description, required_knowledge, notes, level, cds, keywords} = req.body;
   let expiration = req.body.expiration;
 
@@ -144,6 +150,7 @@ async (req,res) => {
 
 app.get('/api/teachers',
 checkJwt,
+isTeacher,
 async(req, res) => {
   try {
     let userInfo = await usersDao.getUserInfo(req.auth);
@@ -159,6 +166,7 @@ async(req, res) => {
 
 app.get('/api/externalCoSupervisors',
 checkJwt,
+isTeacher,
 async(req, res) => {
   try {
     const externalCoSupervisorList = await thesisDao.getExternalCoSupervisorList();
@@ -172,6 +180,7 @@ async(req, res) => {
 
 app.get('/api/keywords',
 checkJwt,
+isTeacher,
 async(req, res) => {
   try {
     const keywords = await thesisDao.getAllKeywords();
@@ -184,6 +193,7 @@ async(req, res) => {
 
 app.get('/api/degrees',
 checkJwt,
+isTeacher,
 async(req, res) => {
   try {
     const degrees = await thesisDao.getDegrees();
@@ -198,8 +208,9 @@ app.get('/api/thesis-proposals',
 checkJwt,
 async (req, res) => {
   try {
-    if (req.user.id.startsWith('s')) {
-      const studentId = req.user.id;
+    let userInfo = await usersDao.getUserInfo(req.auth);
+    if (userInfo.role==='student') {
+      const studentId = userInfo.id;
       const proposals = await thesisDao.listThesisProposalsFromStudent(studentId);
       const cds = await usersDao.getStudentDegree(studentId);
       const proposalsPopulated = await Promise.all(
@@ -216,8 +227,8 @@ async (req, res) => {
         currentPage: 1
       };
       res.json({ $metadata: metadata, items: proposalsPopulated });
-    } else if (req.user.id.startsWith('d')) {
-      const teacherId = req.user.id;
+    } else if (userInfo.role==='teacher') {
+      const teacherId = userInfo.id;
       const thesisProposals = await thesisDao.listThesisProposalsTeacher(teacherId);
       const proposalsPopulated = await Promise.all(
         thesisProposals.map(async proposal => {
@@ -248,8 +259,10 @@ app.get('/api/thesis-proposals/:id',
 checkJwt,
 async (req, res) => {
 try {
-  if (req.user.id.startsWith('s')) {
-    const studentId = req.user.id;
+  let userInfo = await usersDao.getUserInfo(req.auth);
+
+  if (userInfo.role==='student') {
+    const studentId = userInfo.id;
     const proposalId = req.params.id;
 
     const proposal = await thesisDao.getThesisProposal(proposalId, studentId);
@@ -260,8 +273,8 @@ try {
 
     res.json( await _populateProposal(proposal, studentDegree) );
   }
-  else if (req.user.id.startsWith('d')) {
-    const teacherId = req.user.id;
+  else if (userInfo.role==='teacher') {
+    const teacherId = userInfo.id;
     const proposalId = req.params.id;
 
     const proposal = await thesisDao.getThesisProposalTeacher(proposalId, teacherId);
@@ -284,6 +297,7 @@ try {
 
 app.put('/api/thesis-proposals/:id',
 checkJwt,
+isTeacher,
 async (req, res) => {
   try {
     const proposal_id = req.params.id;
@@ -331,8 +345,10 @@ async (req, res) => {
 
 app.post('/api/student/applications',
 checkJwt,
+isStudent,
 async(req,res) => {
-    const student_id = req.user.id; // logged in student
+    let studentInfo = await usersDao.getUserInfo(req.auth); // logged student
+    const student_id = studentInfo.id;
     const {thesis_proposal_id} = req.body;
     await thesisDao.applyForProposal(thesis_proposal_id, student_id).then
     ((applicationId)=>{
@@ -351,10 +367,12 @@ async(req,res) => {
 
 app.get('/api/teacher/applications/:proposal_id',
 checkJwt,
+isTeacher,
 async (req, res) => {
   try {
+    let userInfo = await usersDao.getUserInfo(req.auth);
+    const teacherId = userInfo.id;
     const proposal_id=req.params.proposal_id;
-    const teacherId = req.user.id;
     const applications = await thesisDao.listApplicationsForTeacherThesisProposal(proposal_id, teacherId);
     res.json(applications);
   } catch (e) {
@@ -365,9 +383,11 @@ async (req, res) => {
 
 app.get('/api/student/active-application',
 checkJwt,
+isStudent,
 async (req, res) => {
   try {
-    const studentId = req.user.id;
+    let userInfo = await usersDao.getUserInfo(req.auth);
+    const studentId = userInfo.id;
     const studentApplications = await thesisDao.getStudentActiveApplication(studentId)
     res.json(studentApplications);
   } catch (e) {
@@ -378,6 +398,7 @@ async (req, res) => {
 
 app.patch('/api/teacher/applications/accept/:proposal_id',
 checkJwt,
+isTeacher,
 async (req, res) => {
 const { proposal_id } = req.params;
 const { student_id } = req.body;
@@ -401,6 +422,7 @@ try {
 
 app.patch('/api/teacher/applications/reject/:proposal_id',
 checkJwt,
+isTeacher,
 async (req, res) => {
   const { proposal_id } = req.params;
   const { student_id } = req.body;
@@ -422,9 +444,11 @@ async (req, res) => {
 
 app.get('/api/student/applications-decision',
 checkJwt,
+isStudent,
 async (req, res) => {
   try {
-    const studentId = req.user.id;
+    let userInfo = await usersDao.getUserInfo(req.auth);
+    const studentId = userInfo.id;
     const applications = await thesisDao.listApplicationsDecisionsFromStudent(studentId);
     res.json(applications);
   } catch (e) {
