@@ -2269,7 +2269,10 @@ describe('GET /api/student/active-application', () => {
 describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
 
     afterEach(() => {
-      jest.restoreAllMocks();
+        jest.restoreAllMocks();
+    });
+    beforeEach(() => {
+        jest.clearAllMocks();
     });
     test('should accept thesis and reject others', async () => {
         const mockUser = {
@@ -2329,7 +2332,6 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
 
         // Arrange
         const proposalId = '1';
-        const studentId = 's293605';
 
         // Mock thesisDao functions
         service.updateApplicationStatus.mockResolvedValue(true);
@@ -2342,7 +2344,7 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
 
         // Assert
         expect(response.status).toBe(400);
-        expect(response.body).toEqual({ error: 'Missing required fields.' });
+        expect(response.body).toEqual({ message: 'Missing required fields.' });
     });
     test('should return 404 error if no application has been found', async () => {
         const mockUser = {
@@ -2365,6 +2367,7 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
 
         // Arrange
         const proposalId = '1';
+        const studentId = 's293605';
 
         // Mock thesisDao functions
         service.updateApplicationStatus.mockResolvedValue(false);
@@ -2372,7 +2375,8 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
         // Act
         const response = await request(app)
             .patch(`/api/teacher/applications/accept/${proposalId}`)
-            .set('Cookie', cookies);
+            .set('Cookie', cookies)
+            .send({ student_id: studentId });
 
         // Assert
         expect(response.status).toBe(404);
@@ -2411,7 +2415,7 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
         const response = await request(app)
           .patch(`/api/teacher/applications/accept/${proposalId}`)
           .set('Cookie', cookies)
-          .send({ student_id: studentId })
+          .send({ student_id: studentId });
 
         // Assert
         expect(response.status).toBe(500);
@@ -2420,6 +2424,13 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
 });
 
 describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
     test('should reject thesis', async () => {
       const mockUser = {
           id: 'd1',
@@ -2477,7 +2488,6 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
 
         // Arrange
         const proposalId = '1';
-        const studentId = 's293605';
 
         // Mock thesisDao functions
         service.updateApplicationStatus.mockResolvedValue(true);
@@ -2490,7 +2500,7 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
 
         // Assert
         expect(response.status).toBe(400);
-        expect(response.body).toEqual({ error: 'Missing required fields.' });
+        expect(response.body).toEqual({ message: 'Missing required fields.' });
     });
     test('should return 404 error if no application has been found', async () => {
         const mockUser = {
@@ -2522,6 +2532,7 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
         const response = await request(app)
             .patch(`/api/teacher/applications/reject/${proposalId}`)
             .set('Cookie', cookies)
+            .send({ student_id: studentId });
 
         // Assert
         expect(response.status).toBe(404);
@@ -2560,7 +2571,7 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
         const response = await request(app)
           .patch(`/api/teacher/applications/reject/${proposalId}`)
           .set('Cookie', cookies)
-          .send({ student_id: studentId })
+          .send({ student_id: studentId });
 
         // Assert
         expect(response.status).toBe(500);
