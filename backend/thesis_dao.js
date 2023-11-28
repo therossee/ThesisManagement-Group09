@@ -88,7 +88,7 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
  * @return {Promise<string>}
  */
 exports.updateThesisProposal = (proposal_id, supervisor_id, thesis) => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const now = new AdvancedDate();
 
     db.transaction(() => {
@@ -267,18 +267,18 @@ exports.listThesisProposalsFromStudent = (studentId) => {
     const currentDate = new AdvancedDate().toISOString();
     const query = `SELECT *
         FROM thesisProposal P
-        JOIN proposalCds C ON C.proposal_id = P.proposal_id
-        JOIN degree D ON C.cod_degree = D.cod_degree
-        JOIN student S ON S.cod_degree = D.cod_degree
+            JOIN proposalCds C ON C.proposal_id = P.proposal_id
+            JOIN degree D ON C.cod_degree = D.cod_degree
+            JOIN student S ON S.cod_degree = D.cod_degree
         WHERE S.id = ?
-        AND NOT EXISTS (
-            SELECT 1
-            FROM thesisApplication A
-            WHERE A.proposal_id = P.proposal_id
-            AND A.status = 'accepted'
-        )
-        AND P.expiration > ?
-        AND P.creation_date < ?;`;
+          AND NOT EXISTS (
+              SELECT 1
+              FROM thesisApplication A
+              WHERE A.proposal_id = P.proposal_id
+                AND A.status = 'accepted'
+          )
+          AND P.expiration > ?
+          AND P.creation_date < ?;`;
 
     const thesisProposals = db.prepare(query).all(studentId, currentDate, currentDate);
     resolve(thesisProposals);
@@ -417,6 +417,7 @@ exports.applyForProposal = (proposal_id, student_id) => {
     const proposal_active = db.prepare(checkProposalActive).get(proposal_id, currentDate, currentDate);
     if(!proposal_active){
       reject("The proposal is not active");
+      return;
     }
 
     // Check if the user has already applied for other proposals
@@ -424,6 +425,7 @@ exports.applyForProposal = (proposal_id, student_id) => {
     const already_applied = db.prepare(checkAlreadyApplied).get(student_id);
     if(already_applied){
       reject("The user has already applied for other proposals");
+      return;
     }
 
     const insertApplicationQuery = `
@@ -441,14 +443,14 @@ exports.listThesisProposalsTeacher = (teacherId) => {
     const getProposals = `SELECT * 
       FROM thesisProposal P
       WHERE P.supervisor_id=?
-      AND NOT EXISTS (
-        SELECT 1
-        FROM thesisApplication A
-        WHERE A.proposal_id = P.proposal_id
-        AND A.status = 'accepted'
-    )
-    AND P.expiration > ?
-    AND creation_date < ?;`;
+        AND NOT EXISTS (
+          SELECT 1
+          FROM thesisApplication A
+          WHERE A.proposal_id = P.proposal_id
+            AND A.status = 'accepted'
+        )
+        AND P.expiration > ?
+        AND creation_date < ?;`;
     const proposals = db.prepare(getProposals).all(teacherId, currentDate, currentDate);
     resolve(proposals)
 
@@ -460,8 +462,13 @@ exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
     const currentDate = new AdvancedDate().toISOString();
     const getApplications = `SELECT s.name, s.surname, ta.status, s.id
     FROM thesisApplication ta, thesisProposal tp, student s
-    WHERE ta.proposal_id = tp.proposal_id AND s.id = ta.student_id AND ta.proposal_id=? AND tp.supervisor_id= ? 
-    AND ta.creation_date < ? AND tp.expiration > ? AND tp.creation_date < ?`;
+    WHERE ta.proposal_id = tp.proposal_id 
+      AND s.id = ta.student_id
+      AND ta.proposal_id=?
+      AND tp.supervisor_id= ? 
+      AND ta.creation_date < ?
+      AND tp.expiration > ?
+      AND tp.creation_date < ?`;
 
     const applications = db.prepare(getApplications).all(proposal_id, teacherId, currentDate, currentDate, currentDate);
     resolve(applications)
@@ -483,8 +490,8 @@ exports.updateApplicationStatus = (studentId, proposalId, status) => {
     const query = `
       UPDATE thesisApplication
       SET status = ?
-      WHERE student_id = ? AND proposal_id = ?
-    `
+      WHERE student_id = ? AND proposal_id = ? AND status = 'waiting for approval'
+    `;
     const res = db.prepare(query).run(status, studentId, proposalId);
 
     const rowCount = res.changes;
@@ -498,8 +505,8 @@ exports.rejectOtherApplications = (studentId, proposalId) => {
     const query = `
       UPDATE thesisApplication
       SET status = 'canceled'
-      WHERE student_id <> ? AND proposal_id = ?
-    `
+      WHERE student_id <> ? AND proposal_id = ? AND status = 'waiting for approval'
+    `;
     const res = db.prepare(query).run(studentId, proposalId);
 
     const rowCount = res.changes;
@@ -510,14 +517,14 @@ exports.rejectOtherApplications = (studentId, proposalId) => {
 
 exports.listApplicationsDecisionsFromStudent = (studentId) => {
   return new Promise((resolve) => {
-    
-    const getApplications = `SELECT ta.proposal_id, tp.title,  tp.level, t.name AS "teacher_name" , t.surname AS "teacher_surname" ,ta.status, tp.expiration
+
+    const getApplications = `SELECT ta.id AS "application_id", ta.proposal_id, tp.title,  tp.level, t.name AS "teacher_name" , t.surname AS "teacher_surname" ,ta.status, tp.expiration
     FROM thesisApplication ta, thesisProposal tp, teacher t
     WHERE ta.proposal_id = tp.proposal_id AND ta.student_id = ? AND t.id = tp.supervisor_id`;
 
-    const applications = db.prepare(getApplications).all(studentId);    
+    const applications = db.prepare(getApplications).all(studentId);
     resolve(applications)
-    
+
   })
 };
 exports.getThesisProposalCds = (proposalId) => {
@@ -546,4 +553,4 @@ exports.getThesisProposalTeacher = (proposalId, teacherId) => {
     const res = db.prepare(query).get(proposalId, teacherId, currentDate, currentDate);
     resolve(res);
   })
-}
+};
