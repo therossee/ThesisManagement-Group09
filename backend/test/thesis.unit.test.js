@@ -87,7 +87,7 @@ describe('createThesisProposal', () => {
     );
 
     expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
-    expect(db.prepare).toHaveBeenCalledTimes(4); 
+    expect(db.prepare).toHaveBeenCalledTimes(4);
   });
 });
 
@@ -252,7 +252,7 @@ describe('getThesisProposal', () => {
     // Arrange
     const proposalId = 1;
     const studentId = 1;
-    const expectedResult = 
+    const expectedResult =
     {
       "id": 1,
       "title": "Test Proposal",
@@ -550,10 +550,10 @@ describe('listThesisProposalsTeacher', () => {
 describe('listApplicationsForTeacherThesisProposal', () => {
   test('should return an array of thesis applications for a teacher and proposal', async () => {
     // Mock the response from the database
-    const mockApplications = [
-      { application_id: 1, status: 'Approved' },
-      { application_id: 2, status: 'Pending' },
-    ];
+      const mockApplications = [
+          { status: 'Approved', name: 'M', surname: 'R', student_id: 's1' },
+          { status: 'Pending', name: 'W', surname: 'X', student_id: 's2' }
+      ];
 
     // Mock the SQLite database query
     db.prepare.mockReturnValueOnce({ all: jest.fn(() => mockApplications) });
@@ -570,13 +570,13 @@ describe('listApplicationsForTeacherThesisProposal', () => {
 });
 
 describe('getStudentActiveApplication', () => {
-  
+
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
   test('should retrieve active application of a student', async () => {
-    
+
     const student_id = 1;
     const expectedResult = [ { proposal_id: 1 } ];
 
