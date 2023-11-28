@@ -90,7 +90,7 @@ function ThesisApplications() {
                     <List
                         loading={isLoading}
                         itemLayout="horizontal"
-                        dataSource={x.applications ? x.applications : "no data"}
+                        dataSource={x.applications}
                         renderItem={(student) => (
                             <div style={{ marginRight: "20%", marginLeft: "20%" }}>
                                 <List.Item key={student.id}>
