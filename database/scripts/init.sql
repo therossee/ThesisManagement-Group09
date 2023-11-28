@@ -203,7 +203,21 @@ VALUES
 
 -- Insert data into the teacher_auth0 table
 INSERT INTO teacher_auth0 (id, id_auth0)
-VALUES ('d279620', 'auth0|6564f83a022f6b2083b6b8c9');
+VALUES 
+    ('d279620', 'auth0|6564f83a022f6b2083b6b8c9'),
+    ('d370392', 'auth0|656621f156336a62dd8aaced'),
+    ('d226682', 'auth0|656621a2022f6b2083b7a522'),
+    ('d258293', 'auth0|656621466d87729b6b4216b5'),
+    ('d320694', 'auth0|656620f16d87729b6b42167c'),
+    ('d284435', 'auth0|656620a756336a62dd8aac0e'),
+    ('d258761', 'auth0|6566205c56336a62dd8aabe1'),
+    ('d237188', 'auth0|65661fff6d87729b6b4215e5'),
+    ('d392000', 'auth0|65661fb356336a62dd8aab82'),
+    ('d292715', 'auth0|65661ee656336a62dd8aaaf5'),
+    ('d357587', 'auth0|65661e84022f6b2083b7a341'),
+    ('d255269', 'auth0|65661e2156336a62dd8aaa70'),
+    ('d350985', 'auth0|65661dde56336a62dd8aaa4c'),
+    ('d370335', 'auth0|65661d4e022f6b2083b7a267');
 
 -- Insert data into the externalCoSupervisor table
 INSERT INTO externalCoSupervisor (surname, name, email)
