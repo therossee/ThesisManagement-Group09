@@ -8,9 +8,9 @@ function Proposals(props) {
         <>
             {props.isAuthenticated ? (
                 props.isTeacher ? (
-                    <TeacherThesisProposals />
+                    <TeacherThesisProposals accessToken={props.accessToken}/>
                 ) : (
-                    <StudentThesisProposals />
+                    <StudentThesisProposals accessToken={props.accessToken}/>
                 )
             ) : (
                 <Errors code="403" />

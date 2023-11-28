@@ -7,7 +7,7 @@ function Applications(props) {
         <>
             {props.isAuthenticated ? (
                 props.isTeacher ? (
-                    <ThesisApplications />
+                    <ThesisApplications accessToken={props.accessToken}/>
                 ) : (
                     <Errors code="403" />
                 )

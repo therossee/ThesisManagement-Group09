@@ -32,11 +32,7 @@ function TopBar(props) {
                         <BellOutlined style={{ fontSize: '22px', marginRight: '22px', verticalAlign: 'middle' }} />
                       </Badge>
                      
-                    <LogoutButton>
-                      <Avatar size="large" style={{ backgroundColor: '#1677ff', marginRight: '30px', verticalAlign: 'middle' }}>
-                        <UserOutlined />
-                      </Avatar>
-                    </LogoutButton>
+                    <LogoutButton/>
                   </div>
                 )}
               </nav>

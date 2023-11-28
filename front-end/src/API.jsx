@@ -2,10 +2,11 @@
 const URL = 'http://localhost:3000/api';
 
 
-function getUserInfo(accessToken) {
+async function getUserInfo(accessToken) {
 	return new Promise((resolve, reject) => {
 		fetch(URL + '/user', {
 			headers: {
+                Method: 'GET',
 				Authorization: `Bearer ${accessToken}`,
 			},
 		})
@@ -72,9 +73,12 @@ async function updateClock(date) {
 }
 
 // GET Thesis Proposals
-async function getThesisProposals() {
+async function getThesisProposals(accessToken) {
     const response = await fetch(URL + '/thesis-proposals', {
-        credentials: 'include',
+        headers: {
+            Method: 'GET',
+            Authorization:  `Bearer ${accessToken}`
+        },
     });
     const proposals = await response.json();
     if (response.ok) {
@@ -101,9 +105,12 @@ async function getThesisProposals() {
 }
 
 // GET Thesis Proposals by given id
-async function getThesisProposalbyId(id) {
+async function getThesisProposalbyId(accessToken, id) {
     const response = await fetch(URL + `/thesis-proposals/${id}`, {
-        credentials: 'include',
+        headers: {
+            Method: 'GET',
+            Authorization: `Bearer ${accessToken}`,
+        },
     });
     const thesisProposal = await response.json();
     if (response.ok) {
@@ -129,18 +136,17 @@ async function getThesisProposalbyId(id) {
     }
 }
 
-async function applyForProposal(id) {
+async function applyForProposal(accessToken, id) {
     const response = await fetch(URL + '/student/applications', {
         method: 'POST',
-        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
+            'Authorization' : `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ thesis_proposal_id: id }),
     });
     if (response.ok) {
         const apply = await response.json();
-        console.log(apply);
         return apply;
     } else {
         const errDetail = await response.json();
@@ -149,9 +155,12 @@ async function applyForProposal(id) {
 }
 
 // GET Student's Thesis Applications
-async function getStudentActiveApplication() {
+async function getStudentActiveApplication(accessToken) {
     const response = await fetch(URL + '/student/active-application', {
-        credentials: 'include',
+        headers: {
+            Method: 'GET',
+            Authorization: `Bearer ${accessToken}`,
+        },
     });
     const applications = await response.json();
     if (response.ok) {
@@ -162,9 +171,12 @@ async function getStudentActiveApplication() {
 }
 
 // GET Student Applications on a Thesis Proposal of a Teacher
-async function getTeacherThesisApplications(proposalId) {
+async function getTeacherThesisApplications(accessToken, proposalId) {
     const response = await fetch(URL + `/teacher/applications/${proposalId}`, {
-        credentials: 'include',
+        headers: {
+            Method: 'GET',
+            Authorization:  `Bearer ${accessToken}`
+        },
     });
 
     const applications = await response.json();
@@ -181,12 +193,12 @@ async function getTeacherThesisApplications(proposalId) {
     }
 }
 
-async function insertProposal(proposal) {
+async function insertProposal(accessToken, proposal) {
     let response = await fetch(URL + '/teacher/thesis_proposals', {
         method: 'POST',
-        credentials: 'include',
         headers: {
-            'Content-Type': 'application/json',
+           'Content-Type': 'application/json',
+            Authorization:  `Bearer ${accessToken}`
         },
         body: JSON.stringify(proposal),
     });
@@ -199,12 +211,11 @@ async function insertProposal(proposal) {
     }
 }
 
-async function getExtCoSupervisors() {
+async function getExtCoSupervisors(accessToken) {
     const response = await fetch(URL + '/externalCoSupervisors', {
         method: 'GET',
-        credentials: 'include',
         headers: {
-            'Content-Type': 'application/json',
+            Authorization:  `Bearer ${accessToken}`
         },
     });
     const coSup = await response.json();
@@ -219,7 +230,7 @@ async function getTeachers(accessToken) {
     const response = await fetch(URL + '/teachers', {
         method: 'GET',
         headers: {
-             Authorization:  `Bearer ${accessToken}`
+            Authorization:  `Bearer ${accessToken}`
         },
     });
     const teachers = await response.json();
@@ -230,12 +241,11 @@ async function getTeachers(accessToken) {
     }
 }
 
-async function getAllKeywords() {
+async function getAllKeywords(accessToken) {
     const response = await fetch(URL + '/keywords', {
         method: 'GET',
-        credentials: 'include',
         headers: {
-            'Content-Type': 'application/json',
+            Authorization:  `Bearer ${accessToken}`
         },
     });
     const keywords = await response.json();
@@ -246,12 +256,11 @@ async function getAllKeywords() {
     }
 }
 
-async function getAllDegrees() {
+async function getAllDegrees(accessToken) {
     const response = await fetch(URL + '/degrees', {
         method: 'GET',
-        credentials: 'include',
         headers: {
-            'Content-Type': 'application/json',
+            Authorization:  `Bearer ${accessToken}`
         },
     });
     const degrees = await response.json();
@@ -265,13 +274,13 @@ async function getAllDegrees() {
 
 
 // Accept Student Applications on a Thesis Proposal 
-async function acceptThesisApplications(proposalId, studentId) {
+async function acceptThesisApplications(accessToken, proposalId, studentId) {
     const response = await fetch(URL + `/teacher/applications/accept/${proposalId}`, {
         method: 'PATCH',
         headers: {
-            'Content-Type': 'application/json',
+           'Content-Type': 'application/json',
+            Authorization:  `Bearer ${accessToken}`
         },
-        credentials: 'include',
         body: JSON.stringify({
             student_id: studentId,
         }),
@@ -285,11 +294,12 @@ async function acceptThesisApplications(proposalId, studentId) {
 }
 
 // Reject Student Applications on a Thesis Proposal 
-async function rejectThesisApplications(proposalId, studentId) {
+async function rejectThesisApplications(accessToken, proposalId, studentId) {
     const response = await fetch(URL + `/teacher/applications/reject/${proposalId}`, {
         method: 'PATCH',
         headers: {
-            'Content-Type': 'application/json',
+           'Content-Type': 'application/json',
+            Authorization:  `Bearer ${accessToken}`
         },
         credentials: 'include',
         body: JSON.stringify({

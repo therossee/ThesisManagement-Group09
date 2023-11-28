@@ -1,9 +1,9 @@
 import { ViewThesisProposal } from "../components/ViewThesisProposal"
 
-function ViewProposal() {
+function ViewProposal(props) {
 
     return (
-        <ViewThesisProposal />
+        <ViewThesisProposal isTeacher={props.isTeacher} isAuthenticated={props.isAuthenticated} accessToken={props.accessToken} />
     )
 }
 

@@ -5,9 +5,10 @@ import dayjs from 'dayjs';
 import API from "../API";
 
 
-function ViewThesisProposal() {
+function ViewThesisProposal(props) {
 
-  const { isTeacher, isLoggedIn } = useAuth();
+  const { isTeacher } = props.isTeacher;
+  const { isAuthenticated } = props.isAuthenticated;
 
   const { id } = useParams();
   const { Text } = Typography;
@@ -25,7 +26,7 @@ function ViewThesisProposal() {
 
   async function addApplication() {
     try {
-      await API.applyForProposal(id);
+      await API.applyForProposal(props.accessToken, id);
       message.success("Applied for proposal");
       setDisabled(true);
       setLoading(false);
@@ -38,7 +39,7 @@ function ViewThesisProposal() {
 
 
   useEffect(() => {
-    API.getThesisProposalbyId(id)
+    API.getThesisProposalbyId(props.accessToken, id)
       .then((x) => {
         setData(x);
 
@@ -57,8 +58,8 @@ function ViewThesisProposal() {
   useEffect(() => {
     // Exclude teachers from Application fetch
     // Explanation: If ((isTeacher is computed and user is not a teacher) or (user is logged in and not a teacher (even if not yet computed)))
-    if ((isTeacher !== undefined && !isTeacher) || (isLoggedIn && !isTeacher)) {
-      API.getStudentActiveApplication()
+    if ((isTeacher !== undefined && !isTeacher) || (isAuthenticated && !isTeacher)) {
+      API.getStudentActiveApplication(props.accessToken)
         .then((x) => {
           if (x.length > 0)
             // Disabled if there's already an application pending
@@ -66,7 +67,7 @@ function ViewThesisProposal() {
         })
         .catch((err) => { message.error(err.message ? err.message : err) });
     }
-  }, [data, isTeacher, isLoggedIn]);
+  }, [data, isTeacher, isAuthenticated]);
 
   // If data is still empty
   if (!data) {

@@ -10,7 +10,7 @@ import API from '../API';
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 
-function StudentThesisProposals() {
+function StudentThesisProposals(props) {
 
     const [clock, setClock] = useState(dayjs());
     // Array of objs for storing table data
@@ -73,13 +73,13 @@ function StudentThesisProposals() {
                 setClock(dayjs().add(x.offset, 'ms'));
             })
             .catch((err) => { messageApi.error(err.message ? err.message : err) });
-        API.getThesisProposals()
+        API.getThesisProposals(props.accessToken)
             .then((x) => {
                 setData(handleReceivedData(x));
                 setIsLoadingTable(false);
             })
             .catch((err) => { messageApi.error(err.message ? err.message : err) });
-    }, []);
+    }, [isLoadingTable, props.accessToken]);
 
     const navigate = useNavigate();
 

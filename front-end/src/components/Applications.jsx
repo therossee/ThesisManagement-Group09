@@ -3,7 +3,7 @@ import API from "../API";
 import { Divider, List, Skeleton, Avatar, Button, Flex } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 
-function ThesisApplications() {
+function ThesisApplications(props) {
     const [data, setData] = useState([]);
     const [studentApplications, setStudentApplications] = useState({});
     const [isLoadingTable, setIsLoadingTable] = useState(true);
@@ -11,7 +11,7 @@ function ThesisApplications() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const proposals = await API.getTeacherThesisProposals();
+                const proposals = await API.getThesisProposals(props.accessToken);
                 setData(proposals);
                 setIsLoadingTable(false);
 
@@ -19,7 +19,7 @@ function ThesisApplications() {
                 const studentApplicationsData = {};
                 await Promise.all(
                     proposals.map(async (proposal) => {
-                        const students = await API.getTeacherThesisApplications(proposal.id);
+                        const students = await API.getTeacherThesisApplications(props.accessToken, proposal.id);
                         studentApplicationsData[proposal.id] = Array.isArray(students) ? students : [];
                     })
                 );
@@ -33,11 +33,9 @@ function ThesisApplications() {
     }, [isLoadingTable]);
 
     const acceptApplication = async (proposalId, studentId) => {
-        console.log('Accepting application for proposal_id:', proposalId, 'and student_id:', studentId);
         try {
             setIsLoadingTable(true)
-            const response = await API.acceptThesisApplications(proposalId, studentId);
-            console.log('API response:', response);
+            const response = await API.acceptThesisApplications(props.accessToken, proposalId, studentId);
             if (response.success) {
                 setIsLoadingTable(false)
             } else {
@@ -60,11 +58,9 @@ function ThesisApplications() {
     };
 
     const rejectApplication = async (proposalId, studentId) => {
-        console.log('Rejecting application for proposal_id:', proposalId, 'and student_id:', studentId);
         try {
             setIsLoadingTable(true)
-            const response = await API.rejectThesisApplications(proposalId, studentId);
-            console.log('API response:', response);
+            const response = await API.rejectThesisApplications(props.accessToken, proposalId, studentId);
             if (response.success) {
                 setIsLoadingTable(false)
             } else {

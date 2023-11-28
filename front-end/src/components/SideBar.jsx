@@ -12,7 +12,7 @@ function SideBar(props) {
   // Define the menu items, using directly the route path as key
   const navigation = [
     { label: "Home", key: "/", icon: <HomeOutlined /> },
-    (props.isAuthenticated && !props.isTeacher) && { label: "Thesis Proposals", key: "/proposals", icon: <FileTextOutlined /> },
+    props.isAuthenticated && { label: "Thesis Proposals", key: "/proposals", icon: <FileTextOutlined /> },
     (props.isAuthenticated && props.isTeacher) && { label: "Thesis Applications", key: "/applications", icon: <AuditOutlined /> },
     { type: 'divider' },
     { label: "Administration", key: "/admin/virtual-clock", icon: <SettingOutlined /> }

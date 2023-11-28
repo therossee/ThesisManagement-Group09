@@ -4,7 +4,7 @@ import { message, Space, Table, Tag, Tooltip } from 'antd';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import API from '../API';
 
-function TeacherThesisProposals() {
+function TeacherThesisProposals(props) {
 
     // Array of objs for storing table data
     const [data, setData] = useState([])
@@ -100,7 +100,7 @@ function TeacherThesisProposals() {
     };
 
     useEffect(() => {
-        API.getThesisProposals()
+        API.getThesisProposals(props.accessToken)
             .then((x) => {
                 setData(handleReceivedData(x));
                 setIsLoadingTable(false);

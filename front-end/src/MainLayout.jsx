@@ -25,10 +25,10 @@ function MainLayout(props) {
                         <Routes>
                             <Route path="/" element={<Home isAuthenticated={props.isAuthenticated} isTeacher={props.isTeacher} userData={props.userData} />} />
                             <Route path="/admin/virtual-clock" element={<VirtualClock />} />
-                            <Route path="/proposals" element={<Proposals isAuthenticated={props.isAuthenticated} isTeacher={props.isTeacher}/>} />
-                            <Route path="/applications" element={<Applications isAuthenticated={props.isAuthenticated} isTeacher={props.isTeacher}/>} />
+                            <Route path="/proposals" element={<Proposals isAuthenticated={props.isAuthenticated} isTeacher={props.isTeacher} accessToken={props.accessToken}/>} />
+                            <Route path="/applications" element={<Applications isAuthenticated={props.isAuthenticated} isTeacher={props.isTeacher} accessToken={props.accessToken}/>} />
                             <Route path="/insert-proposal" element={<InsertProposal isAuthenticated={props.isAuthenticated} isTeacher={props.isTeacher} accessToken={props.accessToken}/>} />
-                            <Route path="/view-proposal/:id" element={<ViewProposal isAuthenticated={props.isAuthenticated} isTeacher={props.isTeacher}/>} />
+                            <Route path="/view-proposal/:id" element={<ViewProposal isAuthenticated={props.isAuthenticated} isTeacher={props.isTeacher} accessToken={props.accessToken}/>} />
                             <Route path="/*" element={<Errors code="404"/>} />
                         </Routes>
                     </Content>

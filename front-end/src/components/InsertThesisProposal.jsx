@@ -46,21 +46,21 @@ function InsertThesisProposal(props) {
         .catch((err) => {
           messageApi.error("Failed to fetch teachers!");
         });
-      API.getExtCoSupervisors()
+      API.getExtCoSupervisors(props.accessToken)
         .then((obj) => {
           setExtCoSupervisors(obj.externalCoSupervisors);
         })
         .catch((err) => {
           messageApi.error("Failed to fetch external co-supervisors!");
         });
-      API.getAllDegrees()
+      API.getAllDegrees(props.accessToken)
         .then((obj) => {
           setDegrees(obj);
         })
         .catch((err) => {
           messageApi.error("Failed to fetch degrees!");
         });
-      API.getAllKeywords()
+      API.getAllKeywords(props.accessToken)
         .then((obj) => {
           setKeywords(obj.keywords);
         })
@@ -94,7 +94,7 @@ function InsertThesisProposal(props) {
           cds: formData.cds,
           level: formData.degreeLevel
         }
-        API.insertProposal(proposal)
+        API.insertProposal(props.accessToken, proposal)
           .then((obj) => {
             setProposalId(obj.id);
             next();
