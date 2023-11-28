@@ -11,6 +11,7 @@ DROP TABLE IF EXISTS thesisInternalCoSupervisor;
 DROP TABLE IF EXISTS thesisProposal;
 DROP TABLE IF EXISTS career;
 DROP TABLE IF EXISTS externalCoSupervisor;
+DROP TABLE IF EXISTS teacher_auth0;
 DROP TABLE IF EXISTS teacher;
 DROP TABLE IF EXISTS student_auth0;
 DROP TABLE IF EXISTS student;
