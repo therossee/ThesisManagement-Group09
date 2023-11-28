@@ -777,3 +777,38 @@ describe('rejectOtherApplications', () => {
     await expect(thesis.rejectOtherApplications(studentId, proposalId)).rejects.toThrow('Some error');
   });
 });
+
+describe('getThesisProposalCds', () => {
+    // Restore mocks after each test
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+    
+    test('should return thesis proposal cds', async () => {
+      const proposalId = 1;
+      const expectedQuery = `SELECT d.cod_degree, d.title_degree FROM proposalCds p, degree d WHERE proposal_id = ? AND p.cod_degree = d.cod_degree`;
+      const expectedResult = [{cds: 'TestCds'}];
+
+      jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce(expectedResult);
+
+      result = await thesis.getThesisProposalCds(proposalId);
+
+      expect(result).toEqual(expectedResult);
+      expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
+    })
+    
+    test('should handle an empty result set', async () => {
+      // Arrange
+      const proposalId = 2;
+  
+      // Mock the all function to return an empty array
+      jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce([]);
+  
+      // Act
+      const result = await thesis.getThesisProposalCds(proposalId);
+  
+      // Assert
+      expect(result).toEqual([]);
+    });
+
+})
