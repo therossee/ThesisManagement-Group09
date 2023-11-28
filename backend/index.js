@@ -455,7 +455,7 @@ app.patch('/api/teacher/applications/accept/:proposal_id',
     const { student_id } = req.body;
 
     if (!student_id ) {
-      return res.status(400).json({ error: 'Missing required fields.' });
+      return res.status(400).json({ message: 'Missing required fields.' });
     }
 
     try {
@@ -480,7 +480,7 @@ async (req, res) => {
   const { student_id } = req.body;
 
   if (!student_id ) {
-    return res.status(400).json({ error: 'Missing required fields.' });
+    return res.status(400).json({ message: 'Missing required fields.' });
   }
 
   try {
