@@ -13,22 +13,22 @@ import Applications from './routes/Applications';
 
 const { Content, Footer } = Layout;
 
-function MainLayout() {
+function MainLayout(props) {
 
     return (
         <Router>
             <Layout>
-                <SideBar />
+                <SideBar isAuthenticated={props.isAuthenticated} isTeacher={props.isTeacher}/>
                 <Layout>
-                    <TopBar />
+                    <TopBar isAuthenticated={props.isAuthenticated} isTeacher={props.isTeacher}/>
                     <Content className="content-style">
                         <Routes>
-                            <Route path="/" element={<Home />} />
+                            <Route path="/" element={<Home isAuthenticated={props.isAuthenticated} isTeacher={props.isTeacher} userData={props.userData} />} />
                             <Route path="/admin/virtual-clock" element={<VirtualClock />} />
-                            <Route path="/proposals" element={<Proposals />} />
-                            <Route path="/applications" element={<Applications />} />
-                            <Route path="/insert-proposal" element={<InsertProposal/>} />
-                            <Route path="/view-proposal/:id" element={<ViewProposal />} />
+                            <Route path="/proposals" element={<Proposals isAuthenticated={props.isAuthenticated} isTeacher={props.isTeacher}/>} />
+                            <Route path="/applications" element={<Applications isAuthenticated={props.isAuthenticated} isTeacher={props.isTeacher}/>} />
+                            <Route path="/insert-proposal" element={<InsertProposal isAuthenticated={props.isAuthenticated} isTeacher={props.isTeacher} accessToken={props.accessToken}/>} />
+                            <Route path="/view-proposal/:id" element={<ViewProposal isAuthenticated={props.isAuthenticated} isTeacher={props.isTeacher}/>} />
                             <Route path="/*" element={<Errors code="404"/>} />
                         </Routes>
                     </Content>

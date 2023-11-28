@@ -21,7 +21,7 @@ const steps = [
     },
   ];
 
-function InsertThesisProposal() {
+function InsertThesisProposal(props) {
 
     const [keywords, setKeywords] = useState([]);
     const [intCoSupervisors, setIntCoSupervisors] = useState([]);
@@ -39,7 +39,7 @@ function InsertThesisProposal() {
   
   
     useEffect(() => {
-      API.getTeachers()
+      API.getTeachers(props.accessToken)
         .then((obj) => {
           setIntCoSupervisors(obj.teachers);
         })

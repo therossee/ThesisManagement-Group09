@@ -2,6 +2,36 @@
 const URL = 'http://localhost:3000/api';
 
 
+function getUserInfo(accessToken) {
+	return new Promise((resolve, reject) => {
+		fetch(URL + '/user', {
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		})
+			.then((response) => {
+				if (response.ok) {
+					response
+						.json()
+						.then((user) => resolve(user))
+						.catch(() => {
+							reject({ error: 'Cannot parse server response.' });
+						});
+				} else {
+					response
+						.json()
+						.then((message) => {
+							reject(message);
+						})
+						.catch(() => {
+							reject({ error: 'Cannot parse server response.' });
+						});
+				}
+			})
+			.catch(() => reject({ error: 'Cannot communicate with the server.' }));
+	});
+}
+
 /****** End APIs for auth ******/
 
 async function getClock() {
@@ -185,12 +215,11 @@ async function getExtCoSupervisors() {
     }
 }
 
-async function getTeachers() {
+async function getTeachers(accessToken) {
     const response = await fetch(URL + '/teachers', {
         method: 'GET',
-        credentials: 'include',
         headers: {
-            'Content-Type': 'application/json',
+             Authorization:  `Bearer ${accessToken}`
         },
     });
     const teachers = await response.json();
@@ -278,7 +307,7 @@ async function rejectThesisApplications(proposalId, studentId) {
 
 
 const API = {
-    getClock, updateClock,
+    getUserInfo, getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
     applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications
 };

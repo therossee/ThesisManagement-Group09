@@ -2,18 +2,16 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, Badge, Button, Form, Input, Layout } from "antd";
 import { UserOutlined, BellOutlined, FileAddOutlined, KeyOutlined, LogoutOutlined } from '@ant-design/icons';
-import { useAuth0 } from "@auth0/auth0-react";
 import LoginButton from './authentication/LoginButton';
 import LogoutButton from './authentication/LogoutButton';
-import User from './authentication/User';
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import '../css/style.css';
 
 const { Header } = Layout;
 
-function TopBar() {
+function TopBar(props) {
 
-  const { user, isAuthenticated, isLoading } = useAuth0();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -21,14 +19,24 @@ function TopBar() {
       <Header className="header-style">
             <header>
               <nav>
-                {!isAuthenticated ? (
+                {!props.isAuthenticated ? (
                   <div>
                     <LoginButton/>
                   </div>
                 ) : (
                   <div>
-                    <User user = {user} />
-                    <LogoutButton/>
+                      { props.isTeacher &&
+                          <FileAddOutlined style={{ fontSize: '22px', verticalAlign: 'middle', marginRight: "20px" }} onClick={() => navigate("/insert-proposal")} />
+                      }
+                      <Badge count={1} style={{ marginRight: '22px' }}>
+                        <BellOutlined style={{ fontSize: '22px', marginRight: '22px', verticalAlign: 'middle' }} />
+                      </Badge>
+                     
+                    <LogoutButton>
+                      <Avatar size="large" style={{ backgroundColor: '#1677ff', marginRight: '30px', verticalAlign: 'middle' }}>
+                        <UserOutlined />
+                      </Avatar>
+                    </LogoutButton>
                   </div>
                 )}
               </nav>

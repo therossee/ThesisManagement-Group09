@@ -1,13 +1,11 @@
 import Errors from "./Errors";
 import { InsertThesisProposal } from "../components/InsertThesisProposal"
-import { useAuth0 } from "@auth0/auth0-react";
 
-function InsertProposal() {
-    const { isTeacher } = useAuth0();
-
+function InsertProposal(props) {
+    
     return (
         <>
-            {isTeacher ? <InsertThesisProposal /> : <Errors code="403" />}
+            {props.isTeacher ? <InsertThesisProposal accessToken={props.accessToken}/> : <Errors code="403" />}
         </>
     )
 }

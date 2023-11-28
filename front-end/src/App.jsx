@@ -5,24 +5,16 @@ import API from './API';
 import './css/App.css';
 import { useAuth0 } from '@auth0/auth0-react';
 
-// Context for handling user info and user-related functions
-const AuthContext = createContext();
-
-// Hook for using AuthContext
-// Hook usage: const { user, loginLoading, isLoggedIn, isTeacher, doLogIn, doLogOut } = useAuth();
-export function useAuth() {
-  return useContext(AuthContext);
-}
-
 function App() {
 
-  const {user, isAuthenticated, isLoading} = useAuth0();
-
-  const [isTeacher, setIsTeacher] = useState( user?.nickname.startsWith("d") );
-  const [isStudent, setIsStudent] = useState( user?.nickname.startsWith("s") );
+  const {user, isAuthenticated, getAccessTokenSilently, isLoading, loginWithRedirect} = useAuth0();
+  const [isTeacher, setIsTeacher] = useState(false);
+  const [isStudent, setIsStudent] = useState(false);
+  const [accessToken, setAccessToken] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [dirty, setDirty] = useState(false);
   
-  // Handle the login loading state
-  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginLoading, setLoginLoading ] = useState(false);
 
   // Handle notification box for api errors during login
   const [api, notificationBox] = notification.useNotification();
@@ -36,11 +28,45 @@ function App() {
     });
   };
 
+  useEffect(() => {
+		const getUserData = async () => {
+			try {
+				setLoginLoading(true);
+				const accessToken = await getAccessTokenSilently({
+					authorizationParams: {
+						audience: `https://thesis-management-09.eu.auth0.com/api/v2/`,
+						scope: 'read:current_user',
+					},
+				});
+				setAccessToken(accessToken);
+				API.getUserInfo(accessToken)
+					.then((user) => {
+						setUserData(user);
+						if (user && user.role === 'student') {
+							setIsTeacher(false);
+							setIsStudent(true);
+						} else if (user && user.role === 'teacher') {
+							setIsTeacher(true);
+							setIsStudent(false);
+						}
+					})
+					.catch((err) => openNotification(err));
+			} catch (e) {
+        openNotification(e.message);
+			}
+		};
+		if (isAuthenticated) {
+			getUserData();
+			setDirty(false);
+		}
+	}, [isAuthenticated, getAccessTokenSilently, user?.sub, dirty, setLoginLoading]);
+
+
   return (
-    <AuthContext.Provider value={{ user, loginLoading, isAuthenticated, isTeacher, isStudent }}>
+    <>
       {notificationBox}
-      <MainLayout />
-    </AuthContext.Provider>
+      <MainLayout userData={userData} isTeacher={isTeacher} isAuthenticated={isAuthenticated} accessToken={accessToken}/>
+    </>
   )
 }
 
