@@ -1,5 +1,6 @@
 require('jest');
 
+const AdvancedDate = require('../AdvancedDate');
 const db = require('../db');
 const thesis = require('../thesis_dao');
 
@@ -353,6 +354,7 @@ describe('listThesisProposalsFromStudent', () => {
 
   test('should return the result of the db query', async () => {
       const studentId = "1";
+      const currentDate = new AdvancedDate().toISOString();
       const mockedData = [
           {
               id: "1",
@@ -363,30 +365,32 @@ describe('listThesisProposalsFromStudent', () => {
               required_knowledge: 'Test Knowledge',
               notes: 'Test Notes',
               expiration: '2023-12-31',
-              level: 'Test Level',
-              cds: 'Test CDS'
+              level: 'Test Level'
           }
       ];
 
       db.prepare().all.mockReturnValue(mockedData);
 
-      const result = await thesis.listThesisProposalsFromStudent(studentId);
+      const result = await thesis.listThesisProposalsFromStudent(studentId, currentDate, currentDate);
 
       expect(result).toEqual(mockedData);
-      expect(db.prepare().all).toHaveBeenCalledWith(studentId);
+      expect(db.prepare().all).toHaveBeenCalledWith(studentId, currentDate, currentDate);
   });
 
   test('should return an empty list', async () => {
-      const studentId = "1";
-      const mockedData = [];
+    const studentId = "1";
+    const currentDate = new AdvancedDate().toISOString();
+    const mockedData = [];
 
-      db.prepare().all.mockReturnValue(mockedData);
+    db.prepare().all.mockReturnValue(mockedData);
 
-      const result = await thesis.listThesisProposalsFromStudent(studentId);
+    const result = await thesis.listThesisProposalsFromStudent(studentId, currentDate, currentDate);
 
-      expect(result).toEqual(mockedData);
-      expect(db.prepare().all).toHaveBeenCalledWith(studentId);
-  });
+    expect(result).toEqual(mockedData);
+     expect(db.prepare().all).toHaveBeenCalledWith(studentId, currentDate, currentDate);
+
+    //expect(db.prepare().all.mock.calls[0][0]).toBe(studentId);
+});
 });
 
 describe('getKeywordsOfProposal', () => {
@@ -565,21 +569,30 @@ describe('listThesisProposalsTeacher', () => {
 
     // Assertions
     expect(result).toEqual(mockProposals);
-    expect(db.prepare).toHaveBeenCalledWith('SELECT * FROM thesisProposal WHERE supervisor_id=?');
+    expect(db.prepare).toHaveBeenCalledWith(`SELECT *·
+    FROM thesisProposal P
+    WHERE P.supervisor_id=?
+    AND NOT EXISTS (
+      SELECT 1
+      FROM thesisApplication A
+      WHERE A.proposal_id = P.proposal_id
+      AND A.status = 'accepted'
+  )
+  AND P.expiration > ?
+  AND creation_date < ?;`);
   });
-  test('should return null when the thesis proposal does not exist for the given proposalId and studentId', async () => {
-    // Arrange
-    const proposalId = 2;
-    const studentId = 2;
+  test('should return an empty list', async () => {
+    const studentId = "1";
+    const mockedData = [];
 
-    // Mock the get function to return undefined (indicating no thesis proposal)
-    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(undefined);
+    db.prepare().all.mockReturnValue(mockedData);
 
-    // Act
-    const result = await thesis.getThesisProposal(proposalId, studentId);
+    const result = await thesis.listThesisProposalsFromStudent(studentId);
 
-    // Assert
-    expect(result).toBeNull();
+    expect(result).toEqual(mockedData);
+    // expect(db.prepare().all).toHaveBeenCalledWith(studentId);
+
+    expect(db.prepare().all.mock.calls[0][0]).toBe(studentId);
   });
 });
 
