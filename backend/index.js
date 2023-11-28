@@ -459,12 +459,15 @@ app.patch('/api/teacher/applications/accept/:proposal_id',
     const { student_id } = req.body;
 
     if (!student_id ) {
-      return res.status(400).json({ error: 'Missing required fields.' });
+      return res.status(400).json({ message: 'Missing required fields.' });
     }
 
     try {
       const status = "accepted";
-      await thesisDao.updateApplicationStatus(student_id, proposal_id, status);
+      const success = await thesisDao.updateApplicationStatus(student_id, proposal_id, status);
+      if (!success) {
+        return res.status(404).json({ message: `No application with the status "waiting for approval" found for this proposal.` });
+      }
       setImmediate( async () => _notifyApplicationStatusChange(student_id, proposal_id, status) );
 
       const applicationsRejected = await thesisDao.rejectOtherApplications(student_id, proposal_id);
@@ -491,13 +494,15 @@ async (req, res) => {
   const { student_id } = req.body;
 
   if (!student_id ) {
-    return res.status(400).json({ error: 'Missing required fields.' });
+    return res.status(400).json({ message: 'Missing required fields.' });
   }
 
   try {
     const status = "rejected";
-    await thesisDao.updateApplicationStatus(student_id, proposal_id, status);
-
+    const success = await thesisDao.updateApplicationStatus(student_id, proposal_id, status);
+    if (!success) {
+        return res.status(404).json({ message: `No application with the status "waiting for approval" found for this proposal.` });
+    }
     setImmediate( async () => _notifyApplicationStatusChange(student_id, proposal_id, status) );
 
     res.status(200).json({ message: 'Thesis successfully rejected' });
@@ -507,6 +512,20 @@ async (req, res) => {
   }
 
 })
+
+app.get('/api/student/applications-decision',
+isLoggedIn,
+isStudent,
+async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    const applications = await thesisDao.listApplicationsDecisionsFromStudent(studentId);
+    res.json(applications);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json('Internal Server Error');
+  }
+});
 
 const PORT = 3000;
 const server = app.listen(PORT, () => {
