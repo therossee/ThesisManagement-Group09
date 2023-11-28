@@ -417,6 +417,7 @@ exports.applyForProposal = (proposal_id, student_id) => {
     const proposal_active = db.prepare(checkProposalActive).get(proposal_id, currentDate, currentDate);
     if(!proposal_active){
       reject("The proposal is not active");
+      return;
     }
 
     // Check if the user has already applied for other proposals
@@ -424,6 +425,7 @@ exports.applyForProposal = (proposal_id, student_id) => {
     const already_applied = db.prepare(checkAlreadyApplied).get(student_id);
     if(already_applied){
       reject("The user has already applied for other proposals");
+      return;
     }
 
     const insertApplicationQuery = `
