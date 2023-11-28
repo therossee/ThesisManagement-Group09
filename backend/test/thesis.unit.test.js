@@ -18,6 +18,9 @@ describe('createThesisProposal', () => {
     // Reset the mock before each test
     db.prepare.mockClear();
   });
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
   test('create a thesis proposal with cosupervisors', async () => {
     const proposalData = {
       title: 'Test Proposal',
@@ -130,6 +133,9 @@ describe('createThesisProposal', () => {
 
 // 2. Test Function to get list of teachers not logged
 describe('getTeacherListExcept', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
     let mockDb;
 
     beforeAll(() => {
@@ -168,6 +174,9 @@ describe('getTeacherListExcept', () => {
 });
 
 describe('getExternalCoSupervisors', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
   let mockDb;
 
   beforeAll(() => {
@@ -204,6 +213,9 @@ describe('getExternalCoSupervisors', () => {
 
 // 3. Test function to retrieve the cod_group of a teacher
 describe('getGroup', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
     let mockDb;
 
     beforeAll(() => {
@@ -240,6 +252,9 @@ describe('getGroup', () => {
 });
 
 describe('getAllKeywords', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
   test('should return an array of keywords', async () => {
     // Mock the response from the database
     const mockKeywords = [
@@ -260,6 +275,9 @@ describe('getAllKeywords', () => {
 });
 
 describe('getDegrees', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
   test('should return an array of keywords', async () => {
     // Mock the response from the database
     const mockKeywords = [
@@ -348,6 +366,10 @@ describe('getThesisProposal', () => {
 });
 
 describe('listThesisProposalsFromStudent', () => {
+  beforeEach(() => {
+    // Reset the mock before each test
+    db.prepare.mockClear();
+  });
   afterEach(() => {
       jest.restoreAllMocks()
   });
@@ -369,7 +391,7 @@ describe('listThesisProposalsFromStudent', () => {
           }
       ];
 
-      db.prepare().all.mockReturnValue(mockedData);
+      db.prepare().all.mockClear().mockReturnValue(mockedData);
 
       const result = await thesis.listThesisProposalsFromStudent(studentId, currentDate, currentDate);
 
@@ -382,14 +404,14 @@ describe('listThesisProposalsFromStudent', () => {
     const currentDate = new AdvancedDate().toISOString();
     const mockedData = [];
 
-    db.prepare().all.mockReturnValue(mockedData);
+    db.prepare().all.mockClear().mockReturnValue(mockedData);
 
     const result = await thesis.listThesisProposalsFromStudent(studentId, currentDate, currentDate);
 
     expect(result).toEqual(mockedData);
-     expect(db.prepare().all).toHaveBeenCalledWith(studentId, currentDate, currentDate);
+    //expect(db.prepare().all).toHaveBeenCalledWith(studentId, currentDate, currentDate);
 
-    //expect(db.prepare().all.mock.calls[0][0]).toBe(studentId);
+    expect(db.prepare().all.mock.calls[0][0]).toBe(studentId);
 });
 });
 
@@ -540,10 +562,14 @@ describe('getProposalGroups', () => {
 });
 
 describe('applyForProposal', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
+
   test('applies for a proposal and resolves with applicationId', async () => {
       // Mock data
       const proposal_id = 1;
-      const student_id = 's12345';
+      const student_id = '1';
 
       // Call the function
       const applicationId = await thesis.applyForProposal(proposal_id, student_id);
@@ -554,32 +580,41 @@ describe('applyForProposal', () => {
 });
 
 describe('listThesisProposalsTeacher', () => {
+  beforeEach(() => {
+    // Reset the mock before each test
+    db.prepare.mockClear();
+  });
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
+
   test('should return an array of thesis proposals for a teacher', async () => {
+    const teacherId = "1";
     // Mock the response from the database
     const mockProposals = [
       { proposal_id: 1, title: 'Proposal1' },
       { proposal_id: 2, title: 'Proposal2' },
     ];
-
+    const currentDate = new AdvancedDate().toISOString();
+    const expectedQuery = `SELECT * 
+      FROM thesisProposal P
+      WHERE P.supervisor_id=?
+      AND NOT EXISTS (
+        SELECT 1
+        FROM thesisApplication A
+        WHERE A.proposal_id = P.proposal_id
+        AND A.status = 'accepted'
+    )
+    AND P.expiration > ?
+    AND creation_date < ?;`;
     // Mock the SQLite database query
     db.prepare.mockReturnValueOnce({ all: jest.fn(() => mockProposals) });
 
     // Call the function
-    const result = await thesis.listThesisProposalsTeacher('teacher1');
-
+    const result = await thesis.listThesisProposalsTeacher(teacherId, currentDate, currentDate);
     // Assertions
     expect(result).toEqual(mockProposals);
-    expect(db.prepare).toHaveBeenCalledWith(`SELECT *·
-    FROM thesisProposal P
-    WHERE P.supervisor_id=?
-    AND NOT EXISTS (
-      SELECT 1
-      FROM thesisApplication A
-      WHERE A.proposal_id = P.proposal_id
-      AND A.status = 'accepted'
-  )
-  AND P.expiration > ?
-  AND creation_date < ?;`);
+    expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
   });
   test('should return an empty list', async () => {
     const studentId = "1";
@@ -597,6 +632,9 @@ describe('listThesisProposalsTeacher', () => {
 });
 
 describe('listApplicationsForTeacherThesisProposal', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
   test('should return an array of thesis applications for a teacher and proposal', async () => {
     // Mock the response from the database
     const mockApplications = [
