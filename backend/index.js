@@ -459,9 +459,12 @@ app.patch('/api/teacher/applications/accept/:proposal_id',
     }
 
     try {
-      await thesisDao.updateApplicationStatus(student_id, proposal_id, "accepted");
+      const success = await thesisDao.updateApplicationStatus(student_id, proposal_id, "accepted");
+      if (!success) {
+        return res.status(404).json({ message: `No application with the status "waiting for approval" found for this proposal.` });
+      }
 
-      const rejected = await thesisDao.rejectOtherApplications(student_id, proposal_id);
+      await thesisDao.rejectOtherApplications(student_id, proposal_id);
 
       res.status(200).json({ message: 'Thesis accepted and others rejected successfully' });
 
@@ -484,9 +487,12 @@ async (req, res) => {
   }
 
   try {
-    await thesisDao.updateApplicationStatus(student_id, proposal_id, "rejected");
-    res.status(200).json({ message: 'Thesis successfully rejected' });
+    const success = await thesisDao.updateApplicationStatus(student_id, proposal_id, "rejected");
+    if (!success) {
+        return res.status(404).json({ message: `No application with the status "waiting for approval" found for this proposal.` });
+    }
 
+    res.status(200).json({ message: 'Thesis successfully rejected' });
   } catch (error) {
     console.error(error);
     res.status(500).json(`Internal Server Error`);
