@@ -637,10 +637,10 @@ describe('listApplicationsForTeacherThesisProposal', () => {
   });
   test('should return an array of thesis applications for a teacher and proposal', async () => {
     // Mock the response from the database
-    const mockApplications = [
-      { application_id: 1, status: 'Approved' },
-      { application_id: 2, status: 'Pending' },
-    ];
+      const mockApplications = [
+          { status: 'Approved', name: 'M', surname: 'R', student_id: 's1' },
+          { status: 'Pending', name: 'W', surname: 'X', student_id: 's2' }
+      ];
 
     // Mock the SQLite database query
     db.prepare.mockReturnValueOnce({ all: jest.fn(() => mockApplications) });
@@ -657,22 +657,22 @@ describe('listApplicationsForTeacherThesisProposal', () => {
   });
 });
 
-describe('getStudentApplications', () => {
-  
+describe('getStudentActiveApplication', () => {
+
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  test('should retrieve applications of a student', async () => {
-    
+  test('should retrieve active application of a student', async () => {
+
     const student_id = 1;
-    const expectedResult = [ { proposal_id: 1 }, { proposal_id: 2 } ];
+    const expectedResult = [ { proposal_id: 1 } ];
 
     // Mock the all function to return a mock result
     jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce(expectedResult);
 
     // Act
-    const result = await thesis.getStudentApplications(student_id);
+    const result = await thesis.getStudentActiveApplication(student_id);
 
     // Assert
     expect(result).toEqual(expectedResult);
@@ -687,7 +687,7 @@ describe('getStudentApplications', () => {
     jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce([]);
 
     // Act
-    const result = await thesis.getStudentApplications(student_id);
+    const result = await thesis.getStudentActiveApplication(student_id);
 
     // Assert
     expect(result).toEqual([]);
