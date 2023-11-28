@@ -39,7 +39,7 @@ CREATE TABLE student (
 CREATE TABLE teacher (
     id TEXT PRIMARY KEY,
     surname TEXT NOT NULL,
-    name TEXT NOT NULL, 
+    name TEXT NOT NULL,
     email TEXT NOT NULL,
     cod_group TEXT NOT NULL,
     cod_department TEXT NOT NULL
@@ -49,7 +49,7 @@ CREATE TABLE teacher (
 CREATE TABLE externalCoSupervisor (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     surname TEXT NOT NULL,
-    name TEXT NOT NULL, 
+    name TEXT NOT NULL,
     email TEXT NOT NULL
 );
 
@@ -124,13 +124,13 @@ CREATE TABLE proposalCds(
 
 -- Create the thesisApplication table
 CREATE TABLE thesisApplication (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     proposal_id INTEGER NOT NULL,
     student_id TEXT NOT NULL,
     creation_date DATE NOT NULL,
     status TEXT DEFAULT 'waiting for approval',
     FOREIGN KEY(proposal_id) REFERENCES thesisProposal(proposal_id),
-    FOREIGN KEY(student_id) REFERENCES student(id),
-    PRIMARY KEY (proposal_id, student_id)
+    FOREIGN KEY(student_id) REFERENCES student(id)
 );
 
 
@@ -201,8 +201,8 @@ VALUES
     ('Russo', 'Marco', 'marco.russo@email.com');
 
 -- Insert data into the student table
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year) 
-VALUES 
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year)
+VALUES
     ('s320213', 'Barbato', 'Luca', 'Male', 'Italian', 's320213@studenti.polito.it', 'LM-31', 2020),
     ('s321607', 'Beltran', 'Juan Carlos', 'Male', 'Colombian', 's321607@studenti.polito.it', 'L-09', 2020),
     ('s314796', 'De Rossi', 'Daniele', 'Male', 'Italian', 's314796@studenti.polito.it', 'LM-32', 2020),
@@ -278,7 +278,7 @@ VALUES
     'Enterprise networking, Software Defined Datacenter, network design, service delivery models',
     'The study explores the design and implementation of an Enterprise Software Defined Datacenter network, emphasizing practical solutions and comparing different designs. It requires knowledge in networking, software-defined technologies, and datacenter architecture.',
     '2023-11-27T22:44:51.199Z', '2026-05-29T23:59:59.999Z', 'L'),
-    
+
     ('ROLE OF TECHNOLOGY IN ADVANCING E-COMMERCE SUPPLY CHAIN', 'd392000', 'research project',
     'Over the last 30 years, the supply chain has played a pivotal role in various sectors, with increasing emphasis on operational processes driven by IT advancements. E-commerce platforms, where the supply chain is strategic, particularly impact customer experience, revenue generation, and cost reduction. This thesis explores the evolving expectations of customers, focusing on delivery speed, cost efficiency, and the crucial role of technology in supporting supply chain operations. Leading companies invest significantly in efficient and precise systems, and the challenges of sustainability and waste reduction are addressed. The study anticipates a growing use of e-commerce platforms, requiring the supply chain to adapt to increasing volumes. Artificial Intelligence is identified as a key enabler, enhancing flexibility and speed in the supply chain by automating daily operational decisions, optimizing supply procurement, network deployment, and reducing costs and consumption.',
     'supply chain management, e-commerce, technology impact, sustainability, Artificial Intelligence',
@@ -412,8 +412,8 @@ VALUES
 -- Insert into thesisApplication
 INSERT INTO thesisApplication (proposal_id, student_id, creation_date)
 VALUES
-    (1, 's320213', '2023-11-28T08:08:16.123Z'), 
-    (2, 's321607', '2023-11-28T12:45:58.200Z'), 
+    (1, 's320213', '2023-11-28T08:08:16.123Z'),
+    (2, 's321607', '2023-11-28T12:45:58.200Z'),
     (3, 's318952', '2023-11-28T13:01:22.156Z'),
     (4, 's318771', '2023-11-28T20:20:20.144Z'),
     (5, 's314796', '2023-11-28T09:35:21.132Z'),
