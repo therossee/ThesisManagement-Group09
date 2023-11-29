@@ -23,12 +23,28 @@ docker build -t apokalypt/09_thesis_management .
 _N.B. A working image is available on Docker Hub at [this link](https://hub.docker.com/r/apokalypt/09_thesis_management)._
 ### Run container
 ```
-docker run -p 5173:5173 -p 3000:3000 --name thesis_management apokalypt/09_thesis_management
+docker run -p 5173:5173 -p 3000:3000 --name thesis_management apokalypt/09_thesis_management -e <...>
 ```
+_For the environment variables, see the [Environment variables](#environment-variables) section._
 ### External documentation
 - [Docker](https://docs.docker.com/)
 - [Docker Hub](https://hub.docker.com/)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop)
+
+---
+
+## Environment variables
+
+In order to work properly, the application requires the following environment variables to be set:
+- **TM_SMTP_SERVICE_NAME** = The name of the SMTP service to use (e.g. "gmail")
+- **TM_SMTP_HOST** = The host of the SMTP service to use (e.g. "smtp.gmail.com")
+- **TM_SMTP_USERNAME** = The username of the SMTP service to use (e.g. the email address for a Gmail account)
+- **TM_SMTP_PASSWORD** = The password of the SMTP service to use
+- **TM_SMTP_PORT** = The port of the SMTP service to use (e.g. 587)
+- **TM_SMTP_SECURE** = Whether to use a secure connection to the SMTP service (e.g. "true")
+
+_The service support the use of dotenv-vault and therefore allow you to set only one environment variable: TM_DOTENV_KEY.
+This variable must contain the key to decrypt the environment variables stored in the dotenv-vault file._
 
 ---
 
