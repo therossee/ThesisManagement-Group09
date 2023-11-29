@@ -74,29 +74,46 @@ This test case is related to the security of the pages. During this test case, w
 6. Try to access the page to [create a new thesis](http://localhost:5173/insert-proposal)
    - You should see the form
 7. Log out
-   - Once logged out, the page should be refreshed, and you should see the page indicating that you are not authorized
-     to access this page
+   - Once logged out, the page should be refreshed, and you should see the page indicating that you are not authorized to access this page
 
+### [5] Search for proposal
+This test case is related to the possibility to search, as a student, the thesis proposals matching with his/her interests.
 
-# -- TO ADD NEW ONES HERE --
+1. Go to the [home page](http://localhost:5173/)
+2. Login as a student
+3. Click on the button near to 'Title'
+   - It should appear a tab where to do a search
+4. Write some text of your interest that can be contained in the title
+5. Click on the button "Search"
+6. Browse the proposals resulting from the search
+7. Click again on the button near 'Title'
+8. Click 'Reset' and 'Search' again to see all the proposals again
+9. Click on the button near 'Keyword'
+10. Browse the keywords and select those of your interest
+11. You can also search a keyword writing in the search tab placed on the top of the keywords
+12. Try to write an incomplete word and with opposite lower/upper case (for example 'SPACE' instead of 'aerospace') to see that the search is not case sensitive and is "smart"
+13. Once you selected all the keywords click on 'OK' to see the matches
+14. Log out
 
 
 
 #### [] Browse application decisions
 
-Verification that each student can see the history of their applications and the decision for each of them.
+This test case is related to the verification that each student can see the history of their applications and the decision for each of them.
 
 
 1. Go to the [home page](http://localhost:5173/)
 2. Login as a student
 3. Click on "Applications History" placed in the left bar, under "Thesis Proposals" [Application History](http://localhost:5173/applications)
 4. Ensure that the history of applications is correctly viewed
+5. Log out
 
 ### [] Browse Proposals
 
-Verification that each teacher can view the list of active thesis proposals.
+This test case is related to the verification that each teacher can view the list of active thesis proposals.
 
 1. Go to the [home page](http://localhost:5173/)
-2. Login as a student
+2. Login as a teacher
 3. Click on "Thesis Applications" placed in the left bar, under "Thesis Proposals" [Thesis Applications](http://localhost:5173/applications)
 4. Ensure that the active thesis proposals are listed there 
+5. Log out
