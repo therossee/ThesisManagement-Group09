@@ -122,19 +122,19 @@ This test case is related to the application of a student to a proposal.
 This test case is related to the possibility of seeing all the applications for eache thesis proposal from the side of a professor, so that he/she can accept or reject them.
 
 1. Go to the [home page](http://localhost:5173/)
-2. Login as a teacher
+2. Login as a teacher that has a proposal with at least 2 applicants
 3. Click on 'Thesis Application' on the left bar and go to [Thesis applications page](http://localhost:5173/applications)
 4. You can see the students that applied for the proposals
+      - click on ✘ near the name of a student -> the application for that student will be rejected
       - click on ✔ and accept one student -> you will see a confirmaton message that you accepted a student
 5. Click on 'Thesis Proposals' on the left bar and go on [Thesis proposal page](http://localhost:5173/proposals)
       - you will see that the accepted proposal is not there anymore
 6. Log out
-    - You should be again on the [home page](http://localhost:5173/)
+      - You should be again on the [home page](http://localhost:5173/)
 
 
 
-#### [] Browse application decisions
-
+#### [8] Browse application decisions
 This test case is related to the verification that each student can see the history of their applications and the decision for each of them.
 
 
@@ -142,14 +142,4 @@ This test case is related to the verification that each student can see the hist
 2. Login as a student
 3. Click on "Applications History" placed in the left bar, under "Thesis Proposals" [Application History](http://localhost:5173/applications)
 4. Ensure that the history of applications is correctly viewed
-5. Log out
-
-### [] Browse Proposals
-
-This test case is related to the verification that each teacher can view the list of active thesis proposals.
-
-1. Go to the [home page](http://localhost:5173/)
-2. Login as a teacher
-3. Click on "Thesis Applications" placed in the left bar, under "Thesis Proposals" [Thesis Applications](http://localhost:5173/applications)
-4. Ensure that the active thesis proposals are listed there 
 5. Log out
