@@ -80,7 +80,7 @@ This test case is related to the security of the pages. During this test case, w
 This test case is related to the possibility to search, as a student, the thesis proposals matching with his/her interests.
 
 1. Go to the [home page](http://localhost:5173/)
-2. Login as a student
+2. Login as a student that has not applied for any proposal
 3. Click on 'Thesis Proposal' in the left tab and go to [proposals page](http://localhost:5173/proposals)
 4. Click on the button near to 'Title'
    - It should appear a tab where to do a search
@@ -95,7 +95,7 @@ This test case is related to the possibility to search, as a student, the thesis
 13. Try to write an incomplete word and with opposite lower/upper case (for example 'SPACE' instead of 'aerospace') to see that the search is not case sensitive and is "smart"
 14. Once you selected all the keywords click on 'OK' to see the matches
 15. Log out
-   - You should be again on the [home page](http://localhost:5173/)
+    - You should be again on the [home page](http://localhost:5173/)
 
 ### [6] Apply for proposal
 This test case is related to the application of a student to a proposal.
@@ -111,8 +111,25 @@ This test case is related to the application of a student to a proposal.
 9. Click on it
 10. On the left bar click on 'Application History' 
 11. Check if the proposal you applied for is present as 'waiting for approval'
-   - you have succesfully applied for a thesis proposal
-12. Log out
+      - you have succesfully applied for a thesis proposal
+13. Click on 'Thesis Proposal' on the left bar and go to [thesis proposals page](http://localhost:5173/proposals)
+14. Try to apply for another proposal
+      - You should see that this possibility is disabled
+15. Log out
+    - You should be again on the [home page](http://localhost:5173/)
+
+### [7] Browse and accept/reject applications
+This test case is related to the possibility of seeing all the applications for eache thesis proposal from the side of a professor, so that he/she can accept or reject them.
+
+1. Go to the [home page](http://localhost:5173/)
+2. Login as a teacher
+3. Click on 'Thesis Application' on the left bar and go to [Thesis applications page](http://localhost:5173/applications)
+4. You can see the students that applied for the proposals
+      - click on ✔ and accept one student -> you will see a confirmaton message that you accepted a student
+5. Click on 'Thesis Proposals' on the left bar and go on [Thesis proposal page](http://localhost:5173/proposals)
+      - you will see that the accepted proposal is not there anymore
+6. Log out
+    - You should be again on the [home page](http://localhost:5173/)
 
 
 

@@ -36,14 +36,23 @@ print("applications history clicked")
 status_string = driver.find_element(By.XPATH, "//span[@class='ant-badge-status-text']")
 print(status_string.text)
 
-if status_string.text == "accepted":
-    print("Test passed: application accepted")
-elif status_string.text == "waiting for approval":
-    print("Test passed: application waiting for approval")
+cond = 3
+refresh_status_button = driver.find_element(By.XPATH, "//span[normalize-space()='Refresh List']")
+while cond>0:
+    if status_string.text == "accepted":
+        print("Test passed: application accepted")
+        refresh_status_button.click()
+    elif status_string.text == "waiting for approval":
+        print("Test passed: application waiting for approval")
+        refresh_status_button.click()
+    elif status_string.text == "rejected":
+        print("Test passed: application rejected")
+        refresh_status_button.click()
+    else:
+        driver.quit()
+        raise Exception("Test failed: application status not recognized")
+    cond = cond - 1
 
-else:
-    driver.quit()
-    raise Exception("Test failed: application status not recognized")
 
 
 
