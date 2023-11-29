@@ -143,6 +143,7 @@ This test case is related to the verification that each student can see the hist
 3. Click on "Applications History" placed in the left bar, under "Thesis Proposals" [Application History](http://localhost:5173/applications)
 4. Ensure that the history of applications is correctly viewed
 5. Log out
+    - You should be again on the [home page](http://localhost:5173/)
 
 ### [9] Browse Proposals
 This test case is related to the verification that each teacher can view the list of active thesis proposals.
@@ -152,3 +153,4 @@ This test case is related to the verification that each teacher can view the lis
 3. Click on "Thesis Applications" placed in the left bar, under "Thesis Proposals" [Thesis Applications](http://localhost:5173/applications)
 4. Ensure that the active thesis proposals are listed there 
 5. Log out
+    - You should be again on the [home page](http://localhost:5173/)
