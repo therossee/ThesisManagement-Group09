@@ -287,11 +287,11 @@ async function acceptThesisApplications(proposalId, studentId) {
             student_id: studentId,
         }),
     });
+    const res = await response.json();
     if (response.ok) {
-        return { success: true, status: response.status };
+        return res;
     } else {
-        const errorData = await response.json();
-        return { success: false, status: response.status, error: errorData.error || 'Unknown error' };
+        throw res;
     }
 }
 
@@ -307,11 +307,11 @@ async function rejectThesisApplications(proposalId, studentId) {
             student_id: studentId,
         }),
     });
+    const res = await response.json();
     if (response.ok) {
-        return { success: true, status: response.status };
+        return res;
     } else {
-        const errorData = await response.json();
-        return { success: false, status: response.status, error: errorData.error || 'Unknown error' };
+        throw res;
     }
 }
 
