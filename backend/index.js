@@ -1,7 +1,7 @@
 'use strict';
 
 const dotenv = require("dotenv");
-dotenv.config({ DOTENV_KEY: process.env.TM_DOTENV_KEY ?? "" });
+dotenv.config({ DOTENV_KEY: process.env.TM_DOTENV_KEY });
 
 /*** Importing modules ***/
 const { ZodError } = require("zod");
