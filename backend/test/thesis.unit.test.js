@@ -945,3 +945,58 @@ describe('getThesisProposalCds', () => {
 
 });
 
+describe('getThesisProposalById', () => {
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
+
+  test('should return the thesis proposal given the id', async () => {
+    const proposalId = 1;
+    const expectedResult = 
+    {
+      "id": 1,
+      "title": "Test Proposal",
+      "status": "ACTIVE",
+      "supervisor": {
+        "id":"1",
+        "name": "mockSupervisorName",
+        "surname": "mockSupervisorSurname",
+      },
+      "cosupervisors":{
+        "internal": [
+          {
+            "id": "1",
+            "name":"internalCoSupervisorName",
+            "surname":"internalCoSupervisorSurname"
+          }
+        ],
+        "external": [
+          {
+            "id": 2,
+            "name": "externalCoSupervisorName",
+            "surname": "externalCoSupervisorSurname"
+          }
+        ]
+      },
+      "type": "Test Type",
+      "description": "Test Description",
+      "expiration": "2023-12-31",
+      "level": "Test Level",
+    };
+
+    jest.spyOn(require('../db').prepare(), 'get').mockReturnValue(expectedResult);
+
+    const result = await thesis.getThesisProposalById(proposalId);
+    const expectedQuery = `SELECT * FROM thesisProposal P
+        JOIN proposalCds PC ON P.proposal_id = PC.proposal_id
+        JOIN degree D ON PC.cod_degree = D.cod_degree
+        WHERE P.proposal_id = ?;`;
+
+    expect(result).toEqual(expectedResult);
+    expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
+
+  });
+
+});
+
