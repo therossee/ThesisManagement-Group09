@@ -759,22 +759,38 @@ describe('updateApplicationStatus', () => {
     jest.restoreAllMocks();
   });
 
-  test('should update the application status and return the row count', async () => {
-    // Arrange
-    const studentId = 1;
-    const proposalId = 1;
-    const status = 'accepted';
-    const expectedRowCount = 1;
+    test('should update the application status and return true since row count is greater than 1', async () => {
+        // Arrange
+        const studentId = 1;
+        const proposalId = 1;
+        const status = 'accepted';
+        const expectedRowCount = 1;
 
-    // Mock the run function to return a mock result
-    jest.spyOn(require('../db').prepare(), 'run').mockReturnValueOnce({ changes: expectedRowCount });
+        // Mock the run function to return a mock result
+        jest.spyOn(require('../db').prepare(), 'run').mockReturnValueOnce({ changes: expectedRowCount });
 
-    // Act
-    const result = await thesis.updateApplicationStatus(studentId, proposalId, status);
+        // Act
+        const result = await thesis.updateApplicationStatus(studentId, proposalId, status);
 
-    // Assert
-    expect(result).toEqual(expectedRowCount);
-  });
+        // Assert
+        expect(result).toEqual(true);
+    });
+    test('should not update the application status and return false since row count changes is equal to 0', async () => {
+        // Arrange
+        const studentId = 1;
+        const proposalId = 1;
+        const status = 'accepted';
+        const expectedRowCount = 0;
+
+        // Mock the run function to return a mock result
+        jest.spyOn(require('../db').prepare(), 'run').mockReturnValueOnce({ changes: expectedRowCount });
+
+        // Act
+        const result = await thesis.updateApplicationStatus(studentId, proposalId, status);
+
+        // Assert
+        expect(result).toEqual(false);
+    });
 
   test('should handle errors and reject with an error message', async () => {
     // Arrange
