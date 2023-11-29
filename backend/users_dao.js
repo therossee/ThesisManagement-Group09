@@ -3,7 +3,7 @@
 /* Data Access Object (DAO) module for accessing users data */
 
 const db = require('./db');
-  
+
 // This function is used at log-in time to verify username and password.
 exports.getUser = (email, password) => {
   return new Promise((resolve, reject) => {
@@ -36,7 +36,7 @@ exports.getUser = (email, password) => {
             } else {
                 resolve(user);
             }
-        }    
+        }
   });
 };
 
@@ -51,10 +51,33 @@ exports.getStudentDegree = (id) => {
         else{
             let degree = { cod_degree: row.cod_degree, title_degree: row.title_degree };
             resolve(degree);
-        }    
+        }
     });
-}
+};
 
+/**
+ * Return some data of the student with the given id
+ *
+ * @param {string} id
+ * @return {Promise<StudentPartialRow | null>}
+ */
+exports.getStudentById = (id) => {
+    return new Promise( resolve => {
+        const sql = 'SELECT id, surname, name, email FROM student WHERE id = ?';
+        const row = db.prepare(sql).get(id);
+        if (!row) {
+            resolve(null);
+        }
 
+        resolve({ id: row.id, surname: row.surname, name: row.name, email: row.email });
+    })
+};
 
-  
+/**
+ * @typedef {Object} StudentPartialRow
+ *
+ * @property {string} id
+ * @property {string} surname
+ * @property {string} name
+ * @property {string} email
+ */

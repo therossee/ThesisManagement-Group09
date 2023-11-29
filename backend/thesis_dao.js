@@ -498,16 +498,23 @@ exports.updateApplicationStatus = (studentId, proposalId, status) => {
   })
 };
 
-exports.rejectOtherApplications = (studentId, proposalId) => {
+/**
+ * Cancel all applications waiting for approval for a given proposal except the one of the student
+ *
+ * @param {string} studentId
+ * @param {string} proposalId
+ * @return {Promise<ThesisApplicationRow[]>}
+ */
+exports.cancelOtherApplications = (studentId, proposalId) => {
   return new Promise((resolve, reject) => {
-    const query = `
-      UPDATE thesisApplication
-      SET status = 'canceled'
-      WHERE student_id <> ? AND proposal_id = ? AND status = 'waiting for approval'
-    `;
-    const res = db.prepare(query).run(studentId, proposalId);
+    const updateQuery = `
+        UPDATE thesisApplication
+        SET status='cancelled'
+        WHERE student_id <> ? AND proposal_id = ? AND status = 'waiting for approval'
+        RETURNING *;
+      `;
 
-    resolve(res.changes);
+    resolve(db.prepare(updateQuery).all(studentId, proposalId));
   })
 };
 
@@ -550,3 +557,13 @@ exports.getThesisProposalTeacher = (proposalId, teacherId) => {
     resolve(res);
   })
 };
+
+
+/**
+ * @typedef {Object} ThesisApplicationRow
+ *
+ * @property {string} proposal_id
+ * @property {string} student_id
+ * @property {string} status
+ * @property {string} creation_date
+ */
