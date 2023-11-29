@@ -130,7 +130,7 @@ This test case is related to the possibility of seeing all the applications for 
 5. Click on 'Thesis Proposals' on the left bar and go on [Thesis proposal page](http://localhost:5173/proposals)
       - you will see that the accepted proposal is not there anymore
 6. Log out
-      - You should be again on the [home page](http://localhost:5173/)
+    - You should be again on the [home page](http://localhost:5173/)
 
 
 
@@ -142,4 +142,13 @@ This test case is related to the verification that each student can see the hist
 2. Login as a student
 3. Click on "Applications History" placed in the left bar, under "Thesis Proposals" [Application History](http://localhost:5173/applications)
 4. Ensure that the history of applications is correctly viewed
+5. Log out
+
+### [9] Browse Proposals
+This test case is related to the verification that each teacher can view the list of active thesis proposals.
+
+1. Go to the [home page](http://localhost:5173/)
+2. Login as a teacher
+3. Click on "Thesis Applications" placed in the left bar, under "Thesis Proposals" [Thesis Applications](http://localhost:5173/applications)
+4. Ensure that the active thesis proposals are listed there 
 5. Log out
