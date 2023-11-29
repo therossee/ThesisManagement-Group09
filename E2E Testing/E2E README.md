@@ -19,6 +19,7 @@ Steps:
   so the screen shows the name of the Thesis and below the status, in this case "waiting for approval".
 
 #### Test 2 -> Application aproved
+Steps:
 1. Login as a student
 2. Type the email of a student registered in the DB in the mail text area which it's located at the top right of the screen:
   email: s320213@studenti.polito.it
