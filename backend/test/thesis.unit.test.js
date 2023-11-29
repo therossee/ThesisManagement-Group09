@@ -1000,3 +1000,38 @@ describe('getThesisProposalById', () => {
 
 });
 
+describe('getThesisProposalTeacher', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
+
+  test('should return teacher given thesisProposalId and teacherId', async () => {
+    const proposalId = 1;
+    const teacherId = "d1";
+    const expectedResult = {
+      id: "d1",
+      surname : "SurnameMock",
+      name : "NameMock",
+      email : "emailMock",
+      codGroup : "G1",
+      cod_department : "dep1"
+    }
+
+    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(undefined).mockReturnValueOnce(expectedResult);
+
+    const result = await thesis.getThesisProposalTeacher(proposalId, teacherId); 
+
+    expect(result).toEqual(expectedResult);
+  });
+
+  test('should return null when the proposal is already assigned', async () => {
+    const proposalId = 2;
+    const teacheId = "d2";
+
+    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce({proposalId: 2, teacheId: "d2", status: 'accepted'});
+
+    const result = await thesis.getThesisProposalTeacher(proposalId, teacheId);
+
+    expect(result).toEqual(null);
+  })
+})
