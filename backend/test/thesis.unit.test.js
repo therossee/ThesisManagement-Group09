@@ -363,6 +363,22 @@ describe('getThesisProposal', () => {
     // Assert
     expect(result).toBeNull();
   });
+
+  test('should return null when the proposal is already assigned', async () => {
+    // Arrange
+    const proposalId = 1;
+    const studentId = "1";
+   
+    // Mock the get function to return a mock result
+    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce({proposalId: 1, student_id:"1", status: 'accepted'});
+
+    // Act
+    const result = await thesis.getThesisProposal(proposalId, studentId);
+
+    // Assert
+    expect(result).toEqual(null);
+  });
+  
 });
 
 describe('listThesisProposalsFromStudent', () => {
@@ -563,7 +579,8 @@ describe('getProposalGroups', () => {
 
 describe('applyForProposal', () => {
   afterEach(() => {
-    jest.restoreAllMocks()
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   test('applies for a proposal and resolves with applicationId', async () => {
@@ -571,11 +588,45 @@ describe('applyForProposal', () => {
       const proposal_id = 1;
       const student_id = '1';
 
-      // Call the function
+      db.prepare().get.mockReturnValueOnce({ proposal_id: 1, cod_degree: 'L-01'});
+      db.prepare().get.mockReturnValueOnce({ proposal_id: '1', title: 'Test Proposal', supervisor_id: 1, type: 'Test Type', description: 'Test Description', required_knowledge: 'Test Knowledge', notes: 'Test Notes', creation_date:'2020-10-21', expiration: '2023-12-31', level: 'Test Level' });
+      db.prepare().get.mockReturnValueOnce();
+      db.prepare().run.mockReturnValueOnce({ lastInsertRowid: 1 });
+      
+      
       const applicationId = await thesis.applyForProposal(proposal_id, student_id);
+     
+      expect(applicationId).toBe(1); 
+  });
+  test('applies for a proposal not belonging to his cds', async () => {
+    // Mock data
+    const proposal_id = 1;
+    const student_id = '1';
 
-      // Check if the function resolves with the expected applicationId
-      expect(applicationId).toBe(1); // Assuming your mock database always returns applicationId 1
+    db.prepare().get.mockReturnValueOnce();
+
+    await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual("The proposal doesn't belong to the student degree");;
+  });
+  test('applies for a proposal not active', async () => {
+    // Mock data
+    const proposal_id = 1;
+    const student_id = '1';
+
+    db.prepare().get.mockReturnValueOnce({ proposal_id: 1, cod_degree: 'L-01'});
+    db.prepare().get.mockReturnValueOnce();
+
+    await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual("The proposal is not active");;
+  });
+  test('applies for a proposal while he has already applied for another', async () => {
+    // Mock data
+    const proposal_id = 1;
+    const student_id = '1';
+
+    db.prepare().get.mockReturnValueOnce({ proposal_id: 1, cod_degree: 'L-01'});
+    db.prepare().get.mockReturnValueOnce({ proposal_id: '1', title: 'Test Proposal', supervisor_id: 1, type: 'Test Type', description: 'Test Description', required_knowledge: 'Test Knowledge', notes: 'Test Notes', creation_date:'2020-10-21', expiration: '2023-12-31', level: 'Test Level' });
+    db.prepare().get.mockReturnValueOnce({ proposal_id: 1, cod_degree: 'L-01', status: 'waiting for approval'});
+
+    await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual("The user has already applied for other proposals");;
   });
 });
 
@@ -811,4 +862,69 @@ describe('getThesisProposalCds', () => {
       expect(result).toEqual([]);
     });
 
-})
+});
+
+describe('updateThesisProposal', () => {
+
+  let proposal_id;
+  beforeEach(async () => {
+    const sql_teacher = `INSERT INTO teacher (id, name, surname, email, cod_group, cod_department) VALUES (?, ?, ?, ?, ?, ?)`;
+    const sql_proposal = `INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, expiration, level, creation_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const sql_keyword = `INSERT INTO proposalKeyword (proposal_id, keyword) VALUES (?, ?)`;
+    db.prepare(sql_teacher).run('d1', 'supervisorName', 'supervisorSurname', 'supervisorEmail', 'Group1', 'Dep1');
+    proposal_id = db.prepare(sql_proposal).run('Test Proposal', 'd1', 'Test Type', 'Test Description', 'Test Knowledge', 'Test Notes', '2025-12-31T23:59:59.999Z', 'Test Level', '2020-10-21T10:10:10.001Z');
+    db.prepare(sql_keyword).run(proposal_id, 'Keyword');
+  });
+  afterEach(async() => {
+    const sql_proposal = `DELETE FROM thesisProposal WHERE proposal_id = ?`;
+    const sql_teacher = `DELETE FROM teacher WHERE id = ?`;
+    const sql_keyword = `DELETE FROM proposalKeyword WHERE proposal_id = ? AND keyword = ?`;
+    db.prepare(sql_proposal).run(proposal_id);
+    db.prepare(sql_teacher).run('d1');
+    db.prepare(sql_keyword).run(proposal_id, 'Keyword');
+    jest.restoreAllMocks()
+  });
+  
+  test('updates the thesis proposal with valid data', async () => {
+    const proposalId = 1;
+    const supervisorId = 'd1';
+    const thesisData = {
+      title: 'Test Proposal',
+      type: 'Test Type',
+      description: 'Test Description',
+      required_knowledge: 'Test Knowledge',
+      notes: 'Test Notes',
+      expiration: '2023-12-31T23:59:59.999Z', // Updated expiration date
+      level: 'Updated Level',
+      keywords: ['Keyword1', 'Keyword2'],
+      internal_co_supervisors_id: ['InternalCoSupervisor1', 'InternalCoSupervisor2'],
+      external_co_supervisors_id: ['ExternalCoSupervisor1', 'ExternalCoSupervisor2'],
+      groups: ['Group1', 'Group2'],
+      cds: ['CDS1', 'CDS2'],
+    };
+
+    // Call the function and assert the result
+    const result = await thesis.updateThesisProposal(proposalId, supervisorId, thesisData);
+    expect(result).toEqual(proposalId); // Assuming that the function resolves with the proposal_id on success
+    expect(db.prepare).toHaveBeenCalledTimes(19); // 19 queries
+  });
+
+  test('updates the thesis proposal without changing anything', async () => {
+
+    const proposalId = 1;
+    const supervisorId = 'd1';
+    const thesisData = {
+      title: 'Updated Title',
+      type: 'Updated Type',
+      description: 'Updated Description',
+      required_knowledge: 'Updated Knowledge',
+      notes: 'Updated Notes',
+      expiration: '2027-12-31', 
+      level: 'Test Level'
+    };
+    db.prepare().run.mockReturnValueOnce({ changes: 0 });
+    // Call the function and assert the result
+    const result = await thesis.updateThesisProposal(proposalId, supervisorId, thesisData);
+    expect(result).toBeNull();
+  });
+});
