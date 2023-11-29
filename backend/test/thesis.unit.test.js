@@ -1034,4 +1034,35 @@ describe('getThesisProposalTeacher', () => {
 
     expect(result).toEqual(null);
   })
-})
+});
+
+describe('listApplicationsDecisionsFromStudent', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
+
+  test('should return the list of applications given the studentId', async () => {
+    const studentId = "1";
+    const expectedResult = [{
+      application_id : 1,
+      proposal_id : 1,
+      title : "Title test",
+      level : "Test level",
+      teacher_name : "MockTeacherName",
+      teacher_surname : "MockTeacherSurname",
+      status : "Test status",
+      expiration : "2023-11-29"
+    }];
+    const expectedQuery = `SELECT ta.id AS "application_id", ta.proposal_id, tp.title,  tp.level, t.name AS "teacher_name" , t.surname AS "teacher_surname" ,ta.status, tp.expiration
+    FROM thesisApplication ta, thesisProposal tp, teacher t
+    WHERE ta.proposal_id = tp.proposal_id AND ta.student_id = ? AND t.id = tp.supervisor_id AND ta.creation_date < ?`;
+
+    jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce(expectedResult);
+
+    result = await thesis.listApplicationsDecisionsFromStudent(studentId);
+    
+    expect(result).toEqual(expectedResult);
+    expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
+  });
+  
+});
