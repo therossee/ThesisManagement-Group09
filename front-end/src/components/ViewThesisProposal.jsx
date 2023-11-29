@@ -1,14 +1,14 @@
 import { React, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button, Descriptions, Skeleton, Typography, Tag, message } from "antd";
-import { useAuth } from "../App";
+import { useAuth } from '../components/authentication/useAuth';
 import dayjs from 'dayjs';
 import API from "../API";
 
 
 function ViewThesisProposal() {
 
-  const { isTeacher, isLoggedIn } = useAuth();
+  const { isTeacher, isAuthenticated, accessToken } = useAuth();
 
   const { id } = useParams();
   const { Text } = Typography;
@@ -26,7 +26,7 @@ function ViewThesisProposal() {
 
   async function addApplication() {
     try {
-      await API.applyForProposal(id);
+      await API.applyForProposal(id, accessToken);
       message.success("Applied for proposal");
       setDisabled(true);
       setLoading(false);
@@ -39,7 +39,7 @@ function ViewThesisProposal() {
 
 
   useEffect(() => {
-    API.getThesisProposalbyId(id)
+    API.getThesisProposalbyId(id, accessToken)
       .then((x) => {
         setData(x);
 
@@ -57,9 +57,9 @@ function ViewThesisProposal() {
   // Another Useffect needed because isTeacher needs time to be computed. It is initialized as undefined so we can actually check when it is computed.
   useEffect(() => {
     // Exclude teachers from Application fetch
-    // Explanation: If ((isTeacher is computed and user is not a teacher) or (user is logged in and not a teacher (even if not yet computed)))
-    if ((isTeacher !== undefined && !isTeacher) || (isLoggedIn && !isTeacher)) {
-      API.getStudentActiveApplication()
+    // Explanation: If ((isTeacher is computed and user is not a teacher) or (user is logged in and not a teacher (even if not yet computed))) and accessToken exists
+    if (((isTeacher !== undefined && !isTeacher) || (isAuthenticated && !isTeacher)) && accessToken) {
+      API.getStudentActiveApplication(accessToken)
         .then((x) => {
           if (x.length > 0)
             // Disabled if there's already an application pending
@@ -67,7 +67,7 @@ function ViewThesisProposal() {
         })
         .catch((err) => { message.error(err.message ? err.message : err) });
     }
-  }, [data, isTeacher, isLoggedIn]);
+  }, [data, isTeacher, isAuthenticated, accessToken]);
 
   // If data is still empty
   if (!data) {

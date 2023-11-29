@@ -1,6 +1,6 @@
 import Errors from "./Errors";
 import { InsertThesisProposal } from "../components/InsertThesisProposal"
-import { useAuth } from "../App"
+import { useAuth } from '../components/authentication/useAuth';
 
 function InsertProposal() {
     const { isTeacher } = useAuth();

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { message, Space, Table, Tag, Tooltip } from 'antd';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import API from '../API';
+import { useAuth } from './authentication/useAuth';
 
 function TeacherThesisProposals() {
 
@@ -16,6 +17,8 @@ function TeacherThesisProposals() {
     const [messageApi, messageBox] = message.useMessage();
 
     const navigate = useNavigate();
+
+    const {accessToken} = useAuth();
 
     // Columns of the table
     const columns = [
@@ -100,13 +103,15 @@ function TeacherThesisProposals() {
     };
 
     useEffect(() => {
-        API.getThesisProposals()
-            .then((x) => {
-                setData(handleReceivedData(x));
-                setIsLoadingTable(false);
-            })
-            .catch((err) => { messageApi.error(err.message ? err.message : err) });
-    }, []);
+        if (accessToken) {
+            API.getThesisProposals(accessToken)
+                .then((x) => {
+                    setData(handleReceivedData(x));
+                    setIsLoadingTable(false);
+                })
+                .catch((err) => { messageApi.error(err.message ? err.message : err) });
+        }
+    }, [accessToken]);
 
     function handleReceivedData(data) {
 

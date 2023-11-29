@@ -1,15 +1,15 @@
 import Errors from "./Errors";
 import StudentThesisProposals from "../components/StudentThesisProposals";
 import TeacherThesisProposals from "../components/TeacherThesisProposals";
-import { useAuth } from "../App";
+import { useAuth } from '../components/authentication/useAuth';
 
 function Proposals() {
 
-    const { isLoggedIn, isTeacher } = useAuth();
+    const { isAuthenticated, isTeacher } = useAuth();
 
     return (
         <>
-            {isLoggedIn ? (
+            {isAuthenticated ? (
                 isTeacher ? (
                     <TeacherThesisProposals />
                 ) : (
