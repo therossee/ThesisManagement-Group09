@@ -39,33 +39,37 @@ function ViewThesisProposal() {
 
 
   useEffect(() => {
-    API.getThesisProposalbyId(id, accessToken)
-      .then((x) => {
-        setData(x);
+    if (accessToken) {
+      API.getThesisProposalbyId(id, accessToken)
+        .then((x) => {
+          setData(x);
 
-        API.getClock()
-          .then((y) => {
-            const actual = dayjs().add(y.offset, 'ms')
-            const expDate = dayjs(x.expiration);
-            expDate.isBefore(actual) ? setDisabled(true) : setDisabled(false);
-          })
-          .catch((err) => { message.error(err.message ? err.message : err) });
-      })
-      .catch((err) => { message.error(err.message ? err.message : err) })
-  }, []);
+          API.getClock()
+            .then((y) => {
+              const actual = dayjs().add(y.offset, 'ms')
+              const expDate = dayjs(x.expiration);
+              expDate.isBefore(actual) ? setDisabled(true) : setDisabled(false);
+            })
+            .catch((err) => { message.error(err.message ? err.message : err) });
+        })
+        .catch((err) => { message.error(err.message ? err.message : err) })
+    }
+  }, [accessToken]);
 
   // Another Useffect needed because isTeacher needs time to be computed. It is initialized as undefined so we can actually check when it is computed.
   useEffect(() => {
     // Exclude teachers from Application fetch
     // Explanation: If ((isTeacher is computed and user is not a teacher) or (user is logged in and not a teacher (even if not yet computed))) and accessToken exists
-    if (((isTeacher !== undefined && !isTeacher) || (isAuthenticated && !isTeacher)) && accessToken) {
-      API.getStudentActiveApplication(accessToken)
-        .then((x) => {
-          if (x.length > 0)
-            // Disabled if there's already an application pending
-            setDisabled(true);
-        })
-        .catch((err) => { message.error(err.message ? err.message : err) });
+    if (((isTeacher !== undefined && !isTeacher) || (isAuthenticated && !isTeacher))) {
+      if (accessToken) {
+        API.getStudentActiveApplication(accessToken)
+          .then((x) => {
+            if (x.length > 0)
+              // Disabled if there's already an application pending
+              setDisabled(true);
+          })
+          .catch((err) => { message.error(err.message ? err.message : err) });
+      }
     }
   }, [data, isTeacher, isAuthenticated, accessToken]);
 

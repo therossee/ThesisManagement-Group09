@@ -11,7 +11,9 @@ DROP TABLE IF EXISTS thesisInternalCoSupervisor;
 DROP TABLE IF EXISTS thesisProposal;
 DROP TABLE IF EXISTS career;
 DROP TABLE IF EXISTS externalCoSupervisor;
+DROP TABLE IF EXISTS teacher_auth0;
 DROP TABLE IF EXISTS teacher;
+DROP TABLE IF EXISTS student_auth0;
 DROP TABLE IF EXISTS student;
 DROP TABLE IF EXISTS degree;
 
@@ -35,6 +37,13 @@ CREATE TABLE student (
     FOREIGN KEY(cod_degree) REFERENCES degree(cod_degree)
 );
 
+-- Create the student_auth0 table
+CREATE TABLE student_auth0 (
+    id TEXT PRIMARY KEY,
+    id_auth0 TEXT NOT NULL,
+    FOREIGN KEY(id) REFERENCES student(id)
+);
+
 -- Create the teacher table
 CREATE TABLE teacher (
     id TEXT PRIMARY KEY,
@@ -43,6 +52,13 @@ CREATE TABLE teacher (
     email TEXT NOT NULL,
     cod_group TEXT NOT NULL,
     cod_department TEXT NOT NULL
+);
+
+-- Create the teacher_auth0 table
+CREATE TABLE teacher_auth0 (
+    id TEXT PRIMARY KEY,
+    id_auth0 TEXT NOT NULL,
+    FOREIGN KEY(id) REFERENCES teacher(id)
 );
 
 -- Create the externalCoSupervisor table
@@ -185,6 +201,23 @@ VALUES
     ('d392000', 'Santoro', 'Chiara', 'santoro.chiara@email.com', 'Group5', 'Dep3'),
     ('d292715', 'Gatti', 'Isabella', 'gatti.isabella@email.com', 'Group3', 'Dep4');
 
+-- Insert data into the teacher_auth0 table
+INSERT INTO teacher_auth0 (id, id_auth0)
+VALUES 
+    ('d279620', 'auth0|6564f83a022f6b2083b6b8c9'),
+    ('d370392', 'auth0|656621f156336a62dd8aaced'),
+    ('d226682', 'auth0|656621a2022f6b2083b7a522'),
+    ('d258293', 'auth0|656621466d87729b6b4216b5'),
+    ('d320694', 'auth0|656620f16d87729b6b42167c'),
+    ('d284435', 'auth0|656620a756336a62dd8aac0e'),
+    ('d258761', 'auth0|6566205c56336a62dd8aabe1'),
+    ('d237188', 'auth0|65661fff6d87729b6b4215e5'),
+    ('d392000', 'auth0|65661fb356336a62dd8aab82'),
+    ('d292715', 'auth0|65661ee656336a62dd8aaaf5'),
+    ('d357587', 'auth0|65661e84022f6b2083b7a341'),
+    ('d255269', 'auth0|65661e2156336a62dd8aaa70'),
+    ('d350985', 'auth0|65661dde56336a62dd8aaa4c'),
+    ('d370335', 'auth0|65661d4e022f6b2083b7a267');
 
 -- Insert data into the externalCoSupervisor table
 INSERT INTO externalCoSupervisor (surname, name, email)
@@ -208,8 +241,19 @@ VALUES
     ('s314796', 'De Rossi', 'Daniele', 'Male', 'Italian', 's314796@studenti.polito.it', 'LM-32', 2020),
     ('s318771', 'Husanu', 'Diana', 'Female', 'Romanian', 's318771@studenti.polito.it', 'LM-33', 2020),
     ('s321529', 'Ladrat', 'Matteo', 'Male', 'French', 's321529@studenti.polito.it', 'L-08', 2020),
-    ('s318952', 'Molinatto', 'Sylive', 'Female', 'Italian', 's318952@studenti.polito.it', 'LM-34', 2020),
+    ('s318952', 'Molinatto', 'Sylvie', 'Female', 'Italian', 's318952@studenti.polito.it', 'LM-34', 2020),
     ('s319355', 'Schiavone', 'Michele', 'Male', 'Italian', 's319355@studenti.polito.it', 'LM-35', 2020);
+
+-- Insert data into the student_auth0 table
+INSERT INTO student_auth0 (id, id_auth0) 
+VALUES 
+    ('s318952', 'auth0|65635d036d87729b6b3ffe83'),
+    ('s321529', 'auth0|6564f6ba6d87729b6b412740'),
+    ('s319355', 'auth0|6564f6efd5c067abfc7e6096'),
+    ('s318771', 'auth0|6564f687022f6b2083b6b500'),
+    ('s314796', 'auth0|6564f6476d87729b6b412613'),
+    ('s321607', 'auth0|6564f613d5c067abfc7e5e8a'),
+    ('s320213', 'auth0|6564f5db6d87729b6b412520');
 
 
 -- Insert data into the career table

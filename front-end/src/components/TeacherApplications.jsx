@@ -50,7 +50,7 @@ function TeacherApplications() {
     }, [dirty, accessToken]);
 
 
-    const acceptApplication = async (proposalId, studentId, accessToken) => {
+    const acceptApplication = async (proposalId, studentId) => {
         setButtonsLoading(true);
         try {
             await API.acceptThesisApplications(proposalId, studentId, accessToken);
@@ -64,7 +64,7 @@ function TeacherApplications() {
     };
 
 
-    const rejectApplication = async (proposalId, studentId, accessToken) => {
+    const rejectApplication = async (proposalId, studentId) => {
         setButtonsLoading(true);
         try {
             await API.rejectThesisApplications(proposalId, studentId, accessToken);

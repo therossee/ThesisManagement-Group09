@@ -113,6 +113,10 @@ async function getThesisProposalbyId(id, accessToken) {
             Method: 'GET',
             Authorization: `Bearer ${accessToken}`,
         },
+        headers: {
+            Method: 'GET',
+            Authorization: `Bearer ${accessToken}`,
+        },
     });
     const thesisProposal = await response.json();
     if (response.ok) {
@@ -149,7 +153,6 @@ async function applyForProposal(id, accessToken) {
     });
     if (response.ok) {
         const apply = await response.json();
-        console.log(apply);
         return apply;
     } else {
         const errDetail = await response.json();
