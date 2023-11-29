@@ -4,6 +4,8 @@
 
 const db = require('./db');
 const AdvancedDate = require('./AdvancedDate');
+const NoThesisProposalError = require("./errors/NoThesisProposalError");
+const UnauthorizedActionError = require("./errors/UnauthorizedActionError");
 
 exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id, external_co_supervisors_id, type, groups, description, required_knowledge, notes, expiration, level, cds, keywords) => {
   return new Promise((resolve, reject) => {
@@ -257,6 +259,63 @@ exports.getThesisProposalById = (proposalId) => {
 };
 
 /**
+ * Set the property is_deleted of a thesis proposal to 1 and cancel all the applications waiting for approval for that
+ * thesis
+ *
+ * @param {string} proposalId
+ * @param {string} supervisorId
+ * @return {Promise<ThesisApplicationRow[]>}
+ */
+exports.deleteThesisProposalById = (proposalId, supervisorId) => {
+  return new Promise( (resolve, reject) => {
+    db.transaction(() => {
+      const hasApplicationsApprovedQuery = `
+        SELECT 1
+        FROM thesisApplication
+        WHERE proposal_id = ? AND status = 'accepted';
+      `;
+      const hasApplicationsApproved = db.prepare(hasApplicationsApprovedQuery).get(proposalId) != null;
+      if (hasApplicationsApproved) {
+        reject( new UnauthorizedActionError('Some applications has been accepted and, therefore, you can\'t delete this thesis') );
+        return;
+      }
+
+      const now = new AdvancedDate().toISOString();
+      const deleteThesisProposalQuery = `
+        UPDATE thesisProposal
+        SET is_deleted = 1
+        WHERE proposal_id = ? AND supervisor_id = ? AND expiration > ? AND creation_date < ?;
+      `;
+      const res = db.prepare(deleteThesisProposalQuery).run(proposalId, supervisorId, now, now);
+      if (res.changes === 0) {
+        // We try to understand the reason of the failure
+        const thesis = this.getThesisProposalById(proposalId);
+        if (thesis == null || thesis.is_deleted === 1 || thesis.creation_date > now) {
+          // No thesis proposal with the given id
+          reject( new NoThesisProposalError(proposalId) );
+        } else if (thesis.expiration <= now) {
+          // Thesis proposal expired
+          reject( new UnauthorizedActionError('You can\'t delete a thesis already expired') );
+        } else {
+          // The supervisor is not the owner of the thesis proposal
+          reject( new UnauthorizedActionError('You are not the supervisor of this thesis') );
+        }
+
+        return;
+      }
+
+      const cancelApplicationsQuery = `
+        UPDATE thesisApplication
+        SET status = 'cancelled'
+        WHERE proposal_id = ? AND status = 'waiting for approval'
+        RETURNING *;
+      `;
+      resolve( db.prepare(cancelApplicationsQuery).all(proposalId) );
+    })();
+  })
+};
+
+/**
  * Return the list of thesis proposals related to a student degree
  *
  * @param {string} studentId
@@ -371,6 +430,7 @@ exports.getSupervisorOfProposal = (proposalId) => {
  * @property {string} expiration
  * @property {string} level
  * @property {string} cds
+ * @property {1 | 0} is_deleted
  */
 
 /**

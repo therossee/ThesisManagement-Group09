@@ -77,6 +77,7 @@ CREATE TABLE thesisProposal (
     creation_date DATE NOT NULL,
     expiration DATE NOT NULL,
     level TEXT NOT NULL,
+    is_deleted INTEGER CHECK ( is_deleted == 0 or is_deleted == 1 ) DEFAULT 0,
     FOREIGN KEY(supervisor_id) REFERENCES teacher(id)
 );
 
