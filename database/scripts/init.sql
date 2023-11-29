@@ -446,3 +446,24 @@ VALUES
     (16, 'LM-35'),
     (17, 'LM-35'),
     (18, 'LM-35');
+
+
+-- Create a trigger that check that the proposal_id of the thesisApplication table is present in the thesisProposal table
+-- and that the proposal is not deleted for the insertion and the update
+CREATE TRIGGER check_proposal_id_in_application
+BEFORE INSERT ON thesisApplication
+FOR EACH ROW
+WHEN (NEW.proposal_id NOT IN (SELECT proposal_id FROM thesisProposal WHERE is_deleted = 0))
+BEGIN
+    SELECT RAISE(ABORT, 'The proposal_id is not present in the thesisProposal table or the proposal is deleted');
+END;
+
+CREATE TRIGGER check_proposal_id_in_application_update
+BEFORE UPDATE ON thesisApplication
+FOR EACH ROW
+WHEN (NEW.proposal_id <> OLD.proposal_id
+    AND NEW.proposal_id NOT IN (SELECT proposal_id FROM thesisProposal WHERE is_deleted = 0)
+)
+BEGIN
+    SELECT RAISE(ABORT, 'The proposal_id is not present in the thesisProposal table or the proposal is deleted');
+END;
