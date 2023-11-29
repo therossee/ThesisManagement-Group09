@@ -315,12 +315,26 @@ async function rejectThesisApplications(proposalId, studentId) {
     }
 }
 
-
+async function getStudentApplicationsHistory() {
+    const response = await fetch(URL + '/student/applications-decision', {
+        credentials: 'include',
+    });
+    const applications = await response.json();
+    if (response.ok) {
+        return applications.map((x) => ({
+            title: x.title,
+            teacherName: x.teacher_surname + " " + x.teacher_name,
+            status: x.status, 
+        }))
+    } else {
+        throw proposals;
+    }
+}
 
 const API = {
     logIn, logOut, getUserInfo,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications
+    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory
 };
 export default API;
