@@ -81,19 +81,38 @@ This test case is related to the possibility to search, as a student, the thesis
 
 1. Go to the [home page](http://localhost:5173/)
 2. Login as a student
-3. Click on the button near to 'Title'
+3. Click on 'Thesis Proposal' in the left tab and go to [proposals page](http://localhost:5173/proposals)
+4. Click on the button near to 'Title'
    - It should appear a tab where to do a search
-4. Write some text of your interest that can be contained in the title
-5. Click on the button "Search"
-6. Browse the proposals resulting from the search
-7. Click again on the button near 'Title'
-8. Click 'Reset' and 'Search' again to see all the proposals again
-9. Click on the button near 'Keyword'
-10. Browse the keywords and select those of your interest
-11. You can also search a keyword writing in the search tab placed on the top of the keywords
-12. Try to write an incomplete word and with opposite lower/upper case (for example 'SPACE' instead of 'aerospace') to see that the search is not case sensitive and is "smart"
-13. Once you selected all the keywords click on 'OK' to see the matches
-14. Log out
+5. Write some text of your interest that can be contained in the title
+6. Click on the button "Search"
+7. Browse the proposals resulting from the search
+8. Click again on the button near 'Title'
+9. Click 'Reset' and 'Search' again to see all the proposals again
+10. Click on the button near 'Keyword'
+11. Browse the keywords and select those of your interest
+12. You can also search a keyword writing in the search tab placed on the top of the keywords
+13. Try to write an incomplete word and with opposite lower/upper case (for example 'SPACE' instead of 'aerospace') to see that the search is not case sensitive and is "smart"
+14. Once you selected all the keywords click on 'OK' to see the matches
+15. Log out
+   - You should be again on the [home page](http://localhost:5173/)
+
+### [6] Apply for proposal
+This test case is related to the application of a student to a proposal.
+
+1. Go to the [home page](http://localhost:5173/)
+2. Log in as a student
+3. On the left bar click on 'Application History'
+4. Check that there are no applications or only rejected applications
+5. Click on 'Thesis Proposal' in the left tab and go to [proposals page](http://localhost:5173/proposals)
+6. On the last column ('Actions') there is the icon of an eye, click on it and you will be in the thesis proposal page like in this [example](http://localhost:5173/view-proposal/2)
+7. Scroll till the end of the page
+8. On the button left corner there will be a button 'Apply for proposal', it will be clickable only if the student have not applied to any proposals
+9. Click on it
+10. On the left bar click on 'Application History' 
+11. Check if the proposal you applied for is present as 'waiting for approval'
+   - you have succesfully applied for a thesis proposal
+12. Log out
 
 
 
