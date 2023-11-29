@@ -670,27 +670,33 @@ describe('cancelOtherApplications', () => {
 
   test('should reject other applications and return the row count', async () => {
     // Arrange
-    const studentId = 1;
-    const proposalId = 1;
-    const expectedRowCount = 2;
+    const studentId = "1";
+    const proposalId = "1";
+    const rowUpdated = [
+        { proposal_id: proposalId, student_id: 's1', status: 'cancelled', id: 1 },
+        { proposal_id: proposalId, student_id: 's2', status: 'cancelled', id: 2 },
+    ];
 
     // Mock the run function to return a mock result
-    jest.spyOn(require('../db').prepare(), 'run').mockReturnValueOnce({ changes: expectedRowCount });
+    jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce([
+        { proposal_id: proposalId, student_id: 's1', status: 'cancelled', id: 1 },
+        { proposal_id: proposalId, student_id: 's2', status: 'cancelled', id: 2 },
+    ]);
 
     // Act
     const result = await thesis.cancelOtherApplications(studentId, proposalId);
 
     // Assert
-    expect(result).toEqual(expectedRowCount);
+    expect(result).toEqual(rowUpdated);
   });
 
   test('should handle errors and reject with an error message', async () => {
     // Arrange
-    const studentId = 2;
-    const proposalId = 2;
+    const studentId = "2";
+    const proposalId = "2";
 
     // Mock the run function to throw an error
-    jest.spyOn(require('../db').prepare(), 'run').mockImplementationOnce(() => {
+    jest.spyOn(require('../db').prepare(), 'all').mockImplementationOnce(() => {
       throw new Error('Some error');
     });
 
