@@ -1,5 +1,6 @@
 import Errors from "./Errors";
-import { ThesisApplications } from "../components/Applications"
+import  TeacherApplications  from "../components/TeacherApplications";
+import StudentApplications from "../components/StudentApplications";
 import { useAuth } from "../App";
 
 function Applications() {
@@ -10,9 +11,9 @@ function Applications() {
         <>
             {isLoggedIn ? (
                 isTeacher ? (
-                    <ThesisApplications />
+                    <TeacherApplications />
                 ) : (
-                    <Errors code="403" />
+                    <StudentApplications />
                 )
             ) : (
                 <Errors code="403" />
