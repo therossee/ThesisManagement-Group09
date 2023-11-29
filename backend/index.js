@@ -403,14 +403,17 @@ async (req, res) => {
 const { proposal_id } = req.params;
 const { student_id } = req.body;
 
-if (!student_id ) {
-  return res.status(400).json({ error: 'Missing required fields.' });
-}
+    if (!student_id ) {
+      return res.status(400).json({ message: 'Missing required fields.' });
+    }
 
-try {
-  await thesisDao.updateApplicationStatus(student_id, proposal_id, "accepted");
+    try {
+      const success = await thesisDao.updateApplicationStatus(student_id, proposal_id, "accepted");
+      if (!success) {
+        return res.status(404).json({ message: `No application with the status "waiting for approval" found for this proposal.` });
+      }
 
-  const rejected = await thesisDao.rejectOtherApplications(student_id, proposal_id);
+      await thesisDao.rejectOtherApplications(student_id, proposal_id);
 
   res.status(200).json({ message: 'Thesis accepted and others rejected successfully' });
 
@@ -428,13 +431,16 @@ async (req, res) => {
   const { student_id } = req.body;
 
   if (!student_id ) {
-    return res.status(400).json({ error: 'Missing required fields.' });
+    return res.status(400).json({ message: 'Missing required fields.' });
   }
 
   try {
-    await thesisDao.updateApplicationStatus(student_id, proposal_id, "rejected");
-    res.status(200).json({ message: 'Thesis successfully rejected' });
+    const success = await thesisDao.updateApplicationStatus(student_id, proposal_id, "rejected");
+    if (!success) {
+        return res.status(404).json({ message: `No application with the status "waiting for approval" found for this proposal.` });
+    }
 
+    res.status(200).json({ message: 'Thesis successfully rejected' });
   } catch (error) {
     console.error(error);
     res.status(500).json(`Internal Server Error`);

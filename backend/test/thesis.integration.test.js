@@ -2269,7 +2269,10 @@ describe('GET /api/student/active-application', () => {
 describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
 
     afterEach(() => {
-      jest.restoreAllMocks();
+        jest.restoreAllMocks();
+    });
+    beforeEach(() => {
+        jest.clearAllMocks();
     });
     test('should accept thesis and reject others', async () => {
         const mockUser = {
@@ -2295,7 +2298,7 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
         const studentId = 's293605';
 
         // Mock thesisDao functions
-        service.updateApplicationStatus.mockResolvedValue(1); // Mock the row count
+        service.updateApplicationStatus.mockResolvedValue(true);
         service.rejectOtherApplications.mockResolvedValue(2); // Mock the row count
 
         // Act
@@ -2329,20 +2332,56 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
 
         // Arrange
         const proposalId = '1';
-        const studentId = 's293605';
 
         // Mock thesisDao functions
-        service.updateApplicationStatus.mockResolvedValue(1); // Mock the row count
+        service.updateApplicationStatus.mockResolvedValue(true);
         service.rejectOtherApplications.mockResolvedValue(2); // Mock the row count
 
         // Act
         const response = await request(app)
-          .patch(`/api/teacher/applications/accept/${proposalId}`)
-          .set('Cookie', cookies)
+            .patch(`/api/teacher/applications/accept/${proposalId}`)
+            .set('Cookie', cookies)
 
         // Assert
         expect(response.status).toBe(400);
-        expect(response.body).toEqual({ error: 'Missing required fields.' });
+        expect(response.body).toEqual({ message: 'Missing required fields.' });
+    });
+    test('should return 404 error if no application has been found', async () => {
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
+
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 'd1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+
+        // Arrange
+        const proposalId = '1';
+        const studentId = 's293605';
+
+        // Mock thesisDao functions
+        service.updateApplicationStatus.mockResolvedValue(false);
+
+        // Act
+        const response = await request(app)
+            .patch(`/api/teacher/applications/accept/${proposalId}`)
+            .set('Cookie', cookies)
+            .send({ student_id: studentId });
+
+        // Assert
+        expect(response.status).toBe(404);
+        expect(response.body).toHaveProperty('message');
+        expect(service.rejectOtherApplications).not.toHaveBeenCalled();
     });
     test('should handle errors and return status 500', async () => {
         const mockUser = {
@@ -2369,14 +2408,14 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
 
         // Mock thesisDao functions
         const mockError = new Error('Internal Server Error');
-        service.updateApplicationStatus.mockRejectedValue(mockError); // Mock the row count
+        service.updateApplicationStatus.mockRejectedValue(mockError);
         service.rejectOtherApplications.mockResolvedValue(2); // Mock the row count
 
         // Act
         const response = await request(app)
           .patch(`/api/teacher/applications/accept/${proposalId}`)
           .set('Cookie', cookies)
-          .send({ student_id: studentId })
+          .send({ student_id: studentId });
 
         // Assert
         expect(response.status).toBe(500);
@@ -2385,6 +2424,13 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
 });
 
 describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
     test('should reject thesis', async () => {
       const mockUser = {
           id: 'd1',
@@ -2409,7 +2455,7 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
       const studentId = 's293605';
 
       // Mock thesisDao function
-      service.updateApplicationStatus.mockResolvedValue(1); // Mock the row count
+      service.updateApplicationStatus.mockResolvedValue(true);
 
       // Act
       const response = await request(app)
@@ -2442,20 +2488,56 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
 
         // Arrange
         const proposalId = '1';
-        const studentId = 's293605';
 
         // Mock thesisDao functions
-        service.updateApplicationStatus.mockResolvedValue(1); // Mock the row count
+        service.updateApplicationStatus.mockResolvedValue(true);
         service.rejectOtherApplications.mockResolvedValue(2); // Mock the row count
 
         // Act
         const response = await request(app)
-          .patch(`/api/teacher/applications/reject/${proposalId}`)
-          .set('Cookie', cookies)
+            .patch(`/api/teacher/applications/reject/${proposalId}`)
+            .set('Cookie', cookies)
 
         // Assert
         expect(response.status).toBe(400);
-        expect(response.body).toEqual({ error: 'Missing required fields.' });
+        expect(response.body).toEqual({ message: 'Missing required fields.' });
+    });
+    test('should return 404 error if no application has been found', async () => {
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            cod_group: 'Group1',
+            cod_department: 'Dep1',
+        };
+
+        usersService.getUser.mockResolvedValue(mockUser);
+
+        const loginResponse = await request(app)
+            .post('/api/sessions')
+            .send({ username: 'r.m@email.com', password: 'd1' })
+            .set('Accept', 'application/json');
+
+        const cookies = loginResponse.headers['set-cookie'];
+
+        // Arrange
+        const proposalId = '1';
+        const studentId = 's293605';
+
+        // Mock thesisDao functions
+        service.updateApplicationStatus.mockResolvedValue(false);
+
+        // Act
+        const response = await request(app)
+            .patch(`/api/teacher/applications/reject/${proposalId}`)
+            .set('Cookie', cookies)
+            .send({ student_id: studentId });
+
+        // Assert
+        expect(response.status).toBe(404);
+        expect(response.body).toHaveProperty('message');
+        expect(service.rejectOtherApplications).not.toHaveBeenCalled();
     });
     test('should handle errors and return status 500', async () => {
         const mockUser = {
@@ -2482,14 +2564,14 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
 
         // Mock thesisDao functions
         const mockError = new Error('Internal Server Error');
-        service.updateApplicationStatus.mockRejectedValue(mockError); // Mock the row count
+        service.updateApplicationStatus.mockRejectedValue(mockError);
         service.rejectOtherApplications.mockResolvedValue(2); // Mock the row count
 
         // Act
         const response = await request(app)
           .patch(`/api/teacher/applications/reject/${proposalId}`)
           .set('Cookie', cookies)
-          .send({ student_id: studentId })
+          .send({ student_id: studentId });
 
         // Assert
         expect(response.status).toBe(500);

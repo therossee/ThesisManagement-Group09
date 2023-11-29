@@ -490,13 +490,11 @@ exports.updateApplicationStatus = (studentId, proposalId, status) => {
     const query = `
       UPDATE thesisApplication
       SET status = ?
-      WHERE student_id = ? AND proposal_id = ? AND status = 'waiting for approval'
+      WHERE student_id = ? AND proposal_id = ? AND status = 'waiting for approval' AND creation_date < ?
     `;
-    const res = db.prepare(query).run(status, studentId, proposalId);
+    const res = db.prepare(query).run(status, studentId, proposalId, new AdvancedDate().toISOString());
 
-    const rowCount = res.changes;
-
-    resolve(rowCount);
+    resolve(res.changes !== 0);
   })
 };
 
@@ -509,9 +507,7 @@ exports.rejectOtherApplications = (studentId, proposalId) => {
     `;
     const res = db.prepare(query).run(studentId, proposalId);
 
-    const rowCount = res.changes;
-
-    resolve(rowCount);
+    resolve(res.changes);
   })
 };
 
@@ -520,9 +516,9 @@ exports.listApplicationsDecisionsFromStudent = (studentId) => {
 
     const getApplications = `SELECT ta.id AS "application_id", ta.proposal_id, tp.title,  tp.level, t.name AS "teacher_name" , t.surname AS "teacher_surname" ,ta.status, tp.expiration
     FROM thesisApplication ta, thesisProposal tp, teacher t
-    WHERE ta.proposal_id = tp.proposal_id AND ta.student_id = ? AND t.id = tp.supervisor_id`;
+    WHERE ta.proposal_id = tp.proposal_id AND ta.student_id = ? AND t.id = tp.supervisor_id AND ta.creation_date < ?`;
 
-    const applications = db.prepare(getApplications).all(studentId);
+    const applications = db.prepare(getApplications).all(studentId, new AdvancedDate().toISOString());
     resolve(applications)
 
   })
