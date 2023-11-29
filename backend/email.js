@@ -49,11 +49,10 @@ async function _sendEmail(to, subject, text, html) {
         (err, info) => {
             if (err) {
                 console.log('Error while sending email:', err);
-                return err;
+                return;
             }
 
             console.log('Email successfully sent:', info.response);
-            return info;
         }
     );
 }

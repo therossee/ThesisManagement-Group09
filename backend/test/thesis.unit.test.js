@@ -662,7 +662,7 @@ describe('updateApplicationStatus', () => {
   });
 });
 
-describe('rejectOtherApplications', () => {
+describe('cancelOtherApplications', () => {
   // Restore mocks after each test
   afterEach(() => {
     jest.restoreAllMocks();
@@ -678,7 +678,7 @@ describe('rejectOtherApplications', () => {
     jest.spyOn(require('../db').prepare(), 'run').mockReturnValueOnce({ changes: expectedRowCount });
 
     // Act
-    const result = await thesis.rejectOtherApplications(studentId, proposalId);
+    const result = await thesis.cancelOtherApplications(studentId, proposalId);
 
     // Assert
     expect(result).toEqual(expectedRowCount);
@@ -695,6 +695,6 @@ describe('rejectOtherApplications', () => {
     });
 
     // Act and Assert
-    await expect(thesis.rejectOtherApplications(studentId, proposalId)).rejects.toThrow('Some error');
+    await expect(thesis.cancelOtherApplications(studentId, proposalId)).rejects.toThrow('Some error');
   });
 });

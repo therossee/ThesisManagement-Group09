@@ -29,7 +29,7 @@ jest.mock('../thesis_dao', () => ({
     applyForProposal: jest.fn(),
     getStudentActiveApplication: jest.fn(),
     updateApplicationStatus: jest.fn(),
-    rejectOtherApplications: jest.fn(),
+    cancelOtherApplications: jest.fn(),
     getThesisProposalCds: jest.fn(),
     getThesisProposalTeacher: jest.fn(),
     listApplicationsDecisionsFromStudent: jest.fn(),
@@ -2299,7 +2299,7 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
 
         // Mock thesisDao functions
         service.updateApplicationStatus.mockResolvedValue(true);
-        service.rejectOtherApplications.mockResolvedValue(2); // Mock the row count
+        service.cancelOtherApplications.mockResolvedValue(2); // Mock the row count
 
         // Act
         const response = await request(app)
@@ -2335,7 +2335,7 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
 
         // Mock thesisDao functions
         service.updateApplicationStatus.mockResolvedValue(true);
-        service.rejectOtherApplications.mockResolvedValue(2); // Mock the row count
+        service.cancelOtherApplications.mockResolvedValue(2); // Mock the row count
 
         // Act
         const response = await request(app)
@@ -2381,7 +2381,7 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
         // Assert
         expect(response.status).toBe(404);
         expect(response.body).toHaveProperty('message');
-        expect(service.rejectOtherApplications).not.toHaveBeenCalled();
+        expect(service.cancelOtherApplications).not.toHaveBeenCalled();
     });
     test('should handle errors and return status 500', async () => {
         const mockUser = {
@@ -2409,7 +2409,7 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
         // Mock thesisDao functions
         const mockError = new Error('Internal Server Error');
         service.updateApplicationStatus.mockRejectedValue(mockError);
-        service.rejectOtherApplications.mockResolvedValue(2); // Mock the row count
+        service.cancelOtherApplications.mockResolvedValue(2); // Mock the row count
 
         // Act
         const response = await request(app)
@@ -2491,7 +2491,7 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
 
         // Mock thesisDao functions
         service.updateApplicationStatus.mockResolvedValue(true);
-        service.rejectOtherApplications.mockResolvedValue(2); // Mock the row count
+        service.cancelOtherApplications.mockResolvedValue(2); // Mock the row count
 
         // Act
         const response = await request(app)
@@ -2537,7 +2537,7 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
         // Assert
         expect(response.status).toBe(404);
         expect(response.body).toHaveProperty('message');
-        expect(service.rejectOtherApplications).not.toHaveBeenCalled();
+        expect(service.cancelOtherApplications).not.toHaveBeenCalled();
     });
     test('should handle errors and return status 500', async () => {
         const mockUser = {
@@ -2565,7 +2565,7 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
         // Mock thesisDao functions
         const mockError = new Error('Internal Server Error');
         service.updateApplicationStatus.mockRejectedValue(mockError);
-        service.rejectOtherApplications.mockResolvedValue(2); // Mock the row count
+        service.cancelOtherApplications.mockResolvedValue(2); // Mock the row count
 
         // Act
         const response = await request(app)

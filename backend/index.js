@@ -470,10 +470,10 @@ app.patch('/api/teacher/applications/accept/:proposal_id',
       }
       setImmediate( async () => _notifyApplicationStatusChange(student_id, proposal_id, status) );
 
-      const applicationsRejected = await thesisDao.rejectOtherApplications(student_id, proposal_id);
+      const applicationsCancelled = await thesisDao.cancelOtherApplications(student_id, proposal_id);
       setImmediate(async () => {
         const reason = 'Another student has been accepted for this thesis proposal.';
-        for (const application of applicationsRejected) {
+        for (const application of applicationsCancelled) {
           _notifyApplicationStatusChange(application.student_id, application.proposal_id, application.status, reason);
         }
       });
@@ -628,5 +628,6 @@ async function _notifyApplicationStatusChange (studentId, proposalId, status, re
     return;
   }
 
-  sendEmailApplicationStatusChange(student.email, thesis, status, reason);
+  sendEmailApplicationStatusChange(student.email, thesis, status, reason)
+      .catch( e => console.error(`Failed to send email to student "${studentId}"`, e) );
 }
