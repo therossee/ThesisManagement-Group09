@@ -1,5 +1,6 @@
 require('jest');
 
+const AdvancedDate = require('../AdvancedDate');
 const db = require('../db');
 const thesis = require('../thesis_dao');
 
@@ -17,6 +18,9 @@ describe('createThesisProposal', () => {
     // Reset the mock before each test
     db.prepare.mockClear();
   });
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
   test('create a thesis proposal with cosupervisors', async () => {
     const proposalData = {
       title: 'Test Proposal',
@@ -28,9 +32,9 @@ describe('createThesisProposal', () => {
       description: 'Test Description',
       required_knowledge: 'Test Knowledge',
       notes: 'Test Notes',
-      expiration: '2023-12-31',
+      expiration: '2025-12-31',
       level: 'Test Level',
-      cds: 'Test CDS',
+      cds: ['Test CDS1', 'Test CDS2'],
       keywords: ['Keyword1', 'Keyword2'],
     };
 
@@ -51,7 +55,7 @@ describe('createThesisProposal', () => {
     );
 
     expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
-    expect(db.prepare).toHaveBeenCalledTimes(10); // 10 queries
+    expect(db.prepare).toHaveBeenCalledTimes(12); // 12 queries
   });
   test('create a thesis proposal without cosupervisors', async () => {
     const proposalData = {
@@ -64,9 +68,9 @@ describe('createThesisProposal', () => {
       description: 'Test Description',
       required_knowledge: 'Test Knowledge',
       notes: 'Test Notes',
-      expiration: '2023-12-31',
+      expiration: '2025-12-31',
       level: 'Test Level',
-      cds: 'Test CDS',
+      cds: ['Test CDS1', 'Test CDS2'],
       keywords: ['Keyword1', 'Keyword2'],
     };
 
@@ -87,12 +91,116 @@ describe('createThesisProposal', () => {
     );
 
     expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
-    expect(db.prepare).toHaveBeenCalledTimes(4);
+    expect(db.prepare).toHaveBeenCalledTimes(6); 
+  });
+  test('create a thesis proposal with passed expiration date', async () => {
+    const proposalData = {
+      title: 'Test Proposal',
+      supervisor_id: 1,
+      internal_co_supervisors_id: [],
+      external_co_supervisors_id: [],
+      type: 'Test Type',
+      groups: ['Group1'],
+      description: 'Test Description',
+      required_knowledge: 'Test Knowledge',
+      notes: 'Test Notes',
+      expiration: '2020-12-31',
+      level: 'Test Level',
+      cds: ['Test CDS1', 'Test CDS2'],
+      keywords: ['Keyword1', 'Keyword2'],
+    };
+  
+    // Adding "await" before the thesis.createThesisProposal
+    await expect(
+      thesis.createThesisProposal(
+        proposalData.title,
+        proposalData.supervisor_id,
+        proposalData.internal_co_supervisors_id,
+        proposalData.external_co_supervisors_id,
+        proposalData.type,
+        proposalData.groups,
+        proposalData.description,
+        proposalData.required_knowledge,
+        proposalData.notes,
+        proposalData.expiration,
+        proposalData.level,
+        proposalData.cds,
+        proposalData.keywords
+      )
+    ).rejects.toEqual("The expiration date must be after the creation date");
+  });
+});
+
+describe('updateThesisProposal', () => {
+
+  let proposal_id;
+  beforeEach(async () => {
+    const sql_teacher = `INSERT INTO teacher (id, name, surname, email, cod_group, cod_department) VALUES (?, ?, ?, ?, ?, ?)`;
+    const sql_proposal = `INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, expiration, level, creation_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const sql_keyword = `INSERT INTO proposalKeyword (proposal_id, keyword) VALUES (?, ?)`;
+    db.prepare(sql_teacher).run('d1', 'supervisorName', 'supervisorSurname', 'supervisorEmail', 'Group1', 'Dep1');
+    proposal_id = db.prepare(sql_proposal).run('Test Proposal', 'd1', 'Test Type', 'Test Description', 'Test Knowledge', 'Test Notes', '2025-12-31T23:59:59.999Z', 'Test Level', '2020-10-21T10:10:10.001Z');
+    db.prepare(sql_keyword).run(proposal_id, 'Keyword');
+  });
+  afterEach(async() => {
+    const sql_proposal = `DELETE FROM thesisProposal WHERE proposal_id = ?`;
+    const sql_teacher = `DELETE FROM teacher WHERE id = ?`;
+    const sql_keyword = `DELETE FROM proposalKeyword WHERE proposal_id = ? AND keyword = ?`;
+    db.prepare(sql_proposal).run(proposal_id);
+    db.prepare(sql_teacher).run('d1');
+    db.prepare(sql_keyword).run(proposal_id, 'Keyword');
+    jest.restoreAllMocks()
+  });
+  
+  test('updates the thesis proposal with valid data', async () => {
+    const proposalId = 1;
+    const supervisorId = 'd1';
+    const thesisData = {
+      title: 'Test Proposal',
+      type: 'Test Type',
+      description: 'Test Description',
+      required_knowledge: 'Test Knowledge',
+      notes: 'Test Notes',
+      expiration: '2023-12-31T23:59:59.999Z', // Updated expiration date
+      level: 'Updated Level',
+      keywords: ['Keyword1', 'Keyword2'],
+      internal_co_supervisors_id: ['InternalCoSupervisor1', 'InternalCoSupervisor2'],
+      external_co_supervisors_id: ['ExternalCoSupervisor1', 'ExternalCoSupervisor2'],
+      groups: ['Group1', 'Group2'],
+      cds: ['CDS1', 'CDS2'],
+    };
+
+    // Call the function and assert the result
+    const result = await thesis.updateThesisProposal(proposalId, supervisorId, thesisData);
+    expect(result).toEqual(proposalId); // Assuming that the function resolves with the proposal_id on success
+    expect(db.prepare).toHaveBeenCalledTimes(19); // 19 queries
+  });
+
+  test('updates the thesis proposal without changing anything', async () => {
+
+    const proposalId = 1;
+    const supervisorId = 'd1';
+    const thesisData = {
+      title: 'Updated Title',
+      type: 'Updated Type',
+      description: 'Updated Description',
+      required_knowledge: 'Updated Knowledge',
+      notes: 'Updated Notes',
+      expiration: '2027-12-31', 
+      level: 'Test Level'
+    };
+    db.prepare().run.mockReturnValueOnce({ changes: 0 });
+    // Call the function and assert the result
+    const result = await thesis.updateThesisProposal(proposalId, supervisorId, thesisData);
+    expect(result).toBeNull();
   });
 });
 
 // 2. Test Function to get list of teachers not logged
 describe('getTeacherListExcept', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
     let mockDb;
 
     beforeAll(() => {
@@ -131,6 +239,9 @@ describe('getTeacherListExcept', () => {
 });
 
 describe('getExternalCoSupervisors', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
   let mockDb;
 
   beforeAll(() => {
@@ -167,6 +278,9 @@ describe('getExternalCoSupervisors', () => {
 
 // 3. Test function to retrieve the cod_group of a teacher
 describe('getGroup', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
     let mockDb;
 
     beforeAll(() => {
@@ -203,6 +317,9 @@ describe('getGroup', () => {
 });
 
 describe('getAllKeywords', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
   test('should return an array of keywords', async () => {
     // Mock the response from the database
     const mockKeywords = [
@@ -223,6 +340,9 @@ describe('getAllKeywords', () => {
 });
 
 describe('getDegrees', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
   test('should return an array of keywords', async () => {
     // Mock the response from the database
     const mockKeywords = [
@@ -251,21 +371,21 @@ describe('getThesisProposal', () => {
   test('should return a thesis proposal when it exists for the given proposalId and studentId', async () => {
     // Arrange
     const proposalId = 1;
-    const studentId = 1;
-    const expectedResult =
+    const studentId = "1";
+    const expectedResult = 
     {
       "id": 1,
       "title": "Test Proposal",
       "status": "ACTIVE",
       "supervisor": {
-        "id":1,
+        "id":"1",
         "name": "mockSupervisorName",
         "surname": "mockSupervisorSurname",
       },
       "cosupervisors":{
         "internal": [
           {
-            "id":"s12345",
+            "id": "1",
             "name":"internalCoSupervisorName",
             "surname":"internalCoSupervisorSurname"
           }
@@ -285,7 +405,7 @@ describe('getThesisProposal', () => {
     };
 
     // Mock the get function to return a mock result
-    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(expectedResult);
+    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(undefined).mockReturnValueOnce(expectedResult);
 
     // Act
     const result = await thesis.getThesisProposal(proposalId, studentId);
@@ -297,10 +417,10 @@ describe('getThesisProposal', () => {
   test('should return null when the thesis proposal does not exist for the given proposalId and studentId', async () => {
     // Arrange
     const proposalId = 2;
-    const studentId = 2;
+    const studentId = "2";
 
     // Mock the get function to return undefined (indicating no thesis proposal)
-    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(undefined);
+    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(undefined).mockReturnValueOnce(undefined);
 
     // Act
     const result = await thesis.getThesisProposal(proposalId, studentId);
@@ -308,15 +428,36 @@ describe('getThesisProposal', () => {
     // Assert
     expect(result).toBeNull();
   });
+
+  test('should return null when the proposal is already assigned', async () => {
+    // Arrange
+    const proposalId = 1;
+    const studentId = "1";
+   
+    // Mock the get function to return a mock result
+    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce({proposalId: 1, student_id:"1", status: 'accepted'});
+
+    // Act
+    const result = await thesis.getThesisProposal(proposalId, studentId);
+
+    // Assert
+    expect(result).toEqual(null);
+  });
+  
 });
 
 describe('listThesisProposalsFromStudent', () => {
+  beforeEach(() => {
+    // Reset the mock before each test
+    db.prepare.mockClear();
+  });
   afterEach(() => {
       jest.restoreAllMocks()
   });
 
   test('should return the result of the db query', async () => {
       const studentId = "1";
+      const currentDate = new AdvancedDate().toISOString();
       const mockedData = [
           {
               id: "1",
@@ -327,30 +468,32 @@ describe('listThesisProposalsFromStudent', () => {
               required_knowledge: 'Test Knowledge',
               notes: 'Test Notes',
               expiration: '2023-12-31',
-              level: 'Test Level',
-              cds: 'Test CDS'
+              level: 'Test Level'
           }
       ];
 
-      db.prepare().all.mockReturnValue(mockedData);
+      db.prepare().all.mockClear().mockReturnValue(mockedData);
 
-      const result = await thesis.listThesisProposalsFromStudent(studentId);
+      const result = await thesis.listThesisProposalsFromStudent(studentId, currentDate, currentDate);
 
       expect(result).toEqual(mockedData);
-      expect(db.prepare().all).toHaveBeenCalledWith(studentId);
+      expect(db.prepare().all).toHaveBeenCalledWith(studentId, expect.any(String), expect.any(String));
   });
 
   test('should return an empty list', async () => {
-      const studentId = "1";
-      const mockedData = [];
+    const studentId = "1";
+    const currentDate = new AdvancedDate().toISOString();
+    const mockedData = [];
 
-      db.prepare().all.mockReturnValue(mockedData);
+    db.prepare().all.mockClear().mockReturnValue(mockedData);
 
-      const result = await thesis.listThesisProposalsFromStudent(studentId);
+    const result = await thesis.listThesisProposalsFromStudent(studentId, currentDate, currentDate);
 
-      expect(result).toEqual(mockedData);
-      expect(db.prepare().all).toHaveBeenCalledWith(studentId);
-  });
+    expect(result).toEqual(mockedData);
+    //expect(db.prepare().all).toHaveBeenCalledWith(studentId, currentDate, currentDate);
+
+    expect(db.prepare().all.mock.calls[0][0]).toBe(studentId);
+});
 });
 
 describe('getKeywordsOfProposal', () => {
@@ -500,54 +643,114 @@ describe('getProposalGroups', () => {
 });
 
 describe('applyForProposal', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+  });
+
   test('applies for a proposal and resolves with applicationId', async () => {
       // Mock data
       const proposal_id = 1;
-      const student_id = 's12345';
+      const student_id = '1';
 
-      // Call the function
+      db.prepare().get.mockReturnValueOnce({ proposal_id: 1, cod_degree: 'L-01'});
+      db.prepare().get.mockReturnValueOnce({ proposal_id: '1', title: 'Test Proposal', supervisor_id: 1, type: 'Test Type', description: 'Test Description', required_knowledge: 'Test Knowledge', notes: 'Test Notes', creation_date:'2020-10-21', expiration: '2023-12-31', level: 'Test Level' });
+      db.prepare().get.mockReturnValueOnce();
+      db.prepare().run.mockReturnValueOnce({ lastInsertRowid: 1 });
+      
+      
       const applicationId = await thesis.applyForProposal(proposal_id, student_id);
+     
+      expect(applicationId).toBe(1); 
+  });
+  test('applies for a proposal not belonging to his cds', async () => {
+    // Mock data
+    const proposal_id = 1;
+    const student_id = '1';
 
-      // Check if the function resolves with the expected applicationId
-      expect(applicationId).toBe(1); // Assuming your mock database always returns applicationId 1
+    db.prepare().get.mockReturnValueOnce();
+
+    await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual("The proposal doesn't belong to the student degree");;
+  });
+  test('applies for a proposal not active', async () => {
+    // Mock data
+    const proposal_id = 1;
+    const student_id = '1';
+
+    db.prepare().get.mockReturnValueOnce({ proposal_id: 1, cod_degree: 'L-01'});
+    db.prepare().get.mockReturnValueOnce();
+
+    await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual("The proposal is not active");;
+  });
+  test('applies for a proposal while he has already applied for another', async () => {
+    // Mock data
+    const proposal_id = 1;
+    const student_id = '1';
+
+    db.prepare().get.mockReturnValueOnce({ proposal_id: 1, cod_degree: 'L-01'});
+    db.prepare().get.mockReturnValueOnce({ proposal_id: '1', title: 'Test Proposal', supervisor_id: 1, type: 'Test Type', description: 'Test Description', required_knowledge: 'Test Knowledge', notes: 'Test Notes', creation_date:'2020-10-21', expiration: '2023-12-31', level: 'Test Level' });
+    db.prepare().get.mockReturnValueOnce({ proposal_id: 1, cod_degree: 'L-01', status: 'waiting for approval'});
+
+    await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual("The user has already applied for other proposals");;
   });
 });
 
 describe('listThesisProposalsTeacher', () => {
+  beforeEach(() => {
+    // Reset the mock before each test
+    db.prepare.mockClear();
+  });
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
+
   test('should return an array of thesis proposals for a teacher', async () => {
+    const teacherId = "1";
     // Mock the response from the database
     const mockProposals = [
       { proposal_id: 1, title: 'Proposal1' },
       { proposal_id: 2, title: 'Proposal2' },
     ];
-
+    const currentDate = new AdvancedDate().toISOString();
+    const expectedQuery = `SELECT * 
+      FROM thesisProposal P
+      WHERE P.supervisor_id=?
+        AND NOT EXISTS (
+          SELECT 1
+          FROM thesisApplication A
+          WHERE A.proposal_id = P.proposal_id
+            AND A.status = 'accepted'
+        )
+        AND P.expiration > ?
+        AND creation_date < ?;`;
     // Mock the SQLite database query
-    db.prepare.mockReturnValueOnce({ all: jest.fn(() => mockProposals) });
+    db.prepare.mockClear().mockReturnValueOnce({ all: jest.fn(() => mockProposals) });
 
     // Call the function
-    const result = await thesis.listThesisProposalsTeacher('teacher1');
-
+    const result = await thesis.listThesisProposalsTeacher(teacherId, currentDate, currentDate);
     // Assertions
     expect(result).toEqual(mockProposals);
-    expect(db.prepare).toHaveBeenCalledWith('SELECT * FROM thesisProposal WHERE supervisor_id=?');
+    expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
   });
-  test('should return null when the thesis proposal does not exist for the given proposalId and studentId', async () => {
-    // Arrange
-    const proposalId = 2;
-    const studentId = 2;
+  test('should return an empty list', async () => {
+    const studentId = "1";
+    const mockedData = [];
 
-    // Mock the get function to return undefined (indicating no thesis proposal)
-    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(undefined);
+    db.prepare().all.mockReturnValue(mockedData);
 
-    // Act
-    const result = await thesis.getThesisProposal(proposalId, studentId);
+    const result = await thesis.listThesisProposalsFromStudent(studentId);
 
-    // Assert
-    expect(result).toBeNull();
+    expect(result).toEqual(mockedData);
+    // expect(db.prepare().all).toHaveBeenCalledWith(studentId);
+
+    expect(db.prepare().all.mock.calls[0][0]).toBe(studentId);
   });
 });
 
 describe('listApplicationsForTeacherThesisProposal', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
   test('should return an array of thesis applications for a teacher and proposal', async () => {
     // Mock the response from the database
       const mockApplications = [
@@ -556,16 +759,22 @@ describe('listApplicationsForTeacherThesisProposal', () => {
       ];
 
     // Mock the SQLite database query
-    db.prepare.mockReturnValueOnce({ all: jest.fn(() => mockApplications) });
+    db.prepare.mockClear().mockReturnValueOnce({ all: jest.fn(() => mockApplications) });
 
     // Call the function
     const result = await thesis.listApplicationsForTeacherThesisProposal(1, 'd1');
-
+    const expectedQuery = `SELECT s.name, s.surname, ta.status, s.id
+    FROM thesisApplication ta, thesisProposal tp, student s
+    WHERE ta.proposal_id = tp.proposal_id 
+      AND s.id = ta.student_id
+      AND ta.proposal_id=?
+      AND tp.supervisor_id= ? 
+      AND ta.creation_date < ?
+      AND tp.expiration > ?
+      AND tp.creation_date < ?`;
     // Assertions
     expect(result).toEqual(mockApplications);
-    expect(db.prepare).toHaveBeenCalledWith(`SELECT s.name, s.surname, ta.status, s.id
-    FROM thesisApplication ta, thesisProposal tp, student s
-    WHERE ta.proposal_id = tp.proposal_id AND s.id = ta.student_id AND ta.proposal_id=? AND tp.supervisor_id= ?`);
+    expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
   });
 });
 
@@ -585,10 +794,12 @@ describe('getStudentActiveApplication', () => {
 
     // Act
     const result = await thesis.getStudentActiveApplication(student_id);
+    const expectedQuery = `SELECT proposal_id FROM thesisApplication WHERE student_id=? AND creation_date < ? AND ( status='waiting for approval' OR status='accepted')`;
+
 
     // Assert
     expect(result).toEqual(expectedResult);
-    expect(db.prepare).toHaveBeenCalledWith("SELECT proposal_id FROM thesisApplication WHERE student_id=? AND creation_date < ? AND ( status='waiting for approval' OR status='accepted')");
+    expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
   });
 
   test('should handle an empty result set', async () => {
@@ -697,4 +908,161 @@ describe('rejectOtherApplications', () => {
     // Act and Assert
     await expect(thesis.rejectOtherApplications(studentId, proposalId)).rejects.toThrow('Some error');
   });
+});
+
+describe('getThesisProposalCds', () => {
+    // Restore mocks after each test
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+    
+    test('should return thesis proposal cds', async () => {
+      const proposalId = 1;
+      const expectedQuery = `SELECT d.cod_degree, d.title_degree FROM proposalCds p, degree d WHERE proposal_id = ? AND p.cod_degree = d.cod_degree`;
+      const expectedResult = [{cds: 'TestCds'}];
+
+      jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce(expectedResult);
+
+      result = await thesis.getThesisProposalCds(proposalId);
+
+      expect(result).toEqual(expectedResult);
+      expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
+    })
+    
+    test('should handle an empty result set', async () => {
+      // Arrange
+      const proposalId = 2;
+  
+      // Mock the all function to return an empty array
+      jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce([]);
+  
+      // Act
+      const result = await thesis.getThesisProposalCds(proposalId);
+  
+      // Assert
+      expect(result).toEqual([]);
+    });
+
+});
+
+describe('getThesisProposalById', () => {
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
+
+  test('should return the thesis proposal given the id', async () => {
+    const proposalId = 1;
+    const expectedResult = 
+    {
+      "id": 1,
+      "title": "Test Proposal",
+      "status": "ACTIVE",
+      "supervisor": {
+        "id":"1",
+        "name": "mockSupervisorName",
+        "surname": "mockSupervisorSurname",
+      },
+      "cosupervisors":{
+        "internal": [
+          {
+            "id": "1",
+            "name":"internalCoSupervisorName",
+            "surname":"internalCoSupervisorSurname"
+          }
+        ],
+        "external": [
+          {
+            "id": 2,
+            "name": "externalCoSupervisorName",
+            "surname": "externalCoSupervisorSurname"
+          }
+        ]
+      },
+      "type": "Test Type",
+      "description": "Test Description",
+      "expiration": "2023-12-31",
+      "level": "Test Level",
+    };
+
+    jest.spyOn(require('../db').prepare(), 'get').mockReturnValue(expectedResult);
+
+    const result = await thesis.getThesisProposalById(proposalId);
+    const expectedQuery = `SELECT * FROM thesisProposal P
+        JOIN proposalCds PC ON P.proposal_id = PC.proposal_id
+        JOIN degree D ON PC.cod_degree = D.cod_degree
+        WHERE P.proposal_id = ?;`;
+
+    expect(result).toEqual(expectedResult);
+    expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
+
+  });
+
+});
+
+describe('getThesisProposalTeacher', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
+
+  test('should return teacher given thesisProposalId and teacherId', async () => {
+    const proposalId = 1;
+    const teacherId = "d1";
+    const expectedResult = {
+      id: "d1",
+      surname : "SurnameMock",
+      name : "NameMock",
+      email : "emailMock",
+      codGroup : "G1",
+      cod_department : "dep1"
+    }
+
+    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(undefined).mockReturnValueOnce(expectedResult);
+
+    const result = await thesis.getThesisProposalTeacher(proposalId, teacherId); 
+
+    expect(result).toEqual(expectedResult);
+  });
+
+  test('should return null when the proposal is already assigned', async () => {
+    const proposalId = 2;
+    const teacheId = "d2";
+
+    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce({proposalId: 2, teacheId: "d2", status: 'accepted'});
+
+    const result = await thesis.getThesisProposalTeacher(proposalId, teacheId);
+
+    expect(result).toEqual(null);
+  })
+});
+
+describe('listApplicationsDecisionsFromStudent', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
+
+  test('should return the list of applications given the studentId', async () => {
+    const studentId = "1";
+    const expectedResult = [{
+      application_id : 1,
+      proposal_id : 1,
+      title : "Title test",
+      level : "Test level",
+      teacher_name : "MockTeacherName",
+      teacher_surname : "MockTeacherSurname",
+      status : "Test status",
+      expiration : "2023-11-29"
+    }];
+    const expectedQuery = `SELECT ta.id AS "application_id", ta.proposal_id, tp.title,  tp.level, t.name AS "teacher_name" , t.surname AS "teacher_surname" ,ta.status, tp.expiration
+    FROM thesisApplication ta, thesisProposal tp, teacher t
+    WHERE ta.proposal_id = tp.proposal_id AND ta.student_id = ? AND t.id = tp.supervisor_id AND ta.creation_date < ?`;
+
+    jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce(expectedResult);
+
+    result = await thesis.listApplicationsDecisionsFromStudent(studentId);
+    
+    expect(result).toEqual(expectedResult);
+    expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
+  });
+  
 });
