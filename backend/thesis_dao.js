@@ -268,7 +268,7 @@ exports.getThesisProposalById = (proposalId) => {
  */
 exports.deleteThesisProposalById = (proposalId, supervisorId) => {
   return new Promise( (resolve, reject) => {
-    db.transaction(() => {
+    db.transaction(async () => {
       const hasApplicationsApprovedQuery = `
         SELECT 1
         FROM thesisApplication
@@ -289,7 +289,7 @@ exports.deleteThesisProposalById = (proposalId, supervisorId) => {
       const res = db.prepare(deleteThesisProposalQuery).run(proposalId, supervisorId, now, now);
       if (res.changes === 0) {
         // We try to understand the reason of the failure
-        const thesis = this.getThesisProposalById(proposalId);
+        const thesis = await this.getThesisProposalById(proposalId);
         if (thesis == null || thesis.creation_date > now) {
           // No thesis proposal with the given id
           reject( new NoThesisProposalError(proposalId) );
