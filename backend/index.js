@@ -305,7 +305,8 @@ isTeacher,
 async (req, res) => {
   try {
     const proposal_id = req.params.id;
-    const supervisor_id  = req.user.id;
+    const supervisor = await usersDao.getUserInfo(req.auth);
+    const supervisor_id  = supervisor.id;
 
     const applications = await thesisDao.listApplicationsForTeacherThesisProposal(proposal_id, supervisor_id);
     if (applications.some( application => application.status === 'accepted' )) {
