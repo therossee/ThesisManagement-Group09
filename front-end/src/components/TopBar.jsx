@@ -41,9 +41,6 @@ function IsLoggedInForm() {
       <Badge count={1} style={{ marginRight: '22px' }}>
         <BellOutlined style={{ fontSize: '22px', marginRight: '22px', verticalAlign: 'middle' }} />
       </Badge>
-      <Avatar size="large" style={{ backgroundColor: '#1677ff', marginRight: '30px', verticalAlign: 'middle' }}>
-        <UserOutlined />
-      </Avatar>
       <LogoutButton />
     </div>
   )
