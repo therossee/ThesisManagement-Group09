@@ -19,9 +19,9 @@ This is the front end of the project. It is a mobile/web interface  developed us
 
 ## routes
 - `Errors.jsx` :  React component for displaying different error messages based on a provided error code:
-      - `403`: Not authorized to access the page
-      - `404`: Page doesn't exist
-      - `500`: Server error
+   - `403`: Not authorized to access the page
+   - `404`: Page doesn't exist
+   - `500`: Server error
 - `Home.jsx` : React component for the home page.
 - `InsertProposal.jsx` : React conditional component to filter if a teacher enters InsertThesisProposal, otherwise error.
 - `Proposals.jsx` : React conditional component to filter if a logged-in user is a student. In this case enters ThesisProposals, otherwise error.
@@ -32,16 +32,16 @@ This is the front end of the project. It is a mobile/web interface  developed us
 ## components
 - `Authentication` : Folder with three components: login button, logout button and usaAuth for the authentication provider
 - `InsertThesisProposal`: Form to insert new thesis proposal by a teacher divided in a 3 step form:
-      - `InsertBody.jsx` : Designed to handle the creation of data related to thesis proposals.
-      - `ReviewProposals.jsx` : Designed to view and review the data of a thesis proposal. Uses a table to show proposal details, including title, internal/external supervisors, keywords, type, description, and other associated fields.
-      - `UploadResult.jsx`: Designed to display a result message after attempting to upload a thesis proposal. Depending on the result (success or error), it shows an appropriate message along with a button to return to the main page.
+   - `InsertBody.jsx` : Designed to handle the creation of data related to thesis proposals.
+   - `ReviewProposals.jsx` : Designed to view and review the data of a thesis proposal. Uses a table to show proposal details, including title, internal/external supervisors, keywords, type, description, and other associated fields.
+   - `UploadResult.jsx`: Designed to display a result message after attempting to upload a thesis proposal. Depending on the result (success or error), it shows an appropriate message along with a button to return to the main page.
 - `SideBar.jsx` : Definition of the Side bar.
 - `StudentApplications.jsx`: View the history of student application requests. It shows a list of thesis proposals with their status, allowing students to track the status of their applications.
 - `StudentThesisProposals.jsx`: Allows students to view and filter available thesis proposals. It includes features for searching by title, applying advanced filters, and displaying each proposal in detail.
 - `TeacherApplications.jsx`: Allows faculty to view and manage thesis applications submitted by students. Provides functionality to accept or reject pending applications. 
 Main functions:
-      - `acceptApplication` : Accepts the thesis application from a student
-      - `rejectApplication` : Reject the thesis application from a student
+   - `acceptApplication` : Accepts the thesis application from a student
+   - `rejectApplication` : Reject the thesis application from a student
 - `TeacherThesisProposals.jsx`: Allows teachers to view and manage thesis proposals. Provides a table with detailed information on thesis proposals, allowing quick access to the visualization and editing actions of each proposal.
 - `TopBar.jsx` : Definition for the TopBar with:
       - `LoginForm` : Form for the login inserted in the topbar.
@@ -51,27 +51,27 @@ Main functions:
 
 ## Main React Components
 - `API.jsx` : Main API functions as:
-      - APIs for auth:
-            - `getUserInfo`: retrieves user information.
-      - Virtual Clock APIs :
-            - `getClock`: function to obtain the setted data and offset 
-            - `updateClock`: function to update the system virtual clock
-      - Thesis Proposals APIs
-            - `getThesisProposals`: Gets the thesis proposals for a user.
-            - `getThesisProposalById`: Gets a specific thesis proposal with a given Id
-            - `applyForProposal`: Function to apply to a proposal with a given Id
-      - Applications APIs
-            - `getStudentActiveApplication`: Gets all the active application for a student
-            - `getTeacherThesisApplications` : Gets all the application for a  proposal with a given Id
-            - `insertProposal`: function to insert a proposal in the database
-            - `acceptThesisApplications` : function to accept Student Applications on a Thesis Proposal and automatically reject all the other student applied.
-            - `rejectThesisApplications` : function to reject Student Applications on a Thesis Proposal
-            - `getStudentApplicationsHistory` : function to get all the applications with thesis infos done by the logged-in student
-      - Get APIs to retrieve others infos:
-            - `getExtCoSupervisors`: Gets all the External CoSupervisors
-            - `getTeachers` : Gets all the teachers 
-            - `getAllKeywords` : Gets all the keywords
-            - `getAllDegrees` : Gets all the degrees
+  - APIs for auth:
+     - `getUserInfo`: retrieves user information.
+  - Virtual Clock APIs :
+      - `getClock`: function to obtain the setted data and offset 
+      - `updateClock`: function to update the system virtual clock
+  - Thesis Proposals APIs
+      - `getThesisProposals`: Gets the thesis proposals for a user.
+      - `getThesisProposalById`: Gets a specific thesis proposal with a given Id
+      - `applyForProposal`: Function to apply to a proposal with a given Id
+  - Applications APIs
+      - `getStudentActiveApplication`: Gets all the active application for a student
+      - `getTeacherThesisApplications` : Gets all the application for a  proposal with a given Id
+      - `insertProposal`: function to insert a proposal in the database
+      - `acceptThesisApplications` : function to accept Student Applications on a Thesis Proposal and automatically reject all the other student applied.
+      - `rejectThesisApplications` : function to reject Student Applications on a Thesis Proposal
+      - `getStudentApplicationsHistory` : function to get all the applications with thesis infos done by the logged-in student
+  - Get APIs to retrieve others infos:
+      - `getExtCoSupervisors`: Gets all the External CoSupervisors
+      - `getTeachers` : Gets all the teachers 
+      - `getAllKeywords` : Gets all the keywords
+      - `getAllDegrees` : Gets all the degrees
      
 - `App.jsx` : Main component of the application. It manages user authentication, sets notifications for API errors during login, and defines the basic structure of the application.
 - `main.jsx` : root render for the App
