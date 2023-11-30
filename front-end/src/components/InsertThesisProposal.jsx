@@ -179,7 +179,7 @@ function InsertThesisProposal() {
             </div>
             <div>
               {current === steps.length - 1 &&
-                <UploadResult proposalId={proposalId} error={error} />
+                <UploadResult update={false} proposalId={proposalId} error={error} />
               }
             </div>
           </div>

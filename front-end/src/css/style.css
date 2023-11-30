@@ -34,7 +34,7 @@
   -webkit-backdrop-filter: blur(7px);
   display: flex;
   justify-content: flex-end;
-  overflow: auto;
+  overflow: hidden;
   /*Not amazing from mobile*/
   /*Becomes scrollable when logged in on PC*/
 }
