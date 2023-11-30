@@ -8,7 +8,7 @@ import API from "../API";
 
 function ViewThesisProposal() {
 
-  const { isTeacher, isAuthenticated, accessToken } = useAuth();
+  const { isTeacher, accessToken } = useAuth();
 
   const { id } = useParams();
   const { Text } = Typography;
@@ -48,7 +48,7 @@ function ViewThesisProposal() {
             .then((y) => {
               const actual = dayjs().add(y.offset, 'ms')
               const expDate = dayjs(x.expiration);
-              expDate.isBefore(actual) ? setDisabled(true) : setDisabled(false);
+              expDate.isBefore(actual) ? setDisabled(true) : undefined;
             })
             .catch((err) => { message.error(err.message ? err.message : err) });
         })
@@ -58,10 +58,8 @@ function ViewThesisProposal() {
 
   // Another Useffect needed because isTeacher needs time to be computed. It is initialized as undefined so we can actually check when it is computed.
   useEffect(() => {
-    // Exclude teachers from Application fetch
-    // Explanation: If ((isTeacher is computed and user is not a teacher) or (user is logged in and not a teacher (even if not yet computed))) and accessToken exists
-    if (((isTeacher !== undefined && !isTeacher) || (isAuthenticated && !isTeacher))) {
-      if (accessToken) {
+    // Exclude teachers from Active Application fetch
+    if ((isTeacher !== undefined) && !isTeacher && accessToken) {
         API.getStudentActiveApplication(accessToken)
           .then((x) => {
             if (x.length > 0)
@@ -69,9 +67,8 @@ function ViewThesisProposal() {
               setDisabled(true);
           })
           .catch((err) => { message.error(err.message ? err.message : err) });
-      }
     }
-  }, [data, isTeacher, isAuthenticated, accessToken]);
+  }, [isTeacher, accessToken]);
 
   // If data is still empty
   if (!data) {
