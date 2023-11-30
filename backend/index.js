@@ -19,6 +19,7 @@ const degreeDao = require('./degree_dao.js');
 const AdvancedDate = require("./AdvancedDate");
 const schemas = require('./schemas.js');
 const { sendEmailApplicationStatusChange } = require("./email");
+const AppError = require("./errors/AppError");
 
 /*** init express and setup the middlewares ***/
 const app = express();
@@ -346,6 +347,40 @@ async (req, res) => {
     }
   }
 }
+);
+
+app.delete('/api/thesis-proposals/:id',
+  checkJwt,
+  isTeacher,
+  async (req, res) => {
+    try {
+      const userInfo = await usersDao.getUserInfo(req.auth);
+      const teacherId = userInfo.id;
+      const proposalId = req.params.id;
+
+      await thesisDao.deleteThesisProposalById(proposalId, teacherId)
+          .then( applicationsCancelled => {
+            setImmediate( () => {
+              const reason = 'The thesis proposal has been removed from the website.';
+              for (const application of applicationsCancelled) {
+                _notifyApplicationStatusChange(application.student_id, application.proposal_id, application.status, reason);
+              }
+            });
+
+            return res.status(204).send();
+          })
+          .catch( error => {
+            if (error instanceof AppError) {
+              return error.sendHttpResponse(res);
+            } else {
+              throw error;
+            }
+          });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
 );
 
 app.post('/api/student/applications',

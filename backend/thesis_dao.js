@@ -4,6 +4,8 @@
 
 const db = require('./db');
 const AdvancedDate = require('./AdvancedDate');
+const NoThesisProposalError = require("./errors/NoThesisProposalError");
+const UnauthorizedActionError = require("./errors/UnauthorizedActionError");
 
 exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id, external_co_supervisors_id, type, groups, description, required_knowledge, notes, expiration, level, cds, keywords) => {
   return new Promise((resolve, reject) => {
@@ -95,7 +97,7 @@ exports.updateThesisProposal = (proposal_id, supervisor_id, thesis) => {
       const updateThesisProposalQuery = `
         UPDATE thesisProposal
         SET title = ?, type = ?, description = ?, required_knowledge = ?, notes = ?, expiration = ?, level = ?
-        WHERE proposal_id = ? AND supervisor_id = ? AND creation_date < ?;`;
+        WHERE proposal_id = ? AND supervisor_id = ? AND creation_date < ? AND is_deleted = 0;`;
 
       const res = db.prepare(updateThesisProposalQuery).run(thesis.title, thesis.type, thesis.description, thesis.required_knowledge, thesis.notes, thesis.expiration, thesis.level, proposal_id, supervisor_id, now.toISOString());
       if (res.changes === 0) {
@@ -231,7 +233,7 @@ exports.getThesisProposal = (proposalId, studentId) => {
         JOIN degree D ON PC.cod_degree = D.cod_degree
         JOIN student S ON S.cod_degree = D.cod_degree
         WHERE P.proposal_id = ? AND S.id = ? 
-        AND P.expiration > ? AND P.creation_date < ?;`;
+        AND P.expiration > ? AND P.creation_date < ? AND P.is_deleted = 0;`;
 
     const thesisProposal = db.prepare(query).get(proposalId, studentId, currentDate, currentDate);
     resolve(thesisProposal ?? null);
@@ -249,10 +251,67 @@ exports.getThesisProposalById = (proposalId) => {
     const query = `SELECT * FROM thesisProposal P
         JOIN proposalCds PC ON P.proposal_id = PC.proposal_id
         JOIN degree D ON PC.cod_degree = D.cod_degree
-        WHERE P.proposal_id = ?;`;
+        WHERE P.proposal_id = ? AND is_deleted = 0;`;
 
     const thesisProposal = db.prepare(query).get(proposalId);
     resolve(thesisProposal ?? null);
+  })
+};
+
+/**
+ * Set the property is_deleted of a thesis proposal to 1 and cancel all the applications waiting for approval for that
+ * thesis
+ *
+ * @param {string} proposalId
+ * @param {string} supervisorId
+ * @return {Promise<ThesisApplicationRow[]>}
+ */
+exports.deleteThesisProposalById = (proposalId, supervisorId) => {
+  return new Promise( (resolve, reject) => {
+    db.transaction(async () => {
+      const hasApplicationsApprovedQuery = `
+        SELECT 1
+        FROM thesisApplication
+        WHERE proposal_id = ? AND status = 'accepted';
+      `;
+      const hasApplicationsApproved = db.prepare(hasApplicationsApprovedQuery).get(proposalId) != null;
+      if (hasApplicationsApproved) {
+        reject( new UnauthorizedActionError('Some applications has been accepted and, therefore, you can\'t delete this thesis') );
+        return;
+      }
+
+      const now = new AdvancedDate().toISOString();
+      const deleteThesisProposalQuery = `
+        UPDATE thesisProposal
+        SET is_deleted = 1
+        WHERE proposal_id = ? AND supervisor_id = ? AND expiration > ? AND creation_date < ?;
+      `;
+      const res = db.prepare(deleteThesisProposalQuery).run(proposalId, supervisorId, now, now);
+      if (res.changes === 0) {
+        // We try to understand the reason of the failure
+        const thesis = await this.getThesisProposalById(proposalId);
+        if (thesis == null || thesis.creation_date > now) {
+          // No thesis proposal with the given id
+          reject( new NoThesisProposalError(proposalId) );
+        } else if (thesis.expiration <= now) {
+          // Thesis proposal expired
+          reject( new UnauthorizedActionError('You can\'t delete a thesis already expired') );
+        } else {
+          // The supervisor is not the owner of the thesis proposal
+          reject( new UnauthorizedActionError('You are not the supervisor of this thesis') );
+        }
+
+        return;
+      }
+
+      const cancelApplicationsQuery = `
+        UPDATE thesisApplication
+        SET status = 'cancelled'
+        WHERE proposal_id = ? AND status = 'waiting for approval'
+        RETURNING *;
+      `;
+      resolve( db.prepare(cancelApplicationsQuery).all(proposalId) );
+    })();
   })
 };
 
@@ -278,7 +337,8 @@ exports.listThesisProposalsFromStudent = (studentId) => {
                 AND A.status = 'accepted'
           )
           AND P.expiration > ?
-          AND P.creation_date < ?;`;
+          AND P.creation_date < ?
+          AND is_deleted = 0;`;
 
     const thesisProposals = db.prepare(query).all(studentId, currentDate, currentDate);
     resolve(thesisProposals);
@@ -351,7 +411,7 @@ exports.getExternalCoSupervisorsOfProposal = (proposalId) => {
  */
 exports.getSupervisorOfProposal = (proposalId) => {
   return new Promise((resolve) => {
-    const query = `SELECT T.id, T.surname, T.name, T.email, T.cod_group, T.cod_department FROM thesisProposal P JOIN teacher T ON P.supervisor_id = T.id WHERE P.proposal_id = ?`;
+    const query = `SELECT T.id, T.surname, T.name, T.email, T.cod_group, T.cod_department FROM thesisProposal P JOIN teacher T ON P.supervisor_id = T.id WHERE P.proposal_id = ? AND P.is_deleted = 0`;
     const data = db.prepare(query).get(proposalId);
     resolve(data);
   })
@@ -371,6 +431,7 @@ exports.getSupervisorOfProposal = (proposalId) => {
  * @property {string} expiration
  * @property {string} level
  * @property {string} cds
+ * @property {1 | 0} is_deleted
  */
 
 /**
@@ -406,7 +467,8 @@ exports.applyForProposal = (proposal_id, student_id) => {
     }
 
     // Check if the proposal is active
-    const checkProposalActive = `SELECT * FROM thesisProposal P WHERE P.proposal_id=? AND P.expiration > ? AND P.creation_date < ? 
+    const checkProposalActive = `SELECT * FROM thesisProposal P WHERE P.proposal_id=?
+                                 AND P.expiration > ? AND P.creation_date < ? AND P.is_deleted = 0
                                  AND NOT EXISTS (
                                     SELECT 1
                                     FROM thesisApplication A
@@ -450,7 +512,8 @@ exports.listThesisProposalsTeacher = (teacherId) => {
             AND A.status = 'accepted'
         )
         AND P.expiration > ?
-        AND creation_date < ?;`;
+        AND creation_date < ?
+        AND is_deleted = 0;`;
     const proposals = db.prepare(getProposals).all(teacherId, currentDate, currentDate);
     resolve(proposals)
 
@@ -468,7 +531,8 @@ exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
       AND tp.supervisor_id= ? 
       AND ta.creation_date < ?
       AND tp.expiration > ?
-      AND tp.creation_date < ?`;
+      AND tp.creation_date < ?
+      AND tp.is_deleted = 0;`;
 
     const applications = db.prepare(getApplications).all(proposal_id, teacherId, currentDate, currentDate, currentDate);
     resolve(applications)
@@ -552,7 +616,7 @@ exports.getThesisProposalTeacher = (proposalId, teacherId) => {
     }
 
     const query = `SELECT * FROM thesisProposal WHERE proposal_id = ? AND supervisor_id = ? 
-                   AND expiration > ? AND creation_date < ?;`;
+                   AND expiration > ? AND creation_date < ? AND is_deleted = 0;`;
     const res = db.prepare(query).get(proposalId, teacherId, currentDate, currentDate);
     resolve(res);
   })

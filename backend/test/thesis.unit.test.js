@@ -3,6 +3,8 @@ require('jest');
 const AdvancedDate = require('../AdvancedDate');
 const db = require('../db');
 const thesis = require('../thesis_dao');
+const UnauthorizedActionError = require("../errors/UnauthorizedActionError");
+const NoThesisProposalError = require("../errors/NoThesisProposalError");
 
 // Mocking the database
 jest.mock('../db', () => ({
@@ -10,7 +12,7 @@ jest.mock('../db', () => ({
   run: jest.fn().mockReturnValue({ lastInsertRowid: 1 }),
   all: jest.fn(),
   get: jest.fn(),
-  transaction: jest.fn().mockImplementation(callback => callback()),
+  transaction: jest.fn().mockImplementation(callback => callback),
 }));
 
 afterAll(() => {
@@ -96,7 +98,7 @@ describe('createThesisProposal', () => {
     );
 
     expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
-    expect(db.prepare).toHaveBeenCalledTimes(6); 
+    expect(db.prepare).toHaveBeenCalledTimes(6);
   });
   test('create a thesis proposal with passed expiration date', async () => {
     const proposalData = {
@@ -114,7 +116,7 @@ describe('createThesisProposal', () => {
       cds: ['Test CDS1', 'Test CDS2'],
       keywords: ['Keyword1', 'Keyword2'],
     };
-  
+
     // Adding "await" before the thesis.createThesisProposal
     await expect(
       thesis.createThesisProposal(
@@ -156,7 +158,7 @@ describe('updateThesisProposal', () => {
     db.prepare(sql_keyword).run(proposal_id, 'Keyword');
     jest.restoreAllMocks()
   });
-  
+
   test('updates the thesis proposal with valid data', async () => {
     const proposalId = 1;
     const supervisorId = 'd1';
@@ -191,7 +193,7 @@ describe('updateThesisProposal', () => {
       description: 'Updated Description',
       required_knowledge: 'Updated Knowledge',
       notes: 'Updated Notes',
-      expiration: '2027-12-31', 
+      expiration: '2027-12-31',
       level: 'Test Level'
     };
     db.prepare().run.mockReturnValueOnce({ changes: 0 });
@@ -375,7 +377,7 @@ describe('getThesisProposal', () => {
     // Arrange
     const proposalId = 1;
     const studentId = "1";
-    const expectedResult = 
+    const expectedResult =
     {
       "id": 1,
       "title": "Test Proposal",
@@ -436,7 +438,7 @@ describe('getThesisProposal', () => {
     // Arrange
     const proposalId = 1;
     const studentId = "1";
-   
+
     // Mock the get function to return a mock result
     jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce({proposalId: 1, student_id:"1", status: 'accepted'});
 
@@ -446,7 +448,7 @@ describe('getThesisProposal', () => {
     // Assert
     expect(result).toEqual(null);
   });
-  
+
 });
 
 describe('listThesisProposalsFromStudent', () => {
@@ -660,11 +662,11 @@ describe('applyForProposal', () => {
       db.prepare().get.mockReturnValueOnce({ proposal_id: '1', title: 'Test Proposal', supervisor_id: 1, type: 'Test Type', description: 'Test Description', required_knowledge: 'Test Knowledge', notes: 'Test Notes', creation_date:'2020-10-21', expiration: '2023-12-31', level: 'Test Level' });
       db.prepare().get.mockReturnValueOnce();
       db.prepare().run.mockReturnValueOnce({ lastInsertRowid: 1 });
-      
-      
+
+
       const applicationId = await thesis.applyForProposal(proposal_id, student_id);
-     
-      expect(applicationId).toBe(1); 
+
+      expect(applicationId).toBe(1);
   });
   test('applies for a proposal not belonging to his cds', async () => {
     // Mock data
@@ -725,7 +727,8 @@ describe('listThesisProposalsTeacher', () => {
             AND A.status = 'accepted'
         )
         AND P.expiration > ?
-        AND creation_date < ?;`;
+        AND creation_date < ?
+        AND is_deleted = 0;`;
     // Mock the SQLite database query
     db.prepare.mockClear().mockReturnValueOnce({ all: jest.fn(() => mockProposals) });
 
@@ -774,7 +777,8 @@ describe('listApplicationsForTeacherThesisProposal', () => {
       AND tp.supervisor_id= ? 
       AND ta.creation_date < ?
       AND tp.expiration > ?
-      AND tp.creation_date < ?`;
+      AND tp.creation_date < ?
+      AND tp.is_deleted = 0;`;
     // Assertions
     expect(result).toEqual(mockApplications);
     expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
@@ -924,7 +928,7 @@ describe('getThesisProposalCds', () => {
     afterEach(() => {
       jest.restoreAllMocks();
     });
-    
+
     test('should return thesis proposal cds', async () => {
       const proposalId = 1;
       const expectedQuery = `SELECT d.cod_degree, d.title_degree FROM proposalCds p, degree d WHERE proposal_id = ? AND p.cod_degree = d.cod_degree`;
@@ -937,17 +941,17 @@ describe('getThesisProposalCds', () => {
       expect(result).toEqual(expectedResult);
       expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
     })
-    
+
     test('should handle an empty result set', async () => {
       // Arrange
       const proposalId = 2;
-  
+
       // Mock the all function to return an empty array
       jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce([]);
-  
+
       // Act
       const result = await thesis.getThesisProposalCds(proposalId);
-  
+
       // Assert
       expect(result).toEqual([]);
     });
@@ -962,7 +966,7 @@ describe('getThesisProposalById', () => {
 
   test('should return the thesis proposal given the id', async () => {
     const proposalId = 1;
-    const expectedResult = 
+    const expectedResult =
     {
       "id": 1,
       "title": "Test Proposal",
@@ -1000,13 +1004,11 @@ describe('getThesisProposalById', () => {
     const expectedQuery = `SELECT * FROM thesisProposal P
         JOIN proposalCds PC ON P.proposal_id = PC.proposal_id
         JOIN degree D ON PC.cod_degree = D.cod_degree
-        WHERE P.proposal_id = ?;`;
+        WHERE P.proposal_id = ? AND is_deleted = 0;`;
 
     expect(result).toEqual(expectedResult);
     expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
-
   });
-
 });
 
 describe('getThesisProposalTeacher', () => {
@@ -1028,7 +1030,7 @@ describe('getThesisProposalTeacher', () => {
 
     jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(undefined).mockReturnValueOnce(expectedResult);
 
-    const result = await thesis.getThesisProposalTeacher(proposalId, teacherId); 
+    const result = await thesis.getThesisProposalTeacher(proposalId, teacherId);
 
     expect(result).toEqual(expectedResult);
   });
@@ -1069,9 +1071,99 @@ describe('listApplicationsDecisionsFromStudent', () => {
     jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce(expectedResult);
 
     result = await thesis.listApplicationsDecisionsFromStudent(studentId);
-    
+
     expect(result).toEqual(expectedResult);
     expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
   });
-  
+
+});
+
+describe('deleteThesisProposalById', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        jest.restoreAllMocks();
+    });
+
+    test('should reject the deletion if database indicate that an application has been accepted', async () => {
+        const proposalId = 1;
+        const supervisorId = "d1";
+
+        db.prepare().get.mockReturnValueOnce({ proposal_id: 1, status: 'accepted' });
+        jest.clearAllMocks();
+
+        await expect(thesis.deleteThesisProposalById(proposalId, supervisorId)).rejects.toThrow(UnauthorizedActionError);
+        expect(db.prepare).toHaveBeenCalledTimes(1);
+    });
+
+    test('should reject the deletion if the delete query returns 0 rows and no thesis is found with the ID provided', async () => {
+        const proposalId = 1;
+        const supervisorId = "d1";
+
+        db.prepare().get.mockReturnValueOnce(undefined);
+        db.prepare().run.mockReturnValueOnce({ changes: 0 });
+        db.prepare().get.mockReturnValueOnce(undefined);
+        jest.clearAllMocks();
+
+        await expect(thesis.deleteThesisProposalById(proposalId, supervisorId)).rejects.toThrow(NoThesisProposalError);
+        expect(db.prepare).toHaveBeenCalledTimes(3);
+    });
+
+    test('should reject the deletion if the delete query returns 0 rows and the thesis found has a creation date in the future', async () => {
+        const proposalId = 1;
+        const supervisorId = "d1";
+
+        db.prepare().get.mockReturnValueOnce(undefined);
+        db.prepare().run.mockReturnValueOnce({ changes: 0 });
+        db.prepare().get.mockReturnValueOnce({ proposal_id: proposalId, creation_date: new Date(2332452985000).toISOString() });
+        jest.clearAllMocks();
+
+        await expect(thesis.deleteThesisProposalById(proposalId, supervisorId)).rejects.toThrow(NoThesisProposalError);
+        expect(db.prepare).toHaveBeenCalledTimes(3);
+    });
+
+    test('should reject deletion if thesis is expired', async () => {
+        const proposalId = 1;
+        const supervisorId = "d1";
+
+        db.prepare().get.mockReturnValueOnce(undefined);
+        db.prepare().run.mockReturnValueOnce({ changes: 0 });
+        db.prepare().get.mockReturnValueOnce({ proposal_id: proposalId, creation_date: new Date().toISOString(), expiration: new Date(1701300985000).toISOString() });
+        jest.clearAllMocks();
+
+        await expect(thesis.deleteThesisProposalById(proposalId, supervisorId)).rejects.toThrow(UnauthorizedActionError);
+        expect(db.prepare).toHaveBeenCalledTimes(3);
+    });
+
+    test('should reject deletion if thesis is not owned by the supervisor', async () => {
+        const proposalId = 1;
+        const supervisorId = "d1";
+
+        db.prepare().get.mockReturnValueOnce(undefined);
+        db.prepare().run.mockReturnValueOnce({ changes: 0 });
+        db.prepare().get.mockReturnValueOnce({ proposal_id: proposalId, creation_date: new Date().toISOString(), expiration: new Date(2332452985000).toISOString(), supervisor_id: "d2" });
+        jest.clearAllMocks();
+
+        await expect(thesis.deleteThesisProposalById(proposalId, supervisorId)).rejects.toThrow(UnauthorizedActionError);
+        expect(db.prepare).toHaveBeenCalledTimes(3);
+    });
+
+    test('should delete the thesis proposal and return the list of applications cancelled', async () => {
+        const proposalId = 1;
+        const supervisorId = "d1";
+
+        const mockedApplications = [
+            { proposal_id: proposalId, student_id: 's1', status: 'cancelled', id: 1 },
+            { proposal_id: proposalId, student_id: 's2', status: 'cancelled', id: 2 },
+        ];
+
+        db.prepare().get.mockReturnValueOnce(undefined);
+        db.prepare().run.mockReturnValueOnce({ changes: 1 });
+
+        db.prepare().all.mockReturnValueOnce(mockedApplications);
+        jest.clearAllMocks();
+
+        const res = await thesis.deleteThesisProposalById(proposalId, supervisorId);
+        expect(res).toEqual(mockedApplications);
+        expect(db.prepare).toHaveBeenCalledTimes(3);
+    });
 });

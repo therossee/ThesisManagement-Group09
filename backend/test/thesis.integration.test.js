@@ -4,6 +4,7 @@ const service = require("../thesis_dao");
 const degreeService = require("../degree_dao");
 const usersService = require("../users_dao");
 const schemas = require("../schemas");
+const AppError = require("../errors/AppError");
 const {app, server} = require("../index");
 const { serialize } = require('../db');
 const AdvancedDate = require('../AdvancedDate');
@@ -33,7 +34,9 @@ jest.mock('../thesis_dao', () => ({
     getThesisProposalCds: jest.fn(),
     getThesisProposalTeacher: jest.fn(),
     listApplicationsDecisionsFromStudent: jest.fn(),
-    updateThesisProposal: jest.fn()
+    updateThesisProposal: jest.fn(),
+    deleteThesisProposalById: jest.fn(),
+    _notifyApplicationStatusChange: jest.fn(),
 }));
 
 jest.mock('../users_dao', () => ({
@@ -2221,3 +2224,82 @@ describe('GET /api/student/applications-decision', () => {
         expect(response.body).toEqual('Internal Server Error');
     });
 });
+
+describe('DELETE /api/thesis-proposals/:id', () => {
+    test('should delete a thesis proposal and notify application status change', async () => {
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            role: 'teacher',
+        };
+
+        usersService.getUserInfo.mockResolvedValue(mockUser);
+        service.deleteThesisProposalById.mockResolvedValue([
+            {
+            student_id: 'studentId',
+            proposal_id: 'deletedProposalId',
+            status: 'cancelled',
+            },
+        ]);
+    
+        service._notifyApplicationStatusChange.mockResolvedValue();
+  
+        // Make a request to the endpoint
+        const response = await request(app)
+            .delete('/api/thesis-proposals/deletedProposalId')
+            .set('Authorization', `Bearer ${teacherAccessToken}`); 
+    
+        // Assertions
+        expect(response.status).toBe(204);
+        expect(service.deleteThesisProposalById).toHaveBeenCalledWith('deletedProposalId', 'd1');
+    });
+  
+    test('should handle errors and return the appropriate response', async () => {
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            role: 'teacher',
+        };
+
+        usersService.getUserInfo.mockResolvedValue(mockUser);
+        service.deleteThesisProposalById.mockRejectedValue(new AppError('Simulation error', 400));
+    
+        // Make a request to the endpoint
+        const response = await request(app)
+            .delete('/api/thesis-proposals/nonExistingProposalId')
+            .set('Authorization', `Bearer ${teacherAccessToken}`);
+    
+        // Assertions
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({ message: 'Simulation error' });
+        expect(service.deleteThesisProposalById).toHaveBeenCalledWith('nonExistingProposalId', 'd1');
+    });
+
+    test('should handle unexpected errors and return 500 Internal Server Error', async () => {
+        
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            role: 'teacher',
+        };
+
+        usersService.getUserInfo.mockResolvedValue(mockUser);
+        service.deleteThesisProposalById.mockRejectedValue(new Error('Unexpected error'));
+    
+        // Make a request to the endpoint
+        const response = await request(app)
+          .delete('/api/thesis-proposals/unexpectedErrorId')
+          .set('Authorization', `Bearer ${teacherAccessToken}`);
+    
+        // Assertions
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual({ message: 'Internal Server Error' });
+        expect(service.deleteThesisProposalById).toHaveBeenCalledWith('unexpectedErrorId', 'd1');
+      });
+  });
