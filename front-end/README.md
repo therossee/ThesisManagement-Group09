@@ -51,23 +51,23 @@ Main functions:
 
 ## Main React Components
 - `API.jsx` : Main API functions as:
-      - ### APIs for auth:
+      - APIs for auth:
             - `getUserInfo`: retrieves user information.
       - Virtual Clock APIs :
             - `getClock`: function to obtain the setted data and offset 
             - `updateClock`: function to update the system virtual clock
-      - ### Thesis Proposals APIs
+      - Thesis Proposals APIs
             - `getThesisProposals`: Gets the thesis proposals for a user.
             - `getThesisProposalById`: Gets a specific thesis proposal with a given Id
             - `applyForProposal`: Function to apply to a proposal with a given Id
-      - ### Applications APIs
+      - Applications APIs
             - `getStudentActiveApplication`: Gets all the active application for a student
             - `getTeacherThesisApplications` : Gets all the application for a  proposal with a given Id
             - `insertProposal`: function to insert a proposal in the database
             - `acceptThesisApplications` : function to accept Student Applications on a Thesis Proposal and automatically reject all the other student applied.
             - `rejectThesisApplications` : function to reject Student Applications on a Thesis Proposal
             - `getStudentApplicationsHistory` : function to get all the applications with thesis infos done by the logged-in student
-      - ### Get APIs to retrieve others infos:
+      - Get APIs to retrieve others infos:
             - `getExtCoSupervisors`: Gets all the External CoSupervisors
             - `getTeachers` : Gets all the teachers 
             - `getAllKeywords` : Gets all the keywords
