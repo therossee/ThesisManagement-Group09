@@ -8,16 +8,11 @@ function Proposals() {
     const { isAuthenticated, isTeacher } = useAuth();
 
     return (
+        //Checking !variable is different than checking variable === false. The second one ensures it doesn't return truthy if undefined.
         <>
-            {isAuthenticated ? (
-                isTeacher ? (
-                    <TeacherThesisProposals />
-                ) : (
-                    <StudentThesisProposals />
-                )
-            ) : (
-                <Errors code="403" />
-            )}
+            {(isTeacher === true) && <TeacherThesisProposals />}
+            {(isAuthenticated === true && isTeacher === false) && <StudentThesisProposals />}
+            {!isAuthenticated && <Errors code="403" />}
         </>
     )
 }

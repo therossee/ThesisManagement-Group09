@@ -56,10 +56,10 @@ function ViewThesisProposal() {
     }
   }, [accessToken]);
 
-  // Another Useffect needed because isTeacher needs time to be computed. It is initialized as undefined so we can actually check when it is computed.
+  // Another Useffect needed because isTeacher needs time to be computed. It is initialized as undefined so we can actually see when it is computed by checking isTeacher===false and not !isTeacher.
   useEffect(() => {
     // Exclude teachers from Active Application fetch
-    if ((isTeacher !== undefined) && !isTeacher && accessToken) {
+    if ((isTeacher === false) && accessToken) {
         API.getStudentActiveApplication(accessToken)
           .then((x) => {
             if (x.length > 0)
