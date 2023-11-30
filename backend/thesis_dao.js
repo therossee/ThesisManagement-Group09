@@ -93,6 +93,13 @@ exports.updateThesisProposal = (proposal_id, supervisor_id, thesis) => {
   return new Promise((resolve) => {
     const now = new AdvancedDate();
 
+    if(thesis.notes === ''){
+      thesis.notes = null;
+    }
+    if(thesis.required_knowledge === ''){
+      thesis.required_knowledge = null;
+    }
+
     db.transaction(() => {
       const updateThesisProposalQuery = `
         UPDATE thesisProposal
