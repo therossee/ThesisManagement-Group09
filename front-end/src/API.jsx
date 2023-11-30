@@ -338,10 +338,28 @@ async function getStudentApplicationsHistory(accessToken) {
     }
 }
 
+async function updateProposal(id, proposal, accessToken) {
+    const response = await fetch(URL + `/thesis-proposals/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(proposal),
+    });
+    const update = await response.json();
+    if (response.ok) {
+        return update;
+    }
+    else {
+        throw update;
+    }
+}
+
 const API = {
     getUserInfo,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory
+    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, updateProposal
 };
 export default API;

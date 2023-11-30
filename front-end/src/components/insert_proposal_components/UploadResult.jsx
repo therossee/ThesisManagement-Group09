@@ -5,9 +5,22 @@ function UploadResult(props) {
     const navigate = useNavigate();
     const id = props.proposalId;
     const error = props.error;
+    const update = props.update;
     if (id !== -1) {
       return (
+        <>
+        {update ? (
+        
         <Result
+          status="success"
+          title="Proposal updated succesfully!"
+          subTitle={`ID of the proposal: ${id}`}
+          extra={
+            <Button ghost type="primary" onClick={() => navigate("/")}>
+              Back Home
+            </Button>
+          }
+        />) : (<Result
           status="success"
           title="Proposal added succesfully!"
           subTitle={`ID of the proposal: ${id}`}
@@ -16,7 +29,8 @@ function UploadResult(props) {
               Back Home
             </Button>
           }
-        />
+        />)}
+        </>
       );
     } else {
       return (

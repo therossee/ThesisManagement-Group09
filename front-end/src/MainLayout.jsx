@@ -4,6 +4,7 @@ import Home from './routes/Home';
 import Errors from './routes/Errors';
 import VirtualClock from "./routes/VirtualClock.jsx";
 import InsertProposal from './routes/InsertProposal';
+import EditProposal from './routes/EditProposal.jsx';
 import Proposals from './routes/Proposals';
 import ViewProposal from './routes/ViewProposal';
 import SideBar from './components/SideBar';
@@ -29,6 +30,7 @@ function MainLayout() {
                             <Route path="/applications" element={<Applications />} />
                             <Route path="/insert-proposal" element={<InsertProposal/>} />
                             <Route path="/view-proposal/:id" element={<ViewProposal />} />
+                            <Route path="/edit-proposal/:id" element={<EditProposal />} />
                             <Route path="/*" element={<Errors code="404"/>} />
                         </Routes>
                     </Content>
