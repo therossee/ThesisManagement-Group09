@@ -13,6 +13,11 @@ jest.mock('../db', () => ({
   transaction: jest.fn().mockImplementation(callback => callback()),
 }));
 
+afterAll(() => {
+  jest.restoreAllMocks(); // Restore original functionality after all tests
+  jest.clearAllMocks();
+});
+
 describe('createThesisProposal', () => {
   beforeEach(() => {
     // Reset the mock before each test
@@ -196,7 +201,6 @@ describe('updateThesisProposal', () => {
   });
 });
 
-// 2. Test Function to get list of teachers not logged
 describe('getTeacherListExcept', () => {
   afterEach(() => {
     jest.restoreAllMocks()
@@ -276,7 +280,6 @@ describe('getExternalCoSupervisors', () => {
   });
 });
 
-// 3. Test function to retrieve the cod_group of a teacher
 describe('getGroup', () => {
   afterEach(() => {
     jest.restoreAllMocks()
