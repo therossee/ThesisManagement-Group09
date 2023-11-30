@@ -3,7 +3,7 @@
 /* Data Access Object (DAO) module for accessing users data */
 
 const db = require('./db');
-  
+
 // This function is used at log-in time to verify username and password.
 exports.getUser = (email, password) => {
   return new Promise((resolve, reject) => {
@@ -36,8 +36,35 @@ exports.getUser = (email, password) => {
             } else {
                 resolve(user);
             }
-        }    
+        }
   });
+};
+
+// This function is used to retrieve user info
+exports.getUserInfo = (auth0) => {
+    return new Promise((resolve, reject) => {
+        const sql_student = 'SELECT s.id, s.name, s.surname, s.email FROM student s, student_auth0 sa WHERE s.id=sa.id AND sa.id_auth0=?';
+        const sql_teacher = 'SELECT t.id, t.name, t.surname, t.email FROM teacher t, teacher_auth0 ta WHERE t.id=ta.id AND ta.id_auth0=?';
+
+        try {
+            const student_info = db.prepare(sql_student).get(auth0.payload.sub);
+            if (student_info) {
+                resolve({...student_info, role: "student"});
+                return;
+            }
+
+            const teacher_info = db.prepare(sql_teacher).get(auth0.payload.sub);
+            if (teacher_info) {
+                resolve({...teacher_info, role: "teacher"});
+                return;
+            }
+
+            // Neither student nor teacher found
+            resolve(null);
+        } catch (error) {
+            reject(error);
+        }
+    });
 };
 
 // This function is used to retrieve the degree of a student
@@ -51,10 +78,33 @@ exports.getStudentDegree = (id) => {
         else{
             let degree = { cod_degree: row.cod_degree, title_degree: row.title_degree };
             resolve(degree);
-        }    
+        }
     });
-}
+};
 
+/**
+ * Return some data of the student with the given id
+ *
+ * @param {string} id
+ * @return {Promise<StudentPartialRow | null>}
+ */
+exports.getStudentById = (id) => {
+    return new Promise( resolve => {
+        const sql = 'SELECT id, surname, name, email FROM student WHERE id = ?';
+        const row = db.prepare(sql).get(id);
+        if (!row) {
+            resolve(null);
+        }
 
+        resolve({ id: row.id, surname: row.surname, name: row.name, email: row.email });
+    })
+};
 
-  
+/**
+ * @typedef {Object} StudentPartialRow
+ *
+ * @property {string} id
+ * @property {string} surname
+ * @property {string} name
+ * @property {string} email
+ */

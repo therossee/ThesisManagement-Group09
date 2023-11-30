@@ -1,169 +1,50 @@
 require('jest');
 const request = require("supertest");
-const service = require("../users_dao");
+const usersDao = require("../users_dao");
 const {app, server} = require("../index");
 const passport = require('passport');
 
 jest.mock('../users_dao', () => ({
   getUser: jest.fn(),
+  getUserInfo: jest.fn(),
 }));
 
-describe('Integration Tests for Authentication APIs', () => {
-    afterAll((done) => {
-      jest.resetAllMocks();
-      server.close(done);
-    }); 
-    test('should return 401 for an unsuccessful  (inexistent user)', async () => {
-        const response = await request(app)
-          .post('/api/sessions')
-          .send({ username: 'invalid@example.com', password: 'invalidPassword' })
-          .set('Accept', 'application/json');
-    
-        expect(response.status).toBe(401);
-        expect(response.body).toEqual('Incorrect email and/or password');
-    });
-    test('should return 401 for an unsuccessful  (wrong password)', async () => {
-          const response = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'fontana.caldo@email.com', password: 'invalidPassword' })
-            .set('Accept', 'application/json');
-      
-          expect(response.status).toBe(401);
-          expect(response.body).toEqual('Incorrect email and/or password');
-    });
-    test('should return 201 for a successful login of a student', async () => {
-      service.getUser.mockResolvedValue(
-        { 
-          id: 's1',
-          surname: 'C',
-          name: 'A',
-          gender: 'MALE',
-          nationality: 'It',
-          email: 'c.a@email.com', 
-          cod_degree: 'LM-1',
-          enrollment_year: 2021
-        }
-      );
-
-        const response = await request(app)
-          .post('/api/sessions')
-          .send({ username: 'c.a@email.com', password: 's1' })
-          .set('Accept', 'application/json');
-    
-        expect(response.status).toBe(201);
-        expect(response.body).toEqual(
-          {
-            id: 's1',
-            surname: 'C',
-            name: 'A',
-            gender: 'MALE',
-            nationality: 'It',
-            email: 'c.a@email.com', 
-            cod_degree: 'LM-1',
-            enrollment_year: 2021
-          }
-        )
-    });
-    test('should return 201 for a successful login of a teacher', async () => {
-      service.getUser.mockResolvedValue(
-        { 
-          id: 'd1',
-          surname: 'R',					
-          name: 'M',
-          email: 'r.m@email.com', 
-          cod_group: 'Group1',
-          cod_department: 'Dep1'
-        }
-      );
-      const response = await request(app)
-        .post('/api/sessions')
-        .send({ username: 'r.m@email.com', password: 'd1' })
-        .set('Accept', 'application/json');
-  
-      expect(response.status).toBe(201);
-      expect(response.body).toEqual(
-        {
-          id: 'd1',
-          surname: 'R',					
-          name: 'M',
-          email: 'r.m@email.com', 
-          cod_group: 'Group1',
-          cod_department: 'Dep1'
-        }
-      )
-    });
-    test('should return 200 for the current logged user', async () => {
-      service.getUser.mockResolvedValue(
-        { 
-          id: 's1',
-          surname: 'C',
-          name: 'A',
-          gender: 'MALE',
-          nationality: 'It',
-          email: 'c.a@email.com', 
-          cod_degree: 'LM-1',
-          enrollment_year: 2021
-        }
-      );
-
-        const loginResponse = await request(app)
-          .post('/api/sessions')
-          .send({ username: 'c.a@email.com', password: 's1' })
-          .set('Accept', 'application/json')
-
-        expect(loginResponse.status).toBe(201);
-        // Check if cookies are present in the login response
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-
-        const response = await request(app)
-          .get('/api/sessions/current')
-          .set('Accept', 'application/json')
-          .set('Cookie', loginResponse.headers['set-cookie']);
-    
-        expect(response.status).toBe(200);
-        expect(response.body).toEqual(
-          { 
-            id: 's1',
-            surname: 'C',
-            name: 'A',
-            gender: 'MALE',
-            nationality: 'It',
-            email: 'c.a@email.com', 
-            cod_degree: 'LM-1',
-            enrollment_year: 2021
-          }
-        );        
-    });
-    test('should return an error for an authentication failure', async () => {
-      const authenticateSpy = jest.spyOn(passport, 'authenticate');
-      authenticateSpy.mockImplementation((strategy, callback) => {
-          const err = new Error('Authentication failed');
-          return (req, res, next) => callback(err, null, null, next);
-      });
-
-      const response = await request(app)
-          .post('/api/sessions')
-          .send({ username: 'invalid@example.com', password: 'invalidPassword' })
-          .set('Accept', 'application/json');
-
-      expect(response.status).toBe(500); 
-      
-      authenticateSpy.mockRestore();
-    });
-    test('should return 204 for a successful logout', async () => {
-        const logoutResponse = await request(app)
-          .delete('/api/sessions/current')
-          .set('Accept', 'application/json');
-    
-        expect(logoutResponse.status).toBe(204);
-    
-        // Verify that the user is no longer authenticated
-        const getCurrentUserResponse = await request(app)
-          .get('/api/sessions/current')
-          .set('Accept', 'application/json');
-    
-        expect(getCurrentUserResponse.status).toBe(401);
-        expect(getCurrentUserResponse.body).toEqual('Not authenticated');
-    });
+afterAll((done) => {
+  jest.clearAllMocks();
+  jest.resetAllMocks();
+  server.close(done);
 });
+
+const teacherAccessToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Imt4VHlraUVwT05RRnYxZG4tc2JXVSJ9.eyJpc3MiOiJodHRwczovL3RoZXNpcy1tYW5hZ2VtZW50LTA5LmV1LmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw2NTY0ZjgzYTAyMmY2YjIwODNiNmI4YzkiLCJhdWQiOlsiaHR0cHM6Ly90aGVzaXMtbWFuYWdlbWVudC0wOS5ldS5hdXRoMC5jb20vYXBpL3YyLyIsImh0dHBzOi8vdGhlc2lzLW1hbmFnZW1lbnQtMDkuZXUuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcwMTI4MzE1MywiZXhwIjoxNzAxMzY5NTUzLCJhenAiOiJvNUkxUU5UQUJ3Ylg2ZzF4YzJseG90YTlhWlFFc092QSIsInNjb3BlIjoib3BlbmlkIHJlYWQ6Y3VycmVudF91c2VyIHVwZGF0ZTpjdXJyZW50X3VzZXJfbWV0YWRhdGEifQ.MWkwMZZMKPyu1Xxzx-YxE9wSzZuYMaNrph04FZEaNyO3AX32Ovjnx5T9Y1-S_xUv2QPWMWsZJuWuycRDZOQRzhRplU9-S4aforzSZPDHMqWzASRqSGfyAfxKc-RX36zd6TPRxLpFcd5IrlkkJ_VxsjbuNXW1Lt1M-X4XKBIWicXWtIBvVPsVyUjZRA00FnmmsX2kjutiWJ21kaIcp1rqlNvcS7RdoBR8q_wxan81SIHObMZLX45hds1nJfnjVyOzw0ZqjUFXSb00P8qiy70Un6a1VcqMtqmpaeagfOheRJ6_z311O5W3mH5vG3C2CbFJPShcPAPgTSSRRUuvEEZVwg";
+const studentAccessToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Imt4VHlraUVwT05RRnYxZG4tc2JXVSJ9.eyJpc3MiOiJodHRwczovL3RoZXNpcy1tYW5hZ2VtZW50LTA5LmV1LmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw2NTYzNWQwMzZkODc3MjliNmIzZmZlODMiLCJhdWQiOlsiaHR0cHM6Ly90aGVzaXMtbWFuYWdlbWVudC0wOS5ldS5hdXRoMC5jb20vYXBpL3YyLyIsImh0dHBzOi8vdGhlc2lzLW1hbmFnZW1lbnQtMDkuZXUuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcwMTI4OTAyNywiZXhwIjoxNzAxMzc1NDI3LCJhenAiOiJvNUkxUU5UQUJ3Ylg2ZzF4YzJseG90YTlhWlFFc092QSIsInNjb3BlIjoib3BlbmlkIHJlYWQ6Y3VycmVudF91c2VyIHVwZGF0ZTpjdXJyZW50X3VzZXJfbWV0YWRhdGEifQ.fNl9K0uZHNWOIbiWQ4VINR6HprQbxpGwXn2UNTm7Wuqgh5a7lmBr-cdMmD3D2Im1mXEyB6YS9V6L9BI0YK7Cp7AB9fsUSNb2kmM2KqMgbbEemKfONm8czAj5e34wO-uQEn5J8JEWdrV8pHPnglzNy_AMKkZH_I-EHMxJLmIRJXxPxxfge5yno7r7WQKxvaklq3w5CFv0YDd0thLlHxz5swu2Ag1SE3Md7dmxBrNShGRGuCU882mN87aewzVIH6bfEo02m92lPIj3h272IZH3uW9ow8ZkkY9GIA4DThnF8eZiaUe8caruO06ClDjM6BuiJLCE41nfZSCJQ_nKMzm17g"
+
+describe('GET /users', () => {
+  test('should return user information with valid authentication', async () => {
+    // Mock getUserInfo function
+    jest.spyOn(usersDao, 'getUserInfo').mockResolvedValue({ id: 'd12345', name: 'mockName' });
+
+    // Make a request to the endpoint
+    const response = await request(app)
+      .get('/api/user')
+      .set('Authorization', `Bearer ${teacherAccessToken}`);
+
+    // Assertions
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ id: 'd12345', name: 'mockName' });
+  });
+
+  test('should return 503 error with invalid authentication', async () => {
+    // Mock getUserInfo function to simulate an error
+    jest.spyOn(usersDao, 'getUserInfo').mockRejectedValue(new Error('Simulated error'));
+
+    // Make a request to the endpoint
+    const response = await request(app)
+      .get('/api/user')
+      .set('Authorization', `Bearer ${teacherAccessToken}`);
+
+    // Assertions
+    expect(response.status).toBe(503);
+    expect(response.body).toBe('error retrieving user info');
+  });
+});
+    

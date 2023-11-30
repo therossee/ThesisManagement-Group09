@@ -1,29 +1,13 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useEffect } from 'react';
 import { notification } from 'antd';
 import MainLayout from './MainLayout';
 import API from './API';
+import { useAuth } from './components/authentication/useAuth';
 import './css/App.css'
-
-// Context for handling user info and user-related functions
-const AuthContext = createContext();
-
-// Hook for using AuthContext
-// Hook usage: const { user, loginLoading, isLoggedIn, isTeacher, doLogIn, doLogOut } = useAuth();
-export function useAuth() {
-  return useContext(AuthContext);
-}
 
 function App() {
 
-  const [user, setUser] = useState(undefined);
-
-  // Keep track in the client if user is isLoggedIn or not
-  // Could also use instead user === undefined but isLoggedIn is used for better comprehension
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isTeacher, setIsTeacher] = useState(false);
-
-  // Handle the login loading state
-  const [loginLoading, setLoginLoading] = useState(false);
+  const { setUserData, isAuthenticated, setIsTeacher, getAccessTokenSilently, setAccessToken, accessToken } = useAuth();
 
   // Handle notification box for api errors during login
   const [api, notificationBox] = notification.useNotification();
@@ -38,55 +22,33 @@ function App() {
   };
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const fetch = async () => {
       try {
-        // Here we have the user info, if already logged in
-        const user = await API.getUserInfo();
-        setIsLoggedIn(true);
-        setUser(user);
-        if (user.id.startsWith("d"))
-          setIsTeacher(true);
+        const token = await getAccessTokenSilently({
+          authorizationParams: {
+            audience: 'https://thesis-management-09.eu.auth0.com/api/v2/',
+            scope: 'read:current_user',
+          },
+        });
+        setAccessToken(token);
+        const user = await API.getUserInfo(token);
+        setIsTeacher(user.role === 'teacher');
+        setUserData(user);
       } catch (err) {
-        // NO need to do anything: user is simply not yet authenticated
+        openNotification(err.message || err);
       }
     };
-    checkAuth();
-  }, []);
 
-  const loginSuccessful = (user) => {
-    setUser(user);
-    setIsLoggedIn(true);
-    if (user.id.startsWith("d"))
-      setIsTeacher(true);
-  }
-
-  const doLogIn = (credentials) => {
-    setLoginLoading(true);
-    API.logIn(credentials)
-      .then(user => {
-        loginSuccessful(user);
-      })
-      .catch(err => {
-        // NB: should not give additional info (e.g., if user exists etc.)
-        openNotification(err.message ? err.message : err);
-        setLoginLoading(false);
-      })
-  }
-
-  const doLogOut = async () => {
-    await API.logOut();
-    setIsLoggedIn(false);
-    setIsTeacher(false);
-    setUser(undefined);
-    setLoginLoading(false);
-    
-  }
+    if (isAuthenticated) {
+      fetch();
+    }
+  }, [isAuthenticated, accessToken ]);
 
   return (
-    <AuthContext.Provider value={{ user, loginLoading, isLoggedIn, isTeacher, doLogIn, doLogOut }}>
+    <>
       {notificationBox}
       <MainLayout />
-    </AuthContext.Provider>
+    </>
   )
 }
 

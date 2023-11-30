@@ -1,22 +1,18 @@
 import Errors from "./Errors";
-import { ThesisProposals } from "../components/ThesisProposals";
-import { useAuth } from "../App";
+import StudentThesisProposals from "../components/StudentThesisProposals";
+import TeacherThesisProposals from "../components/TeacherThesisProposals";
+import { useAuth } from '../components/authentication/useAuth';
 
 function Proposals() {
 
-    const { isLoggedIn, isTeacher } = useAuth();
+    const { isAuthenticated, isTeacher } = useAuth();
 
     return (
+        //Checking !variable is different than checking variable === false. The second one ensures it doesn't return truthy if undefined.
         <>
-            {isLoggedIn ? (
-                isTeacher ? (
-                    "Show there maybe another story like show and edit active proposals by the teacher"
-                ) : (
-                    <ThesisProposals />
-                )
-            ) : (
-                <Errors code="403" />
-            )}
+            {(isTeacher === true) && <TeacherThesisProposals />}
+            {(isAuthenticated === true && isTeacher === false) && <StudentThesisProposals />}
+            {!isAuthenticated && <Errors code="403" />}
         </>
     )
 }

@@ -1,24 +1,35 @@
 'use strict';
 
+const dotenv = require("dotenv");
+dotenv.config({ DOTENV_KEY: process.env.TM_DOTENV_KEY });
+
 /*** Importing modules ***/
+const { ZodError } = require("zod");
 const express = require('express');
 const session = require('express-session');
 const morgan = require('morgan');
 const cors = require('cors');
-const passport = require('passport');
-const LocalStrategy = require('passport-local');
+
+const { auth } = require('express-oauth2-jwt-bearer');
+const jwt = require('jsonwebtoken');
 
 const thesisDao = require('./thesis_dao.js');
 const usersDao = require('./users_dao.js');
 const degreeDao = require('./degree_dao.js');
 const AdvancedDate = require("./AdvancedDate");
 const schemas = require('./schemas.js');
-const {ZodError} = require("zod");
+const { sendEmailApplicationStatusChange } = require("./email");
+const AppError = require("./errors/AppError");
 
 /*** init express and setup the middlewares ***/
 const app = express();
 app.use(express.json());
 app.use(morgan('dev'));
+
+const checkJwt = auth({
+	audience: 'https://thesis-management-09.eu.auth0.com/api/v2/',
+	issuerBaseURL: `https://thesis-management-09.eu.auth0.com/`,
+});
 
 /** Set up and enable Cross-Origin Resource Sharing (CORS) **/
 const corsOptions = {
@@ -28,97 +39,32 @@ const corsOptions = {
   };
 app.use(cors(corsOptions));
 
-// Passport: set up local strategy
-passport.use(new LocalStrategy(async function verify(username, password, cb) {
-  const user = await usersDao.getUser(username, password);
-  if(!user)
-    return cb(null, false, 'Incorrect email and/or password');
-
-  return cb(null, user);
-}));
-
-passport.serializeUser(function (user, cb) {
-  cb(null, user);
-});
-
-passport.deserializeUser(function (user, cb) {
-  return cb(null, user);
-});
-
-app.use(session({
-  secret: "shhhhh... it's a secret!",
-  resave: false,
-  saveUninitialized: false
-}));
-
-// Initialize Passport
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(passport.authenticate('session'));
-
-const isLoggedIn = (req, res, next) => {
-  if(req.isAuthenticated()) {
-    return next();
-  }
-  return res.status(401).json('Not authorized');
-}
-
-const isStudent = (req, res, next) => {
-  if(req.user.id.startsWith('s')){
+const isStudent = async(req, res, next) => {
+  let userInfo = await usersDao.getUserInfo(req.auth);
+  if(userInfo.role==='student'){
     return next();
   }
   return res.status(403).json('Unauthorized');
 }
 
-const isTeacher = (req, res, next) => {
-  if(req.user.id.startsWith('d')){
+const isTeacher = async(req, res, next) => {
+  let userInfo = await usersDao.getUserInfo(req.auth);
+  if(userInfo.role==='teacher'){
     return next();
   }
   return res.status(403).json('Unauthorized');
 }
 
-/*** Authentication APIs ***/
-
-// POST /api/sessions
-app.post('/api/sessions', function(req, res, next) {
-  passport.authenticate('local', (err, user, info) => {
-    if (err)
-      return next(err);
-      if (!user) {
-        // display wrong login messages
-        return res.status(401).json(info);
-      }
-      // success, perform the login
-      req.login(user, (err) => {
-        if (err)
-          return next(err);
-
-        // req.user contains the authenticated user, we send all the user info back
-        return res.status(201).json(req.user);
-      });
-  })(req, res, next);
+app.get('/api/user', 
+checkJwt, 
+async(req, res) => {
+	await usersDao.getUserInfo(req.auth)
+		.then((userInfo) => res.status(200).json(userInfo))
+		.catch((err) => {
+      console.error(err);
+			res.status(503).json('error retrieving user info');
+		});
 });
-
-// GET /api/sessions/current
-app.get('/api/sessions/current', (req, res) => {
-  if(req.isAuthenticated()) {
-    res.json(req.user);
-  }
-  else{
-    res.status(401).json('Not authenticated');
-  }
-});
-
-// DELETE /api/sessions/current
-app.delete('/api/sessions/current', (req, res) => {
-  req.logout((err) => {
-    if (err) {
-      return res.status(500).json({ error: 'Logout failed' });
-    }
-    res.status(204).end();
-  });
-});
-
 
 /*** APIs ***/
 
@@ -152,10 +98,11 @@ app.post('/api/system/virtual-clock', (req, res, next) => {
 });
 
 app.post('/api/teacher/thesis_proposals',
-isLoggedIn,
+checkJwt,
 isTeacher,
 async (req,res) => {
-  const supervisor_id  = req.user.id;
+  let supervisor = await usersDao.getUserInfo(req.auth);
+  const supervisor_id = supervisor.id;
   const {title, internal_co_supervisors_id, external_co_supervisors_id, type, description, required_knowledge, notes, level, cds, keywords} = req.body;
   let expiration = req.body.expiration;
 
@@ -207,11 +154,12 @@ async (req,res) => {
 });
 
 app.get('/api/teachers',
-isLoggedIn,
+checkJwt,
 isTeacher,
 async(req, res) => {
   try {
-    const excludedTeacherId = req.user.id; // logged in teacher
+    let userInfo = await usersDao.getUserInfo(req.auth);
+    const excludedTeacherId = userInfo.id;
     const teacherList = await thesisDao.getTeacherListExcept(excludedTeacherId);
 
     res.json({ teachers: teacherList });
@@ -222,7 +170,7 @@ async(req, res) => {
 });
 
 app.get('/api/externalCoSupervisors',
-isLoggedIn,
+checkJwt,
 isTeacher,
 async(req, res) => {
   try {
@@ -236,7 +184,7 @@ async(req, res) => {
 });
 
 app.get('/api/keywords',
-isLoggedIn,
+checkJwt,
 isTeacher,
 async(req, res) => {
   try {
@@ -249,7 +197,7 @@ async(req, res) => {
 });
 
 app.get('/api/degrees',
-isLoggedIn,
+checkJwt,
 isTeacher,
 async(req, res) => {
   try {
@@ -262,121 +210,209 @@ async(req, res) => {
 });
 
 app.get('/api/thesis-proposals',
-  isLoggedIn,
-  async (req, res) => {
-    try {
-      if (req.user.id.startsWith('s')) {
-        const studentId = req.user.id;
-        const proposals = await thesisDao.listThesisProposalsFromStudent(studentId);
-        const cds = await usersDao.getStudentDegree(studentId);
-        const proposalsPopulated = await Promise.all(
-          proposals.map(async proposal => {
-            return await _populateProposal(proposal, cds);
-          })
-        );
+checkJwt,
+async (req, res) => {
+  try {
+    let userInfo = await usersDao.getUserInfo(req.auth);
+    if (userInfo.role==='student') {
+      const studentId = userInfo.id;
+      const proposals = await thesisDao.listThesisProposalsFromStudent(studentId);
+      const cds = await usersDao.getStudentDegree(studentId);
+      const proposalsPopulated = await Promise.all(
+        proposals.map(async proposal => {
+          return await _populateProposal(proposal, cds);
+        })
+      );
 
-        // Not used right now, but it's here for potential future use
-        const metadata = {
-          index: 0,
-          count: proposals.length,
-          total: proposals.length,
-          currentPage: 1
-        };
-        res.json({ $metadata: metadata, items: proposalsPopulated });
-      } else if (req.user.id.startsWith('d')) {
-        const teacherId = req.user.id;
-        const thesisProposals = await thesisDao.listThesisProposalsTeacher(teacherId);
-        const proposalsPopulated = await Promise.all(
-          thesisProposals.map(async proposal => {
-            const cds = await thesisDao.getThesisProposalCds(proposal.proposal_id);
-            return await _populateProposal(proposal, cds);
-          })
-        );
+      // Not used right now, but it's here for potential future use
+      const metadata = {
+        index: 0,
+        count: proposals.length,
+        total: proposals.length,
+        currentPage: 1
+      };
+      res.json({ $metadata: metadata, items: proposalsPopulated });
+    } else if (userInfo.role==='teacher') {
+      const teacherId = userInfo.id;
+      const thesisProposals = await thesisDao.listThesisProposalsTeacher(teacherId);
+      const proposalsPopulated = await Promise.all(
+        thesisProposals.map(async proposal => {
+          const cds = await thesisDao.getThesisProposalCds(proposal.proposal_id);
+          return await _populateProposal(proposal, cds);
+        })
+      );
 
-        // Not used right now, but it's here for potential future use
-        const metadata = {
-          index: 0,
-          count: thesisProposals.length,
-          total: thesisProposals.length,
-          currentPage: 1
-        };
-        res.json({ $metadata: metadata, items: proposalsPopulated });
-      } else {
-        // Handle unauthorized case if neither student nor teacher
-        res.status(403).json('Unauthorized');
-      }
-    } catch (e) {
-      console.error(e);
-      res.status(500).json('Internal Server Error');
+      // Not used right now, but it's here for potential future use
+      const metadata = {
+        index: 0,
+        count: thesisProposals.length,
+        total: thesisProposals.length,
+        currentPage: 1
+      };
+      res.json({ $metadata: metadata, items: proposalsPopulated });
+    } else {
+      // Handle unauthorized case if neither student nor teacher
+      res.status(403).json('Unauthorized');
     }
+  } catch (e) {
+    console.error(e);
+    res.status(500).json('Internal Server Error');
+  }
 });
 
 app.get('/api/thesis-proposals/:id',
-  isLoggedIn,
-  async (req, res) => {
-    try {
-      if (req.user.id.startsWith('s')) {
-        const studentId = req.user.id;
-        const proposalId = req.params.id;
+checkJwt,
+async (req, res) => {
+try {
+  let userInfo = await usersDao.getUserInfo(req.auth);
 
-        const proposal = await thesisDao.getThesisProposal(proposalId, studentId);
-        const studentDegree = await usersDao.getStudentDegree(studentId);
-        if (!proposal) {
-            return res.status(404).json({ message: `Thesis proposal with id ${proposalId} not found.` });
-        }
+  if (userInfo.role==='student') {
+    const studentId = userInfo.id;
+    const proposalId = req.params.id;
 
-        res.json( await _populateProposal(proposal, studentDegree) );
-      }
-      else if (req.user.id.startsWith('d')) {
-        const teacherId = req.user.id;
-        const proposalId = req.params.id;
+    const proposal = await thesisDao.getThesisProposal(proposalId, studentId);
+    const studentDegree = await usersDao.getStudentDegree(studentId);
+    if (!proposal) {
+        return res.status(404).json({ message: `Thesis proposal with id ${proposalId} not found.` });
+    }
 
-        const proposal = await thesisDao.getThesisProposalTeacher(proposalId, teacherId);
-        const cds = await thesisDao.getThesisProposalCds(proposalId);
-        if (!proposal) {
-          return res.status(404).json({ message: `Thesis proposal with id ${proposalId} not found.` });
-        }
+    res.json( await _populateProposal(proposal, studentDegree) );
+  }
+  else if (userInfo.role==='teacher') {
+    const teacherId = userInfo.id;
+    const proposalId = req.params.id;
 
-        res.json( await _populateProposal(proposal, cds) );
-      }
-      else{
-        // Handle unauthorized case if neither student nor teacher
-        res.status(403).json('Unauthorized');
-      }
-    } catch (e) {
+    const proposal = await thesisDao.getThesisProposalTeacher(proposalId, teacherId);
+    const cds = await thesisDao.getThesisProposalCds(proposalId);
+    if (!proposal) {
+      return res.status(404).json({ message: `Thesis proposal with id ${proposalId} not found.` });
+    }
+
+    res.json( await _populateProposal(proposal, cds) );
+  }
+  else{
+    // Handle unauthorized case if neither student nor teacher
+    res.status(403).json('Unauthorized');
+  }
+} catch (e) {
+  console.error(e);
+  res.status(500).json('Internal Server Error');
+}
+});
+
+app.put('/api/thesis-proposals/:id',
+checkJwt,
+isTeacher,
+async (req, res) => {
+  try {
+    const proposal_id = req.params.id;
+    const supervisor = await usersDao.getUserInfo(req.auth);
+    const supervisor_id  = supervisor.id;
+
+    const applications = await thesisDao.listApplicationsForTeacherThesisProposal(proposal_id, supervisor_id);
+    if (applications.some( application => application.status === 'accepted' )) {
+        return res.status(403).json({ message: 'Cannot edit a proposal with accepted applications.' });
+    }
+
+    const thesis = schemas.APIThesisProposalSchema.parse(req.body);
+
+    // Set to store all grous
+    const unique_groups = new Set();
+    await thesisDao.getGroup(supervisor_id).then( group => unique_groups.add(group) );
+    await Promise.all(
+        thesis.internal_co_supervisors_id.map(async id => {
+          return thesisDao.getGroup(id).then( group => unique_groups.add(group) );
+        })
+    );
+    thesis.groups = [...unique_groups];
+
+    const id = await thesisDao.updateThesisProposal(proposal_id, supervisor_id, thesis);
+    if (!id) {
+      return res.status(404).json({ message: `Thesis proposal with id ${proposal_id} not found.` });
+    }
+
+    const proposal = await thesisDao.getThesisProposalById(proposal_id);
+    if (!proposal) {
+      return res.status(404).json({ message: `Thesis proposal with id ${proposal_id} not found.` });
+    }
+    const cds = await thesisDao.getThesisProposalCds(proposal_id);
+
+    res.status(200).send( await _populateProposal(proposal, cds) );
+  } catch (e) {
+    if (e instanceof ZodError) {
+      res.status(400).json({ message: 'Some properties are missing or invalid.', errors: e.issues });
+    } else {
       console.error(e);
       res.status(500).json('Internal Server Error');
     }
-});
+  }
+}
+);
+
+app.delete('/api/thesis-proposals/:id',
+  checkJwt,
+  isTeacher,
+  async (req, res) => {
+    try {
+      const userInfo = await usersDao.getUserInfo(req.auth);
+      const teacherId = userInfo.id;
+      const proposalId = req.params.id;
+
+      await thesisDao.deleteThesisProposalById(proposalId, teacherId)
+          .then( applicationsCancelled => {
+            setImmediate( () => {
+              const reason = 'The thesis proposal has been removed from the website.';
+              for (const application of applicationsCancelled) {
+                _notifyApplicationStatusChange(application.student_id, application.proposal_id, application.status, reason);
+              }
+            });
+
+            return res.status(204).send();
+          })
+          .catch( error => {
+            if (error instanceof AppError) {
+              return error.sendHttpResponse(res);
+            } else {
+              throw error;
+            }
+          });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
+);
 
 app.post('/api/student/applications',
-isLoggedIn,
+checkJwt,
 isStudent,
 async(req,res) => {
-    const student_id = req.user.id; // logged in student
+    let studentInfo = await usersDao.getUserInfo(req.auth); // logged student
+    const student_id = studentInfo.id;
     const {thesis_proposal_id} = req.body;
     await thesisDao.applyForProposal(thesis_proposal_id, student_id).then
-    ((applicationId)=>{  
+    ((applicationId)=>{
       res.status(201).json(
-        { 
-          thesis_proposal_id: thesis_proposal_id, 
+        {
+          thesis_proposal_id: thesis_proposal_id,
           student_id: student_id,
           status: 'waiting for approval'
         });
     })
   .catch((error) => {
-    console.error(error); 
+    console.error(error);
     res.status(500).json(`Failed to apply for proposal. ${error.message || error}`);
   });
 });
 
 app.get('/api/teacher/applications/:proposal_id',
-isLoggedIn,
+checkJwt,
 isTeacher,
 async (req, res) => {
   try {
+    let userInfo = await usersDao.getUserInfo(req.auth);
+    const teacherId = userInfo.id;
     const proposal_id=req.params.proposal_id;
-    const teacherId = req.user.id;
     const applications = await thesisDao.listApplicationsForTeacherThesisProposal(proposal_id, teacherId);
     res.json(applications);
   } catch (e) {
@@ -385,13 +421,14 @@ async (req, res) => {
   }
 });
 
-app.get('/api/student/applications',
-isLoggedIn,
+app.get('/api/student/active-application',
+checkJwt,
 isStudent,
 async (req, res) => {
   try {
-    const studentId = req.user.id;
-    const studentApplications = await thesisDao.getStudentApplications(studentId)
+    let userInfo = await usersDao.getUserInfo(req.auth);
+    const studentId = userInfo.id;
+    const studentApplications = await thesisDao.getStudentActiveApplication(studentId)
     res.json(studentApplications);
   } catch (e) {
     console.error(e);
@@ -400,45 +437,60 @@ async (req, res) => {
 });
 
 app.patch('/api/teacher/applications/accept/:proposal_id',
-  isLoggedIn,
-  isTeacher,
-  async (req, res) => {
-    const { proposal_id } = req.params;
-    const { student_id } = req.body;
+checkJwt,
+isTeacher,
+async (req, res) => {
+const { proposal_id } = req.params;
+const { student_id } = req.body;
 
     if (!student_id ) {
-      return res.status(400).json({ error: 'Missing required fields.' });
+      return res.status(400).json({ message: 'Missing required fields.' });
     }
 
     try {
-      await thesisDao.updateApplicationStatus(student_id, proposal_id, "accepted");
+      const status = "accepted";
+      const success = await thesisDao.updateApplicationStatus(student_id, proposal_id, status);
+      if (!success) {
+        return res.status(404).json({ message: `No application with the status "waiting for approval" found for this proposal.` });
+      }
+      setImmediate( async () => _notifyApplicationStatusChange(student_id, proposal_id, status) );
 
-      const rejected = await thesisDao.rejectOtherApplications(student_id, proposal_id);
+      const applicationsCancelled = await thesisDao.cancelOtherApplications(student_id, proposal_id);
+      setImmediate(async () => {
+        const reason = 'Another student has been accepted for this thesis proposal.';
+        for (const application of applicationsCancelled) {
+          _notifyApplicationStatusChange(application.student_id, application.proposal_id, application.status, reason);
+        }
+      });
 
-      res.status(200).json({ message: 'Thesis accepted and others rejected successfully' });
+  res.status(200).json({ message: 'Thesis accepted and others rejected successfully' });
 
-    } catch (error) {
-      console.error(error);
-      res.status(500).json(`Internal Server Error`);
-    }
-
+} catch (error) {
+  console.error(error);
+  res.status(500).json(`Internal Server Error`);
+}
 })
 
 app.patch('/api/teacher/applications/reject/:proposal_id',
-isLoggedIn,
+checkJwt,
 isTeacher,
 async (req, res) => {
   const { proposal_id } = req.params;
   const { student_id } = req.body;
 
   if (!student_id ) {
-    return res.status(400).json({ error: 'Missing required fields.' });
+    return res.status(400).json({ message: 'Missing required fields.' });
   }
 
   try {
-    await thesisDao.updateApplicationStatus(student_id, proposal_id, "rejected");
-    res.status(200).json({ message: 'Thesis successfully rejected' });
+    const status = "rejected";
+    const success = await thesisDao.updateApplicationStatus(student_id, proposal_id, status);
+    if (!success) {
+        return res.status(404).json({ message: `No application with the status "waiting for approval" found for this proposal.` });
+    }
+    setImmediate( async () => _notifyApplicationStatusChange(student_id, proposal_id, status) );
 
+    res.status(200).json({ message: 'Thesis successfully rejected' });
   } catch (error) {
     console.error(error);
     res.status(500).json(`Internal Server Error`);
@@ -446,12 +498,27 @@ async (req, res) => {
 
 })
 
+app.get('/api/student/applications-decision',
+checkJwt,
+isStudent,
+async (req, res) => {
+  try {
+    let userInfo = await usersDao.getUserInfo(req.auth);
+    const studentId = userInfo.id;
+    const applications = await thesisDao.listApplicationsDecisionsFromStudent(studentId);
+    res.json(applications);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json('Internal Server Error');
+  }
+});
+
 const PORT = 3000;
 const server = app.listen(PORT, () => {
   console.log(`Server started on http://localhost:${PORT}/`);
 });
 
-module.exports = { app, server };
+module.exports = { app, server, checkJwt };
 
 /**
  * Serialize and populate a proposal object in order to have all the data needed by the API
@@ -521,4 +588,32 @@ function _serializeTeacher(teacher) {
     codGroup: teacher.cod_group,
     codDepartment: teacher.cod_department
   };
+}
+
+/**
+ * Notify the student that the status of his/her application has changed.
+ *
+ * @param {string} studentId
+ * @param {string} proposalId
+ * @param {string} status
+ * @param {string} [reason]
+ *
+ * @return {Promise<void>}
+ * @private
+ */
+async function _notifyApplicationStatusChange (studentId, proposalId, status, reason) {
+  const student = await usersDao.getStudentById(studentId);
+  if (!student) {
+    console.error(`Student with id "${studentId}" not found, cannot notify application status change.`);
+    return;
+  }
+
+  const thesis = await thesisDao.getThesisProposalById(proposalId);
+  if (!thesis) {
+    console.error(`Thesis proposal with id "${proposalId}" not found, cannot notify application status change.`);
+    return;
+  }
+
+  sendEmailApplicationStatusChange(student.email, thesis, status, reason)
+      .catch( e => console.error(`Failed to send email to student "${studentId}"`, e) );
 }

@@ -1,21 +1,21 @@
 import { useNavigate } from 'react-router-dom';
-import { HomeOutlined, FileTextOutlined, AuditOutlined, SettingOutlined } from '@ant-design/icons';
+import { HomeOutlined, FileTextOutlined, HistoryOutlined, AuditOutlined, SettingOutlined } from '@ant-design/icons';
 import { Layout, Menu } from 'antd';
-import { useAuth } from '../App';
+import { useAuth } from './authentication/useAuth';
 import '../css/style.css';
 
 const { Sider } = Layout;
 
 function SideBar() {
 
-  const { isLoggedIn, isTeacher } = useAuth();
+  const { isAuthenticated, isTeacher } = useAuth();
   const navigate = useNavigate();
 
   // Define the menu items, using directly the route path as key
   const navigation = [
     { label: "Home", key: "/", icon: <HomeOutlined /> },
-    (isLoggedIn && !isTeacher) && { label: "Thesis Proposals", key: "/proposals", icon: <FileTextOutlined /> },
-    (isLoggedIn && isTeacher) && { label: "Thesis Applications", key: "/applications", icon: <AuditOutlined /> },
+    isAuthenticated && { label: "Thesis Proposals", key: "/proposals", icon: <FileTextOutlined /> },
+    isAuthenticated && { label: isTeacher ? "Thesis Applications" : "Applications History", key: "/applications", icon: isTeacher ? <AuditOutlined /> : <HistoryOutlined /> },
     { type: 'divider' },
     { label: "Administration", key: "/admin/virtual-clock", icon: <SettingOutlined /> }
   ];
