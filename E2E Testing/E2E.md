@@ -1,9 +1,6 @@
 # End 2 End Testing
 This file contains the information related to the end 2 end testing of the project. Basically, it contains reference to each detailed test case with some more information.
 
-## Table of Contents
-TODO
-
 ---
 
 ## Requirements
@@ -52,10 +49,16 @@ This test case is related to the creation of a thesis proposal by the teacher. D
 
 1. Go to the [home page](http://localhost:5173/)
 2. Log in as a teacher
-    - You should see a new icon on the top bar menu
+    - You should see a new icon on the top bar menu 
 3. Click on the top bar menu new icon
    - You should access the page to [create a new thesis proposal](http://localhost:5173/insert-proposal)
-4. TODO (not implemented yet)
+4. Insert all the fields (the ones marked with a red '*' are mandatory), try to not insert all of them and an error will be displayed
+5. Scroll till the end of the page and click on 'Add thesis proposal'
+    - then an overview of what you inserted will appear
+6. Again scroll till the end of the page and confirm the insertion of the thesis proposal
+7. Return to [home page](http://localhost:5173/)
+8. Log out
+
 
 ### [4] Security of pages
 This test case is related to the security of the pages. During this test case, we will check that the security is correctly done and that the user can access to the correct pages while the other pages are not accessible.
