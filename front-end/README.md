@@ -53,7 +53,6 @@ Main functions:
 - `API.jsx` : Main API functions as:
       - APIs for auth:
             - `getUserInfo`: retrieves user information.
-
       - Virtual Clock APIs :
             - `getClock`: function to obtain the setted data and offset 
             - `updateClock`: function to update the system virtual clock
