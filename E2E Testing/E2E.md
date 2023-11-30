@@ -52,11 +52,12 @@ This test case is related to the creation of a thesis proposal by the teacher. D
     - You should see a new icon on the top bar menu 
 3. Click on the top bar menu new icon
    - You should access the page to [create a new thesis proposal](http://localhost:5173/insert-proposal)
-4. Insert all the fields (the ones marked with a red '*' are mandatory), try to not insert all of them and an error will be displayed
-5. Scroll till the end of the page and click on 'Add thesis proposal'
-    - then an overview of what you inserted will appear
-6. Again scroll till the end of the page and confirm the insertion of the thesis proposal
-7. Return to [home page](http://localhost:5173/)
+4. Insert all the fields (the ones marked with a red '*' are mandatory), try to not insert all of them and Submit and an error will be displayed
+5. Scroll till the end of the page and click on 'Submit'
+    - then an overview of what you inserted will appear -> Review the proposal to be sure is how you wanted it
+6. Again scroll till the end of the page and confirm the insertion of the thesis proposal by clicking on 'Next' button
+7. A message will be displayed of the correct insertion of the proposal and a button to [home page](http://localhost:5173/) will be present
+9. Click on that button
 8. Log out
 
 
