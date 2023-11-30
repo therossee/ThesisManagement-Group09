@@ -15,6 +15,11 @@ jest.mock('../db', () => ({
   transaction: jest.fn().mockImplementation(callback => callback),
 }));
 
+afterAll(() => {
+  jest.restoreAllMocks(); // Restore original functionality after all tests
+  jest.clearAllMocks();
+});
+
 describe('createThesisProposal', () => {
   beforeEach(() => {
     // Reset the mock before each test
@@ -198,7 +203,6 @@ describe('updateThesisProposal', () => {
   });
 });
 
-// 2. Test Function to get list of teachers not logged
 describe('getTeacherListExcept', () => {
   afterEach(() => {
     jest.restoreAllMocks()
@@ -278,7 +282,6 @@ describe('getExternalCoSupervisors', () => {
   });
 });
 
-// 3. Test function to retrieve the cod_group of a teacher
 describe('getGroup', () => {
   afterEach(() => {
     jest.restoreAllMocks()
@@ -724,7 +727,8 @@ describe('listThesisProposalsTeacher', () => {
             AND A.status = 'accepted'
         )
         AND P.expiration > ?
-        AND creation_date < ?;`;
+        AND creation_date < ?
+        AND is_deleted = 0;`;
     // Mock the SQLite database query
     db.prepare.mockClear().mockReturnValueOnce({ all: jest.fn(() => mockProposals) });
 
@@ -773,7 +777,8 @@ describe('listApplicationsForTeacherThesisProposal', () => {
       AND tp.supervisor_id= ? 
       AND ta.creation_date < ?
       AND tp.expiration > ?
-      AND tp.creation_date < ?`;
+      AND tp.creation_date < ?
+      AND tp.is_deleted = 0;`;
     // Assertions
     expect(result).toEqual(mockApplications);
     expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
@@ -999,13 +1004,11 @@ describe('getThesisProposalById', () => {
     const expectedQuery = `SELECT * FROM thesisProposal P
         JOIN proposalCds PC ON P.proposal_id = PC.proposal_id
         JOIN degree D ON PC.cod_degree = D.cod_degree
-        WHERE P.proposal_id = ?;`;
+        WHERE P.proposal_id = ? AND is_deleted = 0;`;
 
     expect(result).toEqual(expectedResult);
     expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
-
   });
-
 });
 
 describe('getThesisProposalTeacher', () => {
