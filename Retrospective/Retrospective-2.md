@@ -1,4 +1,4 @@
-RETROSPECTIVE-1 (Team 09)
+RETROSPECTIVE-2 (Team 09)
 =====================================
 
 ### Sections:
@@ -67,7 +67,7 @@ hours spent for fixing issues, improving based on feedback, refactoring, etc.
   - Nr of automated unit test cases: 5 suites (79 total tests)
   - Coverage:
 
-    <img src="./Retrospective-2-unit.png" alt="Unit tests coverage" width="60%" height="60%">
+    <img src="./Retrospective-2-unit.png" alt="Unit tests coverage" width="70%" height="70%">
 
 - Integration Testing:
   - Total hours estimated: **8h50m**
@@ -76,7 +76,7 @@ hours spent for fixing issues, improving based on feedback, refactoring, etc.
   - Coverage:
 
     <img src="./Retrospective-2-integration.jpg" alt="Unit tests coverage" width="70%" height="70%">
-**Notes:** Currently, we have a big problem with our integration tests due to the external authentication service. Before
+**Notes:** Currently, there is a problem with integration tests due to the external authentication service. Before
 running them, we need to update the token used for authentication. This is a manual process that should be automated in
 the next sprint but that explains why we can encounter some failures in the integration tests.
   
