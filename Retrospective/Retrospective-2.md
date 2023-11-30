@@ -72,7 +72,7 @@ hours spent for fixing issues, improving based on feedback, refactoring, etc.
 - Integration Testing:
   - Total hours estimated: **8h50m**
   - Total hours spent: **7h 05m**
-  - Nr of automated unit test cases: 2 suites (55 total tests)
+  - Nr of automated unit test cases: 3 suites (65 total tests)
   - Coverage:
 
     <img src="./Retrospective-2-integration.jpg" alt="Unit tests coverage" width="70%" height="70%">
