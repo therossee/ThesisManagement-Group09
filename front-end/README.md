@@ -44,8 +44,8 @@ Main functions:
    - `rejectApplication` : Reject the thesis application from a student
 - `TeacherThesisProposals.jsx`: Allows teachers to view and manage thesis proposals. Provides a table with detailed information on thesis proposals, allowing quick access to the visualization and editing actions of each proposal.
 - `TopBar.jsx` : Definition for the TopBar with:
-      - `LoginForm` : Form for the login inserted in the topbar.
-      - `IsLoggedInForm` : Form when the user has alredy logged in.
+  - `LoginForm` : Form for the login inserted in the topbar.
+  - `IsLoggedInForm` : Form when the user has alredy logged in.
 - `ViewThesisProposal` : Allows users to view specific details of a thesis proposal. Provides a detailed view of the proposal, including title, level, type, expiration date, description, required knowledge, supervisor, co-supervisors, groups, notes, keywords and, if the user is a lecturer, also the course of study (CdS). Students have the opportunity to apply for the proposal..
 
 
