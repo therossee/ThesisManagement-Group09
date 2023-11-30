@@ -4,6 +4,7 @@ const service = require("../thesis_dao");
 const degreeService = require("../degree_dao");
 const usersService = require("../users_dao");
 const schemas = require("../schemas");
+const AppError = require("../errors/AppError");
 const {app, server} = require("../index");
 const { serialize } = require('../db');
 const AdvancedDate = require('../AdvancedDate');
@@ -29,16 +30,20 @@ jest.mock('../thesis_dao', () => ({
     applyForProposal: jest.fn(),
     getStudentActiveApplication: jest.fn(),
     updateApplicationStatus: jest.fn(),
-    rejectOtherApplications: jest.fn(),
+    cancelOtherApplications: jest.fn(),
     getThesisProposalCds: jest.fn(),
     getThesisProposalTeacher: jest.fn(),
     listApplicationsDecisionsFromStudent: jest.fn(),
     updateThesisProposal: jest.fn(),
+    deleteThesisProposalById: jest.fn(),
+    _notifyApplicationStatusChange: jest.fn(),
 }));
 
 jest.mock('../users_dao', () => ({
-    getUser: jest.fn(),
+    getUserInfo: jest.fn(),
+    getUserInfo: jest.fn(),
     getStudentDegree: jest.fn(),
+    getStudentById: jest.fn()
 }));
 
 jest.mock('../degree_dao', () => ({
@@ -46,9 +51,13 @@ jest.mock('../degree_dao', () => ({
 }));
 
 afterAll((done) => {
+    jest.clearAllMocks();
     jest.resetAllMocks();
     server.close(done);
 });
+
+const teacherAccessToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Imt4VHlraUVwT05RRnYxZG4tc2JXVSJ9.eyJpc3MiOiJodHRwczovL3RoZXNpcy1tYW5hZ2VtZW50LTA5LmV1LmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw2NTY0ZjgzYTAyMmY2YjIwODNiNmI4YzkiLCJhdWQiOlsiaHR0cHM6Ly90aGVzaXMtbWFuYWdlbWVudC0wOS5ldS5hdXRoMC5jb20vYXBpL3YyLyIsImh0dHBzOi8vdGhlc2lzLW1hbmFnZW1lbnQtMDkuZXUuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcwMTI4MzE1MywiZXhwIjoxNzAxMzY5NTUzLCJhenAiOiJvNUkxUU5UQUJ3Ylg2ZzF4YzJseG90YTlhWlFFc092QSIsInNjb3BlIjoib3BlbmlkIHJlYWQ6Y3VycmVudF91c2VyIHVwZGF0ZTpjdXJyZW50X3VzZXJfbWV0YWRhdGEifQ.MWkwMZZMKPyu1Xxzx-YxE9wSzZuYMaNrph04FZEaNyO3AX32Ovjnx5T9Y1-S_xUv2QPWMWsZJuWuycRDZOQRzhRplU9-S4aforzSZPDHMqWzASRqSGfyAfxKc-RX36zd6TPRxLpFcd5IrlkkJ_VxsjbuNXW1Lt1M-X4XKBIWicXWtIBvVPsVyUjZRA00FnmmsX2kjutiWJ21kaIcp1rqlNvcS7RdoBR8q_wxan81SIHObMZLX45hds1nJfnjVyOzw0ZqjUFXSb00P8qiy70Un6a1VcqMtqmpaeagfOheRJ6_z311O5W3mH5vG3C2CbFJPShcPAPgTSSRRUuvEEZVwg";
+const studentAccessToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Imt4VHlraUVwT05RRnYxZG4tc2JXVSJ9.eyJpc3MiOiJodHRwczovL3RoZXNpcy1tYW5hZ2VtZW50LTA5LmV1LmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw2NTYzNWQwMzZkODc3MjliNmIzZmZlODMiLCJhdWQiOlsiaHR0cHM6Ly90aGVzaXMtbWFuYWdlbWVudC0wOS5ldS5hdXRoMC5jb20vYXBpL3YyLyIsImh0dHBzOi8vdGhlc2lzLW1hbmFnZW1lbnQtMDkuZXUuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcwMTI4OTAyNywiZXhwIjoxNzAxMzc1NDI3LCJhenAiOiJvNUkxUU5UQUJ3Ylg2ZzF4YzJseG90YTlhWlFFc092QSIsInNjb3BlIjoib3BlbmlkIHJlYWQ6Y3VycmVudF91c2VyIHVwZGF0ZTpjdXJyZW50X3VzZXJfbWV0YWRhdGEifQ.fNl9K0uZHNWOIbiWQ4VINR6HprQbxpGwXn2UNTm7Wuqgh5a7lmBr-cdMmD3D2Im1mXEyB6YS9V6L9BI0YK7Cp7AB9fsUSNb2kmM2KqMgbbEemKfONm8czAj5e34wO-uQEn5J8JEWdrV8pHPnglzNy_AMKkZH_I-EHMxJLmIRJXxPxxfge5yno7r7WQKxvaklq3w5CFv0YDd0thLlHxz5swu2Ag1SE3Md7dmxBrNShGRGuCU882mN87aewzVIH6bfEo02m92lPIj3h272IZH3uW9ow8ZkkY9GIA4DThnF8eZiaUe8caruO06ClDjM6BuiJLCE41nfZSCJQ_nKMzm17g"
 
 describe('GET /api/teachers', () => {
     test('returns a list of teachers excluding the logged-in teacher', async () => {
@@ -57,30 +66,20 @@ describe('GET /api/teachers', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         service.getTeacherListExcept.mockResolvedValue([
             { id: 'd2', name: 'Teacher2' },
             { id: 'd3', name: 'Teacher3' },
         ]);
 
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
-
         const response = await request(app)
             .get('/api/teachers')
             .set('Accept', 'application/json')
-            .set('Cookie', cookies);
+            .set('Authorization', `Bearer ${teacherAccessToken}`);
 
         // Verify that the response contains the expected data
         expect(response.body.teachers).toEqual([
@@ -99,27 +98,18 @@ describe('GET /api/teachers', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         service.getTeacherListExcept.mockRejectedValue(new Error('Mocked error during getTeacherListExcept'));
 
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
 
         const response = await request(app)
             .get('/api/teachers')
             .set('Accept', 'application/json')
-            .set('Cookie', cookies)
+            .set('Authorization', `Bearer ${teacherAccessToken}`)
             .expect(500);
 
 
@@ -135,30 +125,20 @@ describe('GET /api/externalCoSupervisors', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         service.getExternalCoSupervisorList.mockResolvedValue([
             { id: '1', name: 'ExternalCoSupervisor1' },
             { id: '2', name: 'ExternalCoSupervisor2' },
         ]);
 
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
-
         const response = await request(app)
             .get('/api/externalCoSupervisors')
             .set('Accept', 'application/json')
-            .set('Cookie', cookies);
+            .set('Authorization', `Bearer ${teacherAccessToken}`);
 
         // Verify that the response contains the expected data
         expect(response.body.externalCoSupervisors).toEqual([
@@ -174,27 +154,17 @@ describe('GET /api/externalCoSupervisors', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         service.getExternalCoSupervisorList.mockRejectedValue(new Error('Mocked error during getTeacherListExcept'));
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
 
         const response = await request(app)
             .get('/api/externalCoSupervisors')
             .set('Accept', 'application/json')
-            .set('Cookie', cookies)
+            .set('Authorization', `Bearer ${teacherAccessToken}`)
             .expect(500);
 
 
@@ -210,20 +180,10 @@ describe('POST /api/teacher/thesis_proposals', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Mock data for the request body
         const requestBody = {
@@ -249,7 +209,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
         const response = await request(app)
             .post('/api/teacher/thesis_proposals')
             .set('Accept', 'application/json')
-            .set('Cookie', cookies)
+            .set('Authorization', `Bearer ${teacherAccessToken}`)
             .send(requestBody);
 
         expect(response.status).toBe(201);
@@ -279,20 +239,10 @@ describe('POST /api/teacher/thesis_proposals', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Mock data for the request body
         const requestBody = {
@@ -317,7 +267,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
         const response = await request(app)
             .post('/api/teacher/thesis_proposals')
             .set('Accept', 'application/json')
-            .set('Cookie', loginResponse.headers['set-cookie'])
+            .set('Authorization', `Bearer ${teacherAccessToken}`)
             .send(requestBody);
 
         expect(response.status).toBe(201);
@@ -346,20 +296,10 @@ describe('POST /api/teacher/thesis_proposals', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Mock data for the request body
         const requestBody = {
@@ -384,7 +324,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
         const response = await request(app)
             .post('/api/teacher/thesis_proposals')
             .set('Accept', 'application/json')
-            .set('Cookie', cookies)
+            .set('Authorization', `Bearer ${teacherAccessToken}`)
             .send(requestBody);
 
         expect(response.status).toBe(400);
@@ -392,24 +332,15 @@ describe('POST /api/teacher/thesis_proposals', () => {
     });
     test('should return error 403 if not authorized', async () => {
         const mockUser = {
-            id: 's1',
+            id: 'd1',
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'invalidTeacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
 
         // Mock data for the request body
         const requestBody = {
@@ -434,7 +365,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
         const response = await request(app)
             .post('/api/teacher/thesis_proposals')
             .set('Accept', 'application/json')
-            .set('Cookie', cookies)
+            .set('Authorization', `Bearer ${studentAccessToken}`)
             .send(requestBody);
 
         expect(response.status).toBe(403);
@@ -469,28 +400,17 @@ describe('POST /api/teacher/thesis_proposals', () => {
             .send(requestBody);
 
         expect(response.status).toBe(401);
-        expect(response.body).toEqual("Not authorized");
     });
     test('should return error 500 if createThesisProposal throws an error', async () => {
         const mockUser = {
-        id: 'd1',
-        surname: 'R',
-        name: 'M',
-        email: 'r.m@email.com',
-        cod_group: 'Group1',
-        cod_department: 'Dep1',
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-        .post('/api/sessions')
-        .send({ username: 'r.m@email.com', password: 'd1' })
-        .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Mock data for the request body
         const requestBody = {
@@ -516,7 +436,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
         const response = await request(app)
           .post('/api/teacher/thesis_proposals')
           .set('Accept', 'application/json')
-          .set('Cookie', cookies)
+          .set('Authorization', `Bearer ${teacherAccessToken}`)
           .send(requestBody);
 
         // Expecting a 500 status code
@@ -533,18 +453,10 @@ describe('GET /api/keywords', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Mock the response from thesisDao.getAllKeywords
         const mockKeywords = ['Keyword1', 'Keyword2'];
@@ -552,8 +464,8 @@ describe('GET /api/keywords', () => {
 
         // Send a request to the endpoint
         const response = await request(app)
-                               .get('/api/keywords')
-                               .set('Cookie', cookies);
+                            .get('/api/keywords')
+                            .set('Authorization', `Bearer ${teacherAccessToken}`);
 
         // Assertions
         expect(response.status).toBe(200);
@@ -567,18 +479,10 @@ describe('GET /api/keywords', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Mock an error in thesisDao.getAllKeywords
         const mockError = new Error('Mocked error during getAllKeywords');
@@ -587,7 +491,7 @@ describe('GET /api/keywords', () => {
         // Send a request to the endpoint
         const response = await request(app)
                                .get('/api/keywords')
-                               .set('Cookie', cookies);
+                               .set('Authorization', `Bearer ${teacherAccessToken}`);
 
         // Assertions
         expect(response.status).toBe(500);
@@ -604,18 +508,10 @@ describe('GET /api/degrees', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Mock the response from thesisDao.getAllKeywords
         const mockDegrees = [{ cod_degree: 'L-01', title_degree: 'Ingegneria Informatica' }, { cod_degree: 'L-02', title_degree: 'Ingegneria Elettronica' }];
@@ -624,7 +520,7 @@ describe('GET /api/degrees', () => {
         // Send a request to the endpoint
         const response = await request(app)
                                .get('/api/degrees')
-                               .set('Cookie', cookies);
+                               .set('Authorization', `Bearer ${teacherAccessToken}`);
 
         // Assertions
         expect(response.status).toBe(200);
@@ -638,18 +534,10 @@ describe('GET /api/degrees', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Mock an error in thesisDao.getAllKeywords
         const mockError = new Error('Mocked error during getDegrees');
@@ -658,7 +546,7 @@ describe('GET /api/degrees', () => {
         // Send a request to the endpoint
         const response = await request(app)
                                .get('/api/degrees')
-                               .set('Cookie', cookies);
+                               .set('Authorization', `Bearer ${teacherAccessToken}`);
 
         // Assertions
         expect(response.status).toBe(500);
@@ -674,19 +562,9 @@ describe('GET /api/thesis-proposals (student)', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'student',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 's1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         /**
          * @type {ThesisProposalRow[]}
@@ -741,7 +619,7 @@ describe('GET /api/thesis-proposals (student)', () => {
         const response = await request(app)
             .get('/api/thesis-proposals')
             .set('Accept', 'application/json')
-            .set('Cookie', cookies)
+            .set('Authorization', `Bearer ${studentAccessToken}`)
             .send();
 
         expect(response.status).toBe(200);
@@ -783,19 +661,9 @@ describe('GET /api/thesis-proposals (student)', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'student',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 's1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         /**
          * @type {ThesisProposalRow[]}
@@ -856,7 +724,7 @@ describe('GET /api/thesis-proposals (student)', () => {
         const response = await request(app)
             .get('/api/thesis-proposals')
             .set('Accept', 'application/json')
-            .set('Cookie', cookies)
+            .set('Authorization', `Bearer ${studentAccessToken}`)
             .send();
 
         expect(response.status).toBe(200);
@@ -895,28 +763,18 @@ describe('GET /api/thesis-proposals (student)', () => {
     });
     test('should return error 403 if not authorized', async () => {
         const mockUser = {
-            id: 'm1',
+            id: 's1',
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'invalidStudent',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         const response = await request(app)
             .get('/api/thesis-proposals')
             .set('Accept', 'application/json')
-            .set('Cookie', loginResponse.headers['set-cookie'])
+            .set('Authorization', `Bearer ${studentAccessToken}`)
             .send();
 
         expect(response.status).toBe(403);
@@ -929,7 +787,6 @@ describe('GET /api/thesis-proposals (student)', () => {
             .send();
 
         expect(response.status).toBe(401);
-        expect(response.body).toEqual("Not authorized");
     });
     test('should return error 500 if dao throws an error', async () => {
         const mockUser = {
@@ -937,26 +794,16 @@ describe('GET /api/thesis-proposals (student)', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'student',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 's1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         service.listThesisProposalsFromStudent.mockRejectedValue(new Error());
 
         const response = await request(app)
             .get('/api/thesis-proposals')
             .set('Accept', 'application/json')
-            .set('Cookie', cookies)
+            .set('Authorization', `Bearer ${studentAccessToken}`)
             .send();
 
         // Expecting a 500 status code
@@ -971,19 +818,9 @@ describe('GET /api/thesis-proposals/:id (teacher)', () => {
             surname: 'R',
             name: 'M',
             email: 'd1@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'd1@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         /**
          * @type {ThesisProposalRow}
@@ -1031,7 +868,7 @@ describe('GET /api/thesis-proposals/:id (teacher)', () => {
         const response = await request(app)
             .get('/api/thesis-proposals/' + mockThesisProposal.proposal_id)
             .set('Accept', 'application/json')
-            .set('Cookie', cookies)
+            .set('Authorization', `Bearer ${teacherAccessToken}`)
             .send();
 
         expect(response.status).toBe(200);
@@ -1070,54 +907,34 @@ describe('GET /api/thesis-proposals/:id (teacher)', () => {
             surname: 'R',
             name: 'M',
             email: 'd1@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'd1@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         service.getThesisProposalTeacher.mockResolvedValue(null);
 
         const response = await request(app)
             .get('/api/thesis-proposals/123')
             .set('Accept', 'application/json')
-            .set('Cookie', cookies)
+            .set('Authorization', `Bearer ${teacherAccessToken}`)
             .send();
 
         expect(response.status).toBe(404);
     });
     test('should return error 403 if not authorized', async () => {
         const mockUser = {
-            id: 't1',
+            id: 'm1',
             surname: 'R',
             name: 'M',
             email: 't1@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'invalidTeacher',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 't1@email.com', password: 't1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         const response = await request(app)
             .get('/api/thesis-proposals/1')
             .set('Accept', 'application/json')
-            .set('Cookie', loginResponse.headers['set-cookie'])
+            .set('Authorization', `Bearer ${teacherAccessToken}`)
             .send();
 
         expect(response.status).toBe(403);
@@ -1130,7 +947,6 @@ describe('GET /api/thesis-proposals/:id (teacher)', () => {
             .send();
 
         expect(response.status).toBe(401);
-        expect(response.body).toEqual("Not authorized");
     });
     test('should return error 500 if dao throws an error', async () => {
         const mockUser = {
@@ -1138,26 +954,16 @@ describe('GET /api/thesis-proposals/:id (teacher)', () => {
             surname: 'R',
             name: 'M',
             email: 'd1@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'd1@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         service.getThesisProposalTeacher.mockRejectedValue(new Error());
 
         const response = await request(app)
             .get('/api/thesis-proposals/1')
             .set('Accept', 'application/json')
-            .set('Cookie', cookies)
+            .set('Authorization', `Bearer ${teacherAccessToken}`)
             .send();
 
         // Expecting a 500 status code
@@ -1172,19 +978,9 @@ describe('GET /api/thesis-proposals/:id (student)', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'student',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 's1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         /**
          * @type {ThesisProposalRow}
@@ -1238,7 +1034,7 @@ describe('GET /api/thesis-proposals/:id (student)', () => {
         const response = await request(app)
             .get('/api/thesis-proposals/' + mockThesisProposal.proposal_id)
             .set('Accept', 'application/json')
-            .set('Cookie', cookies)
+            .set('Authorization', `Bearer ${studentAccessToken}`)
             .send();
 
         expect(response.status).toBe(200);
@@ -1272,54 +1068,34 @@ describe('GET /api/thesis-proposals/:id (student)', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'student',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 's1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         service.getThesisProposal.mockResolvedValue(null);
 
         const response = await request(app)
             .get('/api/thesis-proposals/123')
             .set('Accept', 'application/json')
-            .set('Cookie', cookies)
+            .set('Authorization', `Bearer ${studentAccessToken}`)
             .send();
 
         expect(response.status).toBe(404);
     });
     test('should return error 403 if not authorized', async () => {
         const mockUser = {
-            id: 'n1',
+            id: 's1',
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'invalidStudent',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'n1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         const response = await request(app)
             .get('/api/thesis-proposals/1')
             .set('Accept', 'application/json')
-            .set('Cookie', loginResponse.headers['set-cookie'])
+            .set('Authorization', `Bearer ${studentAccessToken}`)
             .send();
 
         expect(response.status).toBe(403);
@@ -1332,7 +1108,6 @@ describe('GET /api/thesis-proposals/:id (student)', () => {
             .send();
 
         expect(response.status).toBe(401);
-        expect(response.body).toEqual("Not authorized");
     });
     test('should return error 500 if dao throws an error', async () => {
         const mockUser = {
@@ -1340,26 +1115,16 @@ describe('GET /api/thesis-proposals/:id (student)', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'student',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 's1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         service.getThesisProposal.mockRejectedValue(new Error());
 
         const response = await request(app)
             .get('/api/thesis-proposals/1')
             .set('Accept', 'application/json')
-            .set('Cookie', cookies)
+            .set('Authorization', `Bearer ${studentAccessToken}`)
             .send();
 
         // Expecting a 500 status code
@@ -1374,18 +1139,11 @@ describe('GET /api/thesis-proposals (teacher)', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
         const mockThesisProposal = [
             {
                 proposal_id: '1',
@@ -1439,7 +1197,7 @@ describe('GET /api/thesis-proposals (teacher)', () => {
         // Send a request to the endpoint
         const response = await request(app)
                                .get('/api/thesis-proposals')
-                               .set('Cookie', cookies)
+                               .set('Authorization', `Bearer ${teacherAccessToken}`)
                                .send();
 
         // Assertions
@@ -1483,18 +1241,10 @@ describe('GET /api/thesis-proposals (teacher)', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Mock an error in thesisDao.getAllKeywords
         const mockError = new Error('Mocked error during getAllKeywords');
@@ -1503,7 +1253,7 @@ describe('GET /api/thesis-proposals (teacher)', () => {
         // Send a request to the endpoint
         const response = await request(app)
                                .get('/api/thesis-proposals')
-                               .set('Cookie', cookies);
+                               .set('Authorization', `Bearer ${teacherAccessToken}`);
 
         // Assertions
         expect(response.status).toBe(500);
@@ -1519,19 +1269,9 @@ describe('PUT /api/thesis-proposals/:id', () => {
             surname: 'R',
             name: 'M',
             email: 'd1@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'd1@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Mock Request body
         const mockBody = {
@@ -1607,7 +1347,7 @@ describe('PUT /api/thesis-proposals/:id', () => {
         // Make the request to your API
         const response = await request(app)
             .put(`/api/thesis-proposals/1`)
-            .set('Cookie', cookies) // Add authorization header if needed
+            .set('Authorization', `Bearer ${teacherAccessToken}`) 
             .send(mockBody);
 
         const mockUpdatedThesisProposal =
@@ -1674,19 +1414,9 @@ describe('PUT /api/thesis-proposals/:id', () => {
             surname: 'R',
             name: 'M',
             email: 'd1@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'd1@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Mock Request body
         const mockBody = {
@@ -1718,7 +1448,7 @@ describe('PUT /api/thesis-proposals/:id', () => {
          // Make the request to your API
          const response = await request(app)
          .put(`/api/thesis-proposals/1`)
-         .set('Cookie', cookies) // Add authorization header if needed
+         .set('Authorization', `Bearer ${teacherAccessToken}`)
          .send(mockBody);
 
         // Assert the response
@@ -1732,19 +1462,9 @@ describe('PUT /api/thesis-proposals/:id', () => {
             surname: 'R',
             name: 'M',
             email: 'd1@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'd1@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Mock Request body
         const mockBody = {
@@ -1784,7 +1504,7 @@ describe('PUT /api/thesis-proposals/:id', () => {
         // Make the request to your API
         const response = await request(app)
             .put(`/api/thesis-proposals/1`)
-            .set('Cookie', cookies) // Add authorization header if needed
+            .set('Authorization', `Bearer ${teacherAccessToken}`)
             .send(mockBody);
 
         // Assert the response
@@ -1798,19 +1518,9 @@ describe('PUT /api/thesis-proposals/:id', () => {
             surname: 'R',
             name: 'M',
             email: 'd1@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'd1@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Mock Request body
         const mockBody = {
@@ -1839,7 +1549,7 @@ describe('PUT /api/thesis-proposals/:id', () => {
         // Make the request to your API
         const response = await request(app)
             .put(`/api/thesis-proposals/1`)
-            .set('Cookie', cookies) // Add authorization header if needed
+            .set('Authorization', `Bearer ${teacherAccessToken}`)
             .send(mockBody);
 
         // Assert the response
@@ -1853,19 +1563,9 @@ describe('PUT /api/thesis-proposals/:id', () => {
             surname: 'R',
             name: 'M',
             email: 'd1@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'd1@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Mock Request body
         const mockBody = {
@@ -1901,7 +1601,7 @@ describe('PUT /api/thesis-proposals/:id', () => {
         // Make the request to your API
         const response = await request(app)
             .put(`/api/thesis-proposals/1`)
-            .set('Cookie', cookies) // Add authorization header if needed
+            .set('Authorization', `Bearer ${teacherAccessToken}`)
             .send(mockBody);
 
         // Assert the response
@@ -1929,19 +1629,9 @@ describe('PUT /api/thesis-proposals/:id', () => {
             surname: 'R',
             name: 'M',
             email: 'd1@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'd1@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Mock Request body
         const mockBody = {
@@ -1978,7 +1668,7 @@ describe('PUT /api/thesis-proposals/:id', () => {
         // Make the request to your API
         const response = await request(app)
             .put(`/api/thesis-proposals/1`)
-            .set('Cookie', cookies) // Add authorization header if needed
+            .set('Authorization', `Bearer ${teacherAccessToken}`)
             .send(mockBody);
 
         // Assert the response
@@ -1997,23 +1687,11 @@ describe('POST /api/student/applications', () => {
             id: 's1',
             surname: 'R',
             name: 'M',
-            gender: 'MALE',
-            nationality: 'Italian',
             email: 'r.m@email.com',
-            cod_degree: 'L-31',
-            enrollment_year: '2018',
+            role: 'student',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 's1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         const mockRequestBody = {
             thesis_proposal_id: 1,
@@ -2025,7 +1703,7 @@ describe('POST /api/student/applications', () => {
 
         const response = await request(app)
             .post('/api/student/applications')
-            .set('Cookie', loginResponse.headers['set-cookie'])
+            .set('Authorization', `Bearer ${studentAccessToken}`)
             .send(mockRequestBody);
 
         expect(response.status).toBe(201);
@@ -2042,26 +1720,15 @@ describe('POST /api/student/applications', () => {
     });
     test('applies for a thesis proposal not logged as a student', async () => {
         const mockUser = {
-            id: 'd1',
+            id: 's1',
             surname: 'R',
             name: 'M',
-            gender: 'MALE',
-            nationality: 'Italian',
             email: 'r.m@email.com',
-            cod_degree: 'L-31',
-            enrollment_year: '2018',
+            role: 'invalidStudent'
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
         const mockRequestBody = {
             thesis_proposal_id: 1,
         };
@@ -2072,7 +1739,7 @@ describe('POST /api/student/applications', () => {
 
         const response = await request(app)
             .post('/api/student/applications')
-            .set('Cookie', loginResponse.headers['set-cookie'])
+            .set('Authorization', `Bearer ${studentAccessToken}`)
             .send(mockRequestBody);
 
         expect(response.status).toBe(403);
@@ -2083,23 +1750,11 @@ describe('POST /api/student/applications', () => {
             id: 's1',
             surname: 'R',
             name: 'M',
-            gender: 'MALE',
-            nationality: 'Italian',
             email: 'r.m@email.com',
-            cod_degree: 'L-31',
-            enrollment_year: '2018',
+            role: 'student',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 's1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         const mockRequestBody = {
             thesis_proposal_id: 1,
@@ -2112,7 +1767,7 @@ describe('POST /api/student/applications', () => {
 
         const response = await request(app)
             .post('/api/student/applications')
-            .set('Cookie', loginResponse.headers['set-cookie'])
+            .set('Authorization', `Bearer ${studentAccessToken}`)
             .send(mockRequestBody);
 
         expect(response.status).toBe(500);
@@ -2131,18 +1786,10 @@ describe('GET /api/teacher/applications/:proposal_id', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Mock the response from thesisDao.listThesisApplicationsForTeacherThesisProposal
         const mockApplications = [
@@ -2156,7 +1803,7 @@ describe('GET /api/teacher/applications/:proposal_id', () => {
         // Send a request to the endpoint
         const response = await request(app)
                                .get('/api/teacher/applications/1')
-                               .set('Cookie', cookies);
+                               .set('Authorization', `Bearer ${teacherAccessToken}`);
 
         // Assertions
         expect(response.status).toBe(200);
@@ -2168,18 +1815,10 @@ describe('GET /api/teacher/applications/:proposal_id', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Mock an error in thesisDao.getAllKeywords
         const mockError = new Error('Mocked error during getAllKeywords');
@@ -2188,7 +1827,7 @@ describe('GET /api/teacher/applications/:proposal_id', () => {
         // Send a request to the endpoint
         const response = await request(app)
                                .get('/api/teacher/applications/1')
-                               .set('Cookie', cookies);
+                               .set('Authorization', `Bearer ${teacherAccessToken}`);
 
         // Assertions
         expect(response.status).toBe(500);
@@ -2203,28 +1842,18 @@ describe('GET /api/student/active-application', () => {
             id: 's1',
             surname: 'R',
             name: 'M',
-            gender: 'MALE',
-            nationality: 'Italian',
             email: 'r.m@email.com',
-            cod_degree: 'L-31',
-            enrollment_year: '2018',
+            role: 'student',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 's1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         const expectedApplication = [{proposal_id: 1}]
         service.getStudentActiveApplication.mockResolvedValueOnce(expectedApplication);
         // Perform the request
         const response = await request(app)
                                .get('/api/student/active-application')
-                               .set('Cookie', cookies);
+                               .set('Authorization', `Bearer ${studentAccessToken}`);
 
         // Assertions
         expect(response.status).toBe(200);
@@ -2237,21 +1866,11 @@ describe('GET /api/student/active-application', () => {
             id: 's1',
             surname: 'R',
             name: 'M',
-            gender: 'MALE',
-            nationality: 'Italian',
             email: 'r.m@email.com',
-            cod_degree: 'L-31',
-            enrollment_year: '2018',
+            role: 'student',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 's1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         const mockError = new Error('Mocked error during getStudentApplications');
         service.getStudentActiveApplication.mockRejectedValueOnce(mockError);
@@ -2259,7 +1878,7 @@ describe('GET /api/student/active-application', () => {
         // Perform the request
         const response = await request(app)
                                .get('/api/student/active-application')
-                               .set('Cookie', cookies);
+                               .set('Authorization', `Bearer ${studentAccessToken}`);
 
         // Assertions
         expect(response.status).toBe(500);
@@ -2269,7 +1888,10 @@ describe('GET /api/student/active-application', () => {
 describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
 
     afterEach(() => {
-      jest.restoreAllMocks();
+        jest.restoreAllMocks();
+    });
+    beforeEach(() => {
+        jest.clearAllMocks();
     });
     test('should accept thesis and reject others', async () => {
         const mockUser = {
@@ -2277,32 +1899,30 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
+        await usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Arrange
         const proposalId = '1';
         const studentId = 's293605';
 
         // Mock thesisDao functions
-        service.updateApplicationStatus.mockResolvedValue(1); // Mock the row count
-        service.rejectOtherApplications.mockResolvedValue(2); // Mock the row count
+        service.updateApplicationStatus.mockResolvedValue(true);
+        service.cancelOtherApplications.mockResolvedValue([
+            { student_id: 's1', proposal_id: proposalId, creation_date: new Date().toISOString(), status: 'rejected' },
+            { student_id: 's2', proposal_id: proposalId, creation_date: new Date().toISOString(), status: 'rejected' }
+        ]); // Mock the row count
+        // Skip the part where we are sending mails for now
+        // FIXME
+        usersService.getStudentById.mockResolvedValue(null);
 
         // Act
         const response = await request(app)
           .patch(`/api/teacher/applications/accept/${proposalId}`)
           .send({ student_id: studentId })
-          .set('Cookie', cookies)
+          .set('Authorization', `Bearer ${teacherAccessToken}`)
           .expect(200);
 
         // Assert
@@ -2314,35 +1934,61 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
+        // Arrange
+        const proposalId = '1';
 
-        const cookies = loginResponse.headers['set-cookie'];
+        // Mock thesisDao functions
+        service.updateApplicationStatus.mockResolvedValue(true);
+        service.cancelOtherApplications.mockResolvedValue([
+            { student_id: 's1', proposal_id: proposalId, creation_date: new Date().toISOString(), status: 'rejected' },
+            { student_id: 's2', proposal_id: proposalId, creation_date: new Date().toISOString(), status: 'rejected' }
+        ]); // Mock the row count
+        // Skip the part where we are sending mails for now
+        // FIXME
+        usersService.getStudentById.mockResolvedValue(null);
+
+        // Act
+        const response = await request(app)
+            .patch(`/api/teacher/applications/accept/${proposalId}`)
+            .set('Authorization', `Bearer ${teacherAccessToken}`)
+
+        // Assert
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({ message: 'Missing required fields.' });
+    });
+    test('should return 404 error if no application has been found', async () => {
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            role: 'teacher',
+        };
+
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Arrange
         const proposalId = '1';
         const studentId = 's293605';
 
         // Mock thesisDao functions
-        service.updateApplicationStatus.mockResolvedValue(1); // Mock the row count
-        service.rejectOtherApplications.mockResolvedValue(2); // Mock the row count
+        service.updateApplicationStatus.mockResolvedValue(false);
 
         // Act
         const response = await request(app)
-          .patch(`/api/teacher/applications/accept/${proposalId}`)
-          .set('Cookie', cookies)
+            .patch(`/api/teacher/applications/accept/${proposalId}`)
+            .set('Authorization', `Bearer ${teacherAccessToken}`)
+            .send({ student_id: studentId });
 
         // Assert
-        expect(response.status).toBe(400);
-        expect(response.body).toEqual({ error: 'Missing required fields.' });
+        expect(response.status).toBe(404);
+        expect(response.body).toHaveProperty('message');
+        expect(service.cancelOtherApplications).not.toHaveBeenCalled();
     });
     test('should handle errors and return status 500', async () => {
         const mockUser = {
@@ -2350,18 +1996,10 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Arrange
         const proposalId = '1';
@@ -2369,53 +2007,52 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
 
         // Mock thesisDao functions
         const mockError = new Error('Internal Server Error');
-        service.updateApplicationStatus.mockRejectedValue(mockError); // Mock the row count
-        service.rejectOtherApplications.mockResolvedValue(2); // Mock the row count
+        service.updateApplicationStatus.mockRejectedValue(mockError);
 
         // Act
         const response = await request(app)
           .patch(`/api/teacher/applications/accept/${proposalId}`)
-          .set('Cookie', cookies)
-          .send({ student_id: studentId })
+          .set('Authorization', `Bearer ${teacherAccessToken}`)
+          .send({ student_id: studentId });
 
         // Assert
         expect(response.status).toBe(500);
         expect(response.body).toEqual('Internal Server Error');
+        expect(service.cancelOtherApplications).not.toHaveBeenCalled();
     });
 });
 
 describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
     test('should reject thesis', async () => {
       const mockUser = {
           id: 'd1',
           surname: 'R',
           name: 'M',
           email: 'r.m@email.com',
-          cod_group: 'Group1',
-          cod_department: 'Dep1',
+          role: 'teacher',
       };
 
-      usersService.getUser.mockResolvedValue(mockUser);
-
-      const loginResponse = await request(app)
-          .post('/api/sessions')
-          .send({ username: 'r.m@email.com', password: 'd1' })
-          .set('Accept', 'application/json');
-
-      const cookies = loginResponse.headers['set-cookie'];
+      usersService.getUserInfo.mockResolvedValue(mockUser);
 
       // Arrange
       const proposalId = '1';
       const studentId = 's293605';
 
       // Mock thesisDao function
-      service.updateApplicationStatus.mockResolvedValue(1); // Mock the row count
+      service.updateApplicationStatus.mockResolvedValue(true);
 
       // Act
       const response = await request(app)
         .patch(`/api/teacher/applications/reject/${proposalId}`)
         .send({ student_id: studentId })
-        .set('Cookie', cookies)
+        .set('Authorization', `Bearer ${teacherAccessToken}`)
         .expect(200);
 
       // Assert
@@ -2427,35 +2064,61 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
+        // Arrange
+        const proposalId = '1';
 
-        const cookies = loginResponse.headers['set-cookie'];
+        // Mock thesisDao functions
+        service.updateApplicationStatus.mockResolvedValue(true);
+        service.cancelOtherApplications.mockResolvedValue([
+            { student_id: 's1', proposal_id: proposalId, creation_date: new Date().toISOString(), status: 'rejected' },
+            { student_id: 's2', proposal_id: proposalId, creation_date: new Date().toISOString(), status: 'rejected' }
+        ]);
+        // Skip the part where we are sending mails for now
+        // FIXME
+        usersService.getStudentById.mockResolvedValue(null);
+
+        // Act
+        const response = await request(app)
+            .patch(`/api/teacher/applications/reject/${proposalId}`)
+            .set('Authorization', `Bearer ${teacherAccessToken}`)
+
+        // Assert
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({ message: 'Missing required fields.' });
+    });
+    test('should return 404 error if no application has been found', async () => {
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            role: 'teacher',
+        };
+
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Arrange
         const proposalId = '1';
         const studentId = 's293605';
 
         // Mock thesisDao functions
-        service.updateApplicationStatus.mockResolvedValue(1); // Mock the row count
-        service.rejectOtherApplications.mockResolvedValue(2); // Mock the row count
+        service.updateApplicationStatus.mockResolvedValue(false);
 
         // Act
         const response = await request(app)
-          .patch(`/api/teacher/applications/reject/${proposalId}`)
-          .set('Cookie', cookies)
+            .patch(`/api/teacher/applications/reject/${proposalId}`)
+            .set('Authorization', `Bearer ${teacherAccessToken}`)
+            .send({ student_id: studentId });
 
         // Assert
-        expect(response.status).toBe(400);
-        expect(response.body).toEqual({ error: 'Missing required fields.' });
+        expect(response.status).toBe(404);
+        expect(response.body).toHaveProperty('message');
+        expect(service.cancelOtherApplications).not.toHaveBeenCalled();
     });
     test('should handle errors and return status 500', async () => {
         const mockUser = {
@@ -2463,18 +2126,10 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'teacher',
         };
 
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 'd1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Arrange
         const proposalId = '1';
@@ -2482,14 +2137,20 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
 
         // Mock thesisDao functions
         const mockError = new Error('Internal Server Error');
-        service.updateApplicationStatus.mockRejectedValue(mockError); // Mock the row count
-        service.rejectOtherApplications.mockResolvedValue(2); // Mock the row count
+        service.updateApplicationStatus.mockRejectedValue(mockError);
+        service.cancelOtherApplications.mockResolvedValue([
+            { student_id: 's1', proposal_id: proposalId, creation_date: new Date().toISOString(), status: 'rejected' },
+            { student_id: 's2', proposal_id: proposalId, creation_date: new Date().toISOString(), status: 'rejected' }
+        ]);
+        // Skip the part where we are sending mails for now
+        // FIXME
+        usersService.getStudentById.mockResolvedValue(null);
 
         // Act
         const response = await request(app)
           .patch(`/api/teacher/applications/reject/${proposalId}`)
-          .set('Cookie', cookies)
-          .send({ student_id: studentId })
+          .set('Authorization', `Bearer ${teacherAccessToken}`)
+          .send({ student_id: studentId });
 
         // Assert
         expect(response.status).toBe(500);
@@ -2505,19 +2166,9 @@ describe('GET /api/student/applications-decision', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'student',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 's1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         // Mock the response data that you expect from your database
         const mockApplications = [
@@ -2540,7 +2191,7 @@ describe('GET /api/student/applications-decision', () => {
         const response = await request(app)
             .get('/api/student/applications-decision')
             .set('Accept', 'application/json')
-            .set('Cookie', cookies)
+            .set('Authorization', `Bearer ${studentAccessToken}`)
             .send();
 
         // Assert the response
@@ -2555,19 +2206,9 @@ describe('GET /api/student/applications-decision', () => {
             surname: 'R',
             name: 'M',
             email: 'r.m@email.com',
-            cod_group: 'Group1',
-            cod_department: 'Dep1',
+            role: 'student',
         };
-        usersService.getUser.mockResolvedValue(mockUser);
-
-        const loginResponse = await request(app)
-            .post('/api/sessions')
-            .send({ username: 'r.m@email.com', password: 's1' })
-            .set('Accept', 'application/json');
-
-        const cookies = loginResponse.headers['set-cookie'];
-        expect(cookies).toBeDefined();
-        expect(loginResponse.status).toBe(201);
+        usersService.getUserInfo.mockResolvedValue(mockUser);
 
         service.listApplicationsDecisionsFromStudent.mockRejectedValueOnce(new Error('Database error'));
 
@@ -2575,7 +2216,7 @@ describe('GET /api/student/applications-decision', () => {
         const response = await request(app)
             .get('/api/student/applications-decision')
             .set('Accept', 'application/json')
-            .set('Cookie', cookies)
+            .set('Authorization', `Bearer ${studentAccessToken}`    )
             .send();
 
         // Assert the response
@@ -2583,3 +2224,82 @@ describe('GET /api/student/applications-decision', () => {
         expect(response.body).toEqual('Internal Server Error');
     });
 });
+
+describe('DELETE /api/thesis-proposals/:id', () => {
+    test('should delete a thesis proposal and notify application status change', async () => {
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            role: 'teacher',
+        };
+
+        usersService.getUserInfo.mockResolvedValue(mockUser);
+        service.deleteThesisProposalById.mockResolvedValue([
+            {
+            student_id: 'studentId',
+            proposal_id: 'deletedProposalId',
+            status: 'cancelled',
+            },
+        ]);
+    
+        service._notifyApplicationStatusChange.mockResolvedValue();
+  
+        // Make a request to the endpoint
+        const response = await request(app)
+            .delete('/api/thesis-proposals/deletedProposalId')
+            .set('Authorization', `Bearer ${teacherAccessToken}`); 
+    
+        // Assertions
+        expect(response.status).toBe(204);
+        expect(service.deleteThesisProposalById).toHaveBeenCalledWith('deletedProposalId', 'd1');
+    });
+  
+    test('should handle errors and return the appropriate response', async () => {
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            role: 'teacher',
+        };
+
+        usersService.getUserInfo.mockResolvedValue(mockUser);
+        service.deleteThesisProposalById.mockRejectedValue(new AppError('Simulation error', 400));
+    
+        // Make a request to the endpoint
+        const response = await request(app)
+            .delete('/api/thesis-proposals/nonExistingProposalId')
+            .set('Authorization', `Bearer ${teacherAccessToken}`);
+    
+        // Assertions
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({ message: 'Simulation error' });
+        expect(service.deleteThesisProposalById).toHaveBeenCalledWith('nonExistingProposalId', 'd1');
+    });
+
+    test('should handle unexpected errors and return 500 Internal Server Error', async () => {
+        
+        const mockUser = {
+            id: 'd1',
+            surname: 'R',
+            name: 'M',
+            email: 'r.m@email.com',
+            role: 'teacher',
+        };
+
+        usersService.getUserInfo.mockResolvedValue(mockUser);
+        service.deleteThesisProposalById.mockRejectedValue(new Error('Unexpected error'));
+    
+        // Make a request to the endpoint
+        const response = await request(app)
+          .delete('/api/thesis-proposals/unexpectedErrorId')
+          .set('Authorization', `Bearer ${teacherAccessToken}`);
+    
+        // Assertions
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual({ message: 'Internal Server Error' });
+        expect(service.deleteThesisProposalById).toHaveBeenCalledWith('unexpectedErrorId', 'd1');
+      });
+  });

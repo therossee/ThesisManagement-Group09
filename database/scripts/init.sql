@@ -11,7 +11,9 @@ DROP TABLE IF EXISTS thesisInternalCoSupervisor;
 DROP TABLE IF EXISTS thesisProposal;
 DROP TABLE IF EXISTS career;
 DROP TABLE IF EXISTS externalCoSupervisor;
+DROP TABLE IF EXISTS teacher_auth0;
 DROP TABLE IF EXISTS teacher;
+DROP TABLE IF EXISTS student_auth0;
 DROP TABLE IF EXISTS student;
 DROP TABLE IF EXISTS degree;
 
@@ -35,6 +37,13 @@ CREATE TABLE student (
     FOREIGN KEY(cod_degree) REFERENCES degree(cod_degree)
 );
 
+-- Create the student_auth0 table
+CREATE TABLE student_auth0 (
+    id TEXT PRIMARY KEY,
+    id_auth0 TEXT NOT NULL,
+    FOREIGN KEY(id) REFERENCES student(id)
+);
+
 -- Create the teacher table
 CREATE TABLE teacher (
     id TEXT PRIMARY KEY,
@@ -43,6 +52,13 @@ CREATE TABLE teacher (
     email TEXT NOT NULL,
     cod_group TEXT NOT NULL,
     cod_department TEXT NOT NULL
+);
+
+-- Create the teacher_auth0 table
+CREATE TABLE teacher_auth0 (
+    id TEXT PRIMARY KEY,
+    id_auth0 TEXT NOT NULL,
+    FOREIGN KEY(id) REFERENCES teacher(id)
 );
 
 -- Create the externalCoSupervisor table
@@ -77,6 +93,7 @@ CREATE TABLE thesisProposal (
     creation_date DATE NOT NULL,
     expiration DATE NOT NULL,
     level TEXT NOT NULL,
+    is_deleted INTEGER CHECK ( is_deleted == 0 or is_deleted == 1 ) DEFAULT 0,
     FOREIGN KEY(supervisor_id) REFERENCES teacher(id)
 );
 
@@ -185,6 +202,23 @@ VALUES
     ('d392000', 'Santoro', 'Chiara', 'santoro.chiara@email.com', 'Group5', 'Dep3'),
     ('d292715', 'Gatti', 'Isabella', 'gatti.isabella@email.com', 'Group3', 'Dep4');
 
+-- Insert data into the teacher_auth0 table
+INSERT INTO teacher_auth0 (id, id_auth0)
+VALUES 
+    ('d279620', 'auth0|6564f83a022f6b2083b6b8c9'),
+    ('d370392', 'auth0|656621f156336a62dd8aaced'),
+    ('d226682', 'auth0|656621a2022f6b2083b7a522'),
+    ('d258293', 'auth0|656621466d87729b6b4216b5'),
+    ('d320694', 'auth0|656620f16d87729b6b42167c'),
+    ('d284435', 'auth0|656620a756336a62dd8aac0e'),
+    ('d258761', 'auth0|6566205c56336a62dd8aabe1'),
+    ('d237188', 'auth0|65661fff6d87729b6b4215e5'),
+    ('d392000', 'auth0|65661fb356336a62dd8aab82'),
+    ('d292715', 'auth0|65661ee656336a62dd8aaaf5'),
+    ('d357587', 'auth0|65661e84022f6b2083b7a341'),
+    ('d255269', 'auth0|65661e2156336a62dd8aaa70'),
+    ('d350985', 'auth0|65661dde56336a62dd8aaa4c'),
+    ('d370335', 'auth0|65661d4e022f6b2083b7a267');
 
 -- Insert data into the externalCoSupervisor table
 INSERT INTO externalCoSupervisor (surname, name, email)
@@ -208,8 +242,19 @@ VALUES
     ('s314796', 'De Rossi', 'Daniele', 'Male', 'Italian', 's314796@studenti.polito.it', 'LM-32', 2020),
     ('s318771', 'Husanu', 'Diana', 'Female', 'Romanian', 's318771@studenti.polito.it', 'LM-33', 2020),
     ('s321529', 'Ladrat', 'Matteo', 'Male', 'French', 's321529@studenti.polito.it', 'L-08', 2020),
-    ('s318952', 'Molinatto', 'Sylive', 'Female', 'Italian', 's318952@studenti.polito.it', 'LM-34', 2020),
+    ('s318952', 'Molinatto', 'Sylvie', 'Female', 'Italian', 's318952@studenti.polito.it', 'LM-34', 2020),
     ('s319355', 'Schiavone', 'Michele', 'Male', 'Italian', 's319355@studenti.polito.it', 'LM-35', 2020);
+
+-- Insert data into the student_auth0 table
+INSERT INTO student_auth0 (id, id_auth0) 
+VALUES 
+    ('s318952', 'auth0|65635d036d87729b6b3ffe83'),
+    ('s321529', 'auth0|6564f6ba6d87729b6b412740'),
+    ('s319355', 'auth0|6564f6efd5c067abfc7e6096'),
+    ('s318771', 'auth0|6564f687022f6b2083b6b500'),
+    ('s314796', 'auth0|6564f6476d87729b6b412613'),
+    ('s321607', 'auth0|6564f613d5c067abfc7e5e8a'),
+    ('s320213', 'auth0|6564f5db6d87729b6b412520');
 
 
 -- Insert data into the career table
@@ -353,7 +398,76 @@ VALUES
     (3, 'congestion'),
     (4, 'design'),
     (4, 'aerospace'),
-    (4, 'arcjet propulsion system');
+    (4, 'arcjet propulsion system'),
+    (5, 'propulsion systems'),
+    (5, 'plasma physics'),
+    (5, 'aerospace engineering'),
+    (6, 'logistics'),
+    (6, 'RFID technology'),
+    (6, 'process optimization'),
+    (7, 'system sizing'),
+    (7, 'predictive modeling'),
+    (7, 'automotive systems'),
+    (7, 'statistical analysis'),
+    (8, 'enterprise networking'),
+    (8, 'software defined datacenter'),
+    (8, 'network design'),
+    (9, 'supply chain management'),
+    (9, 'e-commerce'),
+    (9, 'technology impact'),
+    (9, 'artificial intelligence'),
+    (10, 'control systems'),
+    (10, 'reinforcement learning'),
+    (10, 'MATLAB/Simulink'),
+    (10, 'PID'),
+    (10, 'LQR'),
+    (10, 'FPGA programming'),
+    (11, 'blockchain technology'),
+    (11, 'Ethereum'),
+    (11, 'smart contracts'),
+    (11, 'Dgraph'),
+    (11, 'Rust programming'),
+    (11, 'data analysis'),
+    (12, 'virtual reality'),
+    (12, 'CBRN training'),
+    (12, 'simulation development'),
+    (12, 'XR Lab'),
+    (12, 'procedural design'),
+    (12, 'interaction design'),
+    (13, 'lean manufacturing'),
+    (13, 'Six Sigma'),
+    (13, 'industry 4.0'),
+    (13, 'smart production'),
+    (13, 'IoT'),
+    (13, 'data analysis'),
+    (13, 'DMAIC'),
+    (13, 'process improvement'),
+    (14, 'material science'),
+    (14, 'metallurgy'),
+    (14, 'welding technology'),
+    (14, 'metallography'),
+    (15, 'economics'),
+    (15, 'real estate'),
+    (15, 'econometrics'),
+    (15, 'statistical analysis'),
+    (15, 'sharing economy'),
+    (15, 'Airbnb'),
+    (15, 'Turin real estate market'),
+    (16, 'business process management'),
+    (16, 'performance measurement'),
+    (16, 'Balanced Scorecard'),
+    (16, 'data analysis'),
+    (16, 'project management'),
+    (16, 'customer service'),
+    (17, 'supply chain management'),
+    (17, 'packaging processes'),
+    (17, 'returnable packaging'),
+    (17, 'overseas transport logistics'),
+    (18, 'audiology'),
+    (18, 'cochlear implants'),
+    (18, 'telemedicine'),
+    (18, 'rehabilitation protocols'),
+    (18, 'human hearing anatomy');
 
 
 -- Insert data into thesisInternalCoSupervisor table
@@ -413,12 +527,12 @@ VALUES
 INSERT INTO thesisApplication (proposal_id, student_id, creation_date)
 VALUES
     (1, 's320213', '2023-11-28T08:08:16.123Z'),
-    (2, 's321607', '2023-11-28T12:45:58.200Z'),
-    (3, 's318952', '2023-11-28T13:01:22.156Z'),
+    (6, 's321607', '2023-11-28T12:45:58.200Z'),
+    (2, 's314796', '2023-11-28T13:01:22.156Z'),
     (4, 's318771', '2023-11-28T20:20:20.144Z'),
-    (5, 's314796', '2023-11-28T09:35:21.132Z'),
-    (6, 's321607', '2023-11-28T18:56:39.186Z'),
-    (7, 's321529', '2023-11-28T16:30:00.171Z');
+    (7, 's321529', '2023-11-28T09:35:21.132Z'),
+    (15, 's318952', '2023-11-28T18:56:39.186Z'),
+    (18, 's319355', '2023-11-28T16:30:00.171Z');
 
 INSERT INTO proposalCds(proposal_id, cod_degree)
 VALUES
@@ -445,3 +559,24 @@ VALUES
     (16, 'LM-35'),
     (17, 'LM-35'),
     (18, 'LM-35');
+
+
+-- Create a trigger that check that the proposal_id of the thesisApplication table is present in the thesisProposal table
+-- and that the proposal is not deleted for the insertion and the update
+CREATE TRIGGER check_proposal_id_in_application
+BEFORE INSERT ON thesisApplication
+FOR EACH ROW
+WHEN (NEW.proposal_id NOT IN (SELECT proposal_id FROM thesisProposal WHERE is_deleted = 0))
+BEGIN
+    SELECT RAISE(ABORT, 'The proposal_id is not present in the thesisProposal table or the proposal is deleted');
+END;
+
+CREATE TRIGGER check_proposal_id_in_application_update
+BEFORE UPDATE ON thesisApplication
+FOR EACH ROW
+WHEN (NEW.proposal_id <> OLD.proposal_id
+    AND NEW.proposal_id NOT IN (SELECT proposal_id FROM thesisProposal WHERE is_deleted = 0)
+)
+BEGIN
+    SELECT RAISE(ABORT, 'The proposal_id is not present in the thesisProposal table or the proposal is deleted');
+END;
