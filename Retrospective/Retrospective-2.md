@@ -48,9 +48,9 @@ hours spent for fixing issues, improving based on feedback, refactoring, etc.
 
 - Standard deviation: (TODO)
 
-  - *Standard deviation →* $ \sigma = \sqrt{\frac{\sum_{i=1}^{n}(x_i - \bar{x})^2}{n}} $ = 1.85 (estimated)
+  - *Standard deviation →*$\ sigma = \sqrt{\frac{\sum_{i=1}^{n}(x_i - \bar{x})^2}{n}}$ = 1.85 (estimated)
 
-  - *Standard deviation →* $ \sigma = \sqrt{\frac{\sum_{i=1}^{n}(x_i - \bar{x})^2}{n}} $ = 2.18 (actual)
+  - *Standard deviation →*$\ sigma = \sqrt{\frac{\sum_{i=1}^{n}(x_i - \bar{x})^2}{n}}$ = 2.18 (actual)
 
 - Total task estimation error ratio: 1 - sum of total minutes estimation / sum of total minutes spent = 1 - $\frac{7075}{6725} = 0.05$ = **5%**
 
