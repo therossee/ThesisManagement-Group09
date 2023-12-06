@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { message, Space, Table, Tag, Tooltip } from 'antd';
-import { EditOutlined, EyeOutlined, DeleteOutlined } from '@ant-design/icons';
+import { EditOutlined, EyeOutlined, DeleteOutlined, InboxOutlined } from '@ant-design/icons';
 import API from '../API';
 import { useAuth } from './authentication/useAuth';
 
@@ -92,6 +92,10 @@ function TeacherThesisProposals() {
                     <Tooltip title="Delete Proposal">
                         <DeleteOutlined style={{ fontSize: '20px' }} onClick={()=> deleteProposalById(record.id)} />
                     </Tooltip>
+                    <Tooltip title="Archieve Proposal">
+                        <InboxOutlined style={{ fontSize: '20px' }} onClick={()=> archieveProposalById(record.id)} />
+                    </Tooltip>
+                    
                 </Space>
             ),
         },
@@ -140,6 +144,15 @@ function TeacherThesisProposals() {
             setDirty(true);
         } catch (err) {
             message.error(err.message ? err.message : err);
+            setIsLoadingTable(false);
+        }
+    }
+
+    async function archieveProposalById(id) {
+        try {
+            await API.archieveProposalById(id, accessToken);
+            setDirty(true);
+        } catch (err) {
             setIsLoadingTable(false);
         }
     }
