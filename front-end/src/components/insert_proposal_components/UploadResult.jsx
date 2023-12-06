@@ -14,7 +14,6 @@ function UploadResult(props) {
         <Result
           status="success"
           title="Proposal updated succesfully!"
-          subTitle={`ID of the proposal: ${id}`}
           extra={
             <Button ghost type="primary" onClick={() => navigate("/")}>
               Back Home
