@@ -595,6 +595,14 @@ Error Responses:
     | cod_group     | text    | **NOT NULL**                                         |
     | PRIMARY KEY   | proposal_id, cod_group                              |
 
+- Table `proposalCds`:
+    | Column        | Type    | Constraints                                          |
+    | ------------- | ------- | ---------------------------------------------------- |
+    | proposal_id   | integer | **NOT NULL**, **FK** [thesisProposal](#thesisProposal)(proposal_id) |
+    | cod_degree    | text    | **NOT NULL**, **FK** [degree](#degree)(cod_degree)   |
+    | PRIMARY KEY   | proposal_id, cod_degree                             |
+
+
 - Table `thesisInternalCoSupervisor`
     | Column            | Type     | Constraints                                         |
     | ----------------- | -------- | --------------------------------------------------- |
@@ -624,3 +632,16 @@ Error Responses:
     | student_id    | text    | **NOT NULL**, **FK** [student](#student)(id)         |
     | status        | text    | **DEFAULT 'waiting for approval' NOT NULL**         |
     | PRIMARY KEY   | proposal_id, student_id                             |
+
+- Table `student_auth0`:
+    | Column   | Type | Constraints                        |
+    | -------- | ---- | ---------------------------------- |
+    | id       | text | **PK**, **FK** [student](#student)(id) |
+    | id_auth0  | text | **NOT NULL**                       |
+
+- Table `teacher_auth0`:
+    | Column   | Type | Constraints                        |
+    | -------- | ---- | ---------------------------------- |
+    | id       | text | **PK**, **FK** [teacher](#teacher)(id) |
+    | id_auth0  | text | **NOT NULL**                       |
+

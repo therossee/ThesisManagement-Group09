@@ -183,6 +183,30 @@ describe('updateThesisProposal', () => {
     expect(db.prepare).toHaveBeenCalledTimes(19); // 19 queries
   });
 
+  test('updates the thesis proposal with data containing only mandatory fields', async () => {
+    const proposalId = 1;
+    const supervisorId = 'd1';
+    const thesisData = {
+      title: 'Test Proposal',
+      type: 'Test Type',
+      description: 'Test Description',
+      required_knowledge: '',
+      notes: '',
+      expiration: '2023-12-31T23:59:59.999Z', // Updated expiration date
+      level: 'Updated Level',
+      keywords: ['Keyword1', 'Keyword2'],
+      internal_co_supervisors_id: ['InternalCoSupervisor1', 'InternalCoSupervisor2'],
+      external_co_supervisors_id: ['ExternalCoSupervisor1', 'ExternalCoSupervisor2'],
+      groups: ['Group1', 'Group2'],
+      cds: ['CDS1', 'CDS2'],
+    };
+
+    // Call the function and assert the result
+    const result = await thesis.updateThesisProposal(proposalId, supervisorId, thesisData);
+    expect(result).toEqual(proposalId); // Assuming that the function resolves with the proposal_id on success
+    expect(db.prepare).toHaveBeenCalledTimes(41); // 41 queries
+  });
+
   test('updates the thesis proposal without changing anything', async () => {
 
     const proposalId = 1;
