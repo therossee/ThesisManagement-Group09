@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { message, Space, Table, Tag, Tooltip } from 'antd';
-import { EditOutlined, EyeOutlined } from '@ant-design/icons';
+import { EditOutlined, EyeOutlined, DeleteOutlined } from '@ant-design/icons';
 import API from '../API';
+import { useAuth } from './authentication/useAuth';
 
 function TeacherThesisProposals() {
 
@@ -12,10 +13,11 @@ function TeacherThesisProposals() {
     // Loading table data fetching
     const [isLoadingTable, setIsLoadingTable] = useState(true);
 
-    // Storing message errors
-    const [messageApi, messageBox] = message.useMessage();
-
     const navigate = useNavigate();
+
+    const { accessToken } = useAuth();
+
+    const [dirty, setDirty] = useState(true);
 
     // Columns of the table
     const columns = [
@@ -87,6 +89,9 @@ function TeacherThesisProposals() {
                     <Tooltip title="Edit Proposal">
                         <EditOutlined style={{ fontSize: '20px' }} onClick={() => navigate(`/edit-proposal/${record.id}`)} />
                     </Tooltip>
+                    <Tooltip title="Delete Proposal">
+                        <DeleteOutlined style={{ fontSize: '20px' }} onClick={()=> deleteProposalById(record.id)} />
+                    </Tooltip>
                 </Space>
             ),
         },
@@ -100,13 +105,21 @@ function TeacherThesisProposals() {
     };
 
     useEffect(() => {
-        API.getThesisProposals()
-            .then((x) => {
-                setData(handleReceivedData(x));
-                setIsLoadingTable(false);
-            })
-            .catch((err) => { messageApi.error(err.message ? err.message : err) });
-    }, []);
+        if (accessToken && dirty) {
+            setIsLoadingTable(true);
+            API.getThesisProposals(accessToken)
+                .then((x) => {
+                    setData(handleReceivedData(x));
+                    setIsLoadingTable(false);
+                    setDirty(false);
+                })
+                .catch((err) => {
+                    message.error(err.message ? err.message : err);
+                    setIsLoadingTable(false);
+                    setDirty(false);
+                });
+        }
+    }, [accessToken, dirty]);
 
     function handleReceivedData(data) {
 
@@ -120,11 +133,19 @@ function TeacherThesisProposals() {
         return formattedData;
     }
 
+    async function deleteProposalById(id) {
+        try {
+            await API.deleteProposalById(id, accessToken);
+            message.success("Proposal deleted successfully");
+            setDirty(true);
+        } catch (err) {
+            message.error(err.message ? err.message : err);
+            setIsLoadingTable(false);
+        }
+    }
+
     return (
-        <>
-            {messageBox}
-            <Table {...tableProps} columns={columns} dataSource={data} />
-        </>
+        <Table {...tableProps} columns={columns} dataSource={data} />
     )
 }
 

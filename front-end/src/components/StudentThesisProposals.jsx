@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input, Button, Space, message, Table, Form, Drawer, DatePicker, Tag, Tooltip } from 'antd';
 import { SearchOutlined, EyeOutlined } from '@ant-design/icons';
+import { useAuth } from './authentication/useAuth';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
@@ -27,6 +28,8 @@ function StudentThesisProposals() {
 
     // Store filter date range
     const [dateRange, setDateRange] = useState([]);
+
+    const { accessToken } = useAuth();
 
     const filterTitle = () => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
@@ -68,18 +71,20 @@ function StudentThesisProposals() {
     const [messageApi, messageBox] = message.useMessage();
 
     useEffect(() => {
-        API.getClock()
-            .then((x) => {
-                setClock(dayjs().add(x.offset, 'ms'));
-            })
-            .catch((err) => { messageApi.error(err.message ? err.message : err) });
-        API.getThesisProposals()
-            .then((x) => {
-                setData(handleReceivedData(x));
-                setIsLoadingTable(false);
-            })
-            .catch((err) => { messageApi.error(err.message ? err.message : err) });
-    }, []);
+        if (accessToken) {
+            API.getClock()
+                .then((x) => {
+                    setClock(dayjs().add(x.offset, 'ms'));
+                })
+                .catch((err) => { messageApi.error(err.message ? err.message : err) });
+            API.getThesisProposals(accessToken)
+                .then((x) => {
+                    setData(handleReceivedData(x));
+                    setIsLoadingTable(false);
+                })
+                .catch((err) => { messageApi.error(err.message ? err.message : err) });
+        }
+    }, [accessToken]);
 
     const navigate = useNavigate();
 

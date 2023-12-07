@@ -1,10 +1,12 @@
 import { React, useState, useEffect } from "react";
 import { Space, Badge, Button, Skeleton, message, Typography, Tooltip, FloatButton, Timeline } from "antd";
 import { ReloadOutlined } from '@ant-design/icons';
+import { useAuth } from "./authentication/useAuth";
 import API from "../API";
 
 function StudentApplications() {
 
+    const { accessToken } = useAuth();
     const [isLoading, setIsLoading] = useState(true);
     const [dirty, setDirty] = useState(true);
     const [data, setData] = useState([]);
@@ -12,23 +14,25 @@ function StudentApplications() {
     const { Title } = Typography;
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                if (dirty) {
-                    setIsLoading(true);
-                    const proposals = await API.getStudentApplicationsHistory();
-                    setData(proposals);
+        if (accessToken) {
+            const fetchData = async () => {
+                try {
+                    if (dirty) {
+                        setIsLoading(true);
+                        const proposals = await API.getStudentApplicationsHistory(accessToken);
+                        setData(proposals);
+                        setIsLoading(false);
+                        setDirty(false);
+                    }
+                } catch (err) {
+                    message.error(err.message ? err.message : err);
                     setIsLoading(false);
                     setDirty(false);
                 }
-            } catch (err) {
-                message.error(err.message ? err.message : err);
-                setIsLoading(false);
-                setDirty(false);
-            }
-        };
-        fetchData();
-    }, [dirty]);
+            };
+            fetchData();
+        }
+    }, [dirty, accessToken]);
 
 
     const items = data.map((x, index) => ({
@@ -66,7 +70,7 @@ function StudentApplications() {
                 <Skeleton active />
                 :
                 data.length > 0 ?
-                    <Timeline reverse={true} mode="alternate" items={items} style={{marginTop: "15px"}}/>
+                    <Timeline reverse={true} mode="alternate" items={items} style={{ marginTop: "15px" }} />
                     :
                     <Space direction="vertical" style={{ width: '100%', alignItems: 'center' }}>
                         <Title level={4} >No application requests found.</Title>

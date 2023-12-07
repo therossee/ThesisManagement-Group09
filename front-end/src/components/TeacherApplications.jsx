@@ -1,5 +1,6 @@
 import { React, useState, useEffect } from "react";
 import API from "../API";
+import { useAuth } from "./authentication/useAuth";
 import { message, Divider, List, Skeleton, Avatar, Button, Flex, Typography, Tooltip } from 'antd';
 import { UserOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 
@@ -16,41 +17,43 @@ function TeacherApplications() {
 
     const { Title } = Typography;
 
+    const { accessToken } = useAuth();
+
     useEffect(() => {
         const fetchData = async () => {
             try {
-                if (dirty) {
+                if (dirty && accessToken) {
                     setIsLoading(true);
-                    setData([]);
-                    const proposals = await API.getThesisProposals();
-
-                    // Load applications for each thesis proposal
-                    proposals.map(async proposal => {
-                        const applications = await API.getTeacherThesisApplications(proposal.id);
-                        if (applications.some(x => x.status === "waiting for approval"))
-                            setData(() => Object.assign([], [
-                                {
+                    let newData = [];
+                    const proposals = await API.getThesisProposals(accessToken);
+                    await Promise.all(
+                        proposals.map(async (proposal) => {
+                            const applications = await API.getTeacherThesisApplications(proposal.id, accessToken);
+                            if (applications.some((x) => x.status === "waiting for approval")) {
+                                newData.push({
                                     id: proposal.id,
                                     title: proposal.title,
-                                    applications: applications.filter(x => x.status === "waiting for approval"),
-                                },
-                            ]));
-                    })
+                                    applications: applications.filter((x) => x.status === "waiting for approval"),
+                                });
+                            }
+                        })
+                    );
+                    setData(newData);
                     setIsLoading(false);
                     setDirty(false);
                 }
             } catch (err) {
-                message.error(err.message ? err.message : err)
+                message.error(err.message ? err.message : err);
             }
         };
-        fetchData();
-    }, [dirty]);
 
+        fetchData();
+    }, [dirty, accessToken]);
 
     const acceptApplication = async (proposalId, studentId) => {
         setButtonsLoading(true);
         try {
-            await API.acceptThesisApplications(proposalId, studentId);
+            await API.acceptThesisApplications(proposalId, studentId, accessToken);
             message.success("Accepted the application of " + studentId);
             setDirty(true);
             setButtonsLoading(false)
@@ -64,7 +67,7 @@ function TeacherApplications() {
     const rejectApplication = async (proposalId, studentId) => {
         setButtonsLoading(true);
         try {
-            await API.rejectThesisApplications(proposalId, studentId);
+            await API.rejectThesisApplications(proposalId, studentId, accessToken);
             message.success("Rejected the application of " + studentId);
             setDirty(true);
             setButtonsLoading(false);
@@ -75,45 +78,44 @@ function TeacherApplications() {
     };
 
     function ApplicationsList() {
-        return (
-            data.map((x) => (
-                <div key={x.id} >
-                    <Skeleton loading={isLoading} active title={false}>
+        let ApplicationList = data.map((x) => (
+            <div key={x.id} >
+                <Skeleton loading={isLoading} active title={false}>
                     <Divider orientation="center">
-                            <div style={{ whiteSpace: "normal" }}>
-                                <Title level={4} style={{ margin: "0" }}>
-                                    {x.title}
-                                </Title>
-                            </div>
+                        <div style={{ whiteSpace: "normal" }}>
+                            <Title level={4} style={{ margin: "0" }}>
+                                {x.title}
+                            </Title>
+                        </div>
                     </Divider>
-                    </Skeleton>
-                    <List
-                        loading={isLoading}
-                        itemLayout="horizontal"
-                        dataSource={x.applications}
-                        renderItem={(student) => (
-                            <div style={{ marginRight: "20%", marginLeft: "20%" }}>
-                                <List.Item key={student.id}>
-                                    <List.Item.Meta
-                                        avatar={<Avatar icon={<UserOutlined />} />}
-                                        title={`${student.surname} ${student.name}`}
-                                    />
-                                    <Flex wrap="wrap" gap="small">
-                                        <Tooltip title="Accept Application">
-                                            <Button loading={buttonsLoading} disabled={buttonsLoading} icon={<CheckOutlined />} onClick={() => acceptApplication(x.id, student.id)} ghost type="primary" />
-                                        </Tooltip>
-                                        <Tooltip title="Reject Application">
-                                            <Button loading={buttonsLoading} disabled={buttonsLoading} icon={<CloseOutlined />} onClick={() => rejectApplication(x.id, student.id)} danger />
-                                        </Tooltip>
-                                    </Flex>
-                                </List.Item>
-                            </div>
-                        )}
-                    />
-                </div>
+                </Skeleton>
+                <List
+                    loading={isLoading}
+                    itemLayout="horizontal"
+                    dataSource={x.applications}
+                    renderItem={(student) => (
+                        <div style={{ marginRight: "20%", marginLeft: "20%" }}>
+                            <List.Item key={student.id}>
+                                <List.Item.Meta
+                                    avatar={<Avatar icon={<UserOutlined />} />}
+                                    title={`${student.surname} ${student.name}`}
+                                />
+                                <Flex wrap="wrap" gap="small">
+                                    <Tooltip title="Accept Application">
+                                        <Button loading={buttonsLoading} disabled={buttonsLoading} icon={<CheckOutlined />} onClick={() => acceptApplication(x.id, student.id)} ghost type="primary" />
+                                    </Tooltip>
+                                    <Tooltip title="Reject Application">
+                                        <Button loading={buttonsLoading} disabled={buttonsLoading} icon={<CloseOutlined />} onClick={() => rejectApplication(x.id, student.id)} danger />
+                                    </Tooltip>
+                                </Flex>
+                            </List.Item>
+                        </div>
+                    )}
+                />
+            </div>
 
-            ))
-        )
+        ))
+        return ApplicationList;
     }
 
     return (
@@ -127,4 +129,4 @@ function TeacherApplications() {
 }
 
 
-export default TeacherApplications ;
+export default TeacherApplications;
