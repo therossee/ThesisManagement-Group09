@@ -72,6 +72,6 @@ print("applications history clicked")
 
 if status_string.text == "waiting for approval":
     print("Test passed")
-else:
+elif status_string.text == "accepted" or status_string.text == "rejected":
     driver.quit()
-    raise Exception("Test failed: remember to run the test")
+    raise Exception("Test failed: remember to run the test with a user that has no accepted or rejected applications")

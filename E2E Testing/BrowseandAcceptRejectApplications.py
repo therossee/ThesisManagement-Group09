@@ -41,3 +41,14 @@ if application_text.text == "No applications pending..":
 else:
     driver.quit()
     raise Exception("Test failed: application has not been accepted correctly")
+
+thesis_proposals_button = driver.find_element(By.XPATH, "//span[normalize-space()='Thesis Proposals']")
+thesis_proposals_button.click();
+print("Thesis proposals clicked")
+
+row_proposal = driver.find_element(By.CSS_SELECTOR, "td[class='ant-table-cell ant-table-cell-fix-left ant-table-cell-fix-left-last']")
+if row_proposal.text == None :
+    print("Test passed, proposal have been removed due to acceptance")
+else:
+    driver.quit()
+    raise Exception("Test failed: proposal has not been removed")
