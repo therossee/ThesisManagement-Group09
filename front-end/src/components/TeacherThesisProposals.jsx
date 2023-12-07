@@ -136,6 +136,7 @@ function TeacherThesisProposals() {
     async function deleteProposalById(id) {
         try {
             await API.deleteProposalById(id, accessToken);
+            message.success("Proposal deleted successfully");
             setDirty(true);
         } catch (err) {
             message.error(err.message ? err.message : err);
