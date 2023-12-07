@@ -579,7 +579,6 @@ Error Responses:
     | notes              | text     | **OPTIONAL**                                          |
     | expiration         | text     | **NOT NULL**                                          |
     | level              | text     | **NOT NULL**                                          |
-    | cds                | text     | **NOT NULL**, **FK** [degree](#degree)(cod_degree)    |
 
 - Table `proposalKeyword`
     | Column        | Type    | Constraints                                          |
