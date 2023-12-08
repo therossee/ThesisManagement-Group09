@@ -570,15 +570,18 @@ Error Responses:
 - Table `thesisProposal`
     | Column             | Type     | Constraints                                           |
     | ------------------ | -------- | ----------------------------------------------------- |
-    | proposal_id        | integer  | **PK**, **Autoincrement**                             |
+    | proposal_id        | integer  | **PK, Autoincrement**                                 |
     | title              | text     | **NOT NULL**                                          |
-    | supervisor_id      | text     | **NOT NULL**, **FK** [teacher](#teacher)(id)          |
+    | supervisor_id      | text     | **NOT NULL, FK** [teacher](#teacher)(id)               |
     | type               | text     | **NOT NULL**                                          |
     | description        | text     | **NOT NULL**                                          |
     | required_knowledge | text     | **OPTIONAL**                                          |
     | notes              | text     | **OPTIONAL**                                          |
-    | expiration         | text     | **NOT NULL**                                          |
+    | creation_date      | date     | **NOT NULL**                                          |
+    | expiration         | date     | **NOT NULL**                                          |
     | level              | text     | **NOT NULL**                                          |
+    | is_deleted         | integer  | **CHECK (is_deleted == 0 or is_deleted == 1) DEFAULT 0** |
+
 
 - Table `proposalKeyword`
     | Column        | Type    | Constraints                                          |
@@ -627,10 +630,11 @@ Error Responses:
 - Table `thesisApplication`:
     | Column        | Type    | Constraints                                          |
     | ------------- | ------- | ---------------------------------------------------- |
-    | proposal_id   | integer | **NOT NULL**, **FK** [thesisProposal](#thesisProposal)(proposal_id) |
-    | student_id    | text    | **NOT NULL**, **FK** [student](#student)(id)         |
-    | status        | text    | **DEFAULT 'waiting for approval' NOT NULL**         |
-    | PRIMARY KEY   | proposal_id, student_id                             |
+    | id            | integer | **PK, Autoincrement**                               |
+    | proposal_id   | integer | **NOT NULL, FK** [thesisProposal](#thesisProposal)(proposal_id) |
+    | student_id    | text    | **NOT NULL, FK** [student](#student)(id)             |
+    | creation_date | date    | **NOT NULL**                                         |
+    | status        | text    | **DEFAULT 'waiting for approval'**         |
 
 - Table `student_auth0`:
     | Column   | Type | Constraints                        |
