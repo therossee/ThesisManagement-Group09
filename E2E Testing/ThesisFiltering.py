@@ -15,19 +15,23 @@ driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),
 driver.get("http://localhost:5173/")
 driver.maximize_window()
 
+driver.implicitly_wait(5)
 login_button = driver.find_element(By.XPATH, "//span[normalize-space()='Log in']")
 login_button.click();
 print("Login clicked")
 
+driver.implicitly_wait(5)
 user_field = driver.find_element(By.XPATH, "//input[@id='username']")
 user_field.send_keys("s321607@studenti.polito.it")
 print("User inserted")
 
+driver.implicitly_wait(5)
 password_field = driver.find_element(By.XPATH, "//input[@id='password']")
 password_field.send_keys("s321607")
 print("Password inserted")
 
-continue_button = driver.find_element(By.XPATH, "//button[@class='cb8dcbc41 c5fa977b5 c3419c4cf cf576c2dc cdb91ebae']")
+driver.implicitly_wait(5)
+continue_button = driver.find_element(By.XPATH, "//div[@class='cdc80f5fa']")
 continue_button.click();
 print("Continue clicked")
 
@@ -165,4 +169,4 @@ if text_found.text == text_to_find :
 else:
     print("Test failed: no supervisor found")
 
-
+#ALL THE OTHER FILTERS ARE IMPLEMENTED EXACTLY IN THE SAME WAY AS THE PREVIOUS ONES, SO THEY ARE NOT TESTED.
