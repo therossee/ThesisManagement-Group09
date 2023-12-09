@@ -1,17 +1,11 @@
 const dayjs = require('dayjs');
 dayjs.extend(require('dayjs/plugin/utc'));
 const InvalidNewVirtualOffsetError = require("./errors/InvalidNewVirtualOffsetError");
+const configuration = require('./configuration_dao');
 
 class VirtualClock {
-    /**
-     * The offset in milliseconds
-     *
-     * @type {number}
-     * @private
-     */
-    static _offsetMs = 0;
     static get offsetMs() {
-        return this._offsetMs;
+        return configuration.getIntegerValue(configuration.KEYS.VIRTUAL_OFFSET_MS) ?? 0;
     }
 
     /**
@@ -28,11 +22,11 @@ class VirtualClock {
             newOffsetMs = date.valueOf() - now.valueOf();
         }
 
-        if (newOffsetMs < this._offsetMs) {
+        if (newOffsetMs < this.offsetMs) {
             throw new InvalidNewVirtualOffsetError();
         }
 
-        this._offsetMs = newOffsetMs;
+        configuration.setValue('virtual_offset_ms', newOffsetMs);
     }
 
     /**
@@ -45,7 +39,7 @@ class VirtualClock {
             date = dayjs.utc();
         }
 
-        return date.add(this._offsetMs, 'millisecond');
+        return date.add(this.offsetMs, 'millisecond');
     }
 }
 
