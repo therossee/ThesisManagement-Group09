@@ -340,7 +340,7 @@ exports.archiveThesisProposalById = (proposalId, supervisorId) => {
       `;
       const hasApplicationsApproved = db.prepare(hasApplicationsApprovedQuery).get(proposalId) != null;
       if (hasApplicationsApproved) {
-        reject( new UnauthorizedActionError('Some applications has been accepted and, therefore, you can\'t delete this thesis') );
+        reject( new UnauthorizedActionError('Some applications has been accepted and, therefore, you can\'t archive this thesis') );
         return;
       }
 
