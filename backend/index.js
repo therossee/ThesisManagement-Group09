@@ -383,7 +383,7 @@ app.delete('/api/thesis-proposals/:id',
   }
 );
 
-app.put('/api/thesis-proposals/archieve/:id',
+app.patch('/api/thesis-proposals/archieve/:id',
   checkJwt,
   isTeacher,
   async (req, res) => {
