@@ -1,8 +1,9 @@
 import { React, useState, useEffect } from "react";
 import API from "../API";
 import { useAuth } from "./authentication/useAuth";
-import { message, Divider, List, Skeleton, Avatar, Button, Flex, Typography, Tooltip } from 'antd';
+import { Alert, message, Divider, List, Skeleton, Avatar, Button, Flex, Typography, Tooltip } from 'antd';
 import { UserOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
+import StudentCV from "./StudentCV";
 
 function TeacherApplications() {
 
@@ -14,6 +15,9 @@ function TeacherApplications() {
     const [buttonsLoading, setButtonsLoading] = useState(false);
 
     const [dirty, setDirty] = useState(true);
+
+    // Drawer for viewing student CV
+    const [isOpen, setIsOpen] = useState(false);
 
     const { Title } = Typography;
 
@@ -89,29 +93,31 @@ function TeacherApplications() {
                         </div>
                     </Divider>
                 </Skeleton>
-                <List
-                    loading={isLoading}
-                    itemLayout="horizontal"
-                    dataSource={x.applications}
-                    renderItem={(student) => (
-                        <div style={{ marginRight: "20%", marginLeft: "20%" }}>
-                            <List.Item key={student.id}>
-                                <List.Item.Meta
-                                    avatar={<Avatar icon={<UserOutlined />} />}
-                                    title={`${student.surname} ${student.name}`}
-                                />
-                                <Flex wrap="wrap" gap="small">
-                                    <Tooltip title="Accept Application">
-                                        <Button loading={buttonsLoading} disabled={buttonsLoading} icon={<CheckOutlined />} onClick={() => acceptApplication(x.id, student.id)} ghost type="primary" />
-                                    </Tooltip>
-                                    <Tooltip title="Reject Application">
-                                        <Button loading={buttonsLoading} disabled={buttonsLoading} icon={<CloseOutlined />} onClick={() => rejectApplication(x.id, student.id)} danger />
-                                    </Tooltip>
-                                </Flex>
-                            </List.Item>
-                        </div>
-                    )}
-                />
+                <div style={{ marginRight: "18%", marginLeft: "18%" }}>
+                    <List
+                        loading={isLoading}
+                        itemLayout="horizontal"
+                        dataSource={x.applications}
+                        renderItem={(student) => (
+                            <div style={{ paddingRight: "1%", paddingLeft: "1%" }}>
+                                <List.Item key={student.id} onClick={() => setIsOpen(true)}>
+                                    <List.Item.Meta
+                                        avatar={<Avatar icon={<UserOutlined />} />}
+                                        title={student.surname + " " + student.name}
+                                    />
+                                    <Flex wrap="wrap" gap="small">
+                                        <Tooltip title="Accept Application">
+                                            <Button loading={buttonsLoading} disabled={buttonsLoading} icon={<CheckOutlined />} onClick={() => acceptApplication(x.id, student.id)} ghost type="primary" />
+                                        </Tooltip>
+                                        <Tooltip title="Reject Application">
+                                            <Button loading={buttonsLoading} disabled={buttonsLoading} icon={<CloseOutlined />} onClick={() => rejectApplication(x.id, student.id)} ghost danger />
+                                        </Tooltip>
+                                    </Flex>
+                                </List.Item>
+                            </div>
+                        )}
+                    />
+                </div>
             </div>
 
         ))
@@ -120,7 +126,11 @@ function TeacherApplications() {
 
     return (
         data.length > 0 ?
-            <ApplicationsList />
+            <>
+                <Alert message="To view a specific applicant's CV and eventually the file uploaded within the application, simply click anywhere in the corresponding row." type="info" showIcon closable/>
+                <StudentCV isOpen={isOpen} setIsOpen={setIsOpen} />
+                <ApplicationsList />
+            </>
             :
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 <Title level={3}>No applications pending..</Title>
