@@ -5,6 +5,8 @@ const {app, server} = require("../index");
 const AdvancedDate = require("../AdvancedDate");
 const request = require("supertest");
 
+// TODO: To be fixed after new authorization system
+
 describe('Integration of AdvancedDate class in APIs', () => {
     let initialOffset;
 

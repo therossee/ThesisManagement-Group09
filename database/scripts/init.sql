@@ -16,9 +16,14 @@ DROP TABLE IF EXISTS teacher;
 DROP TABLE IF EXISTS student_auth0;
 DROP TABLE IF EXISTS student;
 DROP TABLE IF EXISTS degree;
-
+DROP TABLE IF EXISTS configuration;
 
 -- Create the degree table
+CREATE TABLE configuration (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL -- Stringified value
+);
+
 CREATE TABLE degree (
     cod_degree TEXT PRIMARY KEY,
     title_degree TEXT NOT NULL UNIQUE
@@ -156,6 +161,10 @@ CREATE TABLE thesisApplication (
 -- Insert Data
 
 -- Insert data into the degree table
+INSERT INTO configuration (key, value)
+VALUES
+    ('virtual_clock_offset', '0');
+
 INSERT INTO degree (cod_degree, title_degree)
 VALUES
     ('L-07', 'Ingegneria Civile e Ambientale'),
@@ -205,7 +214,7 @@ VALUES
 
 -- Insert data into the teacher_auth0 table
 INSERT INTO teacher_auth0 (id, id_auth0)
-VALUES 
+VALUES
     ('d279620', 'auth0|6564f83a022f6b2083b6b8c9'),
     ('d370392', 'auth0|656621f156336a62dd8aaced'),
     ('d226682', 'auth0|656621a2022f6b2083b7a522'),
@@ -247,8 +256,8 @@ VALUES
     ('s319355', 'Schiavone', 'Michele', 'Male', 'Italian', 's319355@studenti.polito.it', 'LM-35', 2020);
 
 -- Insert data into the student_auth0 table
-INSERT INTO student_auth0 (id, id_auth0) 
-VALUES 
+INSERT INTO student_auth0 (id, id_auth0)
+VALUES
     ('s318952', 'auth0|65635d036d87729b6b3ffe83'),
     ('s321529', 'auth0|6564f6ba6d87729b6b412740'),
     ('s319355', 'auth0|6564f6efd5c067abfc7e6096'),
