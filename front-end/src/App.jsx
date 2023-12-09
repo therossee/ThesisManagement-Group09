@@ -7,7 +7,7 @@ import './css/App.css'
 
 function App() {
 
-  const { setUserData, isAuthenticated, setIsTeacher, getAccessTokenSilently, setAccessToken, accessToken } = useAuth();
+  const { setUserData, isAuthenticated, setIsTeacher } = useAuth();
 
   // Handle notification box for api errors during login
   const [api, notificationBox] = notification.useNotification();
@@ -20,29 +20,6 @@ function App() {
       duration: 4,
     });
   };
-
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const token = await getAccessTokenSilently({
-          authorizationParams: {
-            audience: 'https://thesis-management-09.eu.auth0.com/api/v2/',
-            scope: 'read:current_user',
-          },
-        });
-        setAccessToken(token);
-        const user = await API.getUserInfo(token);
-        setIsTeacher(user.role === 'teacher');
-        setUserData(user);
-      } catch (err) {
-        openNotification(err.message || err);
-      }
-    };
-
-    if (isAuthenticated) {
-      fetch();
-    }
-  }, [isAuthenticated, accessToken ]);
 
   return (
     <>

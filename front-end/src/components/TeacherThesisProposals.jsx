@@ -15,8 +15,6 @@ function TeacherThesisProposals() {
 
     const navigate = useNavigate();
 
-    const { accessToken } = useAuth();
-
     const [dirty, setDirty] = useState(true);
 
     // Columns of the table
@@ -105,9 +103,9 @@ function TeacherThesisProposals() {
     };
 
     useEffect(() => {
-        if (accessToken && dirty) {
+        if (dirty) {
             setIsLoadingTable(true);
-            API.getThesisProposals(accessToken)
+            API.getThesisProposals()
                 .then((x) => {
                     setData(handleReceivedData(x));
                     setIsLoadingTable(false);
@@ -119,7 +117,7 @@ function TeacherThesisProposals() {
                     setDirty(false);
                 });
         }
-    }, [accessToken, dirty]);
+    }, [dirty]);
 
     function handleReceivedData(data) {
 
@@ -135,7 +133,7 @@ function TeacherThesisProposals() {
 
     async function deleteProposalById(id) {
         try {
-            await API.deleteProposalById(id, accessToken);
+            await API.deleteProposalById(id, );
             setDirty(true);
         } catch (err) {
             message.error(err.message ? err.message : err);

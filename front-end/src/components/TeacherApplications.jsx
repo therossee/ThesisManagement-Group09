@@ -17,18 +17,16 @@ function TeacherApplications() {
 
     const { Title } = Typography;
 
-    const { accessToken } = useAuth();
-
     useEffect(() => {
         const fetchData = async () => {
             try {
-                if (dirty && accessToken) {
+                if (dirty) {
                     setIsLoading(true);
                     let newData = [];
-                    const proposals = await API.getThesisProposals(accessToken);
+                    const proposals = await API.getThesisProposals();
                     await Promise.all(
                         proposals.map(async (proposal) => {
-                            const applications = await API.getTeacherThesisApplications(proposal.id, accessToken);
+                            const applications = await API.getTeacherThesisApplications(proposal.id);
                             if (applications.some((x) => x.status === "waiting for approval")) {
                                 newData.push({
                                     id: proposal.id,
@@ -48,12 +46,12 @@ function TeacherApplications() {
         };
 
         fetchData();
-    }, [dirty, accessToken]);
+    }, [dirty]);
 
     const acceptApplication = async (proposalId, studentId) => {
         setButtonsLoading(true);
         try {
-            await API.acceptThesisApplications(proposalId, studentId, accessToken);
+            await API.acceptThesisApplications(proposalId, studentId);
             message.success("Accepted the application of " + studentId);
             setDirty(true);
             setButtonsLoading(false)
@@ -67,7 +65,7 @@ function TeacherApplications() {
     const rejectApplication = async (proposalId, studentId) => {
         setButtonsLoading(true);
         try {
-            await API.rejectThesisApplications(proposalId, studentId, accessToken);
+            await API.rejectThesisApplications(proposalId, studentId);
             message.success("Rejected the application of " + studentId);
             setDirty(true);
             setButtonsLoading(false);

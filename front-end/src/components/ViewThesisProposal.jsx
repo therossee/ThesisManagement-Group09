@@ -8,7 +8,7 @@ import API from "../API";
 
 function ViewThesisProposal() {
 
-  const { isTeacher, accessToken } = useAuth();
+  const { isTeacher } = useAuth();
 
   const { id } = useParams();
   const { Text } = Typography;
@@ -26,7 +26,7 @@ function ViewThesisProposal() {
 
   async function addApplication() {
     try {
-      await API.applyForProposal(id, accessToken);
+      await API.applyForProposal(id, );
       message.success("Applied for proposal");
       setDisabled(true);
       setLoading(false);
@@ -39,8 +39,7 @@ function ViewThesisProposal() {
 
 
   useEffect(() => {
-    if (accessToken) {
-      API.getThesisProposalbyId(id, accessToken)
+      API.getThesisProposalbyId(id)
         .then((x) => {
           setData(x);
 
@@ -53,14 +52,13 @@ function ViewThesisProposal() {
             .catch((err) => { message.error(err.message ? err.message : err) });
         })
         .catch((err) => { message.error(err.message ? err.message : err) })
-    }
-  }, [accessToken]);
+  }, []);
 
   // Another Useffect needed because isTeacher needs time to be computed. It is initialized as undefined so we can actually see when it is computed by checking isTeacher===false and not !isTeacher.
   useEffect(() => {
     // Exclude teachers from Active Application fetch
-    if ((isTeacher === false) && accessToken) {
-        API.getStudentActiveApplication(accessToken)
+    if ((isTeacher === false) ) {
+        API.getStudentActiveApplication()
           .then((x) => {
             if (x.length > 0)
               // Disabled if there's already an application pending
@@ -68,7 +66,7 @@ function ViewThesisProposal() {
           })
           .catch((err) => { message.error(err.message ? err.message : err) });
     }
-  }, [isTeacher, accessToken]);
+  }, [isTeacher]);
 
   // If data is still empty
   if (!data) {

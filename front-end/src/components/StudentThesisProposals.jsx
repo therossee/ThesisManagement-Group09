@@ -29,8 +29,6 @@ function StudentThesisProposals() {
     // Store filter date range
     const [dateRange, setDateRange] = useState([]);
 
-    const { accessToken } = useAuth();
-
     const filterTitle = () => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
             <div style={{ padding: 8 }}>
@@ -71,20 +69,19 @@ function StudentThesisProposals() {
     const [messageApi, messageBox] = message.useMessage();
 
     useEffect(() => {
-        if (accessToken) {
-            API.getClock()
-                .then((x) => {
-                    setClock(dayjs().add(x.offset, 'ms'));
-                })
-                .catch((err) => { messageApi.error(err.message ? err.message : err) });
-            API.getThesisProposals(accessToken)
-                .then((x) => {
-                    setData(handleReceivedData(x));
-                    setIsLoadingTable(false);
-                })
-                .catch((err) => { messageApi.error(err.message ? err.message : err) });
-        }
-    }, [accessToken]);
+        API.getClock()
+            .then((x) => {
+                setClock(dayjs().add(x.offset, 'ms'));
+            })
+            .catch((err) => { messageApi.error(err.message ? err.message : err) });
+        API.getThesisProposals()
+            .then((x) => {
+                setData(handleReceivedData(x));
+                setIsLoadingTable(false);
+            })
+            .catch((err) => { messageApi.error(err.message ? err.message : err) });
+
+    }, []);
 
     const navigate = useNavigate();
 
