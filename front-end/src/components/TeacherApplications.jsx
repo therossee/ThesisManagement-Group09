@@ -52,7 +52,7 @@ function TeacherApplications() {
         setButtonsLoading(true);
         try {
             await API.acceptThesisApplications(proposalId, studentId);
-            message.success("Accepted the application of " + studentId);
+            message.success("Successfully accepted the application of " + studentId);
             setDirty(true);
             setButtonsLoading(false)
         } catch (err) {
@@ -66,7 +66,7 @@ function TeacherApplications() {
         setButtonsLoading(true);
         try {
             await API.rejectThesisApplications(proposalId, studentId);
-            message.success("Rejected the application of " + studentId);
+            message.success("Successfully rejected the application of " + studentId);
             setDirty(true);
             setButtonsLoading(false);
         } catch (err) {

@@ -166,8 +166,8 @@ describe('updateThesisProposal', () => {
       title: 'Test Proposal',
       type: 'Test Type',
       description: 'Test Description',
-      required_knowledge: 'Test Knowledge',
-      notes: 'Test Notes',
+      required_knowledge: '',
+      notes: '',
       expiration: '2023-12-31T23:59:59.999Z', // Updated expiration date
       level: 'Updated Level',
       keywords: ['Keyword1', 'Keyword2'],
@@ -728,6 +728,7 @@ describe('listThesisProposalsTeacher', () => {
         )
         AND P.expiration > ?
         AND creation_date < ?
+        AND is_archived = 0
         AND is_deleted = 0;`;
     // Mock the SQLite database query
     db.prepare.mockClear().mockReturnValueOnce({ all: jest.fn(() => mockProposals) });
@@ -778,6 +779,7 @@ describe('listApplicationsForTeacherThesisProposal', () => {
       AND ta.creation_date < ?
       AND tp.expiration > ?
       AND tp.creation_date < ?
+      AND tp.is_archived = 0
       AND tp.is_deleted = 0;`;
     // Assertions
     expect(result).toEqual(mockApplications);

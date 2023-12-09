@@ -27,7 +27,7 @@ function ViewThesisProposal() {
   async function addApplication() {
     try {
       await API.applyForProposal(id, );
-      message.success("Applied for proposal");
+      message.success("Succesfully applied for thesis proposal");
       setDisabled(true);
       setLoading(false);
     } catch (err) {

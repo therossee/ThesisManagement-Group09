@@ -13,21 +13,20 @@ dayjs.extend(isSameOrAfter);
 
 function StudentThesisProposals() {
 
-    const [clock, setClock] = useState(dayjs());
     // Array of objs for storing table data
     const [data, setData] = useState([])
 
     // Loading table data fetching
     const [isLoadingTable, setIsLoadingTable] = useState(true);
 
-    // Storing Title Search filter
-    const [searchTitle, setSearchTitle] = useState('');
-
     // Drawer for viewing more filters
     const [isOpen, setIsOpen] = useState(false);
 
     // Store filter date range
     const [dateRange, setDateRange] = useState([]);
+
+    // Set virtual clock date to prevent filtering for a date before virtual clock one
+    const [date, setDate] = useState(dayjs());
 
     const filterTitle = () => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
@@ -36,20 +35,20 @@ function StudentThesisProposals() {
                     placeholder="Search Title"
                     value={selectedKeys[0]}
                     onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-                    onPressEnter={() => handleSearch(selectedKeys, confirm)}
+                    onPressEnter={() => confirm()}
                     style={{ width: '100%', marginBottom: 8, display: 'block' }}
                 />
                 <Space>
                     <Button
                         type="primary"
-                        onClick={() => handleSearch(selectedKeys, confirm)}
+                        onClick={() => confirm()}
                         icon={<SearchOutlined />}
                         size="small"
                         style={{ width: 90 }}
                     >
                         Search
                     </Button>
-                    <Button onClick={() => handleReset(clearFilters)} size="small" style={{ width: 90 }}>
+                    <Button onClick={() => clearFilters()} size="small" style={{ width: 90 }}>
                         Reset
                     </Button>
                     <Button type="link" size="small" onClick={() => close()}>
@@ -65,9 +64,6 @@ function StudentThesisProposals() {
             record.title.toLowerCase().includes(value.toLowerCase()),
     });
 
-    // Storing message errors
-    const [messageApi, messageBox] = message.useMessage();
-
     useEffect(() => {
         API.getClock()
             .then((x) => {
@@ -80,7 +76,7 @@ function StudentThesisProposals() {
                 setIsLoadingTable(false);
             })
             .catch((err) => { messageApi.error(err.message ? err.message : err) });
-
+        
     }, []);
 
     const navigate = useNavigate();
@@ -107,6 +103,10 @@ function StudentThesisProposals() {
             setFilteredData(filtered);
         }
     }, [data, moreFiltersData]);
+
+    function disabledDate(current) {
+        return current?.isSameOrBefore(date);
+    }
 
     // Columns of the table
     const columns = [
@@ -275,7 +275,7 @@ function StudentThesisProposals() {
                         <DatePicker.RangePicker
                             value={selectedKeys}
                             onChange={onDateChange}
-                            defaultValue={[clock, clock]}
+                            disabledDate={disabledDate}
                             format="YYYY-MM-DD"
                         />
                         <Space style={{ marginLeft: "8px" }}>
@@ -320,16 +320,6 @@ function StudentThesisProposals() {
         loading: isLoadingTable,
     };
 
-    const handleSearch = (selectedKeys, confirm) => {
-        confirm();
-        setSearchTitle(selectedKeys[0]);
-    };
-
-    const handleReset = (clearFilters) => {
-        clearFilters();
-        setSearchTitle('');
-    };
-
     function handleReceivedData(data) {
 
         const formattedData = data.map((x) => ({
@@ -346,7 +336,7 @@ function StudentThesisProposals() {
 
         const [form] = Form.useForm();
 
-        const savemoreFiltersData = () => {
+        const saveMoreFiltersData = () => {
             setMoreFiltersData({
                 description: form.getFieldsValue().description,
                 knowledge: form.getFieldsValue().knowledge,
@@ -356,7 +346,7 @@ function StudentThesisProposals() {
 
         const handleSubmit = () => {
             setIsOpen(false);
-            savemoreFiltersData();
+            saveMoreFiltersData();
         };
 
         const handleReset = () => {
@@ -374,7 +364,7 @@ function StudentThesisProposals() {
                 onClose={() => setIsOpen(false)}
                 extra={
                     <Space>
-                        <Button onClick={() => handleReset()}>Reset Fields</Button>
+                        <Button onClick={handleReset}>Reset Fields</Button>
                         <Button type="primary" onClick={handleSubmit}>
                             Submit Filters
                         </Button>
@@ -399,7 +389,6 @@ function StudentThesisProposals() {
 
     return (
         <>
-            {messageBox}
             <MoreFilters />
             <Table {...tableProps} columns={columns} dataSource={filteredData}
                 title={() => <Button type="link" size="small" onClick={() => setIsOpen(true)}>Show even more filters...</Button>} />
