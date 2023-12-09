@@ -1,5 +1,6 @@
 const dayjs = require('dayjs');
 dayjs.extend(require('dayjs/plugin/utc'));
+const InvalidNewVirtualOffsetError = require("./errors/InvalidNewVirtualOffsetError");
 
 class VirtualClock {
     /**
@@ -17,17 +18,21 @@ class VirtualClock {
      * @param {number|string} offsetOrDateStr The offset in milliseconds or a date string in ISO 8601 format
      */
     static setNewOffset(offsetOrDateStr) {
-        let offset;
+        let newOffsetMs;
         if (typeof offsetOrDateStr === 'number') {
-            offset = offsetOrDateStr;
+            newOffsetMs = offsetOrDateStr;
         } else {
             const date = dayjs.utc(offsetOrDateStr);
             const now = dayjs();
 
-            offset = date.valueOf() - now.valueOf();
+            newOffsetMs = date.valueOf() - now.valueOf();
         }
 
-        this._offsetMs = offset;
+        if (newOffsetMs < this._offsetMs) {
+            throw new InvalidNewVirtualOffsetError();
+        }
+
+        this._offsetMs = newOffsetMs;
     }
 
     /**
