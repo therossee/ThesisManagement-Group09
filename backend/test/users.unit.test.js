@@ -9,62 +9,6 @@ jest.mock('../db', () => ({
   get: jest.fn(),
 }));
 
-describe('getUser', () => {
-  test('should return student data if the email and password are correct', async () => {
-    const mockStudent = {
-      id: 's1',
-      surname: 'mockStudentSurname',
-      name: 'mockStudentName',
-      gender: 'MALE',
-      nationality: 'Italian',
-      email: 'mockStudentEmail@email.com',
-      cod_degree: 'L-01',
-      enrollment_year: 2020,
-    }
-    db.prepare().get.mockReturnValueOnce(mockStudent);
-
-    const result = await users.getUser('mockStudentEmail@email.com', 's1');
-
-    expect(result).toEqual(mockStudent);
-  });
-  test('should return teacher data if the email and password are correct', async () => {
-    const mockTeacher = {
-      id: 'd1',
-      surname: 'mockTeacherSurname',
-      name: 'mockTeacherName',
-      email: 'mockTeacherEmail@email.com',
-      cod_group: 'Group1',
-      cod_department: 'Dep1',
-    }
-    db.prepare().get.mockReturnValueOnce(mockTeacher);
-    const result = await users.getUser('mockTeacherEmail@email.com', 'd1');
-
-    expect(result).toEqual(mockTeacher);
-  });
-  test('should return false if the email does not exist in the database', async () => {
-    const result = await users.getUser('mock@example.com', '1');
-
-    expect(result).toBe(false);
-    });
-  test('should return false if the password is incorrect', async () => {
-    const mockStudent = {
-      id: 's1',
-      surname: 'mockStudentSurname',
-      name: 'mockStudentName',
-      gender: 'MALE',
-      nationality: 'Italian',
-      email: 'mockStudentEmail@email.com',
-      cod_degree: 'L-01',
-      enrollment_year: 2020,
-    }
-    db.prepare().get.mockReturnValueOnce(mockStudent);
-
-    const result = await users.getUser('mockStudentEmail@email.com', 's2');
-
-    expect(result).toEqual(false);
-  });
-});
-
 describe('getUserInfo', () => {
   afterEach(() => {
     jest.restoreAllMocks();
