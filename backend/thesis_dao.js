@@ -401,6 +401,7 @@ exports.listThesisProposalsFromStudent = (studentId) => {
           )
           AND P.expiration > ?
           AND P.creation_date < ?
+          AND is_archieved = 0
           AND is_deleted = 0;`;
 
     const thesisProposals = db.prepare(query).all(studentId, currentDate, currentDate);
@@ -531,7 +532,7 @@ exports.applyForProposal = (proposal_id, student_id) => {
 
     // Check if the proposal is active
     const checkProposalActive = `SELECT * FROM thesisProposal P WHERE P.proposal_id=?
-                                 AND P.expiration > ? AND P.creation_date < ? AND P.is_deleted = 0
+                                 AND P.expiration > ? AND P.creation_date < ? AND P.is_deleted = 0 AND is_archieved = 0
                                  AND NOT EXISTS (
                                     SELECT 1
                                     FROM thesisApplication A
@@ -576,6 +577,7 @@ exports.listThesisProposalsTeacher = (teacherId) => {
         )
         AND P.expiration > ?
         AND creation_date < ?
+        AND is_archieved = 0
         AND is_deleted = 0;`;
     const proposals = db.prepare(getProposals).all(teacherId, currentDate, currentDate);
     resolve(proposals)
@@ -595,6 +597,7 @@ exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
       AND ta.creation_date < ?
       AND tp.expiration > ?
       AND tp.creation_date < ?
+      AND tp.is_archieved = 0
       AND tp.is_deleted = 0;`;
 
     const applications = db.prepare(getApplications).all(proposal_id, teacherId, currentDate, currentDate, currentDate);
@@ -679,7 +682,7 @@ exports.getThesisProposalTeacher = (proposalId, teacherId) => {
     }
 
     const query = `SELECT * FROM thesisProposal WHERE proposal_id = ? AND supervisor_id = ? 
-                   AND expiration > ? AND creation_date < ? AND is_deleted = 0;`;
+                   AND expiration > ? AND creation_date < ? AND is_deleted = 0 AND is_archieved = 0;`;
     const res = db.prepare(query).get(proposalId, teacherId, currentDate, currentDate);
     resolve(res);
   })
