@@ -26,7 +26,7 @@ class VirtualClock {
             throw new InvalidNewVirtualOffsetError();
         }
 
-        configuration.setValue('virtual_offset_ms', newOffsetMs);
+        configuration.setValue(configuration.KEYS.VIRTUAL_OFFSET_MS, newOffsetMs);
     }
 
     /**
