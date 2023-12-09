@@ -109,6 +109,12 @@ exports.getStudentById = (id) => {
  * @property {string} email
  */
 
+/**
+ * Return all the exams of the student with the given id
+ *
+ * @param {string} id
+ * @return {Promise<Exams[] | null>}
+ */
 exports.getStudentCareer = (id) => {
     return new Promise((resolve, reject) => {
         const sql = 'SELECT cod_course, title_course, cfu, grade, date FROM career WHERE id = ?';
