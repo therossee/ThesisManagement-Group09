@@ -54,11 +54,11 @@ function TeacherApplications() {
         fetchData();
     }, [dirty, accessToken]);
 
-    const acceptApplication = async (proposalId, studentId) => {
+    const acceptApplication = async (proposalId, student) => {
         setButtonsLoading(true);
         try {
-            await API.acceptThesisApplications(proposalId, studentId, accessToken);
-            message.success("Accepted the application of " + studentId);
+            await API.acceptThesisApplications(proposalId, student.id, accessToken);
+            message.success("Accepted the application of " + student.surname + " " + student.name);
             setDirty(true);
             setButtonsLoading(false)
         } catch (err) {
@@ -68,11 +68,11 @@ function TeacherApplications() {
     };
 
 
-    const rejectApplication = async (proposalId, studentId) => {
+    const rejectApplication = async (proposalId, student) => {
         setButtonsLoading(true);
         try {
-            await API.rejectThesisApplications(proposalId, studentId, accessToken);
-            message.success("Rejected the application of " + studentId);
+            await API.rejectThesisApplications(proposalId, student.id, accessToken);
+            message.success("Rejected the application of " + student.surname + " " + student.name);
             setDirty(true);
             setButtonsLoading(false);
         } catch (err) {
@@ -107,10 +107,10 @@ function TeacherApplications() {
                                     />
                                     <Flex wrap="wrap" gap="small">
                                         <Tooltip title="Accept Application">
-                                            <Button loading={buttonsLoading} disabled={buttonsLoading} icon={<CheckOutlined />} onClick={() => acceptApplication(x.id, student.id)} ghost type="primary" />
+                                            <Button loading={buttonsLoading} disabled={buttonsLoading} icon={<CheckOutlined />} onClick={() => acceptApplication(x.id, student)} ghost type="primary" />
                                         </Tooltip>
                                         <Tooltip title="Reject Application">
-                                            <Button loading={buttonsLoading} disabled={buttonsLoading} icon={<CloseOutlined />} onClick={() => rejectApplication(x.id, student.id)} ghost danger />
+                                            <Button loading={buttonsLoading} disabled={buttonsLoading} icon={<CloseOutlined />} onClick={() => rejectApplication(x.id, student)} ghost danger />
                                         </Tooltip>
                                     </Flex>
                                 </List.Item>
