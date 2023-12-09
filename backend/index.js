@@ -383,7 +383,7 @@ app.delete('/api/thesis-proposals/:id',
   }
 );
 
-app.patch('/api/thesis-proposals/archieve/:id',
+app.patch('/api/thesis-proposals/archive/:id',
   checkJwt,
   isTeacher,
   async (req, res) => {
@@ -392,11 +392,11 @@ app.patch('/api/thesis-proposals/archieve/:id',
       const teacherId = userInfo.id;
       const proposalId = req.params.id;
 
-      await thesisDao.archieveThesisProposalById(proposalId, teacherId)
-          .then( applicationsArchieved => {
+      await thesisDao.archiveThesisProposalById(proposalId, teacherId)
+          .then( applicationsArchived => {
             setImmediate( () => {
-              const reason = 'The thesis proposal has been archieved from the website.';
-              for (const application of applicationsArchieved) {
+              const reason = 'The thesis proposal has been archived from the website.';
+              for (const application of applicationsArchived) {
                 _notifyApplicationStatusChange(application.student_id, application.proposal_id, application.status, reason);
               }
             });

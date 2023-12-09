@@ -94,7 +94,7 @@ CREATE TABLE thesisProposal (
     expiration DATE NOT NULL,
     level TEXT NOT NULL,
     is_deleted INTEGER CHECK ( is_deleted == 0 or is_deleted == 1 ) DEFAULT 0,
-    is_archieved INTEGER CHECK(is_archieved == 0 OR is_archieved == 1) DEFAULT 0,
+    is_archived INTEGER CHECK(is_archived == 0 OR is_archived == 1) DEFAULT 0,
     FOREIGN KEY(supervisor_id) REFERENCES teacher(id)
 );
 
@@ -563,12 +563,12 @@ VALUES
 
 
 -- Create a trigger that check that the proposal_id of the thesisApplication table is present in the thesisProposal table
--- and that the proposal is not deleted or archieved for the insertion and the update
+-- and that the proposal is not deleted or archived for the insertion and the update
 CREATE TRIGGER check_proposal_id_in_application
 BEFORE INSERT ON thesisApplication
 FOR EACH ROW
 WHEN (NEW.proposal_id NOT IN (SELECT proposal_id FROM thesisProposal WHERE is_deleted = 0)
-        AND NEW.proposal_id NOT IN (SELECT proposal_id FROM thesisProposal WHERE is_archieved = 0))
+        AND NEW.proposal_id NOT IN (SELECT proposal_id FROM thesisProposal WHERE is_archived = 0))
 BEGIN
     SELECT RAISE(ABORT, 'The proposal_id is not present in the thesisProposal table or the proposal is deleted');
 END;
@@ -578,8 +578,8 @@ BEFORE UPDATE ON thesisApplication
 FOR EACH ROW
 WHEN (NEW.proposal_id <> OLD.proposal_id
     AND NEW.proposal_id NOT IN (SELECT proposal_id FROM thesisProposal WHERE is_deleted = 0)
-    AND NEW.proposal_id NOT IN (SELECT proposal_id FROM thesisProposal WHERE is_archieved = 0)
+    AND NEW.proposal_id NOT IN (SELECT proposal_id FROM thesisProposal WHERE is_archived = 0)
 )
 BEGIN
-    SELECT RAISE(ABORT, 'The proposal_id is not present in the thesisProposal table or the proposal is deleted or archieved');
+    SELECT RAISE(ABORT, 'The proposal_id is not present in the thesisProposal table or the proposal is deleted or archived');
 END;
