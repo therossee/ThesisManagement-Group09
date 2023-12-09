@@ -121,7 +121,7 @@ function VirtualClock() {
                         allowClear={false}
                         defaultValue={date}
                         changeOnBlur={true}
-                        disabledDate={ (current) => current && current.isBefore(date) }
+                        disabledDate={ (current) => current?.isBefore(date) }
                         disabledTime={
                             (dateSelected) => {
                                 return {
