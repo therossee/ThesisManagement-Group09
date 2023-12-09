@@ -166,8 +166,8 @@ describe('updateThesisProposal', () => {
       title: 'Test Proposal',
       type: 'Test Type',
       description: 'Test Description',
-      required_knowledge: 'Test Knowledge',
-      notes: 'Test Notes',
+      required_knowledge: '',
+      notes: '',
       expiration: '2023-12-31T23:59:59.999Z', // Updated expiration date
       level: 'Updated Level',
       keywords: ['Keyword1', 'Keyword2'],

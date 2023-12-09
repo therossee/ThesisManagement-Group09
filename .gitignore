@@ -1,5 +1,8 @@
 /database/node_modules
+/database
 **/.env
 **/node_modules
 **/coverage
 **/.idea
+.DS_Store
+
