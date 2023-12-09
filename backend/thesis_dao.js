@@ -323,6 +323,62 @@ exports.deleteThesisProposalById = (proposalId, supervisorId) => {
 };
 
 /**
+ * Set the property is_archieved of a thesis proposal to 1 and cancel all the applications waiting for approval for that
+ * thesis
+ *
+ * @param {string} proposalId
+ * @param {string} supervisorId
+ * @return {Promise<ThesisApplicationRow[]>}
+ */
+exports.archieveThesisProposalById = (proposalId, supervisorId) => {
+  return new Promise( (resolve, reject) => {
+    db.transaction(async () => {
+      const hasApplicationsApprovedQuery = `
+        SELECT 1
+        FROM thesisApplication
+        WHERE proposal_id = ? AND status = 'accepted';
+      `;
+      const hasApplicationsApproved = db.prepare(hasApplicationsApprovedQuery).get(proposalId) != null;
+      if (hasApplicationsApproved) {
+        reject( new UnauthorizedActionError('Some applications has been accepted and, therefore, you can\'t delete this thesis') );
+        return;
+      }
+
+      const now = new AdvancedDate().toISOString();
+      const archieveThesisProposalQuery = `
+        UPDATE thesisProposal
+        SET is_archieved = 1
+        WHERE proposal_id = ? AND supervisor_id = ? AND expiration > ? AND creation_date < ?;
+      `;
+      const res = db.prepare(archieveThesisProposalQuery).run(proposalId, supervisorId, now, now);
+      if (res.changes === 0) {
+        // We try to understand the reason of the failure
+        const thesis = await this.getThesisProposalById(proposalId);
+        if (thesis == null || thesis.creation_date > now) {
+          // No thesis proposal with the given id
+          reject( new NoThesisProposalError(proposalId) );
+        } else if (thesis.expiration <= now) {
+          // Thesis proposal expired
+          reject( new UnauthorizedActionError('You can\'t archieve a thesis already expired') );
+        } else {
+          // The supervisor is not the owner of the thesis proposal
+          reject( new UnauthorizedActionError('You are not the supervisor of this thesis') );
+        }
+
+        return;
+      }
+
+      const cancelApplicationsQuery = `
+        UPDATE thesisApplication
+        SET status = 'cancelled'
+        WHERE proposal_id = ? AND status = 'waiting for approval'
+        RETURNING *;
+      `;
+      resolve( db.prepare(cancelApplicationsQuery).all(proposalId) );
+    })();
+  })
+};
+/**
  * Return the list of thesis proposals related to a student degree
  *
  * @param {string} studentId
