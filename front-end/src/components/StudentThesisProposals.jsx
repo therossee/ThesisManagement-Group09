@@ -113,7 +113,7 @@ function StudentThesisProposals() {
     }, [data, moreFiltersData]);
 
     function disabledDate(current) {
-        return current && current.isSameOrBefore(date);
+        return current?.isSameOrBefore(date);
     }
 
     // Columns of the table
@@ -344,7 +344,7 @@ function StudentThesisProposals() {
 
         const [form] = Form.useForm();
 
-        const savemoreFiltersData = () => {
+        const saveMoreFiltersData = () => {
             setMoreFiltersData({
                 description: form.getFieldsValue().description,
                 knowledge: form.getFieldsValue().knowledge,
@@ -354,7 +354,7 @@ function StudentThesisProposals() {
 
         const handleSubmit = () => {
             setIsOpen(false);
-            savemoreFiltersData();
+            saveMoreFiltersData();
         };
 
         const handleReset = () => {
@@ -372,7 +372,7 @@ function StudentThesisProposals() {
                 onClose={() => setIsOpen(false)}
                 extra={
                     <Space>
-                        <Button onClick={() => clearFilters()}>Reset Fields</Button>
+                        <Button onClick={handleReset}>Reset Fields</Button>
                         <Button type="primary" onClick={handleSubmit}>
                             Submit Filters
                         </Button>
