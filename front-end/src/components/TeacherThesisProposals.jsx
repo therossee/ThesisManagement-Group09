@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { message, Space, Table, Tag, Tooltip } from 'antd';
+import { Popconfirm, message, Space, Table, Tag, Tooltip } from 'antd';
 import { EditOutlined, EyeOutlined, DeleteOutlined, InboxOutlined } from '@ant-design/icons';
 import API from '../API';
 import { useAuth } from './authentication/useAuth';
@@ -12,6 +12,7 @@ function TeacherThesisProposals() {
 
     // Loading table data fetching
     const [isLoadingTable, setIsLoadingTable] = useState(true);
+
 
     const navigate = useNavigate();
 
@@ -90,12 +91,22 @@ function TeacherThesisProposals() {
                         <EditOutlined style={{ fontSize: '20px' }} onClick={() => navigate(`/edit-proposal/${record.id}`)} />
                     </Tooltip>
                     <Tooltip title="Delete Proposal">
-                        <DeleteOutlined style={{ fontSize: '20px' }} onClick={()=> deleteProposalById(record.id)} />
+                        <DeleteOutlined style={{ fontSize: '20px' }} onClick={() => deleteProposalById(record.id)} />
                     </Tooltip>
+                    <Popconfirm
+                        title="Conferma Archiviazione"
+                        placement="bottomRight"
+                        description="Sei sicuro di voler archiviare questa proposta?"
+                        onConfirm={() => archiveProposalById(record.id)}
+                        onCancel={() => { }}
+                        okText="Si"
+                        cancelText="No"
+                    >
                     <Tooltip title="Archieve Proposal">
-                        <InboxOutlined style={{ fontSize: '20px' }} onClick={()=> archieveProposalById(record.id)} />
+                        <InboxOutlined style={{ fontSize: '20px' }} />
                     </Tooltip>
-                    
+                    </Popconfirm>
+
                 </Space>
             ),
         },
@@ -148,17 +159,24 @@ function TeacherThesisProposals() {
         }
     }
 
-    async function archieveProposalById(id) {
-        try {
-            await API.archieveProposalById(id, accessToken);
-            setDirty(true);
-        } catch (err) {
-            setIsLoadingTable(false);
-        }
+
+    async function archiveProposalById(id) {
+            console.log(id);
+            try {
+                await API.archiveProposalById(id, accessToken);
+                message.success("Proposal archived successfully");
+                setDirty(true);
+            } catch (err) {
+                message.error(err.message ? err.message : err);
+                setIsLoadingTable(false);
+            }
+    
     }
 
     return (
-        <Table {...tableProps} columns={columns} dataSource={data} />
+
+            <Table {...tableProps} columns={columns} dataSource={data} />
+
     )
 }
 
