@@ -69,7 +69,7 @@ passport.use(
     logoutUrl:
         "https://thesis-management-09.eu.auth0.com/samlp/JbUVcU90I7wK6nuQXaVty41vHEBHC8cF/logout",
     cert: fs.readFileSync(path.join(__dirname, 'thesis-management-09.pem'), 'utf8'),
-    signatureAlgorithm: 'sha1',
+    signatureAlgorithm: 'sha256',
     acceptedClockSkewMs: 5000, // 5 seconds
     disableRequestedAuthnContext: true,
     identifierFormat: null, // Use default identifier format
