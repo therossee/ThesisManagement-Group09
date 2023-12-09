@@ -150,3 +150,7 @@ Content-Type: application/json
 ## LIST ALL APPLICATIONS DECISIONS FROM A STUDENT
 GET http://localhost:3000/api/student/applications-decision HTTP/1.1
 ###
+
+## GET STUDENT CAREER
+GET http://localhost:3000/api/student/s318952/career HTTP/1.1
+###
