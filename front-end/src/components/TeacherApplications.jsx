@@ -19,6 +19,9 @@ function TeacherApplications() {
     // Drawer for viewing student CV
     const [isOpen, setIsOpen] = useState(false);
 
+    // Which student should be seen in the drawer?
+    const [studentInfo, setStudentInfo] = useState(null);
+
     const { Title } = Typography;
 
     const { accessToken } = useAuth();
@@ -100,7 +103,7 @@ function TeacherApplications() {
                         dataSource={x.applications}
                         renderItem={(student) => (
                             <div style={{ paddingRight: "1%", paddingLeft: "1%" }}>
-                                <List.Item key={student.id} onClick={() => setIsOpen(true)}>
+                                <List.Item key={student.id} onClick={() => {setStudentInfo(student); setIsOpen(true)}}>
                                     <List.Item.Meta
                                         avatar={<Avatar icon={<UserOutlined />} />}
                                         title={student.surname + " " + student.name}
@@ -127,8 +130,8 @@ function TeacherApplications() {
     return (
         data.length > 0 ?
             <>
-                <Alert message="To view a specific applicant's CV and eventually the file uploaded within the application, simply click anywhere in the corresponding row." type="info" showIcon closable/>
-                <StudentCV isOpen={isOpen} setIsOpen={setIsOpen} />
+                <Alert message="To view a specific applicant's CV and eventually the file uploaded within the application, simply click anywhere in the corresponding row." type="info" showIcon closable />
+                {isOpen && <StudentCV isOpen={isOpen} setIsOpen={setIsOpen} studentInfo={studentInfo} />}
                 <ApplicationsList />
             </>
             :

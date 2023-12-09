@@ -370,10 +370,26 @@ async function updateProposal(id, proposal, accessToken) {
     }
 }
 
+// GET Student CV
+async function getStudentCVById(id, accessToken) {
+    const response = await fetch(URL + `/student/${id}/career`, {
+        headers: {
+            Method: 'GET',
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+    const career = await response.json();
+    if (response.ok) {
+        return career;
+    } else {
+        throw career;
+    }
+}
+
 const API = {
     getUserInfo,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal
+    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, getStudentCVById
 };
 export default API;
