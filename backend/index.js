@@ -547,6 +547,24 @@ async (req, res) => {
   }
 });
 
+app.get('/api/student/:id/career',
+checkJwt,
+isTeacher,
+async (req, res) => {
+  try{
+    const studentId = req.params.id;
+    const student = await usersDao.getStudentById(studentId);
+    if(!student){
+      return res.status(404).json({ message: `Student with id ${studentId} not found.` });
+    }
+    const career = await usersDao.getStudentCareer(studentId);
+    res.json(career);
+  }catch(e){
+    console.error(e);
+    res.status(500).json('Internal Server Error');
+  } 
+})
+
 const PORT = 3000;
 const server = app.listen(PORT, () => {
   console.log(`Server started on http://localhost:${PORT}/`);
