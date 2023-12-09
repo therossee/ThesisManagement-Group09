@@ -338,7 +338,7 @@ async function getStudentApplicationsHistory(accessToken) {
     }
 }
 
-async function deleteProposalById(id, accessToken) {
+async function archieveProposalById(id, accessToken) {
     const response = await fetch(URL +  `/thesis-proposals/archieve/${id} `, {
         method: 'PATCH',
         headers: {
@@ -352,7 +352,7 @@ async function deleteProposalById(id, accessToken) {
     }
 }
 
-async function archieveProposalById(id, accessToken) {
+async function deleteProposalById(id, accessToken) {
     const response = await fetch(URL +  `/thesis-proposals/${id} `, {
         method: 'DELETE',
         headers: {
