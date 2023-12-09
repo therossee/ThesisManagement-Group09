@@ -41,19 +41,19 @@ exports.getUser = (email, password) => {
 };
 
 // This function is used to retrieve user info
-exports.getUserInfo = (auth0) => {
+exports.getUserInfo = (auth0_id) => {
     return new Promise((resolve, reject) => {
         const sql_student = 'SELECT s.id, s.name, s.surname, s.email FROM student s, student_auth0 sa WHERE s.id=sa.id AND sa.id_auth0=?';
         const sql_teacher = 'SELECT t.id, t.name, t.surname, t.email FROM teacher t, teacher_auth0 ta WHERE t.id=ta.id AND ta.id_auth0=?';
 
         try {
-            const student_info = db.prepare(sql_student).get(auth0.payload.sub);
+            const student_info = db.prepare(sql_student).get(auth0_id);
             if (student_info) {
                 resolve({...student_info, role: "student"});
                 return;
             }
 
-            const teacher_info = db.prepare(sql_teacher).get(auth0.payload.sub);
+            const teacher_info = db.prepare(sql_teacher).get(auth0_id);
             if (teacher_info) {
                 resolve({...teacher_info, role: "teacher"});
                 return;
