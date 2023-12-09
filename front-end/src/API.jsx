@@ -338,8 +338,8 @@ async function getStudentApplicationsHistory(accessToken) {
     }
 }
 
-async function archieveProposalById(id, accessToken) {
-    const response = await fetch(URL +  `/thesis-proposals/archieve/${id} `, {
+async function archiveProposalById(id, accessToken) {
+    const response = await fetch(URL +  `/thesis-proposals/archive/${id} `, {
         method: 'PATCH',
         headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -388,6 +388,6 @@ const API = {
     getUserInfo,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archieveProposalById
+    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById
 };
 export default API;
