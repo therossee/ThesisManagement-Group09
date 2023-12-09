@@ -570,16 +570,18 @@ Error Responses:
 - Table `thesisProposal`
     | Column             | Type     | Constraints                                           |
     | ------------------ | -------- | ----------------------------------------------------- |
-    | proposal_id        | integer  | **PK**, **Autoincrement**                             |
+    | proposal_id        | integer  | **PK, Autoincrement**                                 |
     | title              | text     | **NOT NULL**                                          |
-    | supervisor_id      | text     | **NOT NULL**, **FK** [teacher](#teacher)(id)          |
+    | supervisor_id      | text     | **NOT NULL, FK** [teacher](#teacher)(id)               |
     | type               | text     | **NOT NULL**                                          |
     | description        | text     | **NOT NULL**                                          |
     | required_knowledge | text     | **OPTIONAL**                                          |
     | notes              | text     | **OPTIONAL**                                          |
-    | expiration         | text     | **NOT NULL**                                          |
+    | creation_date      | date     | **NOT NULL**                                          |
+    | expiration         | date     | **NOT NULL**                                          |
     | level              | text     | **NOT NULL**                                          |
-    | cds                | text     | **NOT NULL**, **FK** [degree](#degree)(cod_degree)    |
+    | is_deleted         | integer  | **CHECK (is_deleted == 0 or is_deleted == 1) DEFAULT 0** |
+
 
 - Table `proposalKeyword`
     | Column        | Type    | Constraints                                          |
@@ -594,6 +596,14 @@ Error Responses:
     | proposal_id   | integer | **NOT NULL**, **FK** [thesisProposal](#thesisProposal)(proposal_id) |
     | cod_group     | text    | **NOT NULL**                                         |
     | PRIMARY KEY   | proposal_id, cod_group                              |
+
+- Table `proposalCds`:
+    | Column        | Type    | Constraints                                          |
+    | ------------- | ------- | ---------------------------------------------------- |
+    | proposal_id   | integer | **NOT NULL**, **FK** [thesisProposal](#thesisProposal)(proposal_id) |
+    | cod_degree    | text    | **NOT NULL**, **FK** [degree](#degree)(cod_degree)   |
+    | PRIMARY KEY   | proposal_id, cod_degree                             |
+
 
 - Table `thesisInternalCoSupervisor`
     | Column            | Type     | Constraints                                         |
@@ -620,7 +630,21 @@ Error Responses:
 - Table `thesisApplication`:
     | Column        | Type    | Constraints                                          |
     | ------------- | ------- | ---------------------------------------------------- |
-    | proposal_id   | integer | **NOT NULL**, **FK** [thesisProposal](#thesisProposal)(proposal_id) |
-    | student_id    | text    | **NOT NULL**, **FK** [student](#student)(id)         |
-    | status        | text    | **DEFAULT 'waiting for approval' NOT NULL**         |
-    | PRIMARY KEY   | proposal_id, student_id                             |
+    | id            | integer | **PK, Autoincrement**                               |
+    | proposal_id   | integer | **NOT NULL, FK** [thesisProposal](#thesisProposal)(proposal_id) |
+    | student_id    | text    | **NOT NULL, FK** [student](#student)(id)             |
+    | creation_date | date    | **NOT NULL**                                         |
+    | status        | text    | **DEFAULT 'waiting for approval'**         |
+
+- Table `student_auth0`:
+    | Column   | Type | Constraints                        |
+    | -------- | ---- | ---------------------------------- |
+    | id       | text | **PK**, **FK** [student](#student)(id) |
+    | id_auth0  | text | **NOT NULL**                       |
+
+- Table `teacher_auth0`:
+    | Column   | Type | Constraints                        |
+    | -------- | ---- | ---------------------------------- |
+    | id       | text | **PK**, **FK** [teacher](#teacher)(id) |
+    | id_auth0  | text | **NOT NULL**                       |
+
