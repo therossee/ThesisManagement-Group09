@@ -113,7 +113,7 @@ function StudentThesisProposals() {
     }, [data, moreFiltersData]);
 
     function disabledDate(current) {
-        return current && current.valueOf() < date;
+        return current && current.isSameOrBefore(date);
     }
 
     // Columns of the table
