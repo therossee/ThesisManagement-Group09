@@ -354,11 +354,31 @@ async function updateProposal(id, proposal) {
     }
 }
 
+// GET Student CV
+async function getStudentCVById(id) {
+    const response = await fetch(URL + `/student/${id}/career`, {
+        method: 'GET',
+        credentials: 'include',
+    });
+    const career = await response.json();
+    if (response.ok) {
+        return career.map((x) => ({
+            code: x.cod_course,
+            teaching: x.title_course,
+            cfu: x.cfu,
+            mark: x.grade,
+            date: x.date,
+        })).sort((a, b) => new Date(b.date) - new Date(a.date));
+    } else {
+        throw career;
+    }
+}
+
 const API = {
     logOut, redirectToLogin,
     getUser,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById
+    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById
 };
 export default API;
