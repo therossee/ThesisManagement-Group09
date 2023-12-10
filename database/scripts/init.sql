@@ -11,9 +11,7 @@ DROP TABLE IF EXISTS thesisInternalCoSupervisor;
 DROP TABLE IF EXISTS thesisProposal;
 DROP TABLE IF EXISTS career;
 DROP TABLE IF EXISTS externalCoSupervisor;
-DROP TABLE IF EXISTS teacher_auth0;
 DROP TABLE IF EXISTS teacher;
-DROP TABLE IF EXISTS student_auth0;
 DROP TABLE IF EXISTS student;
 DROP TABLE IF EXISTS degree;
 
@@ -37,13 +35,6 @@ CREATE TABLE student (
     FOREIGN KEY(cod_degree) REFERENCES degree(cod_degree)
 );
 
--- Create the student_auth0 table
-CREATE TABLE student_auth0 (
-    id TEXT PRIMARY KEY,
-    id_auth0 TEXT NOT NULL,
-    FOREIGN KEY(id) REFERENCES student(id)
-);
-
 -- Create the teacher table
 CREATE TABLE teacher (
     id TEXT PRIMARY KEY,
@@ -52,13 +43,6 @@ CREATE TABLE teacher (
     email TEXT NOT NULL,
     cod_group TEXT NOT NULL,
     cod_department TEXT NOT NULL
-);
-
--- Create the teacher_auth0 table
-CREATE TABLE teacher_auth0 (
-    id TEXT PRIMARY KEY,
-    id_auth0 TEXT NOT NULL,
-    FOREIGN KEY(id) REFERENCES teacher(id)
 );
 
 -- Create the externalCoSupervisor table
@@ -182,44 +166,21 @@ VALUES
 -- Insert data into the teacher table
 INSERT INTO teacher (id, surname, name, email, cod_group, cod_department)
 VALUES
-    ('d279620', 'Rossi', 'Marco', 'rossi.marco@email.com', 'Group1', 'Dep1'),
-    ('d370335', 'Bianchi', 'Luca', 'bianchi.luca@email.com', 'Group2', 'Dep2'),
-    ('d350985', 'Esposito', 'Andrea', 'esposito.andrea@email.com', 'Group3', 'Dep3'),
-    ('d255269', 'Romano', 'Giovanni', 'romano.giovanni@email.com', 'Group4', 'Dep4'),
-    ('d357587', 'Ricci', 'Matteo', 'ricci.matteo@email.com', 'Group5', 'Dep1'),
-    ('d250665', 'Conti', 'Alessandro', 'conti.alessandro@email.com', 'Group6', 'Dep2'),
-    ('d277137', 'Colombo', 'Davide', 'colombo.davide@email.com', 'Group1', 'Dep3'),
-    ('d314371', 'Bruno', 'Francesco', 'bruno.francesco@email.com', 'Group2', 'Dep4'),
-    ('d270993', 'Moretti', 'Paolo', 'moretti.paolo@email.com', 'Group3', 'Dep1'),
-    ('d342424', 'Luci', 'Simone', 'luci.simone@email.com', 'Group4', 'Dep2'),
-    ('d370392', 'Martini', 'Maria', 'martini.maria@email.com', 'Group5', 'Dep3'),
-    ('d226172', 'Ferretti', 'Anna', 'ferretti.anna@email.com', 'Group6', 'Dep4'),
-    ('d226682', 'Mancini', 'Giulia', 'mancini.giulia@email.com', 'Group1', 'Dep1'),
-    ('d258293', 'Barbieri', 'Francesca', 'barbieri.francesca@email.com', 'Group2', 'Dep2'),
-    ('d320694', 'Rinaldi', 'Sofia', 'rinaldi.sofia@email.com', 'Group3', 'Dep3'),
-    ('d284435', 'Caruso', 'Laura', 'caruso.laura@email.com', 'Group4', 'Dep4'),
-    ('d258761', 'Ferrara', 'Valentina', 'ferrara.valentina@email.com', 'Group5', 'Dep1'),
-    ('d237188', 'Marini', 'Alessia', 'marini.alessia@email.com', 'Group6', 'Dep2'),
-    ('d392000', 'Santoro', 'Chiara', 'santoro.chiara@email.com', 'Group5', 'Dep3'),
-    ('d292715', 'Gatti', 'Isabella', 'gatti.isabella@email.com', 'Group3', 'Dep4');
-
--- Insert data into the teacher_auth0 table
-INSERT INTO teacher_auth0 (id, id_auth0)
-VALUES 
-    ('d279620', 'auth0|6564f83a022f6b2083b6b8c9'),
-    ('d370392', 'auth0|656621f156336a62dd8aaced'),
-    ('d226682', 'auth0|656621a2022f6b2083b7a522'),
-    ('d258293', 'auth0|656621466d87729b6b4216b5'),
-    ('d320694', 'auth0|656620f16d87729b6b42167c'),
-    ('d284435', 'auth0|656620a756336a62dd8aac0e'),
-    ('d258761', 'auth0|6566205c56336a62dd8aabe1'),
-    ('d237188', 'auth0|65661fff6d87729b6b4215e5'),
-    ('d392000', 'auth0|65661fb356336a62dd8aab82'),
-    ('d292715', 'auth0|65661ee656336a62dd8aaaf5'),
-    ('d357587', 'auth0|65661e84022f6b2083b7a341'),
-    ('d255269', 'auth0|65661e2156336a62dd8aaa70'),
-    ('d350985', 'auth0|65661dde56336a62dd8aaa4c'),
-    ('d370335', 'auth0|65661d4e022f6b2083b7a267');
+    ('d279620', 'Rossi', 'Marco', 'd279620@polito.it', 'Group1', 'Dep1'),
+    ('d370335', 'Bianchi', 'Luca', 'd370335@polito.it', 'Group2', 'Dep2'),
+    ('d350985', 'Esposito', 'Andrea', 'd350985@polito.it', 'Group3', 'Dep3'),
+    ('d255269', 'Romano', 'Giovanni', 'd255269@polito.it', 'Group4', 'Dep4'),
+    ('d357587', 'Ricci', 'Matteo', 'd357587@polito.it', 'Group5', 'Dep1'),
+    ('d277137', 'Colombo', 'Davide', 'd277137@polito.it', 'Group1', 'Dep3'),
+    ('d370392', 'Martini', 'Maria', 'd370392@polito.it', 'Group5', 'Dep3'),
+    ('d226682', 'Mancini', 'Giulia', 'd226682@polito.it', 'Group1', 'Dep1'),
+    ('d258293', 'Barbieri', 'Francesca', 'd258293@polito.it', 'Group2', 'Dep2'),
+    ('d320694', 'Rinaldi', 'Sofia', 'd320694@polito.it', 'Group3', 'Dep3'),
+    ('d284435', 'Caruso', 'Laura', 'd284435@polito.it', 'Group4', 'Dep4'),
+    ('d258761', 'Ferrara', 'Valentina', 'd258761@polito.it', 'Group5', 'Dep1'),
+    ('d237188', 'Marini', 'Alessia', 'd237188@polito.it', 'Group6', 'Dep2'),
+    ('d392000', 'Santoro', 'Chiara', 'd392000@polito.it', 'Group5', 'Dep3'),
+    ('d292715', 'Gatti', 'Isabella', 'd292715@polito.it', 'Group3', 'Dep4');
 
 -- Insert data into the externalCoSupervisor table
 INSERT INTO externalCoSupervisor (surname, name, email)
@@ -245,18 +206,6 @@ VALUES
     ('s321529', 'Ladrat', 'Matteo', 'Male', 'French', 's321529@studenti.polito.it', 'L-08', 2020),
     ('s318952', 'Molinatto', 'Sylvie', 'Female', 'Italian', 's318952@studenti.polito.it', 'LM-34', 2020),
     ('s319355', 'Schiavone', 'Michele', 'Male', 'Italian', 's319355@studenti.polito.it', 'LM-35', 2020);
-
--- Insert data into the student_auth0 table
-INSERT INTO student_auth0 (id, id_auth0) 
-VALUES 
-    ('s318952', 'auth0|65635d036d87729b6b3ffe83'),
-    ('s321529', 'auth0|6564f6ba6d87729b6b412740'),
-    ('s319355', 'auth0|6564f6efd5c067abfc7e6096'),
-    ('s318771', 'auth0|6564f687022f6b2083b6b500'),
-    ('s314796', 'auth0|6564f6476d87729b6b412613'),
-    ('s321607', 'auth0|6564f613d5c067abfc7e5e8a'),
-    ('s320213', 'auth0|6564f5db6d87729b6b412520');
-
 
 -- Insert data into the career table
 INSERT INTO career (id, cod_course, title_course, cfu, grade, date)
