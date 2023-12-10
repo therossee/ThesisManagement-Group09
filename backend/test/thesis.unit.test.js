@@ -15,6 +15,14 @@ jest.mock('../db', () => ({
   transaction: jest.fn().mockImplementation(callback => callback),
 }));
 
+jest.mock('../configuration_dao', () => ({
+    getIntegerValue: jest.fn().mockReturnValue(0),
+    setValue: jest.fn(),
+    KEYS: {
+        VIRTUAL_OFFSET_MS: 'virtual_clock_offset'
+    }
+}));
+
 afterAll(() => {
   jest.restoreAllMocks(); // Restore original functionality after all tests
   jest.clearAllMocks();
@@ -728,6 +736,7 @@ describe('listThesisProposalsTeacher', () => {
         )
         AND P.expiration > ?
         AND creation_date < ?
+        AND is_archived = 0
         AND is_deleted = 0;`;
     // Mock the SQLite database query
     db.prepare.mockClear().mockReturnValueOnce({ all: jest.fn(() => mockProposals) });
@@ -778,6 +787,7 @@ describe('listApplicationsForTeacherThesisProposal', () => {
       AND ta.creation_date < ?
       AND tp.expiration > ?
       AND tp.creation_date < ?
+      AND tp.is_archived = 0
       AND tp.is_deleted = 0;`;
     // Assertions
     expect(result).toEqual(mockApplications);
