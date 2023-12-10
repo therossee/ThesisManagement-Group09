@@ -23,7 +23,10 @@ function StudentCV(props) {
                     setIsLoading(false);
                     setData(x);
                 })
-                .catch((err) => { message.error(err.message ? err.message : err) });
+                .catch((err) => {
+                    message.error(err.message ? err.message : err);
+                    setIsLoading(false);
+                });
         }
     }, [accessToken]);
 
@@ -57,37 +60,45 @@ function StudentCV(props) {
                 :
                 <>
                     <Flex vertical justify="center" align="center">
-                    <ColorLegenda />
+                        <ColorLegenda />
                         <Avatar icon={<UserOutlined />} size={128} />
-                        <Title level={2} style={{ marginTop: '15px'}}>{studentInfo.surname} {studentInfo.name}</Title>
+                        <Title level={2} style={{ marginTop: '15px' }}>{studentInfo.surname} {studentInfo.name}</Title>
                         <Tag color="#1677ff" style={{ borderRadius: "10px", marginLeft: "4px", marginTop: '-7px' }}>
                             <Text style={{ color: "white" }}>
                                 {studentInfo.id}
                             </Text>
                         </Tag>
                     </Flex>
-                    <Row style={{ marginTop: '30px' }}>
-                        <Col span={4}><Text strong>Date <ArrowDownOutlined /></Text></Col>
-                        <Col span={3}><Text strong>Code</Text></Col>
-                        <Col span={14}><Text strong>Teaching</Text></Col>
-                        <Col span={2}><Text strong>Mark</Text></Col>
-                        <Col span={1}><Text strong>CFU</Text></Col>
-                    </Row>
-                    {data.map((x, index) => (
-                        <Row key={index} style={{ marginTop: '8px' }}>
-                            <Col span={4}><Text type="secondary">{x.date}</Text></Col>
-                            <Col span={3}><Text type="secondary">{x.code}</Text></Col>
-                            <Col span={14}><Text>{x.teaching}</Text></Col>
-                            <Col span={2}>
-                                <Tag color={color(x.mark)} style={{ borderRadius: "20px" }}>
-                                    <Text style={{ color: "white" }}>
-                                        {x.mark}
-                                    </Text>
-                                </Tag>
-                            </Col>
-                            <Col span={1}><Text type="secondary">{x.cfu}</Text></Col>
-                        </Row>
-                    ))}
+                    {data.length > 0 ?
+                        <>
+                            <Row style={{ marginTop: '30px' }}>
+                                <Col span={4}><Text strong>Date <ArrowDownOutlined /></Text></Col>
+                                <Col span={3}><Text strong>Code</Text></Col>
+                                <Col span={14}><Text strong>Teaching</Text></Col>
+                                <Col span={2}><Text strong>Mark</Text></Col>
+                                <Col span={1}><Text strong>CFU</Text></Col>
+                            </Row>
+                            {data.map((x, index) => (
+                                <Row key={index} style={{ marginTop: '8px' }}>
+                                    <Col span={4}><Text type="secondary">{x.date}</Text></Col>
+                                    <Col span={3}><Text type="secondary">{x.code}</Text></Col>
+                                    <Col span={14}><Text>{x.teaching}</Text></Col>
+                                    <Col span={2}>
+                                        <Tag color={color(x.mark)} style={{ borderRadius: "20px" }}>
+                                            <Text style={{ color: "white" }}>
+                                                {x.mark}
+                                            </Text>
+                                        </Tag>
+                                    </Col>
+                                    <Col span={1}><Text type="secondary">{x.cfu}</Text></Col>
+                                </Row>
+                            ))}
+                        </>
+                        :
+                        <Flex vertical justify="center" align="center" marginTop='30px'>
+                            <Title level={5}>No Exams found</Title>
+                        </Flex>
+                    }
                 </>
             }
         </Drawer >
