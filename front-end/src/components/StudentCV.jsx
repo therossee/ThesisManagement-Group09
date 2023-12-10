@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Avatar, Col, Drawer, Flex, message, Row, Skeleton, Tag, Typography } from 'antd';
 import { UserOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import { useAuth } from './authentication/useAuth';
+import PropTypes from 'prop-types';
 import API from '../API';
 
 function StudentCV(props) {
@@ -31,26 +32,19 @@ function StudentCV(props) {
     }, [accessToken]);
 
     function color(mark) {
-        return (
-            mark < 20 ? "#f5222d" : // 18-19
-                mark < 22 ? "#fa8c16" : // 20-21
-                    mark < 24 ? "#fadb14" : // 22-23
-                        mark < 27 ? "#a0d911" : // 24-26
-                            mark < 31 ? "#52c41a" : // 27-30
-                                "#bfbfbf" // default color
-        )
-    }
-
-    function ColorLegenda() {
-        return (
-            <Row style={{ marginBottom: '40px' }}>
-                <Tag color="#f5222d">Less than 20</Tag>
-                <Tag color="#fa8c16">20 to 21</Tag>
-                <Tag color="#fadb14">22 to 23</Tag>
-                <Tag color="#a0d911">24 to 26</Tag>
-                <Tag color="#52c41a">27 and above</Tag>
-            </Row>
-        )
+        let colorCode;
+        if (mark < 20) {
+            colorCode = "#f5222d";
+        } else if (mark < 22) {
+            colorCode = "#fa8c16";
+        } else if (mark < 24) {
+            colorCode = "#fadb14";
+        } else if (mark < 27) {
+            colorCode = "#a0d911";
+        } else {
+            colorCode = "#52c41a";
+        }
+        return colorCode;
     }
 
     return (
@@ -78,8 +72,8 @@ function StudentCV(props) {
                                 <Col span={2}><Text strong>Mark</Text></Col>
                                 <Col span={1}><Text strong>CFU</Text></Col>
                             </Row>
-                            {data.map((x, index) => (
-                                <Row key={index} style={{ marginTop: '8px' }}>
+                            {data.map((x) => (
+                                <Row key={x.code} style={{ marginTop: '8px' }}>
                                     <Col span={4}><Text type="secondary">{x.date}</Text></Col>
                                     <Col span={3}><Text type="secondary">{x.code}</Text></Col>
                                     <Col span={14}><Text>{x.teaching}</Text></Col>
@@ -95,7 +89,7 @@ function StudentCV(props) {
                             ))}
                         </>
                         :
-                        <Flex vertical justify="center" align="center" marginTop='30px'>
+                        <Flex vertical style={{justify:"center", align:"center", marginTop:"30px"}}>
                             <Title level={5}>No Exams found</Title>
                         </Flex>
                     }
@@ -103,6 +97,28 @@ function StudentCV(props) {
             }
         </Drawer >
     );
+}
+
+function ColorLegenda() {
+    return (
+        <Row style={{ marginBottom: '40px' }}>
+            <Tag color="#f5222d">Less than 20</Tag>
+            <Tag color="#fa8c16">20 to 21</Tag>
+            <Tag color="#fadb14">22 to 23</Tag>
+            <Tag color="#a0d911">24 to 26</Tag>
+            <Tag color="#52c41a">27 and above</Tag>
+        </Row>
+    )
+}
+
+StudentCV.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    setIsOpen: PropTypes.func.isRequired,
+    studentInfo: PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        surname: PropTypes.string.isRequired,
+        id: PropTypes.string.isRequired,
+    }),
 }
 
 export default StudentCV;
