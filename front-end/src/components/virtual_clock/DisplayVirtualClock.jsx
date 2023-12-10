@@ -14,7 +14,7 @@ function DisplayVirtualClock() {
     const [date, setDate] = useState(dayjs.tz());
     // State of the page
     const [editMode, setEditMode] = useState(false);
-    const [dateSelected, setDateSelection] = useState(undefined);
+    const [dateSelected, setDateSelected] = useState(undefined);
 
 
     /*
@@ -148,7 +148,7 @@ function DisplayVirtualClock() {
                                 }
                             }
                         }
-                        onChange={ (newDate) => setDateSelection(newDate) }
+                        onChange={ (newDate) => setDateSelected(newDate) }
                         popupClassName="time-picker-hide-footer"
                     />
 
