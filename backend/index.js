@@ -182,6 +182,8 @@ app.post('/api/system/virtual-clock', (req, res, next) => {
   } catch (e) {
     if (e instanceof ZodError) {
       res.status(400).json({ message: 'Some properties are missing or invalid.', errors: e.issues });
+    } else if (e instanceof AppError) {
+      return e.sendHttpResponse(res);
     } else {
       next(e);
     }

@@ -20,9 +20,6 @@ async function getUser() {
     const response = await fetch(URL+'/user', {
         method: 'GET',
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
     });
 
     if (response.ok) {
@@ -30,37 +27,6 @@ async function getUser() {
     } else {
         throw await response.json();
     }
-}
-
-async function getUserInfo(auth0_id) {
-    return new Promise((resolve, reject) => {
-        fetch(`${URL}/userInfo/${auth0_id}`, {
-            headers: {
-                method: 'GET',
-            },
-            credentials: 'include',
-        })
-            .then((response) => {
-                if (response.ok) {
-                    response
-                        .json()
-                        .then((user) => resolve(user))
-                        .catch(() => {
-                            reject({ message: 'Cannot parse server response.' });
-                        });
-                } else {
-                    response
-                        .json()
-                        .then((message) => {
-                            reject(message);
-                        })
-                        .catch(() => {
-                            reject({ message: 'Cannot parse server response.' });
-                        });
-                }
-            })
-            .catch(() => reject({ message: 'Cannot communicate with the server.' }));
-    });
 }
 
 
@@ -106,9 +72,7 @@ async function updateClock(date) {
 // GET Thesis Proposals
 async function getThesisProposals() {
     const response = await fetch(URL + '/thesis-proposals', {
-        headers: {
-            method: 'GET',
-        },
+        method: 'GET',
         credentials: 'include',
     });
     const proposals = await response.json();
@@ -138,9 +102,7 @@ async function getThesisProposals() {
 // GET Thesis Proposals by given id
 async function getThesisProposalbyId(id) {
     const response = await fetch(URL + `/thesis-proposals/${id}`, {
-        headers: {
-            method: 'GET',
-        },
+        method: 'GET',
         credentials: 'include'
 
     });
@@ -189,9 +151,7 @@ async function applyForProposal(id) {
 // GET Student's Thesis Applications
 async function getStudentActiveApplication() {
     const response = await fetch(URL + '/student/active-application', {
-        headers: {
-            method: 'GET',
-        },
+        method: 'GET',
         credentials: 'include'
     });
     const applications = await response.json();
@@ -205,9 +165,7 @@ async function getStudentActiveApplication() {
 // GET Student Applications on a Thesis Proposal of a Teacher
 async function getTeacherThesisApplications(proposalId) {
     const response = await fetch(URL + `/teacher/applications/${proposalId}`, {
-        headers: {
-            method: 'GET',
-        },
+        method: 'GET',
         credentials: 'include'
     });
 
@@ -245,9 +203,7 @@ async function insertProposal(proposal) {
 
 async function getExtCoSupervisors() {
     const response = await fetch(URL + '/externalCoSupervisors', {
-        headers: {
-            method: 'GET',
-        },
+        method: 'GET',
         credentials: 'include'
     });
     const coSup = await response.json();
@@ -260,9 +216,7 @@ async function getExtCoSupervisors() {
 
 async function getTeachers() {
     const response = await fetch(URL + '/teachers', {
-        headers: {
-            method: 'GET',
-        },
+        method: 'GET',
         credentials: 'include'
     });
     const teachers = await response.json();
@@ -275,9 +229,7 @@ async function getTeachers() {
 
 async function getAllKeywords() {
     const response = await fetch(URL + '/keywords', {
-        headers: {
-            method: 'GET',
-        },
+        method: 'GET',
         credentials: 'include'
     });
     const keywords = await response.json();
@@ -290,9 +242,7 @@ async function getAllKeywords() {
 
 async function getAllDegrees() {
     const response = await fetch(URL + '/degrees', {
-        headers: {
-            method: 'GET',
-        },
+        method: 'GET',
         credentials: 'include'
     });
     const degrees = await response.json();
@@ -347,9 +297,7 @@ async function rejectThesisApplications(proposalId, studentId) {
 
 async function getStudentApplicationsHistory() {
     const response = await fetch(URL + '/student/applications-decision', {
-        headers: {
-            method: 'GET',
-        },
+        method: 'GET',
         credentials: 'include',
     });
     const applications = await response.json();
@@ -361,6 +309,18 @@ async function getStudentApplicationsHistory() {
         }))
     } else {
         throw proposals;
+    }
+}
+
+async function archiveProposalById(id) {
+    const response = await fetch(URL +  `/thesis-proposals/archive/${id} `, {
+        method: 'PATCH',
+        credentials: 'include'
+    });
+    if (response.ok) {
+        return response; 
+    } else {
+        throw response;
     }
 }
 
@@ -396,9 +356,9 @@ async function updateProposal(id, proposal) {
 
 const API = {
     logOut, redirectToLogin,
-    getUserInfo, getUser,
+    getUser,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal
+    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById
 };
 export default API;

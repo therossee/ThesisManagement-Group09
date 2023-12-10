@@ -1,53 +1,89 @@
 require('jest');
 
 const dayjs = require('dayjs');
+const configuration = require('../configuration_dao');
 const AdvancedDate = require("../AdvancedDate");
+const InvalidNewVirtualOffsetError = require("../errors/InvalidNewVirtualOffsetError");
+
+function toBeAnIntegerCloseTo(received, expected, delta) {
+    const pass = Number.isInteger(received) && Math.abs(received - expected) <= delta;
+    if (pass) {
+        return {
+            message: () => `expected ${received} not to be an integer close to ${expected} (with a tolerance of ${delta})`,
+            pass: true,
+        };
+    } else {
+        return {
+            message: () => `expected ${received} to be an integer close to ${expected} (with a tolerance of ${delta})`,
+            pass: false,
+        };
+    }
+}
+expect.extend({ toBeAnIntegerCloseTo });
+
+
+jest.mock('../configuration_dao', () => ({
+    getIntegerValue: jest.fn(),
+    setValue: jest.fn(),
+    KEYS: {
+        VIRTUAL_OFFSET_MS: 'virtual_offset_ms',
+    },
+}));
 
 describe('AdvancedDate class', () => {
-    let initialOffset;
-
     beforeAll(() => {
-        initialOffset = AdvancedDate.virtual.offsetMs;
+        jest.restoreAllMocks();
     });
+
     afterEach(() => {
-        AdvancedDate.virtual.setNewOffset(initialOffset);
+        jest.resetAllMocks();
+    });
+    afterAll(() => {
+        jest.restoreAllMocks();
     });
 
     describe('Virtual clock changes', () => {
         test('should support offset changes with milliseconds', () => {
+            configuration.getIntegerValue.mockReturnValueOnce(0);
+
             const offset = 1000;
             AdvancedDate.virtual.setNewOffset(offset);
 
-            const dayjsDate = dayjs();
-            const virtualDate = AdvancedDate.virtual.getVirtualDate(dayjsDate);
-
-            expect(virtualDate.valueOf()).toBe(dayjsDate.valueOf() + offset);
+            expect(configuration.setValue).toHaveBeenCalledWith(configuration.KEYS.VIRTUAL_OFFSET_MS, offset);
+            expect(configuration.getIntegerValue).toHaveBeenCalledWith(configuration.KEYS.VIRTUAL_OFFSET_MS);
         });
 
         test('should support offset changes from a date string', () => {
+            configuration.getIntegerValue.mockReturnValueOnce(0);
+
             const now = dayjs();
             const offset = 1000;
             const dateStr = now.add(offset, 'millisecond').toISOString();
             AdvancedDate.virtual.setNewOffset(dateStr);
 
-            const dayjsDate = dayjs('2021-01-01T00:00:00.000Z');
-            const virtualDate = AdvancedDate.virtual.getVirtualDate(dayjsDate);
-
-            // Check with a tolerance of 3 milliseconds
-            expect(virtualDate.valueOf()).toBeGreaterThanOrEqual(dayjsDate.valueOf() + offset - 3);
-            expect(virtualDate.valueOf()).toBeLessThanOrEqual(dayjsDate.valueOf() + offset);
+            expect(configuration.setValue).toHaveBeenCalledWith(configuration.KEYS.VIRTUAL_OFFSET_MS, expect.toBeAnIntegerCloseTo(offset, 3));
+            expect(configuration.getIntegerValue).toHaveBeenCalledWith(configuration.KEYS.VIRTUAL_OFFSET_MS);
         });
 
         test('should return virtual date based on the offset', () => {
             const offset = 1000;
-            AdvancedDate.virtual.setNewOffset(offset);
+            configuration.getIntegerValue.mockReturnValueOnce(offset);
 
             const dayjsDate = dayjs();
             const virtualDate = AdvancedDate.virtual.getVirtualDate();
 
-            // Check with a tolerance of 3 milliseconds
-            expect(virtualDate.valueOf()).toBeGreaterThanOrEqual(dayjsDate.valueOf() + offset);
-            expect(virtualDate.valueOf()).toBeLessThanOrEqual(dayjsDate.valueOf() + offset + 3);
+            expect(virtualDate.valueOf()).toBeAnIntegerCloseTo(dayjsDate.valueOf() + offset, 3);
+            expect(configuration.getIntegerValue).toHaveBeenCalledWith(configuration.KEYS.VIRTUAL_OFFSET_MS);
+            expect(configuration.getIntegerValue).toHaveBeenCalledTimes(1);
+        });
+
+        test('should refuse to set an offset lower than the current one', () => {
+            const offset = 1000;
+            configuration.getIntegerValue.mockReturnValueOnce(offset);
+
+            expect(() => AdvancedDate.virtual.setNewOffset(offset - 1)).toThrowError(InvalidNewVirtualOffsetError);
+            expect(configuration.setValue).not.toHaveBeenCalled();
+            expect(configuration.getIntegerValue).toBeCalledTimes(1);
         });
     });
 
@@ -81,7 +117,7 @@ describe('AdvancedDate class', () => {
 
         test('should return the same date even if the virtual clock is changed', () => {
             const offset = 1000;
-            AdvancedDate.virtual.setNewOffset(offset);
+            configuration.getIntegerValue.mockReturnValueOnce(offset);
 
             const str = '2023-01-01T00:00:00.000Z';
             const dayjsDate = dayjs(str);
@@ -92,54 +128,45 @@ describe('AdvancedDate class', () => {
             expect(advancedDate.valueOf()).toBe(dayjsDate.valueOf());
             expect(advancedDate.isBefore(dayjsDate)).toBe(false);
         });
-
-        test('should return the same date even if the virtual clock is changed to a date in the past', () => {
-            const offset = -1000;
-            AdvancedDate.virtual.setNewOffset(offset);
-
-            const str = '2022-01-01T00:00:00.000Z';
-            const dayjsDate = dayjs(str);
-            const advancedDate = new AdvancedDate(str);
-
-            expect(advancedDate.toISOString()).toBe(dayjsDate.toISOString());
-            expect(advancedDate.unix()).toBe(dayjsDate.unix());
-            expect(advancedDate.isBefore(dayjsDate)).toBe(false);
-            expect(advancedDate.valueOf()).toBe(dayjsDate.valueOf());
-        });
     });
 
     describe('No date in constructor (current date)', () => {
         test('should return the correct date in ISO format', () => {
+            configuration.getIntegerValue.mockReturnValueOnce(0);
+
             const dayjsDate = dayjs();
             const advancedDate = new AdvancedDate();
 
             expect(advancedDate.toISOString()).toBe(dayjsDate.toISOString());
+            expect(configuration.getIntegerValue).toHaveBeenCalledWith(configuration.KEYS.VIRTUAL_OFFSET_MS);
         });
 
         test('should return the correct unix timestamp', () => {
+            configuration.getIntegerValue.mockReturnValueOnce(0);
+
             const dayjsDate = dayjs();
             const advancedDate = new AdvancedDate();
 
-            // Check with a tolerance of 1 second
-            expect(advancedDate.unix()).toBeGreaterThanOrEqual(dayjsDate.unix());
-            expect(advancedDate.unix()).toBeLessThanOrEqual(dayjsDate.unix() + 1);
+            expect(advancedDate.unix()).toBeAnIntegerCloseTo(dayjsDate.unix(), 1);
+            expect(configuration.getIntegerValue).toHaveBeenCalledWith(configuration.KEYS.VIRTUAL_OFFSET_MS);
         });
 
         test('should return the correct valueOf', () => {
+            configuration.getIntegerValue.mockReturnValueOnce(0);
+
             /**
              * @type {dayjs.Dayjs}
              */
             const dayjsDate = dayjs();
             const advancedDate = new AdvancedDate();
 
-            // Check with a tolerance of 3 milliseconds
-            expect(advancedDate.valueOf()).toBeGreaterThanOrEqual(dayjsDate.valueOf());
-            expect(advancedDate.valueOf()).toBeLessThanOrEqual(dayjsDate.valueOf() + 3);
+            expect(advancedDate.valueOf()).toBeAnIntegerCloseTo(dayjsDate.valueOf(), 3);
+            expect(configuration.getIntegerValue).toHaveBeenCalledWith(configuration.KEYS.VIRTUAL_OFFSET_MS);
         });
 
         test('should apply offset to the current date', () => {
             const offset = 1000;
-            AdvancedDate.virtual.setNewOffset(offset);
+            configuration.getIntegerValue.mockReturnValueOnce(1000);
 
             /**
              * @type {dayjs.Dayjs}
@@ -148,8 +175,8 @@ describe('AdvancedDate class', () => {
             const advancedDate = new AdvancedDate();
 
             // Check with a tolerance of 3 milliseconds
-            expect(advancedDate.valueOf()).toBeGreaterThanOrEqual(dayjsDateWithOffset.valueOf());
-            expect(advancedDate.valueOf()).toBeLessThanOrEqual(dayjsDateWithOffset.valueOf() + 3);
+            expect(advancedDate.valueOf()).toBeAnIntegerCloseTo(dayjsDateWithOffset.valueOf(), 3);
+            expect(configuration.getIntegerValue).toHaveBeenCalledWith(configuration.KEYS.VIRTUAL_OFFSET_MS);
         });
     });
 });

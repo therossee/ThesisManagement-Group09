@@ -14,9 +14,14 @@ DROP TABLE IF EXISTS externalCoSupervisor;
 DROP TABLE IF EXISTS teacher;
 DROP TABLE IF EXISTS student;
 DROP TABLE IF EXISTS degree;
-
+DROP TABLE IF EXISTS configuration;
 
 -- Create the degree table
+CREATE TABLE configuration (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL -- Stringified value
+);
+
 CREATE TABLE degree (
     cod_degree TEXT PRIMARY KEY,
     title_degree TEXT NOT NULL UNIQUE
@@ -140,6 +145,10 @@ CREATE TABLE thesisApplication (
 -- Insert Data
 
 -- Insert data into the degree table
+INSERT INTO configuration (key, value)
+VALUES
+    ('virtual_clock_offset', '0');
+
 INSERT INTO degree (cod_degree, title_degree)
 VALUES
     ('L-07', 'Ingegneria Civile e Ambientale'),
