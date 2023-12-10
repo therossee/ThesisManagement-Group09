@@ -69,15 +69,15 @@ function StudentCV(props) {
                     <Row style={{ marginTop: '30px' }}>
                         <Col span={4}><Text strong>Date <ArrowDownOutlined /></Text></Col>
                         <Col span={3}><Text strong>Code</Text></Col>
-                        <Col span={13}><Text strong>Teaching</Text></Col>
+                        <Col span={14}><Text strong>Teaching</Text></Col>
                         <Col span={2}><Text strong>Mark</Text></Col>
-                        <Col span={2}><Text strong>CFU</Text></Col>
+                        <Col span={1}><Text strong>CFU</Text></Col>
                     </Row>
                     {data.map((x, index) => (
                         <Row key={index} style={{ marginTop: '8px' }}>
                             <Col span={4}><Text type="secondary">{x.date}</Text></Col>
                             <Col span={3}><Text type="secondary">{x.code}</Text></Col>
-                            <Col span={13}><Text>{x.teaching}</Text></Col>
+                            <Col span={14}><Text>{x.teaching}</Text></Col>
                             <Col span={2}>
                                 <Tag color={color(x.mark)} style={{ borderRadius: "20px" }}>
                                     <Text style={{ color: "white" }}>
@@ -85,7 +85,7 @@ function StudentCV(props) {
                                     </Text>
                                 </Tag>
                             </Col>
-                            <Col span={2}><Text type="secondary">{x.cfu}</Text></Col>
+                            <Col span={1}><Text type="secondary">{x.cfu}</Text></Col>
                         </Row>
                     ))}
                 </>
