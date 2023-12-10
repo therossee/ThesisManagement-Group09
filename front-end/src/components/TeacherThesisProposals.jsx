@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { message, Space, Table, Tag, Tooltip } from 'antd';
+import { message, Space, Table, Tag, Tooltip, Popconfirm } from 'antd';
 import { EditOutlined, EyeOutlined, DeleteOutlined } from '@ant-design/icons';
 import API from '../API';
 import { useAuth } from './authentication/useAuth';
@@ -12,6 +12,8 @@ function TeacherThesisProposals() {
 
     // Loading table data fetching
     const [isLoadingTable, setIsLoadingTable] = useState(true);
+
+    const [isVisible, setVisible] = useState(false);
 
     const navigate = useNavigate();
 
@@ -90,12 +92,19 @@ function TeacherThesisProposals() {
                         <EditOutlined style={{ fontSize: '20px' }} onClick={() => navigate(`/edit-proposal/${record.id}`)} />
                     </Tooltip>
                     <Tooltip title="Delete Proposal">
-                        <DeleteOutlined style={{ fontSize: '20px' }} onClick={()=> deleteProposalById(record.id)} />
+                        <Popconfirm 
+                        title="Are you sure you want to delete this proposal?" 
+                        onConfirm={() => deleteProposalById(record.id)} 
+                        okText="Yes" 
+                        cancelText="No"
+                        >
+                         <DeleteOutlined style={{ fontSize: '20px' }} />
+                        </Popconfirm>
                     </Tooltip>
                 </Space>
             ),
         },
-    ];
+    ];Popconfirm
 
     // Some props regarding the table
     const tableProps = {
