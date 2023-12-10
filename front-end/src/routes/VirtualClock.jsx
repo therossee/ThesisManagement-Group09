@@ -4,10 +4,17 @@ import { Button, DatePicker, Flex, message, Space, Typography } from 'antd';
 import { EditOutlined, RollbackOutlined, SaveOutlined } from '@ant-design/icons';
 import '../css/style.css';
 import API from "../API.jsx";
+import Errors from "./Errors.jsx";
+import { useAuth } from "../components/authentication/useAuth.jsx";
 
 const { Title, Text } = Typography;
 
 function VirtualClock() {
+    const { isTester } = useAuth();
+    if (!isTester) {
+        return <Errors code="403" />
+    }
+
     const [messageApi, contextHolder] = message.useMessage();
 
     // Clock from server
