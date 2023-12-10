@@ -1,12 +1,10 @@
 import { React, useState, useEffect } from "react";
 import { Space, Badge, Button, Skeleton, message, Typography, Tooltip, FloatButton, Timeline } from "antd";
 import { ReloadOutlined } from '@ant-design/icons';
-import { useAuth } from "./authentication/useAuth";
 import API from "../API";
 
 function StudentApplications() {
 
-    const { accessToken } = useAuth();
     const [isLoading, setIsLoading] = useState(true);
     const [dirty, setDirty] = useState(true);
     const [data, setData] = useState([]);
@@ -14,25 +12,23 @@ function StudentApplications() {
     const { Title } = Typography;
 
     useEffect(() => {
-        if (accessToken) {
-            const fetchData = async () => {
-                try {
-                    if (dirty) {
-                        setIsLoading(true);
-                        const proposals = await API.getStudentApplicationsHistory(accessToken);
-                        setData(proposals);
-                        setIsLoading(false);
-                        setDirty(false);
-                    }
-                } catch (err) {
-                    message.error(err.message ? err.message : err);
+        const fetchData = async () => {
+            try {
+                if (dirty) {
+                    setIsLoading(true);
+                    const proposals = await API.getStudentApplicationsHistory();
+                    setData(proposals);
                     setIsLoading(false);
                     setDirty(false);
                 }
-            };
-            fetchData();
-        }
-    }, [dirty, accessToken]);
+            } catch (err) {
+                message.error(err.message ? err.message : err);
+                setIsLoading(false);
+                setDirty(false);
+            }
+        };
+        fetchData();
+    }, [dirty]);
 
 
     const items = data.map((x, index) => ({

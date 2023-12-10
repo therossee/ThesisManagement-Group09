@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Popconfirm, message, Space, Table, Tag, Tooltip } from 'antd';
 import { EditOutlined, EyeOutlined, DeleteOutlined, InboxOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import API from '../API';
-import { useAuth } from './authentication/useAuth';
 
 function TeacherThesisProposals() {
 
@@ -15,8 +14,6 @@ function TeacherThesisProposals() {
 
 
     const navigate = useNavigate();
-
-    const { accessToken } = useAuth();
 
     const [dirty, setDirty] = useState(true);
 
@@ -123,9 +120,9 @@ function TeacherThesisProposals() {
     };
 
     useEffect(() => {
-        if (accessToken && dirty) {
+        if (dirty) {
             setIsLoadingTable(true);
-            API.getThesisProposals(accessToken)
+            API.getThesisProposals()
                 .then((x) => {
                     setData(handleReceivedData(x));
                     setIsLoadingTable(false);
@@ -137,7 +134,7 @@ function TeacherThesisProposals() {
                     setDirty(false);
                 });
         }
-    }, [accessToken, dirty]);
+    }, [dirty]);
 
     function handleReceivedData(data) {
 
@@ -153,8 +150,8 @@ function TeacherThesisProposals() {
 
     async function deleteProposalById(id) {
         try {
-            await API.deleteProposalById(id, accessToken);
-            message.success("Proposal deleted successfully");
+            await API.deleteProposalById(id);
+            message.success("Thesis proposal deleted successfully");
             setDirty(true);
         } catch (err) {
             message.error(err.message ? err.message : err);
@@ -166,7 +163,7 @@ function TeacherThesisProposals() {
     async function archiveProposalById(id) {
         console.log(id);
         try {
-            await API.archiveProposalById(id, accessToken);
+            await API.archiveProposalById(id);
             message.success("Proposal archived successfully");
             setDirty(true);
         } catch (err) {

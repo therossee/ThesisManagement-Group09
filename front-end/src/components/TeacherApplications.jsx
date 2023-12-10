@@ -1,6 +1,5 @@
 import { React, useState, useEffect } from "react";
 import API from "../API";
-import { useAuth } from "./authentication/useAuth";
 import { Alert, message, Divider, List, Skeleton, Avatar, Button, Flex, Typography, Tooltip } from 'antd';
 import { UserOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import StudentCV from "./StudentCV";
@@ -24,18 +23,16 @@ function TeacherApplications() {
 
     const { Title } = Typography;
 
-    const { accessToken } = useAuth();
-
     useEffect(() => {
         const fetchData = async () => {
             try {
-                if (dirty && accessToken) {
+                if (dirty) {
                     setIsLoading(true);
                     let newData = [];
-                    const proposals = await API.getThesisProposals(accessToken);
+                    const proposals = await API.getThesisProposals();
                     await Promise.all(
                         proposals.map(async (proposal) => {
-                            const applications = await API.getTeacherThesisApplications(proposal.id, accessToken);
+                            const applications = await API.getTeacherThesisApplications(proposal.id);
                             if (applications.some((x) => x.status === "waiting for approval")) {
                                 newData.push({
                                     id: proposal.id,
@@ -55,12 +52,12 @@ function TeacherApplications() {
         };
 
         fetchData();
-    }, [dirty, accessToken]);
+    }, [dirty]);
 
     const acceptApplication = async (proposalId, student) => {
         setButtonsLoading(true);
         try {
-            await API.acceptThesisApplications(proposalId, student.id, accessToken);
+            await API.acceptThesisApplications(proposalId, student.id); 
             message.success("Accepted the application of " + student.surname + " " + student.name);
             setDirty(true);
             setButtonsLoading(false)
@@ -74,7 +71,7 @@ function TeacherApplications() {
     const rejectApplication = async (proposalId, student) => {
         setButtonsLoading(true);
         try {
-            await API.rejectThesisApplications(proposalId, student.id, accessToken);
+            await API.rejectThesisApplications(proposalId, student.id); 
             message.success("Rejected the application of " + student.surname + " " + student.name);
             setDirty(true);
             setButtonsLoading(false);

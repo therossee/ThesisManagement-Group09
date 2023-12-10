@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Avatar, Col, Drawer, Flex, message, Row, Skeleton, Tag, Typography } from 'antd';
 import { UserOutlined, ArrowDownOutlined } from '@ant-design/icons';
-import { useAuth } from './authentication/useAuth';
 import PropTypes from 'prop-types';
 import API from '../API';
 
@@ -9,7 +8,6 @@ function StudentCV(props) {
 
     const { isOpen, setIsOpen, studentInfo } = props;
     const { Title, Text } = Typography;
-    const { accessToken } = useAuth();
 
     const [isLoading, setIsLoading] = useState(true);
 
@@ -17,19 +15,18 @@ function StudentCV(props) {
     const [data, setData] = useState(true);
 
     useEffect(() => {
-        if (accessToken) {
-            setIsLoading(true);
-            API.getStudentCVById(studentInfo.id, accessToken)
-                .then((x) => {
-                    setIsLoading(false);
-                    setData(x);
-                })
-                .catch((err) => {
-                    message.error(err.message ? err.message : err);
-                    setIsLoading(false);
-                });
-        }
-    }, [accessToken]);
+        setIsLoading(true);
+        API.getStudentCVById(studentInfo.id)
+            .then((x) => {
+                setIsLoading(false);
+                setData(x);
+            })
+            .catch((err) => {
+                message.error(err.message ? err.message : err);
+                setIsLoading(false);
+            });
+        
+    }, []);
 
     function color(mark) {
         let colorCode;

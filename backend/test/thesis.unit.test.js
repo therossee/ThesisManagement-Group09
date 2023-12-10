@@ -728,6 +728,7 @@ describe('listThesisProposalsTeacher', () => {
         )
         AND P.expiration > ?
         AND creation_date < ?
+        AND is_archived = 0
         AND is_deleted = 0;`;
     // Mock the SQLite database query
     db.prepare.mockClear().mockReturnValueOnce({ all: jest.fn(() => mockProposals) });
@@ -778,6 +779,7 @@ describe('listApplicationsForTeacherThesisProposal', () => {
       AND ta.creation_date < ?
       AND tp.expiration > ?
       AND tp.creation_date < ?
+      AND tp.is_archived = 0
       AND tp.is_deleted = 0;`;
     // Assertions
     expect(result).toEqual(mockApplications);
