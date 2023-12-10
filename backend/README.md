@@ -75,6 +75,14 @@ Contains the API for the working project.
         - There are no thesis proposal with the given id
         - The thesis is already expired
         - The supervisor is not the owner of the thesis proposal
+- PATCH `/api/thesis-proposals/archive/:id`
+    - Authenticated by a teacher, archive the proposal with the given id, of which the teacher is the superviso
+    - Requires the id of the thesis proposal to delete
+    - Error if:
+        - Some applications of the given thesis proposals has been accepted
+        - There are no thesis proposal with the given id
+        - The thesis is already expired
+        - The supervisor is not the owner of the thesis proposal
 
 ### Applications APIs
 
@@ -108,4 +116,8 @@ Contains the API for the working project.
 
 - GET `/api/student/applications-decision`
     - Authenticated by a student, gets all the applications with thesis infos done by the logged-in student
+
+- GET `/api/student/:id/career`
+    - Authenticated by a teacher, gets the career of the student with the given id
+    - Error if a student with the given id doesn't exist
 
