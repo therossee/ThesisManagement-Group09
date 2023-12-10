@@ -380,7 +380,13 @@ async function getStudentCVById(id, accessToken) {
     });
     const career = await response.json();
     if (response.ok) {
-        return career;
+        return career.map((x) => ({
+            code: x.cod_course,
+            teaching: x.title_course,
+            cfu: x.cfu,
+            mark: x.grade,
+            date: x.date,
+        })).sort((a, b) => new Date(b.date) - new Date(a.date));
     } else {
         throw career;
     }
