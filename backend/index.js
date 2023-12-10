@@ -322,7 +322,6 @@ async (req, res) => {
       };
       res.json({ $metadata: metadata, items: proposalsPopulated });
     } else if (req.user.roles.includes('teacher')) {
-      console.log(req.user.id);
       const thesisProposals = await thesisDao.listThesisProposalsTeacher(req.user.id);
       const proposalsPopulated = await Promise.all(
         thesisProposals.map(async proposal => {
