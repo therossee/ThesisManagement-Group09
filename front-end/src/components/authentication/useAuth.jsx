@@ -1,4 +1,4 @@
-import { useState, createContext, useContext, useEffect } from 'react';
+import { useState, createContext, useContext, useEffect, useMemo } from 'react';
 import API  from '../../API.jsx';
 
 // Context for handling user info and user-related functions
@@ -41,8 +41,17 @@ export function AuthProvider({ children }) {
         checkAuth();
     }, []);
 
+     // Memorize the context value
+     const contextValue = useMemo(() => ({
+        isAuthenticated,
+        userData,
+        handleLogin,
+        handleLogout,
+        isTeacher,
+    }), [isAuthenticated, userData, handleLogin, handleLogout, isTeacher]);
+
     return (
-        <AuthContext.Provider value={{ isAuthenticated, userData, handleLogin, handleLogout, isTeacher }}>
+        <AuthContext.Provider value={contextValue}>
             {children}
         </AuthContext.Provider>
     );
