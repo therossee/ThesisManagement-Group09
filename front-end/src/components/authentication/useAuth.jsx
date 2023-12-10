@@ -31,8 +31,7 @@ export function AuthProvider({ children }) {
         const checkAuth = async () => {
             try {
                 const user = await API.getUser();
-                const userInfo = await API.getUserInfo(user.auth0_id);
-                setIsTeacher(userInfo.role === 'teacher');
+                setIsTeacher(user.roles.includes("teacher"));
                 setUserData(user);
                 setIsAuthenticated(true);
             } catch (err) {
