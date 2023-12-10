@@ -97,6 +97,20 @@ function TeacherThesisProposals() {
                          <DeleteOutlined style={{ fontSize: '20px' }} />
                         </Popconfirm>
                     </Tooltip>
+                    <Tooltip title="Archive Proposal">
+                        <Popconfirm
+                            title="Confirm action"
+                            placement="left"
+                            icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+                            description="Are you sure you want to archive this proposal?"
+                            cancelText="No"
+                            okText="Yes"
+                            onConfirm={() => archiveProposalById(record.id)}
+                            onCancel={() => { }}
+                            >
+                            <InboxOutlined style={{ fontSize: '20px' }} />
+                        </Popconfirm>
+                    </Tooltip>
 
 
 
