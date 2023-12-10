@@ -338,6 +338,20 @@ async function getStudentApplicationsHistory(accessToken) {
     }
 }
 
+async function archiveProposalById(id, accessToken) {
+    const response = await fetch(URL +  `/thesis-proposals/archive/${id} `, {
+        method: 'PATCH',
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+    if (response.ok) {
+        return response; 
+    } else {
+        throw response;
+    }
+}
+
 async function deleteProposalById(id, accessToken) {
     const response = await fetch(URL +  `/thesis-proposals/${id} `, {
         method: 'DELETE',
@@ -396,6 +410,6 @@ const API = {
     getUserInfo,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, getStudentCVById
+    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById
 };
 export default API;
