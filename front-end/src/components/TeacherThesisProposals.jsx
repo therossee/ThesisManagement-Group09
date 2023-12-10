@@ -88,7 +88,16 @@ function TeacherThesisProposals() {
                         <EditOutlined style={{ fontSize: '20px' }} onClick={() => navigate(`/edit-proposal/${record.id}`)} />
                     </Tooltip>
                     <Tooltip title="Delete Proposal">
-                        <DeleteOutlined style={{ fontSize: '20px' }} onClick={() => deleteProposalById(record.id)} />
+                        <Popconfirm 
+                        title="Confirm action"
+                        description="Are you sure you want to delete this proposal?"
+                        icon={<QuestionCircleOutlined style={{ color: 'red' }} />} 
+                        onConfirm={() => deleteProposalById(record.id)} 
+                        okText="Yes" 
+                        cancelText="No"
+                        >
+                         <DeleteOutlined style={{ fontSize: '20px' }} />
+                        </Popconfirm>
                     </Tooltip>
                     <Tooltip title="Archive Proposal">
                         <Popconfirm
