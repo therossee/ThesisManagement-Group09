@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Input, Button, Space, message, Table, Form, Drawer, DatePicker, Tag, Tooltip } from 'antd';
+import { Input, Button, Space, Table, Form, Drawer, DatePicker, Tag, Tooltip } from 'antd';
 import { SearchOutlined, EyeOutlined } from '@ant-design/icons';
-import { useAuth } from './authentication/useAuth';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
@@ -26,7 +25,7 @@ function StudentThesisProposals() {
     const [dateRange, setDateRange] = useState([]);
 
     // Set virtual clock date to prevent filtering for a date before virtual clock one
-    const [date, setDate] = useState(dayjs());
+    const date = useState(dayjs());
 
     const filterTitle = () => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (

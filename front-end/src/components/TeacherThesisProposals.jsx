@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Popconfirm, message, Space, Table, Tag, Tooltip } from 'antd';
 import { EditOutlined, EyeOutlined, DeleteOutlined, InboxOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import API from '../API';
-import { useAuth } from './authentication/useAuth';
 
 function TeacherThesisProposals() {
 

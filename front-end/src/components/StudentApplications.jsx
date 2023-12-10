@@ -1,7 +1,6 @@
 import { React, useState, useEffect } from "react";
 import { Space, Badge, Button, Skeleton, message, Typography, Tooltip, FloatButton, Timeline } from "antd";
 import { ReloadOutlined } from '@ant-design/icons';
-import { useAuth } from "./authentication/useAuth";
 import API from "../API";
 
 function StudentApplications() {

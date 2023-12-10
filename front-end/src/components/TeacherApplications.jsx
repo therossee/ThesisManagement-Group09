@@ -1,6 +1,5 @@
 import { React, useState, useEffect } from "react";
 import API from "../API";
-import { useAuth } from "./authentication/useAuth";
 import { message, Divider, List, Skeleton, Avatar, Button, Flex, Typography, Tooltip } from 'antd';
 import { UserOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 

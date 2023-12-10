@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Form, message, Spin, Steps, Tooltip, FloatButton, Button } from 'antd';
 import dayjs from 'dayjs';
-import { useAuth } from './authentication/useAuth.jsx';
 import { ReviewProposal } from './insert_proposal_components/ReviewProposal.jsx';
 import { useParams } from 'react-router-dom';
 import { UploadResult } from './insert_proposal_components/UploadResult.jsx';
