@@ -89,7 +89,8 @@ function TeacherThesisProposals() {
                     </Tooltip>
                     <Tooltip title="Delete Proposal">
                         <Popconfirm 
-                        title="Are you sure you want to delete this proposal?" 
+                        title="Are you sure you want to delete this proposal?"
+                        icon={<QuestionCircleOutlined style={{ color: 'red' }} />} 
                         onConfirm={() => deleteProposalById(record.id)} 
                         okText="Yes" 
                         cancelText="No"
