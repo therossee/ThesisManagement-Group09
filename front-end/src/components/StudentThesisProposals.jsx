@@ -25,7 +25,7 @@ function StudentThesisProposals() {
     const [dateRange, setDateRange] = useState([]);
 
     // Set virtual clock date to prevent filtering for a date before virtual clock one
-    const date = useState(dayjs());
+    const date = dayjs();
 
     const filterTitle = () => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
