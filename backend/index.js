@@ -75,10 +75,9 @@ passport.use(
     identifierFormat: null, // Use default identifier format
   },
   function(profile, done){
-    profile.auth0_id = profile["http://schemas.auth0.com/user_id"];
     profile.id = profile['http://schemas.auth0.com/nickname'];
-    profile.name =
-      profile["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"];
+    profile.name = profile["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"];
+    profile.roles = profile["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
     done(null, profile);
   },
   )
@@ -96,18 +95,14 @@ const isLoggedIn = (req, res, next) => {
 };
 
 const isStudent = async(req, res, next) => {
-  if(req.isAuthenticated()){
-    const loggedUserInfo = await usersDao.getUserInfo(req.user.auth0_id);
-    if(loggedUserInfo.role==='student')
+  if(req.isAuthenticated() && req.user.roles.includes('student')){
       return next();
   }
   return res.status(403).json('Unauthorized');
 }
 
 const isTeacher = async(req, res, next) => {
- if(req.isAuthenticated()){
-  const loggedUserInfo = await usersDao.getUserInfo(req.user.auth0_id);
-  if(loggedUserInfo.role==='teacher')
+  if(req.isAuthenticated() && req.user.roles.includes('teacher')){
     return next();
   }
   return res.status(403).json('Unauthorized');
@@ -162,16 +157,6 @@ async(req, res) => {
   }
 });
 
-app.get('/api/userInfo/:auth0_id', 
-async(req, res) => {
-	await usersDao.getUserInfo(req.params.auth0_id)
-		.then((userInfo) => res.status(200).json(userInfo))
-		.catch((err) => {
-      console.error(err);
-			res.status(503).json('error retrieving user info');
-		});
-});
-
 /*** APIs ***/
 
 app.get('/api/system/virtual-clock', (req, res) => {
@@ -207,8 +192,7 @@ app.post('/api/teacher/thesis_proposals',
 isLoggedIn,
 isTeacher,
 async (req,res) => {
-  const loggedUserInfo = await usersDao.getUserInfo(req.user.auth0_id);
-  const supervisor_id = loggedUserInfo.id;
+  const supervisor_id = req.user.id;
   const {title, internal_co_supervisors_id, external_co_supervisors_id, type, description, required_knowledge, notes, level, cds, keywords} = req.body;
   let expiration = req.body.expiration;
 
@@ -264,8 +248,7 @@ isLoggedIn,
 isTeacher,
 async(req, res) => {
   try {
-    const loggedUserInfo = await usersDao.getUserInfo(req.user.auth0_id); 
-    const excludedTeacherId = loggedUserInfo.id;
+    const excludedTeacherId = req.user.id;
     const teacherList = await thesisDao.getTeacherListExcept(excludedTeacherId);
 
     res.json({ teachers: teacherList });
@@ -319,9 +302,9 @@ app.get('/api/thesis-proposals',
 isLoggedIn,
 async (req, res) => {
   try {
-    const loggedUserInfo = await usersDao.getUserInfo(req.user.auth0_id);
-    if (loggedUserInfo.role==='student') {
-      const studentId = loggedUserInfo.id;
+
+    if (req.user.roles.includes('student')) {
+      const studentId = req.user.id;
       const proposals = await thesisDao.listThesisProposalsFromStudent(studentId);
       const cds = await usersDao.getStudentDegree(studentId);
       const proposalsPopulated = await Promise.all(
@@ -338,8 +321,9 @@ async (req, res) => {
         currentPage: 1
       };
       res.json({ $metadata: metadata, items: proposalsPopulated });
-    } else if (loggedUserInfo.role==='teacher') {
-      const thesisProposals = await thesisDao.listThesisProposalsTeacher(loggedUserInfo.id);
+    } else if (req.user.roles.includes('teacher')) {
+      console.log(req.user.id);
+      const thesisProposals = await thesisDao.listThesisProposalsTeacher(req.user.id);
       const proposalsPopulated = await Promise.all(
         thesisProposals.map(async proposal => {
           const cds = await thesisDao.getThesisProposalCds(proposal.proposal_id);
@@ -369,9 +353,8 @@ app.get('/api/thesis-proposals/:id',
 isLoggedIn,
 async (req, res) => {
 try {
-  const loggedUserInfo = await usersDao.getUserInfo(req.user.auth0_id);
-  if (loggedUserInfo.role==='student') {
-    const studentId = loggedUserInfo.id;
+  if (req.user.roles.includes('student')) {
+    const studentId = req.user.id;
     const proposalId = req.params.id;
 
     const proposal = await thesisDao.getThesisProposal(proposalId, studentId);
@@ -382,8 +365,8 @@ try {
 
     res.json( await _populateProposal(proposal, studentDegree) );
   }
-  else if (loggedUserInfo.role==='teacher') {
-    const teacherId = loggedUserInfo.id;
+  else if (req.user.roles.includes('teacher')) {
+    const teacherId = req.user.id;
     const proposalId = req.params.id;
 
     const proposal = await thesisDao.getThesisProposalTeacher(proposalId, teacherId);
@@ -409,8 +392,7 @@ isLoggedIn,
 isTeacher,
 async (req, res) => {
   try {
-    const loggedUserInfo = await usersDao.getUserInfo(req.user.auth0_id);
-    const supervisor_id  = loggedUserInfo.id;
+    const supervisor_id  = req.user.id;
     const proposal_id = req.params.id;
 
     const applications = await thesisDao.listApplicationsForTeacherThesisProposal(proposal_id, supervisor_id);
@@ -458,8 +440,7 @@ isLoggedIn,
 isTeacher,
   async (req, res) => {
     try {
-      const loggedUserInfo = await usersDao.getUserInfo(req.user.auth0_id);
-      const teacherId = loggedUserInfo.id;
+      const teacherId = req.user.id;
       const proposalId = req.params.id;
 
       await thesisDao.deleteThesisProposalById(proposalId, teacherId)
@@ -492,8 +473,7 @@ app.patch('/api/thesis-proposals/archive/:id',
   isTeacher,
   async (req, res) => {
     try {
-      const loggedUserInfo = await usersDao.getUserInfo(req.user.auth0_id);
-      const teacherId = userInfo.id;
+      const teacherId = req.user.id;
       const proposalId = req.params.id;
 
       await thesisDao.archiveThesisProposalById(proposalId, teacherId)
@@ -525,8 +505,7 @@ app.post('/api/student/applications',
 isLoggedIn,
 isStudent,
 async(req,res) => {
-    const loggedUserInfo = await usersDao.getUserInfo(req.user.auth0_id);
-    const student_id = loggedUserInfo.id;
+    const student_id = req.user.id;
     const {thesis_proposal_id} = req.body;
     await thesisDao.applyForProposal(thesis_proposal_id, student_id).then
     ((applicationId)=>{
@@ -548,8 +527,7 @@ isLoggedIn,
 isTeacher,
 async (req, res) => {
   try {
-    const loggedUserInfo = await usersDao.getUserInfo(req.user.auth0_id);
-    const teacherId = loggedUserInfo.id;
+    const teacherId = req.user.id;
     const proposal_id=req.params.proposal_id;
     const applications = await thesisDao.listApplicationsForTeacherThesisProposal(proposal_id, teacherId);
     res.json(applications);
@@ -564,8 +542,7 @@ isLoggedIn,
 isStudent,
 async (req, res) => {
   try {
-    const loggedUserInfo = await usersDao.getUserInfo(req.user.auth0_id);
-    const studentId = loggedUserInfo.id;
+    const studentId = req.user.id;
     const studentApplications = await thesisDao.getStudentActiveApplication(studentId)
     res.json(studentApplications);
   } catch (e) {
@@ -641,8 +618,7 @@ isLoggedIn,
 isStudent,
 async (req, res) => {
   try {
-    const loggedUserInfo = await usersDao.getUserInfo(req.user.auth0_id);
-    const studentId = loggedUserInfo.id;
+    const studentId = req.user.id;
     const applications = await thesisDao.listApplicationsDecisionsFromStudent(studentId);
     res.json(applications);
   } catch (e) {
