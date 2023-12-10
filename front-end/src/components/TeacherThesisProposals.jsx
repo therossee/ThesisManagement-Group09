@@ -103,7 +103,7 @@ function TeacherThesisProposals() {
                 </Space >
             ),
         },
-    ];Popconfirm
+    ];
 
     // Some props regarding the table
     const tableProps = {
