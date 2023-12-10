@@ -1,17 +1,20 @@
 'use strict';
 
+/*** Importing modules ***/
+
 const dotenv = require("dotenv");
 dotenv.config({ DOTENV_KEY: process.env.TM_DOTENV_KEY });
 
-/*** Importing modules ***/
-const { ZodError } = require("zod");
+const fs = require('fs');
+const path = require('path');
+const bodyParser = require("body-parser");
+
+const passport = require('passport');
+const passportSaml = require('passport-saml');
 const express = require('express');
 const session = require('express-session');
 const morgan = require('morgan');
 const cors = require('cors');
-
-const { auth } = require('express-oauth2-jwt-bearer');
-const jwt = require('jsonwebtoken');
 
 const thesisDao = require('./thesis_dao.js');
 const usersDao = require('./users_dao.js');
@@ -20,50 +23,138 @@ const AdvancedDate = require("./AdvancedDate");
 const schemas = require('./schemas.js');
 const { sendEmailApplicationStatusChange } = require("./email");
 const AppError = require("./errors/AppError");
+const { ZodError } = require("zod");
 
 /*** init express and setup the middlewares ***/
 const app = express();
+app.use(morgan("dev"));
 app.use(express.json());
-app.use(morgan('dev'));
-
-const checkJwt = auth({
-	audience: 'https://thesis-management-09.eu.auth0.com/api/v2/',
-	issuerBaseURL: `https://thesis-management-09.eu.auth0.com/`,
-});
 
 /** Set up and enable Cross-Origin Resource Sharing (CORS) **/
 const corsOptions = {
-    origin: 'http://localhost:5173',
-    optionsSuccessStatus: 200,
-    credentials: true
-  };
+  origin: 'http://localhost:5173',
+  optionsSuccessStatus: 200,
+  credentials: true
+};
 app.use(cors(corsOptions));
+app.use(express.static('public'));
+
+app.use(
+session({
+  secret: "session-secret",
+  resave: false,
+  saveUninitialized: false,
+  cookie: { _expires: 60000000, maxAge: 60000000 },
+})
+);
+
+// Serialize user to the session
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+// Deserialize user from the session
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
+
+// Setup passport-saml strategy
+passport.use(
+  new passportSaml.Strategy(
+  {
+    path: '/sso/callback',
+    entryPoint: 'https://thesis-management-09.eu.auth0.com/samlp/JbUVcU90I7wK6nuQXaVty41vHEBHC8cF',
+    issuer: 'urn:thesis-management-09.eu.auth0.com',
+    callbackUrl: 'http://localhost:3000/sso/callback',
+    logoutUrl:
+        "https://thesis-management-09.eu.auth0.com/samlp/JbUVcU90I7wK6nuQXaVty41vHEBHC8cF/logout",
+    cert: fs.readFileSync(path.join(__dirname, 'thesis-management-09.pem'), 'utf8'),
+    signatureAlgorithm: 'sha256',
+    acceptedClockSkewMs: 5000, // 5 seconds
+    disableRequestedAuthnContext: true,
+    identifierFormat: null, // Use default identifier format
+  },
+  function(profile, done){
+    profile.id = profile['http://schemas.auth0.com/nickname'];
+    profile.name = profile["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"];
+    profile.roles = profile["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+    done(null, profile);
+  },
+  )
+);
+
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+const isLoggedIn = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  return res.status(401).json({ error: "Not authenticated" });
+};
 
 const isStudent = async(req, res, next) => {
-  let userInfo = await usersDao.getUserInfo(req.auth);
-  if(userInfo.role==='student'){
-    return next();
+  if(req.isAuthenticated() && req.user.roles.includes('student')){
+      return next();
   }
   return res.status(403).json('Unauthorized');
 }
 
 const isTeacher = async(req, res, next) => {
-  let userInfo = await usersDao.getUserInfo(req.auth);
-  if(userInfo.role==='teacher'){
+  if(req.isAuthenticated() && req.user.roles.includes('teacher')){
     return next();
   }
   return res.status(403).json('Unauthorized');
 }
 
-app.get('/api/user',
-checkJwt,
+// Endpoint to initiate SAML authentication
+app.get(
+  "/login",
+  passport.authenticate("saml", { 
+    failureRedirect: "/", 
+    failureFlash: true 
+  }),
+  (req, res) => {
+    res.redirect("http://localhost:5173");
+  }
+);
+
+// Callback endpoint where the SAML response is received
+app.post(
+  "/sso/callback",
+  bodyParser.urlencoded({ extended: false }),
+  passport.authenticate("saml", {
+    failureRedirect: "/",
+    failureFlash: true,
+  }),
+  function (req, res) {
+    res.redirect("http://localhost:5173");
+  }
+);
+
+// Logout endpoint
+app.post("/logout", (req, res, next) => {
+  res.clearCookie("connect.sid");
+  req.logout(function (err) {
+    req.session.destroy(function (err) {
+      res.send();
+    });
+  });
+});
+
+app.get('/api/user', 
 async(req, res) => {
-	await usersDao.getUserInfo(req.auth)
-		.then((userInfo) => res.status(200).json(userInfo))
-		.catch((err) => {
-      console.error(err);
-			res.status(503).json('error retrieving user info');
-		});
+  try{
+    if (req.isAuthenticated()) {
+      res.status(200).json(req.user);
+    } else { 
+      res.status(401).json('Unauthorized');
+    }
+  } catch (e) { 
+    console.error(e);
+    res.status(500).json('Internal Server Error');
+  }
 });
 
 /*** APIs ***/
@@ -100,11 +191,10 @@ app.post('/api/system/virtual-clock', (req, res, next) => {
 });
 
 app.post('/api/teacher/thesis_proposals',
-checkJwt,
+isLoggedIn,
 isTeacher,
 async (req,res) => {
-  let supervisor = await usersDao.getUserInfo(req.auth);
-  const supervisor_id = supervisor.id;
+  const supervisor_id = req.user.id;
   const {title, internal_co_supervisors_id, external_co_supervisors_id, type, description, required_knowledge, notes, level, cds, keywords} = req.body;
   let expiration = req.body.expiration;
 
@@ -156,12 +246,11 @@ async (req,res) => {
 });
 
 app.get('/api/teachers',
-checkJwt,
+isLoggedIn,
 isTeacher,
 async(req, res) => {
   try {
-    let userInfo = await usersDao.getUserInfo(req.auth);
-    const excludedTeacherId = userInfo.id;
+    const excludedTeacherId = req.user.id;
     const teacherList = await thesisDao.getTeacherListExcept(excludedTeacherId);
 
     res.json({ teachers: teacherList });
@@ -172,7 +261,7 @@ async(req, res) => {
 });
 
 app.get('/api/externalCoSupervisors',
-checkJwt,
+isLoggedIn,
 isTeacher,
 async(req, res) => {
   try {
@@ -186,7 +275,7 @@ async(req, res) => {
 });
 
 app.get('/api/keywords',
-checkJwt,
+isLoggedIn,
 isTeacher,
 async(req, res) => {
   try {
@@ -199,7 +288,7 @@ async(req, res) => {
 });
 
 app.get('/api/degrees',
-checkJwt,
+isLoggedIn,
 isTeacher,
 async(req, res) => {
   try {
@@ -212,12 +301,12 @@ async(req, res) => {
 });
 
 app.get('/api/thesis-proposals',
-checkJwt,
+isLoggedIn,
 async (req, res) => {
   try {
-    let userInfo = await usersDao.getUserInfo(req.auth);
-    if (userInfo.role==='student') {
-      const studentId = userInfo.id;
+
+    if (req.user.roles.includes('student')) {
+      const studentId = req.user.id;
       const proposals = await thesisDao.listThesisProposalsFromStudent(studentId);
       const cds = await usersDao.getStudentDegree(studentId);
       const proposalsPopulated = await Promise.all(
@@ -234,9 +323,8 @@ async (req, res) => {
         currentPage: 1
       };
       res.json({ $metadata: metadata, items: proposalsPopulated });
-    } else if (userInfo.role==='teacher') {
-      const teacherId = userInfo.id;
-      const thesisProposals = await thesisDao.listThesisProposalsTeacher(teacherId);
+    } else if (req.user.roles.includes('teacher')) {
+      const thesisProposals = await thesisDao.listThesisProposalsTeacher(req.user.id);
       const proposalsPopulated = await Promise.all(
         thesisProposals.map(async proposal => {
           const cds = await thesisDao.getThesisProposalCds(proposal.proposal_id);
@@ -263,13 +351,11 @@ async (req, res) => {
 });
 
 app.get('/api/thesis-proposals/:id',
-checkJwt,
+isLoggedIn,
 async (req, res) => {
 try {
-  let userInfo = await usersDao.getUserInfo(req.auth);
-
-  if (userInfo.role==='student') {
-    const studentId = userInfo.id;
+  if (req.user.roles.includes('student')) {
+    const studentId = req.user.id;
     const proposalId = req.params.id;
 
     const proposal = await thesisDao.getThesisProposal(proposalId, studentId);
@@ -280,8 +366,8 @@ try {
 
     res.json( await _populateProposal(proposal, studentDegree) );
   }
-  else if (userInfo.role==='teacher') {
-    const teacherId = userInfo.id;
+  else if (req.user.roles.includes('teacher')) {
+    const teacherId = req.user.id;
     const proposalId = req.params.id;
 
     const proposal = await thesisDao.getThesisProposalTeacher(proposalId, teacherId);
@@ -303,13 +389,12 @@ try {
 });
 
 app.put('/api/thesis-proposals/:id',
-checkJwt,
+isLoggedIn,
 isTeacher,
 async (req, res) => {
   try {
+    const supervisor_id  = req.user.id;
     const proposal_id = req.params.id;
-    const supervisor = await usersDao.getUserInfo(req.auth);
-    const supervisor_id  = supervisor.id;
 
     const applications = await thesisDao.listApplicationsForTeacherThesisProposal(proposal_id, supervisor_id);
     if (applications.some( application => application.status === 'accepted' )) {
@@ -352,12 +437,11 @@ async (req, res) => {
 );
 
 app.delete('/api/thesis-proposals/:id',
-  checkJwt,
-  isTeacher,
+isLoggedIn,
+isTeacher,
   async (req, res) => {
     try {
-      const userInfo = await usersDao.getUserInfo(req.auth);
-      const teacherId = userInfo.id;
+      const teacherId = req.user.id;
       const proposalId = req.params.id;
 
       await thesisDao.deleteThesisProposalById(proposalId, teacherId)
@@ -386,12 +470,11 @@ app.delete('/api/thesis-proposals/:id',
 );
 
 app.patch('/api/thesis-proposals/archive/:id',
-  checkJwt,
+  isLoggedIn,
   isTeacher,
   async (req, res) => {
     try {
-      const userInfo = await usersDao.getUserInfo(req.auth);
-      const teacherId = userInfo.id;
+      const teacherId = req.user.id;
       const proposalId = req.params.id;
 
       await thesisDao.archiveThesisProposalById(proposalId, teacherId)
@@ -420,11 +503,10 @@ app.patch('/api/thesis-proposals/archive/:id',
 );
 
 app.post('/api/student/applications',
-checkJwt,
+isLoggedIn,
 isStudent,
 async(req,res) => {
-    let studentInfo = await usersDao.getUserInfo(req.auth); // logged student
-    const student_id = studentInfo.id;
+    const student_id = req.user.id;
     const {thesis_proposal_id} = req.body;
     await thesisDao.applyForProposal(thesis_proposal_id, student_id).then
     ((applicationId)=>{
@@ -442,12 +524,11 @@ async(req,res) => {
 });
 
 app.get('/api/teacher/applications/:proposal_id',
-checkJwt,
+isLoggedIn,
 isTeacher,
 async (req, res) => {
   try {
-    let userInfo = await usersDao.getUserInfo(req.auth);
-    const teacherId = userInfo.id;
+    const teacherId = req.user.id;
     const proposal_id=req.params.proposal_id;
     const applications = await thesisDao.listApplicationsForTeacherThesisProposal(proposal_id, teacherId);
     res.json(applications);
@@ -458,12 +539,11 @@ async (req, res) => {
 });
 
 app.get('/api/student/active-application',
-checkJwt,
+isLoggedIn,
 isStudent,
 async (req, res) => {
   try {
-    let userInfo = await usersDao.getUserInfo(req.auth);
-    const studentId = userInfo.id;
+    const studentId = req.user.id;
     const studentApplications = await thesisDao.getStudentActiveApplication(studentId)
     res.json(studentApplications);
   } catch (e) {
@@ -473,7 +553,7 @@ async (req, res) => {
 });
 
 app.patch('/api/teacher/applications/accept/:proposal_id',
-checkJwt,
+isLoggedIn,
 isTeacher,
 async (req, res) => {
 const { proposal_id } = req.params;
@@ -508,7 +588,7 @@ const { student_id } = req.body;
 })
 
 app.patch('/api/teacher/applications/reject/:proposal_id',
-checkJwt,
+isLoggedIn,
 isTeacher,
 async (req, res) => {
   const { proposal_id } = req.params;
@@ -535,12 +615,11 @@ async (req, res) => {
 })
 
 app.get('/api/student/applications-decision',
-checkJwt,
+isLoggedIn,
 isStudent,
 async (req, res) => {
   try {
-    let userInfo = await usersDao.getUserInfo(req.auth);
-    const studentId = userInfo.id;
+    const studentId = req.user.id;
     const applications = await thesisDao.listApplicationsDecisionsFromStudent(studentId);
     res.json(applications);
   } catch (e) {
@@ -550,7 +629,7 @@ async (req, res) => {
 });
 
 app.get('/api/student/:id/career',
-checkJwt,
+isLoggedIn,
 isTeacher,
 async (req, res) => {
   try{
@@ -572,7 +651,7 @@ const server = app.listen(PORT, () => {
   console.log(`Server started on http://localhost:${PORT}/`);
 });
 
-module.exports = { app, server, checkJwt };
+module.exports = { app, server };
 
 /**
  * Serialize and populate a proposal object in order to have all the data needed by the API

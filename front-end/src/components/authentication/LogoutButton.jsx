@@ -3,10 +3,10 @@ import { Button } from 'antd';
 import { useAuth } from './useAuth';
 const LogoutButton = () => {
 
-    const { logout } = useAuth();
+    const { handleLogout } = useAuth();
 
     return (
-        <Button ghost type="primary" style={{ marginTop: "17px" }} onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>
+        <Button ghost type="primary" style={{ marginTop: "17px" }} onClick={handleLogout}>
             Log Out
         </Button>
     );

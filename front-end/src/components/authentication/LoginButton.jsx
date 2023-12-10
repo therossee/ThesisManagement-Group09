@@ -4,10 +4,10 @@ import { useAuth } from './useAuth';
 
 // Functional component with a login button
 const LoginButton = () => {
-    const { loginWithRedirect } = useAuth();
+    const { handleLogin } = useAuth();
 
     return (
-        <Button ghost type="primary" onClick={() => loginWithRedirect()} style={{ marginTop: "17px" }}>
+        <Button ghost type="primary" onClick={() => handleLogin()} style={{ marginTop: "17px" }}>
             Log in
         </Button>
     );

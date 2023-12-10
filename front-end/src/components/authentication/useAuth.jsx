@@ -1,5 +1,5 @@
-import { useState, createContext, useContext } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useState, createContext, useContext, useEffect, useMemo } from 'react';
+import API  from '../../API.jsx';
 
 // Context for handling user info and user-related functions
 const AuthContext = createContext();
@@ -11,17 +11,47 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
 
-    const {isAuthenticated, getAccessTokenSilently, isLoading, loginWithRedirect, logout } = useAuth0();
-
     // Keep track in the client if user is Teacher or not
     const [isTeacher, setIsTeacher] = useState(undefined);
 
-    const [accessToken, setAccessToken] = useState(null);
-
     const [userData, setUserData] = useState(null);
 
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    const handleLogin = () => {
+        API.redirectToLogin();
+    };
+    
+    const handleLogout = () => {
+        API.logOut();
+    };
+
+    // Check if someone is authenticated
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const user = await API.getUser();
+                setIsTeacher(user.roles.includes("teacher"));
+                setUserData(user);
+                setIsAuthenticated(true);
+            } catch (err) {
+                setIsAuthenticated(false);
+            }
+        };
+        checkAuth();
+    }, []);
+
+     // Memorize the context value
+     const contextValue = useMemo(() => ({
+        isAuthenticated,
+        userData,
+        handleLogin,
+        handleLogout,
+        isTeacher,
+    }), [isAuthenticated, userData, handleLogin, handleLogout, isTeacher]);
+
     return (
-        <AuthContext.Provider value={{ userData, setUserData, isAuthenticated, getAccessTokenSilently, isLoading, loginWithRedirect, isTeacher, setIsTeacher, accessToken, setAccessToken, logout }}>
+        <AuthContext.Provider value={contextValue}>
             {children}
         </AuthContext.Provider>
     );

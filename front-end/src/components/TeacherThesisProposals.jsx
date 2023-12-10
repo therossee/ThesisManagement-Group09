@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { message, Space, Table, Tag, Tooltip } from 'antd';
-import { EditOutlined, EyeOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Popconfirm, message, Space, Table, Tag, Tooltip } from 'antd';
+import { EditOutlined, EyeOutlined, DeleteOutlined, InboxOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import API from '../API';
-import { useAuth } from './authentication/useAuth';
 
 function TeacherThesisProposals() {
 
@@ -13,9 +12,8 @@ function TeacherThesisProposals() {
     // Loading table data fetching
     const [isLoadingTable, setIsLoadingTable] = useState(true);
 
-    const navigate = useNavigate();
 
-    const { accessToken } = useAuth();
+    const navigate = useNavigate();
 
     const [dirty, setDirty] = useState(true);
 
@@ -90,9 +88,26 @@ function TeacherThesisProposals() {
                         <EditOutlined style={{ fontSize: '20px' }} onClick={() => navigate(`/edit-proposal/${record.id}`)} />
                     </Tooltip>
                     <Tooltip title="Delete Proposal">
-                        <DeleteOutlined style={{ fontSize: '20px' }} onClick={()=> deleteProposalById(record.id)} />
+                        <DeleteOutlined style={{ fontSize: '20px' }} onClick={() => deleteProposalById(record.id)} />
                     </Tooltip>
-                </Space>
+                    <Tooltip title="Archive Proposal">
+                        <Popconfirm
+                            title="Confirm action"
+                            placement="left"
+                            icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+                            description="Are you sure you want to archive this proposal?"
+                            cancelText="No"
+                            okText="Yes"
+                            onConfirm={() => archiveProposalById(record.id)}
+                            onCancel={() => { }}
+                            >
+                            <InboxOutlined style={{ fontSize: '20px' }} />
+                        </Popconfirm>
+                    </Tooltip>
+
+
+
+                </Space >
             ),
         },
     ];
@@ -105,9 +120,9 @@ function TeacherThesisProposals() {
     };
 
     useEffect(() => {
-        if (accessToken && dirty) {
+        if (dirty) {
             setIsLoadingTable(true);
-            API.getThesisProposals(accessToken)
+            API.getThesisProposals()
                 .then((x) => {
                     setData(handleReceivedData(x));
                     setIsLoadingTable(false);
@@ -119,7 +134,7 @@ function TeacherThesisProposals() {
                     setDirty(false);
                 });
         }
-    }, [accessToken, dirty]);
+    }, [dirty]);
 
     function handleReceivedData(data) {
 
@@ -135,8 +150,8 @@ function TeacherThesisProposals() {
 
     async function deleteProposalById(id) {
         try {
-            await API.deleteProposalById(id, accessToken);
-            message.success("Proposal deleted successfully");
+            await API.deleteProposalById(id);
+            message.success("Thesis proposal deleted successfully");
             setDirty(true);
         } catch (err) {
             message.error(err.message ? err.message : err);
@@ -144,8 +159,24 @@ function TeacherThesisProposals() {
         }
     }
 
+
+    async function archiveProposalById(id) {
+        console.log(id);
+        try {
+            await API.archiveProposalById(id);
+            message.success("Proposal archived successfully");
+            setDirty(true);
+        } catch (err) {
+            message.error(err.message ? err.message : err);
+            setIsLoadingTable(false);
+        }
+
+    }
+
     return (
+
         <Table {...tableProps} columns={columns} dataSource={data} />
+
     )
 }
 

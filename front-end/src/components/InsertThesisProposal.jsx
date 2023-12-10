@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Form, message, Spin, Steps, Tooltip, FloatButton, Button } from 'antd';
 import dayjs from 'dayjs';
-import { useAuth } from './authentication/useAuth.jsx';
 import { ReviewProposal } from './insert_proposal_components/ReviewProposal.jsx';
 import { UploadResult } from './insert_proposal_components/UploadResult.jsx';
 import { InsertBody } from './insert_proposal_components/InsertBody.jsx';
@@ -24,7 +23,6 @@ const steps = [
 
 function InsertThesisProposal() {
 
-  const { accessToken } = useAuth();
   const [keywords, setKeywords] = useState([]);
   const [intCoSupervisors, setIntCoSupervisors] = useState([]);
   const [extCoSupervisors, setExtCoSupervisors] = useState([]);
@@ -41,50 +39,48 @@ function InsertThesisProposal() {
 
 
   useEffect(() => {
-    if (accessToken) {
-      API.getTeachers(accessToken)
-        .then((obj) => {
-          setIntCoSupervisors(obj.teachers);
-        })
-        .catch((err) => {
-          messageApi.error("Failed to fetch teachers!");
-        });
-      API.getExtCoSupervisors(accessToken)
-        .then((obj) => {
-          setExtCoSupervisors(obj.externalCoSupervisors);
-        })
-        .catch((err) => {
-          messageApi.error("Failed to fetch external co-supervisors!");
-        });
-      API.getAllDegrees(accessToken)
-        .then((obj) => {
-          setDegrees(obj);
-        })
-        .catch((err) => {
-          messageApi.error("Failed to fetch degrees!");
-        });
-      API.getAllKeywords(accessToken)
-        .then((obj) => {
-          setKeywords(obj.keywords);
-        })
-        .catch((err) => {
-          messageApi.error("Failed to fetch keywords!");
-        });
-      API.getClock()
-        .then((clock) => {
-          setDate(dayjs().add(clock.offset, 'ms'));
-        })
-        .catch((err) => {
-          messageApi.error("Failed to fetch virtual clock!");
-        })
-        .finally(() => {
-          setLoading(false);
-        })
-    }
-  }, [current, accessToken]);
+    API.getTeachers()
+      .then((obj) => {
+        setIntCoSupervisors(obj.teachers);
+      })
+      .catch((err) => {
+        messageApi.error("Failed to fetch teachers!");
+      });
+    API.getExtCoSupervisors()
+      .then((obj) => {
+        setExtCoSupervisors(obj.externalCoSupervisors);
+      })
+      .catch((err) => {
+        messageApi.error("Failed to fetch external co-supervisors!");
+      });
+    API.getAllDegrees()
+      .then((obj) => {
+        setDegrees(obj);
+      })
+      .catch((err) => {
+        messageApi.error("Failed to fetch degrees!");
+      });
+    API.getAllKeywords()
+      .then((obj) => {
+        setKeywords(obj.keywords);
+      })
+      .catch((err) => {
+        messageApi.error("Failed to fetch keywords!");
+      });
+    API.getClock()
+      .then((clock) => {
+        setDate(dayjs().add(clock.offset, 'ms'));
+      })
+      .catch((err) => {
+        messageApi.error("Failed to fetch virtual clock!");
+      })
+      .finally(() => {
+        setLoading(false);
+      })
+  }, [current]);
 
   useEffect(() => {
-    if (insert && accessToken) {
+    if (insert) {
       const proposal = {
         title: formData.title,
         internal_co_supervisors_id: formData.intCoSupervisors ?? [],
@@ -98,7 +94,7 @@ function InsertThesisProposal() {
         cds: formData.cds,
         level: formData.degreeLevel
       }
-      API.insertProposal(proposal, accessToken)
+      API.insertProposal(proposal)
         .then((obj) => {
           setProposalId(obj.id);
           next();
@@ -110,7 +106,7 @@ function InsertThesisProposal() {
         });
       setInsert(false);
     }
-  }, [insert, accessToken]);
+  }, [insert]);
 
   const addProposal = () => {
     setInsert(true);
