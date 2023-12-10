@@ -47,7 +47,9 @@ function ViewThesisProposal() {
             .then((y) => {
               const actual = dayjs().add(y.offset, 'ms')
               const expDate = dayjs(x.expiration);
-              expDate.isBefore(actual) ? setDisabled(true) : undefined;
+              if (expDate.isBefore(actual)) {
+                setDisabled(true);
+              }
             })
             .catch((err) => { message.error(err.message ? err.message : err) });
         })
