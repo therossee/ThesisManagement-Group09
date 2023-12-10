@@ -7,6 +7,7 @@ const users = require('../users_dao');
 jest.mock('../db', () => ({
   prepare: jest.fn().mockReturnThis(),
   get: jest.fn(),
+  all: jest.fn(),
 }));
 
 describe('getStudentDegree', () => {
@@ -73,4 +74,47 @@ describe('getStudentById', () => {
     // Check if the function resolves with null
     expect(result).toBeNull();
   });
+});
+
+describe('getStudentCareer', () => {
+  test('returns career information for a valid student ID with data', async () => {
+    const validStudentId = 's12345';
+    const careerData = [
+      { cod_course: '1', title_course: 'Course1', cfu: 6, grade: 30, date: '2022-01-01' },
+      { cod_course: '2', title_course: 'Course2', cfu: 6, grade: 28, date: '2022-02-01' },
+    ];
+
+    db.prepare().all.mockReturnValueOnce(careerData);
+
+    const result = await users.getStudentCareer(validStudentId);
+
+    expect(db.prepare().all).toHaveBeenCalledWith(validStudentId);
+    expect(result).toEqual(careerData);
+  });
+
+  test('returns empty array for a valid student ID with no career data', async () => {
+    
+    const validStudentId = 's12345';
+
+    db.prepare().all.mockReturnValueOnce([]);
+
+    const result = await users.getStudentCareer(validStudentId);
+
+    // Check if the db.prepare.all function was called with the correct arguments
+    expect(db.prepare().all).toHaveBeenCalledWith(validStudentId);
+
+    // Check if the function resolves with null
+    expect(result).toEqual([]);
+  });
+
+  test('returns null for an invalid student ID', async () => {
+    const invalidStudentId = 'd1';
+
+    const result = await users.getStudentCareer(invalidStudentId);
+
+    expect(db.prepare().all).toHaveBeenCalledWith(invalidStudentId);
+
+    expect(result).toBeNull();
+  });
+
 });
