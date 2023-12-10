@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Form, message, Spin, Steps, Tooltip, FloatButton, Button } from 'antd';
 import dayjs from 'dayjs';
-import { useAuth } from './authentication/useAuth.jsx';
 import { ReviewProposal } from './insert_proposal_components/ReviewProposal.jsx';
 import { useParams } from 'react-router-dom';
 import { UploadResult } from './insert_proposal_components/UploadResult.jsx';
@@ -25,7 +24,6 @@ const steps = [
 
 function EditThesisProposal() {
 
-    const { accessToken } = useAuth();
     const id = useParams().id;
     const [keywords, setKeywords] = useState([]);
     const [intCoSupervisors, setIntCoSupervisors] = useState([]);
@@ -43,77 +41,73 @@ function EditThesisProposal() {
 
 
     useEffect(() => {
-        if (accessToken) {
-            API.getThesisProposalbyId(id, accessToken)
-                .then((x) => {
-                    console.log(x);
-                    let proposal;
-                        proposal = {
-                            title: x.title,
-                            intCoSupervisors: x.internalCoSupervisors.map((x) => x.id),
-                            extCoSupervisors: x.externalCoSupervisors.map((x) => x.id),
-                            type: x.type,
-                            description: x.description,
-                            requiredKnowledge: x.requiredKnowledge,
-                            notes: x.notes,
-                            keywords: x.keywords,
-                            expirationDate: dayjs(x.expiration),
-                            cds: x.cds.map((x) => x.cod_degree),
-                            degreeLevel: x.level
-                        }
-                    form.setFieldsValue(proposal);
-                    setFormData(proposal);
-                })
-        }
-    }, [accessToken]);
+        API.getThesisProposalbyId(id)
+            .then((x) => {
+                console.log(x);
+                let proposal;
+                    proposal = {
+                        title: x.title,
+                        intCoSupervisors: x.internalCoSupervisors.map((x) => x.id),
+                        extCoSupervisors: x.externalCoSupervisors.map((x) => x.id),
+                        type: x.type,
+                        description: x.description,
+                        requiredKnowledge: x.requiredKnowledge,
+                        notes: x.notes,
+                        keywords: x.keywords,
+                        expirationDate: dayjs(x.expiration),
+                        cds: x.cds.map((x) => x.cod_degree),
+                        degreeLevel: x.level
+                    }
+                form.setFieldsValue(proposal);
+                setFormData(proposal);
+            })
+    }, []);
 
     useEffect(() => {
-        if (accessToken) {
-            API.getTeachers(accessToken)
-                .then((obj) => {
-                    setIntCoSupervisors(obj.teachers);
-                })
-                .catch((err) => {
-                    messageApi.error("Failed to fetch teachers!");
-                });
-            API.getExtCoSupervisors(accessToken)
-                .then((obj) => {
-                    setExtCoSupervisors(obj.externalCoSupervisors);
-                })
-                .catch((err) => {
-                    messageApi.error("Failed to fetch external co-supervisors!");
-                });
-            API.getAllDegrees(accessToken)
-                .then((obj) => {
-                    setDegrees(obj);
-                })
-                .catch((err) => {
-                    messageApi.error("Failed to fetch degrees!");
-                });
-            API.getAllKeywords(accessToken)
-                .then((obj) => {
-                    setKeywords(obj.keywords);
-                })
-                .catch((err) => {
-                    messageApi.error("Failed to fetch keywords!");
-                });
-            API.getClock()
-                .then((clock) => {
-                    setDate(dayjs().add(clock.offset, 'ms'));
-                })
-                .catch((err) => {
-                    messageApi.error("Failed to fetch virtual clock!");
-                })
-                .finally(() => {
-                    setTimeout(() => {
-                        setLoading(false);
-                    }, 200);
-                })
-        }
-    }, [current, accessToken]);
+        API.getTeachers()
+            .then((obj) => {
+                setIntCoSupervisors(obj.teachers);
+            })
+            .catch((err) => {
+                messageApi.error("Failed to fetch teachers!");
+            });
+        API.getExtCoSupervisors()
+            .then((obj) => {
+                setExtCoSupervisors(obj.externalCoSupervisors);
+            })
+            .catch((err) => {
+                messageApi.error("Failed to fetch external co-supervisors!");
+            });
+        API.getAllDegrees()
+            .then((obj) => {
+                setDegrees(obj);
+            })
+            .catch((err) => {
+                messageApi.error("Failed to fetch degrees!");
+            });
+        API.getAllKeywords()
+            .then((obj) => {
+                setKeywords(obj.keywords);
+            })
+            .catch((err) => {
+                messageApi.error("Failed to fetch keywords!");
+            });
+        API.getClock()
+            .then((clock) => {
+                setDate(dayjs().add(clock.offset, 'ms'));
+            })
+            .catch((err) => {
+                messageApi.error("Failed to fetch virtual clock!");
+            })
+            .finally(() => {
+                setTimeout(() => {
+                    setLoading(false);
+                }, 200);
+            })
+    }, [current]);
 
     useEffect(() => {
-        if (insert && accessToken) {
+        if (insert) {
             const proposal = {
                 title: formData.title,
                 internal_co_supervisors_id: formData.intCoSupervisors ?? [],
@@ -127,7 +121,7 @@ function EditThesisProposal() {
                 cds: formData.cds,
                 level: formData.degreeLevel
             }
-            API.updateProposal(id, proposal, accessToken)
+            API.updateProposal(id, proposal)
                 .then(() => {
                     setProposalId(id);
                     next();
@@ -139,7 +133,7 @@ function EditThesisProposal() {
                 });
             setInsert(false);
         }
-    }, [insert, accessToken]);
+    }, [insert]);
 
     const addProposal = () => {
         setInsert(true);
