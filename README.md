@@ -581,6 +581,7 @@ Error Responses:
     | expiration         | date     | **NOT NULL**                                          |
     | level              | text     | **NOT NULL**                                          |
     | is_deleted         | integer  | **CHECK (is_deleted == 0 or is_deleted == 1) DEFAULT 0** |
+    | is_archived        | integer  | **CHECK (is_archived == 0 or is_archived == 1) DEFAULT 0** |
 
 
 - Table `proposalKeyword`
