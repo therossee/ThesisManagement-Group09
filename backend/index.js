@@ -556,55 +556,66 @@ app.patch('/api/teacher/applications/accept/:proposal_id',
 isLoggedIn,
 isTeacher,
 async (req, res) => {
-const { proposal_id } = req.params;
-const { student_id } = req.body;
+  try{
+    const { proposal_id } = req.params;
+    const { student_id } = req.body;
 
     if (!student_id ) {
       return res.status(400).json({ message: 'Missing required fields.' });
     }
 
-    try {
-      const status = "accepted";
-      const success = await thesisDao.updateApplicationStatus(student_id, proposal_id, status);
-      if (!success) {
-        return res.status(404).json({ message: `No application with the status "waiting for approval" found for this proposal.` });
+    const thesis = await thesisDao.getThesisProposalById(proposal_id);
+    if (!thesis) {
+      return res.status(404).json({ message: `Thesis proposal with id ${proposal_id} not found, cannot accept this application.`})
+    }
+
+    
+    const status = "accepted";
+    const success = await thesisDao.updateApplicationStatus(student_id, proposal_id, status);
+    if (!success) {
+      return res.status(404).json({ message: `No application with the status "waiting for approval" found for this proposal.` });
+    }
+    _notifyApplicationStatusChange(student_id, proposal_id, status);
+
+    const applicationsCancelled = await thesisDao.cancelOtherApplications(student_id, proposal_id);
+    setImmediate( () => {
+      const reason = 'Another student has been accepted for this thesis proposal.';
+      for (const application of applicationsCancelled) {
+        _notifyApplicationStatusChange(application.student_id, application.proposal_id, application.status, reason);
       }
-      setImmediate( () => _notifyApplicationStatusChange(student_id, proposal_id, status) );
+    });
 
-      const applicationsCancelled = await thesisDao.cancelOtherApplications(student_id, proposal_id);
-      setImmediate( () => {
-        const reason = 'Another student has been accepted for this thesis proposal.';
-        for (const application of applicationsCancelled) {
-          _notifyApplicationStatusChange(application.student_id, application.proposal_id, application.status, reason);
-        }
-      });
+    res.status(200).json({ message: 'Thesis accepted and others rejected successfully' });
 
-  res.status(200).json({ message: 'Thesis accepted and others rejected successfully' });
-
-} catch (error) {
-  console.error(error);
-  res.status(500).json(`Internal Server Error`);
-}
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(`Internal Server Error`);
+  }
 })
 
 app.patch('/api/teacher/applications/reject/:proposal_id',
 isLoggedIn,
 isTeacher,
 async (req, res) => {
-  const { proposal_id } = req.params;
-  const { student_id } = req.body;
+  try{
+    const { proposal_id } = req.params;
+    const { student_id } = req.body;
 
-  if (!student_id ) {
-    return res.status(400).json({ message: 'Missing required fields.' });
-  }
+    if (!student_id ) {
+      return res.status(400).json({ message: 'Missing required fields.' });
+    }
 
-  try {
+    const thesis = await thesisDao.getThesisProposalById(proposal_id);
+    if (!thesis) {
+      return res.status(404).json({ message: `Thesis proposal with id ${proposal_id} not found, cannot reject this application.`})
+    }
+
     const status = "rejected";
     const success = await thesisDao.updateApplicationStatus(student_id, proposal_id, status);
     if (!success) {
         return res.status(404).json({ message: `No application with the status "waiting for approval" found for this proposal.` });
     }
-    setImmediate( () => _notifyApplicationStatusChange(student_id, proposal_id, status) );
+    _notifyApplicationStatusChange(student_id, proposal_id, status);
 
     res.status(200).json({ message: 'Thesis successfully rejected' });
   } catch (error) {
