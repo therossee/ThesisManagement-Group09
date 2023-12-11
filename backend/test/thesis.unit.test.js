@@ -5,6 +5,7 @@ const db = require('../db');
 const thesis = require('../thesis_dao');
 const UnauthorizedActionError = require("../errors/UnauthorizedActionError");
 const NoThesisProposalError = require("../errors/NoThesisProposalError");
+const { any } = require('zod');
 
 // Mocking the database
 jest.mock('../db', () => ({
@@ -490,7 +491,10 @@ describe('listThesisProposalsFromStudent', () => {
       const result = await thesis.listThesisProposalsFromStudent(studentId, currentDate, currentDate);
 
       expect(result).toEqual(mockedData);
-      expect(db.prepare().all).toHaveBeenCalledWith(studentId, expect.any(String), expect.any(String));
+      expect(db.prepare().all).toHaveBeenCalledWith(
+        studentId,  
+        expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+        expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/));
   });
 
   test('should return an empty list', async () => {
@@ -1176,4 +1180,125 @@ describe('deleteThesisProposalById', () => {
         expect(res).toEqual(mockedApplications);
         expect(db.prepare).toHaveBeenCalledTimes(3);
     });
+});
+
+describe('archiveThesisProposalById', () => {
+  test('archives a thesis proposal without accepted applications', async () => {
+    const proposalId = 1;
+    const supervisorId = 'd1';
+
+    db.prepare().get.mockReturnValueOnce(null); // No accepted applications
+    db.prepare().run.mockReturnValueOnce({ changes: 1 }); // Successful archiving
+
+    const result = await thesis.archiveThesisProposalById(proposalId, supervisorId);
+    
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+    expect(db.prepare().run).toHaveBeenCalledWith(
+      proposalId, 
+      supervisorId,
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
+    );
+
+    expect(result).toEqual([]);
+  });
+
+  test('rejects with UnauthorizedActionError for a thesis with accepted applications', async () => {
+    const proposalId = 1;
+    const supervisorId = 'd1';
+
+    db.prepare().get.mockReturnValueOnce({});
+
+    await expect(thesis.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(UnauthorizedActionError);
+
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+  });
+
+  test('rejects with the appropriate error for an unsuccessful archiving (inexistent thesis)', async () => {
+   
+    const proposalId = 1;
+    const supervisorId = 'd1';
+    
+
+    db.prepare().get.mockReturnValueOnce(null);
+    db.prepare().run.mockReturnValueOnce({ changes: 0 });
+
+    db.prepare().get.mockReturnValueOnce(null); // No thesis proposal with the given id
+
+    await expect(thesis.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(NoThesisProposalError); // No thesis proposal with the given id
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+    expect(db.prepare().run).toHaveBeenCalledWith(
+      proposalId,
+      supervisorId,
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
+    );
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+  });
+
+  test('rejects with the appropriate error for an unsuccessful archiving (thesis not already created)', async () => {
+   
+    const proposalId = 1;
+    const supervisorId = 'd1';
+    
+
+    db.prepare().get.mockReturnValueOnce(null);
+    db.prepare().run.mockReturnValueOnce({ changes: 0 });
+
+    db.prepare().get.mockReturnValueOnce({ creation_date: '2030-11-10T23:59:59.999Z'}); 
+
+    await expect(thesis.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(NoThesisProposalError); // No thesis proposal with the given id
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+    expect(db.prepare().run).toHaveBeenCalledWith(
+      proposalId,
+      supervisorId,
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
+    );
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+  });
+
+  test('rejects with the appropriate error for an unsuccessful archiving (expired thesis)', async () => {
+   
+    const proposalId = 1;
+    const supervisorId = 'd1';
+    
+
+    db.prepare().get.mockReturnValueOnce(null);
+    db.prepare().run.mockReturnValueOnce({ changes: 0 });
+
+    db.prepare().get.mockReturnValueOnce({ expiration: '2020-11-10T23:59:59.999Z'}); // Expired thesis
+
+    await expect(thesis.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(new UnauthorizedActionError('You can\'t archive a thesis already expired'));
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+    expect(db.prepare().run).toHaveBeenCalledWith(
+      proposalId,
+      supervisorId,
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
+    );
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+  });
+
+  test('rejects with the appropriate error for an unsuccessful archiving (supervisor not owner of the proposal)', async () => {
+   
+    const proposalId = 1;
+    const supervisorId = 'd1';
+    
+
+    db.prepare().get.mockReturnValueOnce(null);
+    db.prepare().run.mockReturnValueOnce({ changes: 0 });
+
+    db.prepare().get.mockReturnValueOnce({ expiration: '2030-11-10T23:59:59.999Z', creation_date: '2020-11-10T23:59:59.999Z'}); // No thesis proposal with the given id
+
+    await expect(thesis.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(new UnauthorizedActionError('You are not the supervisor of this thesis') ); // No thesis proposal with the given id
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+    expect(db.prepare().run).toHaveBeenCalledWith(
+      proposalId,
+      supervisorId,
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
+    );
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+  });
 });
