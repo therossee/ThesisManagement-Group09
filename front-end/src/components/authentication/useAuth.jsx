@@ -13,6 +13,7 @@ export function AuthProvider({ children }) {
 
     // Keep track in the client if user is Teacher or not
     const [isTeacher, setIsTeacher] = useState(undefined);
+    const [isTester, setIsTester] = useState(false);
 
     const [userData, setUserData] = useState(null);
 
@@ -21,7 +22,7 @@ export function AuthProvider({ children }) {
     const handleLogin = () => {
         API.redirectToLogin();
     };
-    
+
     const handleLogout = () => {
         API.logOut();
     };
@@ -32,6 +33,7 @@ export function AuthProvider({ children }) {
             try {
                 const user = await API.getUser();
                 setIsTeacher(user.roles.includes("teacher"));
+                setIsTester(user.roles.includes("tester"));
                 setUserData(user);
                 setIsAuthenticated(true);
             } catch (err) {
@@ -48,7 +50,8 @@ export function AuthProvider({ children }) {
         handleLogin,
         handleLogout,
         isTeacher,
-    }), [isAuthenticated, userData, handleLogin, handleLogout, isTeacher]);
+        isTester
+    }), [isAuthenticated, userData, handleLogin, handleLogout, isTeacher, isTester]);
 
     return (
         <AuthContext.Provider value={contextValue}>

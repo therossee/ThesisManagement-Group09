@@ -15,6 +15,14 @@ jest.mock('../db', () => ({
   transaction: jest.fn().mockImplementation(callback => callback),
 }));
 
+jest.mock('../configuration_dao', () => ({
+    getIntegerValue: jest.fn().mockReturnValue(0),
+    setValue: jest.fn(),
+    KEYS: {
+        VIRTUAL_OFFSET_MS: 'virtual_clock_offset'
+    }
+}));
+
 afterAll(() => {
   jest.restoreAllMocks(); // Restore original functionality after all tests
   jest.clearAllMocks();
