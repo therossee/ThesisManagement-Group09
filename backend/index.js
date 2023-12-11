@@ -569,10 +569,10 @@ const { student_id } = req.body;
       if (!success) {
         return res.status(404).json({ message: `No application with the status "waiting for approval" found for this proposal.` });
       }
-      setImmediate( async () => _notifyApplicationStatusChange(student_id, proposal_id, status) );
+      setImmediate( () => _notifyApplicationStatusChange(student_id, proposal_id, status) );
 
       const applicationsCancelled = await thesisDao.cancelOtherApplications(student_id, proposal_id);
-      setImmediate(async () => {
+      setImmediate( () => {
         const reason = 'Another student has been accepted for this thesis proposal.';
         for (const application of applicationsCancelled) {
           _notifyApplicationStatusChange(application.student_id, application.proposal_id, application.status, reason);
@@ -604,7 +604,7 @@ async (req, res) => {
     if (!success) {
         return res.status(404).json({ message: `No application with the status "waiting for approval" found for this proposal.` });
     }
-    setImmediate( async () => _notifyApplicationStatusChange(student_id, proposal_id, status) );
+    setImmediate( () => _notifyApplicationStatusChange(student_id, proposal_id, status) );
 
     res.status(200).json({ message: 'Thesis successfully rejected' });
   } catch (error) {
