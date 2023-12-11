@@ -24,6 +24,7 @@ const schemas = require('./schemas.js');
 const { sendEmailApplicationStatusChange } = require("./email");
 const AppError = require("./errors/AppError");
 const { ZodError } = require("zod");
+const { USER_ROLES } = require("./enums");
 
 /*** init express and setup the middlewares ***/
 const app = express();
@@ -77,9 +78,18 @@ passport.use(
   function(profile, done){
     profile.id = profile['http://schemas.auth0.com/nickname'];
     profile.name = profile["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"];
-    profile.roles = profile["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+
+    const roles = profile["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+    if (Array.isArray(roles)) {
+        profile.roles = roles;
+    } else if (typeof roles === 'string') {
+        profile.roles = [roles];
+    } else {
+        profile.roles = [];
+    }
+
     done(null, profile);
-  },
+  }
   )
 );
 
@@ -95,25 +105,32 @@ const isLoggedIn = (req, res, next) => {
 };
 
 const isStudent = async(req, res, next) => {
-  if(req.isAuthenticated() && req.user.roles.includes('student')){
+  if (req.isAuthenticated() && req.user.roles.includes(USER_ROLES.STUDENT)){
       return next();
   }
   return res.status(403).json('Unauthorized');
-}
+};
 
 const isTeacher = async(req, res, next) => {
-  if(req.isAuthenticated() && req.user.roles.includes('teacher')){
+  if (req.isAuthenticated() && req.user.roles.includes(USER_ROLES.TEACHER)){
     return next();
   }
   return res.status(403).json('Unauthorized');
-}
+};
+
+const isTester = async(req, res, next) => {
+  if (req.isAuthenticated() && req.user.roles.includes(USER_ROLES.TESTER)){
+    return next();
+  }
+  return res.status(403).json('Unauthorized');
+};
 
 // Endpoint to initiate SAML authentication
 app.get(
   "/login",
-  passport.authenticate("saml", { 
-    failureRedirect: "/", 
-    failureFlash: true 
+  passport.authenticate("saml", {
+    failureRedirect: "/",
+    failureFlash: true
   }),
   (req, res) => {
     res.redirect("http://localhost:5173");
@@ -143,15 +160,15 @@ app.post("/logout", (req, res, next) => {
   });
 });
 
-app.get('/api/user', 
+app.get('/api/user',
 async(req, res) => {
   try{
     if (req.isAuthenticated()) {
       res.status(200).json(req.user);
-    } else { 
+    } else {
       res.status(401).json('Unauthorized');
     }
-  } catch (e) { 
+  } catch (e) {
     console.error(e);
     res.status(500).json('Internal Server Error');
   }
@@ -168,7 +185,7 @@ app.get('/api/system/virtual-clock', (req, res) => {
   res.status(200).json(json);
 });
 
-app.post('/api/system/virtual-clock', (req, res, next) => {
+app.post('/api/system/virtual-clock', isTester, (req, res, next) => {
   try {
     const { newDate } = schemas.APIVirtualClockUpdateSchema.parse(req.body);
 
@@ -308,7 +325,7 @@ isLoggedIn,
 async (req, res) => {
   try {
 
-    if (req.user.roles.includes('student')) {
+    if (req.user.roles.includes(USER_ROLES.STUDENT)) {
       const studentId = req.user.id;
       const proposals = await thesisDao.listThesisProposalsFromStudent(studentId);
       const cds = await usersDao.getStudentDegree(studentId);
@@ -326,7 +343,7 @@ async (req, res) => {
         currentPage: 1
       };
       res.json({ $metadata: metadata, items: proposalsPopulated });
-    } else if (req.user.roles.includes('teacher')) {
+    } else if (req.user.roles.includes(USER_ROLES.TEACHER)) {
       const thesisProposals = await thesisDao.listThesisProposalsTeacher(req.user.id);
       const proposalsPopulated = await Promise.all(
         thesisProposals.map(async proposal => {
@@ -357,7 +374,7 @@ app.get('/api/thesis-proposals/:id',
 isLoggedIn,
 async (req, res) => {
 try {
-  if (req.user.roles.includes('student')) {
+  if (req.user.roles.includes(USER_ROLES.STUDENT)) {
     const studentId = req.user.id;
     const proposalId = req.params.id;
 
@@ -369,7 +386,7 @@ try {
 
     res.json( await _populateProposal(proposal, studentDegree) );
   }
-  else if (req.user.roles.includes('teacher')) {
+  else if (req.user.roles.includes(USER_ROLES.TEACHER)) {
     const teacherId = req.user.id;
     const proposalId = req.params.id;
 
@@ -656,7 +673,7 @@ async (req, res) => {
   }catch(e){
     console.error(e);
     res.status(500).json('Internal Server Error');
-  } 
+  }
 })
 
 const PORT = 3000;
