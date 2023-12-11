@@ -144,7 +144,7 @@ async function applyForProposal(id) {
         return apply;
     } else {
         const errDetail = await response.json();
-        throw { status: response.status, message: errDetail };
+        throw new Error({status: response.status, message: errDetail });
     }
 }
 
@@ -197,7 +197,7 @@ async function insertProposal(proposal) {
         return prop;
     } else {
         const errDetail = await response.json();
-        throw { status: response.status, msg: errDetail };
+        throw new Error({ status: response.status, msg: errDetail });
     }
 }
 
