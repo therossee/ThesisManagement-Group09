@@ -1,5 +1,4 @@
 import React from 'react'
-import { createRoot } from 'react-dom/client';
 import ReactDOM from 'react-dom/client'
 import { AuthProvider } from './components/authentication/useAuth.jsx';
 import App from './App.jsx'
