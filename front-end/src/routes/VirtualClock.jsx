@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { Button, DatePicker, Flex, message, Space, Typography } from 'antd';
-import { EditOutlined, RollbackOutlined, SaveOutlined, UndoOutlined } from '@ant-design/icons';
+import { EditOutlined, RollbackOutlined, SaveOutlined } from '@ant-design/icons';
 import '../css/style.css';
 import API from "../API.jsx";
 
@@ -32,8 +32,6 @@ function VirtualClock() {
         const nbSeconds = duration.get('second');
         const nbMilliseconds = duration.get('millisecond');
 
-
-
         const dynamicFormats = [!!nbYears && "Y [years]", !!nbMonths && "M [months]", !!nbDays && "D [days]", !!nbHours && "H [hours]", !!nbMinutes && "m [minutes]", !!nbSeconds && "s [seconds]", !!nbMilliseconds && "SSS [milliseconds]"]
             .filter(Boolean)
             .filter( (_, index) => index < 3)
@@ -55,15 +53,7 @@ function VirtualClock() {
      * Methods used in HTML events to call APIs
      */
     const updateClock = () => {
-        saveClockOnServer(dateSelected)
-    };
-    const resetOffset = () => {
-        setDateSelection(undefined);
-        saveClockOnServer(undefined);
-    };
-
-    const saveClockOnServer = (date) => {
-        API.updateClock(date?.toISOString())
+        API.updateClock(dateSelected?.toISOString())
             .then( clock => {
                 setOffset(clock.offset);
                 setDate(dayjs.tz().add(clock.offset, 'milliseconds'));
@@ -118,12 +108,6 @@ function VirtualClock() {
                         <Button type="primary" shape="round" icon={<EditOutlined />} size="large" onClick={() => setEditMode(true)}>
                             EDIT
                         </Button>
-
-                        {offset !== 0 &&
-                            <Button type="primary" danger shape="round" icon={<UndoOutlined />} size="large" onClick={resetOffset}>
-                                RESET OFFSET
-                            </Button>
-                        }
                     </Flex>
                 </Flex>
             }
@@ -137,7 +121,35 @@ function VirtualClock() {
                         allowClear={false}
                         defaultValue={date}
                         changeOnBlur={true}
-                        onChange={ (date) => setDateSelection(date) }
+                        disabledDate={ (current) => current?.isBefore(date) }
+                        disabledTime={
+                            (dateSelected) => {
+                                return {
+                                    disabledHours: () => {
+                                        if (!dateSelected?.isSame(date, 'day')) {
+                                            return [];
+                                        }
+
+                                        return [...Array(24).keys()].filter( hour => hour < date.hour() );
+                                    },
+                                    disabledMinutes: () => {
+                                        if (!dateSelected?.isSame(date, 'hour')) {
+                                            return [];
+                                        }
+
+                                        return [...Array(60).keys()].filter( minute => minute < date.minute() );
+                                    },
+                                    disabledSeconds: () => {
+                                        if (!dateSelected?.isSame(date, 'minute')) {
+                                            return [];
+                                        }
+
+                                        return [...Array(60).keys()].filter( second => second < date.second() );
+                                    },
+                                }
+                            }
+                        }
+                        onChange={ (newDate) => setDateSelection(newDate) }
                         popupClassName="time-picker-hide-footer"
                     />
 
@@ -146,13 +158,7 @@ function VirtualClock() {
                             CANCEL
                         </Button>
 
-                        {offset !== 0 &&
-                            <Button type="primary" danger shape="round" icon={<UndoOutlined />} size="large" onClick={resetOffset}>
-                                RESET OFFSET
-                            </Button>
-                        }
-
-                        <Button type="primary" shape="round" icon={<SaveOutlined />} size="large" onClick={updateClock}>
+                        <Button type="primary" shape="round" icon={<SaveOutlined />} size="large" onClick={updateClock} disabled={dateSelected?.isBefore(date) ?? false}>
                             SAVE NEW CLOCK
                         </Button>
                     </Flex>

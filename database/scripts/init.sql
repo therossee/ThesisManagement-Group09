@@ -16,9 +16,14 @@ DROP TABLE IF EXISTS teacher;
 DROP TABLE IF EXISTS student_auth0;
 DROP TABLE IF EXISTS student;
 DROP TABLE IF EXISTS degree;
-
+DROP TABLE IF EXISTS configuration;
 
 -- Create the degree table
+CREATE TABLE configuration (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL -- Stringified value
+);
+
 CREATE TABLE degree (
     cod_degree TEXT PRIMARY KEY,
     title_degree TEXT NOT NULL UNIQUE
@@ -94,6 +99,7 @@ CREATE TABLE thesisProposal (
     expiration DATE NOT NULL,
     level TEXT NOT NULL,
     is_deleted INTEGER CHECK ( is_deleted == 0 or is_deleted == 1 ) DEFAULT 0,
+    is_archived INTEGER CHECK(is_archived == 0 OR is_archived == 1) DEFAULT 0,
     FOREIGN KEY(supervisor_id) REFERENCES teacher(id)
 );
 
@@ -155,6 +161,10 @@ CREATE TABLE thesisApplication (
 -- Insert Data
 
 -- Insert data into the degree table
+INSERT INTO configuration (key, value)
+VALUES
+    ('virtual_clock_offset', '0');
+
 INSERT INTO degree (cod_degree, title_degree)
 VALUES
     ('L-07', 'Ingegneria Civile e Ambientale'),
@@ -204,7 +214,7 @@ VALUES
 
 -- Insert data into the teacher_auth0 table
 INSERT INTO teacher_auth0 (id, id_auth0)
-VALUES 
+VALUES
     ('d279620', 'auth0|6564f83a022f6b2083b6b8c9'),
     ('d370392', 'auth0|656621f156336a62dd8aaced'),
     ('d226682', 'auth0|656621a2022f6b2083b7a522'),
@@ -246,8 +256,8 @@ VALUES
     ('s319355', 'Schiavone', 'Michele', 'Male', 'Italian', 's319355@studenti.polito.it', 'LM-35', 2020);
 
 -- Insert data into the student_auth0 table
-INSERT INTO student_auth0 (id, id_auth0) 
-VALUES 
+INSERT INTO student_auth0 (id, id_auth0)
+VALUES
     ('s318952', 'auth0|65635d036d87729b6b3ffe83'),
     ('s321529', 'auth0|6564f6ba6d87729b6b412740'),
     ('s319355', 'auth0|6564f6efd5c067abfc7e6096'),
@@ -260,18 +270,44 @@ VALUES
 -- Insert data into the career table
 INSERT INTO career (id, cod_course, title_course, cfu, grade, date)
 VALUES
-    ('s320213', '01DSHOV', 'Big data processing and analytics', 6, 29, '1/12/2022'),
-    ('s320213', '01URTOV', 'Machine learning and pattern recognition', 6, 29, '2/12/2022'),
-    ('s321607','01NYHOV', 'System and device programming', 10, 30, '1/09/2023'),
-    ('s318771', '01PFPOV', 'Mobile application development', 6, 25, '02/09/2023'),
-    ('s321607', '01SQNOV', 'Software Engineering II', 6, 28, '03/03/2023'),
-    ('s314796', '01SQNOV', 'Software Engineering II', 6, 28, '03/03/2023'),
-    ('s321529', '01SQNOV', 'Software Engineering II', 6, 28, '03/03/2023'),
-    ('s314796', '01TXYOV', 'Web Applications I', 6, 30, '05/06/2023'),
-    ('s321529', '01TXYOV', 'Web Applications I', 6, 30, '05/06/2023'),
-    ('s318952', '01TXYOV', 'Web Applications I', 6, 30, '05/06/2023'),
-    ('s318952', '01TYMOV', 'Information systems security', 6, 30, '05/06/2023'),
-    ('s319355', '01TYMOV', 'Information systems security', 6, 30, '05/06/2023');
+    ('s320213', '06AWPMU', 'Finanza aziendale', 8, 26, '30/01/2023'),
+    ('s320213', '03BNCMU', 'Logistica', 12, 30, '11/02/2023'),
+    ('s320213', '01NJVMU', 'Gestiove e svilupppo dei progetti di innovazione', 10, 29, '17/01/2023'),
+    ('s320213', '01NJUMU', 'Marketing internazionale', 10, 24, '28/01/2023'),
+    ('s321607', '16ACFPI', 'Analisi matematica I', 10, 20, '20/01/2023'),
+    ('s321607', '16AHMPI', 'Chimica', 8, 28, '15/01/2023'),
+    ('s321607', '14BHDPI', 'Informatica', 8, 23, '18/01/2023'),
+    ('s321607', '01RKCPI', 'Algebra lineare e geometria', 10, 28, '18/06/2023'),
+    ('s321607', '09ARHPI', 'Economia e organizzazione azeindale', 8, 27, '25/06/2023'),
+    ('s321607', '15AXOPI', 'Fisica I', 10, 18, '01/07/2023'),
+    ('s314796', '01PDWOV', 'Information Systems', 6, 28, '03/02/2022'),
+    ('s314796', '02GOLOV', 'Architetture dei sistemi di elaborazione', 10, 30, '28/01/2022'),
+    ('s314796', '01SQJOV', 'Data Science and Database Technology', 8, 29, '20/01/2022'),
+    ('s314796', '02KPNOV', 'Tecnologie e servizi di rete', 6, 26, '10/02/2022'),
+    ('s314796', '02JEUOV', 'Formale Languages and Compilers', 6, 28, '18/06/2022'),
+    ('s314796', '04GSPOV', 'Software Engineering', 8, 30, '24/06/2022'),
+    ('s314796', '01TXYOV', 'Web applications I', 6, 30, '20/06/2022'),
+    ('s314796', '02GRSOV', 'Programmazione di sistema', 10, 18, '07/09/2022'),
+    ('s314796', '01SQNOV', 'Software Engineering II', 6, 30, '03/03/2023'),
+    ('s321529', '16ACFPI', 'Analisi matematica I', 10, 30, '20/01/2022'),
+    ('s321529', '16AHMPI', 'Chimica', 8, 30, '15/01/2022'),
+    ('s321529', '14BHDPI', 'Informatica', 8, 30, '18/01/2022'),
+    ('s321529', '01RKCPI', 'Algebra lineare e geometria', 10, 30, '18/06/2022'),
+    ('s321529', '09ARHPI', 'Economia e organizzazione azeindale', 8, 30, '25/06/2022'),
+    ('s321529', '15AXOPI', 'Fisica I', 10, 18, '01/07/2022'),
+    ('s321529', '23ACIPL', 'Analisi matematica II', 8, 30, '03/02/2023'),
+    ('s321529', '14AFQPL', 'Basi di dati', 8, 30, '25/01/2023'),
+    ('s318952', '04PBVPG', 'Analisi dei sistemi economici', 8, 28, '29/01/2023'),
+    ('s318952', '09AQGPG', 'Economia aziendale', 8, 30, '09/02/2023'),
+    ('s318952', '02CIXPG', 'Sistemi informativi aziendali', 8, 30, '19/02/2023'),
+    ('s318952', '01PDYPG', 'Analisi e gestione dei sistemi produttivi', 8, 27, '22/06/2023'),
+    ('s318952', '02ANYPG', 'Diritto commerciale', 8, 24, '06/07/2023'),
+    ('s318771', '05MRPLO', 'Numerical modelling and simulation', 8, 30, '23/01/2023'),
+    ('s318771', '01USHLO', 'Driver assistance system design', 12, 19, '13/02/2023'),
+    ('s319355', '02ILSMZ', 'Impianti metallurgici', 6, 19, '13/01/2023'),
+    ('s319355', '01NGFMZ', 'Ingegneria dei materiali', 10, 23, '10/02/2023'),
+    ('s319355', '02CFUMZ', 'Scienza e tecnologia dei materiali composti', 10, 30, '16/02/2023'),
+    ('s319355', '02NGKMZ', 'Tecnologia dei materiali polimerici', 10, 27, '16/06/2023');
 
 -- Insert data into the thesisProposal table
 INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)
@@ -562,11 +598,12 @@ VALUES
 
 
 -- Create a trigger that check that the proposal_id of the thesisApplication table is present in the thesisProposal table
--- and that the proposal is not deleted for the insertion and the update
+-- and that the proposal is not deleted or archived for the insertion and the update
 CREATE TRIGGER check_proposal_id_in_application
 BEFORE INSERT ON thesisApplication
 FOR EACH ROW
-WHEN (NEW.proposal_id NOT IN (SELECT proposal_id FROM thesisProposal WHERE is_deleted = 0))
+WHEN (NEW.proposal_id NOT IN (SELECT proposal_id FROM thesisProposal WHERE is_deleted = 0)
+        AND NEW.proposal_id NOT IN (SELECT proposal_id FROM thesisProposal WHERE is_archived = 0))
 BEGIN
     SELECT RAISE(ABORT, 'The proposal_id is not present in the thesisProposal table or the proposal is deleted');
 END;
@@ -576,7 +613,8 @@ BEFORE UPDATE ON thesisApplication
 FOR EACH ROW
 WHEN (NEW.proposal_id <> OLD.proposal_id
     AND NEW.proposal_id NOT IN (SELECT proposal_id FROM thesisProposal WHERE is_deleted = 0)
+    AND NEW.proposal_id NOT IN (SELECT proposal_id FROM thesisProposal WHERE is_archived = 0)
 )
 BEGIN
-    SELECT RAISE(ABORT, 'The proposal_id is not present in the thesisProposal table or the proposal is deleted');
+    SELECT RAISE(ABORT, 'The proposal_id is not present in the thesisProposal table or the proposal is deleted or archived');
 END;

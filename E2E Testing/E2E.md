@@ -138,7 +138,7 @@ This test case is related to the possibility of seeing all the applications for 
 
 
 
-#### [8] Browse application decisions
+### [8] Browse application decisions
 This test case is related to the verification that each student can see the history of their applications and the decision for each of them.
 
 
@@ -157,4 +157,29 @@ This test case is related to the verification that each teacher can view the lis
 3. Click on "Thesis Applications" placed in the left bar, under "Thesis Proposals" [Thesis Applications](http://localhost:5173/applications)
 4. Ensure that the active thesis proposals are listed there 
 5. Log out
+    - You should be again on the [home page](http://localhost:5173/)
+
+### [10] Update Proposal
+This test case is related to the update of a proposal from teacher's point of view. 
+
+1. Go to the [home page](http://localhost:5173/)
+2. Login as a teacher
+3. Click on "Thesis Proposals" in the left bar [Thesis Proposals](http://localhost:5173/proposals)
+4. Choose a thesis you want to update and see the icon in the middle in the last column (actions). When you move the mouse cursor over it, you'll see the phrase 'edit proposal'. Click on it.
+5. You are now in [edit proposal page](http://localhost:5173/edit-proposal/1). The view is similar to the one of insert proposal, with the exception that each field is already filled. You can modify whatever you want. Once you finish, click on 'submit' at the end of the page. 
+6. You can see now a page with the of the draft of the edited proposal. You can review it, if other changes are needed or you make a mistake you can click on 'Previous' button at the end of the page. Otherwise you can click on 'Next' button. 
+7. You are now in a page that confirms you that the changes are made correctly. There is a button 'Back Home' to close it. Click on it.
+8. Log out
+    - You should be again on the [home page](http://localhost:5173/)
+
+### [11] Notify Application Decision
+This test case is related to the student's point of view: we want to verify that notificaiton system which informs the student if when his/her application is accepted works correctly.
+
+1. Go to the [home page](http://localhost:5173/)
+2. Log in as a teacher
+3. Click on 'Thesis Applications' in the left bar. You are now in [Thesis Applicaitons page](http://localhost:5173/applications) and you can see all the applications for the thesis
+4. Accept one of them/reject one of them
+5. Go to the student's private mail and check if the notification mail is arrived
+6. After seeing that everything was as espected come back to [Thesis Applications page](http://localhost:5173/applications)
+7. Log out
     - You should be again on the [home page](http://localhost:5173/)
