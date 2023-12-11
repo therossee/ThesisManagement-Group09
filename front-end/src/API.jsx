@@ -144,7 +144,7 @@ async function applyForProposal(id) {
         return apply;
     } else {
         const errDetail = await response.json();
-        throw { status: response.status, message: errDetail };
+        throw new Error({status: response.status, message: errDetail });
     }
 }
 
@@ -197,7 +197,7 @@ async function insertProposal(proposal) {
         return prop;
     } else {
         const errDetail = await response.json();
-        throw { status: response.status, msg: errDetail };
+        throw new Error({ status: response.status, msg: errDetail });
     }
 }
 
@@ -303,6 +303,7 @@ async function getStudentApplicationsHistory() {
     const applications = await response.json();
     if (response.ok) {
         return applications.map((x) => ({
+            application_id: x.application_id,
             title: x.title,
             teacherName: x.teacher_surname + " " + x.teacher_name,
             status: x.status,
