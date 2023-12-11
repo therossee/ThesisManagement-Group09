@@ -556,7 +556,7 @@ app.patch('/api/teacher/applications/accept/:proposal_id',
 isLoggedIn,
 isTeacher,
 async (req, res) => {
-  try{
+  try{ 
     const { proposal_id } = req.params;
     const { student_id } = req.body;
 
