@@ -45,21 +45,26 @@ describe('createThesisProposal', () => {
       keywords: ['Keyword1', 'Keyword2'],
     };
 
-    const proposalId = await thesis.createThesisProposal(
-      proposalData.title,
-      proposalData.supervisor_id,
-      proposalData.internal_co_supervisors_id,
-      proposalData.external_co_supervisors_id,
-      proposalData.type,
-      proposalData.groups,
-      proposalData.description,
-      proposalData.required_knowledge,
-      proposalData.notes,
-      proposalData.expiration,
-      proposalData.level,
-      proposalData.cds,
-      proposalData.keywords
-    );
+    const proposal_details = { 
+      title: proposalData.title, 
+      supervisor_id: proposalData.supervisor_id, 
+      type: proposalData.type,
+      description: proposalData.description,
+      required_knowledge: proposalData.required_knowledge,
+      notes: proposalData.notes,
+      expiration: proposalData.expiration,
+      level: proposalData.level
+    }
+
+    const additional_details = {
+      internal_co_supervisors_id: proposalData.internal_co_supervisors_id,
+      external_co_supervisors_id: proposalData.external_co_supervisors_id,
+      unique_groups: proposalData.groups,
+      keywords: proposalData.keywords,
+      cds: proposalData.cds,
+    }
+
+    const proposalId = await thesis.createThesisProposal(proposalData, additional_details);
 
     expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
     expect(db.prepare).toHaveBeenCalledTimes(12); // 12 queries
@@ -81,21 +86,26 @@ describe('createThesisProposal', () => {
       keywords: ['Keyword1', 'Keyword2'],
     };
 
-    const proposalId = await thesis.createThesisProposal(
-      proposalData.title,
-      proposalData.supervisor_id,
-      proposalData.internal_co_supervisors_id,
-      proposalData.external_co_supervisors_id,
-      proposalData.type,
-      proposalData.groups,
-      proposalData.description,
-      proposalData.required_knowledge,
-      proposalData.notes,
-      proposalData.expiration,
-      proposalData.level,
-      proposalData.cds,
-      proposalData.keywords
-    );
+    const proposal_details = { 
+      title: proposalData.title, 
+      supervisor_id: proposalData.supervisor_id, 
+      type: proposalData.type,
+      description: proposalData.description,
+      required_knowledge: proposalData.required_knowledge,
+      notes: proposalData.notes,
+      expiration: proposalData.expiration,
+      level: proposalData.level
+    }
+
+    const additional_details = {
+      internal_co_supervisors_id: proposalData.internal_co_supervisors_id,
+      external_co_supervisors_id: proposalData.external_co_supervisors_id,
+      unique_groups: proposalData.groups,
+      keywords: proposalData.keywords,
+      cds: proposalData.cds,
+    }
+
+    const proposalId = await thesis.createThesisProposal(proposalData, additional_details);
 
     expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
     expect(db.prepare).toHaveBeenCalledTimes(6);
@@ -117,24 +127,29 @@ describe('createThesisProposal', () => {
       keywords: ['Keyword1', 'Keyword2'],
     };
 
+    const proposal_details = { 
+      title: proposalData.title, 
+      supervisor_id: proposalData.supervisor_id, 
+      type: proposalData.type,
+      description: proposalData.description,
+      required_knowledge: proposalData.required_knowledge,
+      notes: proposalData.notes,
+      expiration: proposalData.expiration,
+      level: proposalData.level
+    }
+
+    const additional_details = {
+      internal_co_supervisors_id: proposalData.internal_co_supervisors_id,
+      external_co_supervisors_id: proposalData.external_co_supervisors_id,
+      unique_groups: proposalData.groups,
+      keywords: proposalData.keywords,
+      cds: proposalData.cds,
+    }
+
     // Adding "await" before the thesis.createThesisProposal
     await expect(
-      thesis.createThesisProposal(
-        proposalData.title,
-        proposalData.supervisor_id,
-        proposalData.internal_co_supervisors_id,
-        proposalData.external_co_supervisors_id,
-        proposalData.type,
-        proposalData.groups,
-        proposalData.description,
-        proposalData.required_knowledge,
-        proposalData.notes,
-        proposalData.expiration,
-        proposalData.level,
-        proposalData.cds,
-        proposalData.keywords
-      )
-    ).rejects.toEqual("The expiration date must be after the creation date");
+      thesis.createThesisProposal(proposal_details, additional_details)
+    ).rejects.toEqual(new Error("The expiration date must be after the creation date"));
   });
 });
 
@@ -675,7 +690,7 @@ describe('applyForProposal', () => {
 
     db.prepare().get.mockReturnValueOnce();
 
-    await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual("The proposal doesn't belong to the student degree");;
+    await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual(new Error("The proposal doesn't belong to the student degree"));
   });
   test('applies for a proposal not active', async () => {
     // Mock data
@@ -685,7 +700,7 @@ describe('applyForProposal', () => {
     db.prepare().get.mockReturnValueOnce({ proposal_id: 1, cod_degree: 'L-01'});
     db.prepare().get.mockReturnValueOnce();
 
-    await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual("The proposal is not active");;
+    await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual(new Error("The proposal is not active"));;
   });
   test('applies for a proposal while he has already applied for another', async () => {
     // Mock data
@@ -696,7 +711,7 @@ describe('applyForProposal', () => {
     db.prepare().get.mockReturnValueOnce({ proposal_id: '1', title: 'Test Proposal', supervisor_id: 1, type: 'Test Type', description: 'Test Description', required_knowledge: 'Test Knowledge', notes: 'Test Notes', creation_date:'2020-10-21', expiration: '2023-12-31', level: 'Test Level' });
     db.prepare().get.mockReturnValueOnce({ proposal_id: 1, cod_degree: 'L-01', status: 'waiting for approval'});
 
-    await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual("The user has already applied for other proposals");;
+    await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual(new Error("The user has already applied for other proposals"));
   });
 });
 
