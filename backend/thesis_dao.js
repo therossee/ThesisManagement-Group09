@@ -7,13 +7,13 @@ const AdvancedDate = require('./AdvancedDate');
 const NoThesisProposalError = require("./errors/NoThesisProposalError");
 const UnauthorizedActionError = require("./errors/UnauthorizedActionError");
 
-exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id, external_co_supervisors_id, type, groups, description, required_knowledge, notes, expiration, level, cds, keywords) => {
+exports.createThesisProposal = (proposal_details, additional_details) => {
   return new Promise((resolve, reject) => {
 
     let currentDate = new AdvancedDate();
-    const exp = new AdvancedDate(expiration);
+    const exp = new AdvancedDate(proposal_details.expiration);
     if(exp.isBefore(currentDate)){
-      reject("The expiration date must be after the creation date");
+      reject(new Error("The expiration date must be after the creation date"));
       return;
     }
 
@@ -45,31 +45,31 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
 
     // Self-called transaction
     db.transaction(() => {
-      const res = db.prepare(insertThesisProposalQuery).run(title, supervisor_id, type, description, required_knowledge, notes, currentDate, expiration, level);
+      const res = db.prepare(insertThesisProposalQuery).run(proposal_details.title, proposal_details.supervisor_id, proposal_details.type, proposal_details.description, proposal_details.required_knowledge, proposal_details.notes, currentDate, proposal_details.expiration, proposal_details.level);
       const proposalId = res.lastInsertRowid;
 
       // Keywords insertion
-      keywords.forEach(keyword => {
+      additional_details.keywords.forEach(keyword => {
         db.prepare(insertProposalKeywordQuery).run(proposalId, keyword);
       });
 
-      if (internal_co_supervisors_id.length > 0) {
-        internal_co_supervisors_id.forEach(internal_co_supervisor_id => {
+      if (additional_details.internal_co_supervisors_id.length > 0) {
+        additional_details.internal_co_supervisors_id.forEach(internal_co_supervisor_id => {
           db.prepare(insertInternalCoSupervisorsQuery).run(proposalId, internal_co_supervisor_id);
         });
       }
 
-      if (external_co_supervisors_id.length > 0) {
-        external_co_supervisors_id.forEach(external_co_supervisor_id => {
+      if (additional_details.external_co_supervisors_id.length > 0) {
+        additional_details.external_co_supervisors_id.forEach(external_co_supervisor_id => {
           db.prepare(insertExternalCoSupervisorsQuery).run(proposalId, external_co_supervisor_id);
         });
       }
 
-      groups.forEach(group => {
+      additional_details.unique_groups.forEach(group => {
         db.prepare(insertGroupsQuery).run(proposalId, group);
       });
 
-      cds.forEach(cod_degree => {
+      additional_details.cds.forEach(cod_degree => {
         db.prepare(insertCdsQuery).run(proposalId, cod_degree);
       });
 
@@ -526,7 +526,7 @@ exports.applyForProposal = (proposal_id, student_id) => {
     const checkProposalDegree = `SELECT * FROM proposalCds WHERE proposal_id=? AND cod_degree=(SELECT cod_degree FROM student WHERE id=?)`;
     const proposal_correct = db.prepare(checkProposalDegree).get(proposal_id, student_id);
     if(!proposal_correct){
-      reject("The proposal doesn't belong to the student degree");
+      reject(new UnauthorizedActionError("The proposal doesn't belong to the student degree"));
       return;
     }
 
@@ -542,7 +542,7 @@ exports.applyForProposal = (proposal_id, student_id) => {
 
     const proposal_active = db.prepare(checkProposalActive).get(proposal_id, currentDate, currentDate);
     if(!proposal_active){
-      reject("The proposal is not active");
+      reject(new Error("The proposal is not active"));
       return;
     }
 
@@ -550,7 +550,7 @@ exports.applyForProposal = (proposal_id, student_id) => {
     const checkAlreadyApplied = `SELECT * FROM thesisApplication WHERE student_id=? AND status='waiting for approval' OR status='accepted'`;
     const already_applied = db.prepare(checkAlreadyApplied).get(student_id);
     if(already_applied){
-      reject("The user has already applied for other proposals");
+      reject(new UnauthorizedActionError("The user has already applied for other proposals"));
       return;
     }
 

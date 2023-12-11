@@ -219,7 +219,10 @@ async (req,res) => {
     }
   }
 
-  thesisDao.createThesisProposal(title, supervisor_id, internal_co_supervisors_id, external_co_supervisors_id, type, unique_groups, description, required_knowledge, notes, expiration, level, cds, keywords)
+  const proposal_details = { title, supervisor_id, type, description, required_knowledge, notes, expiration, level };
+  const additional_details = { internal_co_supervisors_id, external_co_supervisors_id, unique_groups, keywords, cds };
+
+  await thesisDao.createThesisProposal(proposal_details, additional_details)
   .then((thesisProposalId)=>{
     res.status(201).json(
       {
@@ -508,8 +511,7 @@ isStudent,
 async(req,res) => {
     const student_id = req.user.id;
     const {thesis_proposal_id} = req.body;
-    await thesisDao.applyForProposal(thesis_proposal_id, student_id).then
-    ((applicationId)=>{
+    await thesisDao.applyForProposal(thesis_proposal_id, student_id).then((applicationId)=>{
       res.status(201).json(
         {
           thesis_proposal_id: thesis_proposal_id,
