@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import PropTypes from 'prop-types';
 import { Button, Result } from "antd";
 
 function Errors(props) {
@@ -9,6 +10,10 @@ function Errors(props) {
         </div>
     )
 }
+
+Errors.propTypes = {
+    code: PropTypes.string.isRequired,
+};
 
 function content(code) {
 
