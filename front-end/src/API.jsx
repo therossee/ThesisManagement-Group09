@@ -303,6 +303,7 @@ async function getStudentApplicationsHistory() {
     const applications = await response.json();
     if (response.ok) {
         return applications.map((x) => ({
+            application_id: x.application_id,
             title: x.title,
             teacherName: x.teacher_surname + " " + x.teacher_name,
             status: x.status,
