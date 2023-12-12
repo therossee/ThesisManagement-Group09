@@ -544,17 +544,16 @@ describe('GET /api/thesis-proposals (teacher)', () => {
 
         // Assertions
         expect(response.status).toBe(200);
-        expect(response.body).toEqual({
-            $metadata: {
-                index: 0,
-                count: 2,
-                total: 2,
-                currentPage: 1
-            },
-            items: [
-                // TODO
-            ]
+
+        const metadata = response.body['$metadata'];
+        expect(metadata).toEqual({
+            index: 0,
+            count: 2,
+            total: 2,
+            currentPage: 1
         });
+        const items = response.body['items'];
+        expect(items).toHaveLength(3);
     });
 
     test('should handle errors and return 500', async () => {
