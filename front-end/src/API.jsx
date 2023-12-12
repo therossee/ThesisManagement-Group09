@@ -130,14 +130,16 @@ async function getThesisProposalbyId(id) {
     }
 }
 
-async function applyForProposal(id) {
+async function applyForProposal(id, attached_file) {
+    const formData = new FormData();
+    formData.append('file', attached_file);
+    formData.append('thesis_proposal_id', id);
+
+    console.log(attached_file);
     
     const response = await fetch(URL + '/student/applications', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({thesis_proposal_id: id}),
+        body: formData,
         credentials: 'include',
     });
     if (response.ok) {
@@ -148,26 +150,6 @@ async function applyForProposal(id) {
         const errDetail = await response.json();
         throw { status: response.status, message: errDetail };
     }
-}
-
-async function uploadFile(file){
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const response = await fetch(URL + '/student/upload', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-    })
-
-    if (response.ok) {
-        const apply = await response.json();
-        return apply;
-    } else {
-        const errDetail = await response.json();
-        throw { status: response.status, message: errDetail };
-    }
-
 }
 
 // GET Student's Thesis Applications
@@ -401,6 +383,6 @@ const API = {
     getUser,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, uploadFile, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById
+    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById
 };
 export default API;

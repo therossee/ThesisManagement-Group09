@@ -16,6 +16,7 @@ const session = require('express-session');
 const morgan = require('morgan');
 const cors = require('cors');
 const multer = require('multer');
+const formidable = require('formidable');
 
 let appId = -1;
 const storage = multer.diskStorage({
@@ -522,37 +523,34 @@ app.patch('/api/thesis-proposals/archive/:id',
 app.post('/api/student/applications',
   isLoggedIn,
   isStudent,
-  async (req, res) => {
-    const student_id = req.user.id;
-    const { thesis_proposal_id } = req.body;
-    await thesisDao.applyForProposal(thesis_proposal_id, student_id).then
-      ((applicationId) => {
-        appId = applicationId;
-        res.status(201).json(
-          {
-            application_id: applicationId,
-            thesis_proposal_id: thesis_proposal_id,
-            student_id: student_id,
-            status: 'waiting for approval'
-          });
-      })
-      .catch((error) => {
+  (req, res) => {
+    const form = new formidable.IncomingForm();
+
+    form.parse(req, async (err, fields, files) => {
+      if (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal Server Error' });
+        return;
+      }
+
+      const student_id = req.user.id;
+      const thesis_proposal_id = fields.thesis_proposal_id;
+
+
+      try {
+        const applicationId = await thesisDao.applyForProposal(thesis_proposal_id, student_id, files.file);
+        console.log(files);
+        res.status(201).json({
+          application_id: applicationId,
+          thesis_proposal_id: thesis_proposal_id,
+          student_id: student_id,
+          status: 'waiting for approval'
+        });
+      } catch (error) {
         console.error(error);
         res.status(500).json(`Failed to apply for proposal. ${error.message || error}`);
-      });
-  });
-
-  app.post('/api/student/upload',
-  isLoggedIn,
-  isStudent,
-  upload.single('file'),
-  async (req, res) => {
-    try{
-      appId = -1;
-    }catch(err){
-      console.log(err);
-      res.status(500).json(`Failed to upload optional file'. ${err.message || err}`);
-    }
+      }
+    });
   });
 
 app.get('/api/teacher/applications/:proposal_id',
