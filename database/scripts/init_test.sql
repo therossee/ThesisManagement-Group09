@@ -172,7 +172,7 @@ INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, 
 VALUES
     ('s320213', 'Barbato', 'Luca', 'Male', 'Italian', 's320213@studenti.polito.it', 'LM-31', 2020),
     ('s321529', 'Ladrat', 'Matteo', 'Male', 'French', 's321529@studenti.polito.it', 'L-08', 2020),
-    ('s318952', 'Molinatto', 'Sylvie', 'Female', 'Italian', 's318952@studenti.polito.it', 'L-08', 2020),;
+    ('s318952', 'Molinatto', 'Sylvie', 'Female', 'Italian', 's318952@studenti.polito.it', 'L-08', 2020);
 
 -- Insert data into the externalCoSupervisor table
 INSERT INTO externalCoSupervisor (id, surname, name, email)
@@ -207,6 +207,12 @@ INSERT INTO thesisExternalCoSupervisor (proposal_id, co_supervisor_id)
 VALUES
     (1, 1),
     (2, 2);
+
+INSERT INTO proposalGroup (proposal_id, cod_group)
+VALUES
+    (1, 'Group1'),
+    (2, 'Group1'),
+    (3, 'Group1');
 
 -- Insert data into the proposal keyword table
 INSERT INTO proposalKeyword (proposal_id, keyword)

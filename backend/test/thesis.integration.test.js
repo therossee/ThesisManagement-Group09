@@ -4,7 +4,7 @@ const { resetTestDatabase } = require('./integration_config');
 
 const request = require("supertest");
 const { app } = require("../app");
-const AdvancedDate = require('../AdvancedDate');
+const thesisDao = require('../thesis_dao');
 
 const teacherAccessToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Imt4VHlraUVwT05RRnYxZG4tc2JXVSJ9.eyJpc3MiOiJodHRwczovL3RoZXNpcy1tYW5hZ2VtZW50LTA5LmV1LmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw2NTY0ZjgzYTAyMmY2YjIwODNiNmI4YzkiLCJhdWQiOlsiaHR0cHM6Ly90aGVzaXMtbWFuYWdlbWVudC0wOS5ldS5hdXRoMC5jb20vYXBpL3YyLyIsImh0dHBzOi8vdGhlc2lzLW1hbmFnZW1lbnQtMDkuZXUuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcwMTI4MzE1MywiZXhwIjoxNzAxMzY5NTUzLCJhenAiOiJvNUkxUU5UQUJ3Ylg2ZzF4YzJseG90YTlhWlFFc092QSIsInNjb3BlIjoib3BlbmlkIHJlYWQ6Y3VycmVudF91c2VyIHVwZGF0ZTpjdXJyZW50X3VzZXJfbWV0YWRhdGEifQ.MWkwMZZMKPyu1Xxzx-YxE9wSzZuYMaNrph04FZEaNyO3AX32Ovjnx5T9Y1-S_xUv2QPWMWsZJuWuycRDZOQRzhRplU9-S4aforzSZPDHMqWzASRqSGfyAfxKc-RX36zd6TPRxLpFcd5IrlkkJ_VxsjbuNXW1Lt1M-X4XKBIWicXWtIBvVPsVyUjZRA00FnmmsX2kjutiWJ21kaIcp1rqlNvcS7RdoBR8q_wxan81SIHObMZLX45hds1nJfnjVyOzw0ZqjUFXSb00P8qiy70Un6a1VcqMtqmpaeagfOheRJ6_z311O5W3mH5vG3C2CbFJPShcPAPgTSSRRUuvEEZVwg";
 const studentAccessToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Imt4VHlraUVwT05RRnYxZG4tc2JXVSJ9.eyJpc3MiOiJodHRwczovL3RoZXNpcy1tYW5hZ2VtZW50LTA5LmV1LmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw2NTYzNWQwMzZkODc3MjliNmIzZmZlODMiLCJhdWQiOlsiaHR0cHM6Ly90aGVzaXMtbWFuYWdlbWVudC0wOS5ldS5hdXRoMC5jb20vYXBpL3YyLyIsImh0dHBzOi8vdGhlc2lzLW1hbmFnZW1lbnQtMDkuZXUuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcwMTI4OTAyNywiZXhwIjoxNzAxMzc1NDI3LCJhenAiOiJvNUkxUU5UQUJ3Ylg2ZzF4YzJseG90YTlhWlFFc092QSIsInNjb3BlIjoib3BlbmlkIHJlYWQ6Y3VycmVudF91c2VyIHVwZGF0ZTpjdXJyZW50X3VzZXJfbWV0YWRhdGEifQ.fNl9K0uZHNWOIbiWQ4VINR6HprQbxpGwXn2UNTm7Wuqgh5a7lmBr-cdMmD3D2Im1mXEyB6YS9V6L9BI0YK7Cp7AB9fsUSNb2kmM2KqMgbbEemKfONm8czAj5e34wO-uQEn5J8JEWdrV8pHPnglzNy_AMKkZH_I-EHMxJLmIRJXxPxxfge5yno7r7WQKxvaklq3w5CFv0YDd0thLlHxz5swu2Ag1SE3Md7dmxBrNShGRGuCU882mN87aewzVIH6bfEo02m92lPIj3h272IZH3uW9ow8ZkkY9GIA4DThnF8eZiaUe8caruO06ClDjM6BuiJLCE41nfZSCJQ_nKMzm17g"
@@ -12,6 +12,8 @@ const studentAccessToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Imt4VHlr
 beforeEach(() => {
     // Be sure that we are using a full clean database before each test
     resetTestDatabase();
+
+    jest.restoreAllMocks();
 });
 
 describe('GET /api/teachers', () => {
@@ -33,8 +35,9 @@ describe('GET /api/teachers', () => {
         });
     });
 
-    // TODO: keep ?
     test('handles internal server error gracefully', async () => {
+        jest.spyOn(thesisDao, 'getTeacherListExcept').mockRejectedValueOnce(new Error());
+
         const response = await request(app)
             .get('/api/teachers')
             .set('Accept', 'application/json')
@@ -63,8 +66,9 @@ describe('GET /api/externalCoSupervisors', () => {
         });
     });
 
-    // TODO: keep ?
     test('handles internal server error gracefully', async () => {
+        jest.spyOn(thesisDao, 'getExternalCoSupervisorList').mockRejectedValueOnce(new Error());
+
         const response = await request(app)
             .get('/api/externalCoSupervisors')
             .set('Accept', 'application/json')
@@ -187,8 +191,9 @@ describe('POST /api/teacher/thesis_proposals', () => {
         expect(response.status).toBe(401);
     });
 
-    // TODO: keep ?
-    test('should return error 500 if createThesisProposal throws an error', async () => {
+    test('should return error 500 if an error is thrown', async () => {
+        jest.spyOn(thesisDao, 'getGroup').mockRejectedValueOnce(new Error());
+
         const requestBody = {
             title: 'Test Thesis',
             internal_co_supervisors_id: ['d2'],
@@ -228,8 +233,9 @@ describe('GET /api/keywords', () => {
 
     // TODO: Add tests on authentication controls
 
-    // TODO: keep ?
     test('should handle errors and return 500', async () => {
+        jest.spyOn(thesisDao, 'getAllKeywords').mockRejectedValueOnce(new Error());
+
         // Send a request to the endpoint
         const response = await request(app)
             .get('/api/keywords')
@@ -238,7 +244,6 @@ describe('GET /api/keywords', () => {
         // Assertions
         expect(response.status).toBe(500);
         expect(response.body).toEqual('Internal Server Error');
-        expect(service.getAllKeywords).toHaveBeenCalled();
     });
 });
 
@@ -257,8 +262,9 @@ describe('GET /api/degrees', () => {
         ]);
     });
 
-    // TODO: keep ?
     test('should handle errors and return 500', async () => {
+        jest.spyOn(thesisDao, 'getDegrees').mockRejectedValueOnce(new Error());
+
         // Send a request to the endpoint
         const response = await request(app)
                                .get('/api/degrees')
@@ -267,7 +273,6 @@ describe('GET /api/degrees', () => {
         // Assertions
         expect(response.status).toBe(500);
         expect(response.body).toEqual('Internal Server Error');
-        expect(service.getDegrees).toHaveBeenCalled();
     });
 });
 
@@ -290,7 +295,74 @@ describe('GET /api/thesis-proposals (student)', () => {
                 currentPage: 1
             },
             items: [
-                // TODO
+                {
+                    id: 1,
+                    title: expect.any(String),
+                    status: expect.any(String),
+                    supervisor: {
+                        id: expect.any(String),
+                        name: expect.any(String),
+                        surname: expect.any(String),
+                        email: expect.any(String),
+                        codGroup: expect.any(String),
+                        codDepartment: expect.any(String),
+                    },
+                    coSupervisors: {
+                        internal: [],
+                        external: [
+                            {
+                                id: 1, surname: 'Amato', name: 'Alice', email: 'alice.amato@email.com'
+                            }
+                        ]
+                    },
+                    type: expect.any(String),
+                    description: expect.any(String),
+                    requiredKnowledge: expect.any(String),
+                    notes: expect.any(String),
+                    creation_date: expect.any(String),
+                    expiration: expect.any(String),
+                    level: expect.any(String),
+                    cds: {
+                        code: 'L-08',
+                        title: 'Ingegneria Elettronica'
+                    },
+                    keywords: ['AI', 'web development', 'research'],
+                    groups: ['Group1']
+                },
+                {
+                    id: 2,
+                    title: expect.any(String),
+                    status: expect.any(String),
+                    supervisor: {
+                        id: expect.any(String),
+                        name: expect.any(String),
+                        surname: expect.any(String),
+                        email: expect.any(String),
+                        codGroup: expect.any(String),
+                        codDepartment: expect.any(String),
+                    },
+                    coSupervisors: {
+                        internal: [],
+                        external: [
+                            {
+                                id: 1, surname: 'Amato', name: 'Alice', email: 'alice.amato@email.com'
+                            }
+                        ]
+                    },
+                    type: expect.any(String),
+                    description: expect.any(String),
+                    requiredKnowledge: expect.any(String),
+                    notes: expect.any(String),
+                    creation_date: expect.any(String),
+                    expiration: expect.any(String),
+                    level: expect.any(String),
+                    cds: {
+                        code: 'L-08',
+                        title: 'Ingegneria Elettronica'
+                    },
+                    keywords: ['AI', 'reactive API'],
+                    groups: ['Group1']
+                }
             ]
         });
     });
@@ -362,18 +434,8 @@ describe('GET /api/thesis-proposals/:id (teacher)', () => {
         expect(response.status).toBe(401);
     });
 
-    // TODO: keep ?
     test('should return error 500 if dao throws an error', async () => {
-        const mockUser = {
-            id: 'd1',
-            surname: 'R',
-            name: 'M',
-            email: 'd1@email.com',
-            role: 'teacher',
-        };
-        usersService.getUserInfo.mockResolvedValue(mockUser);
-
-        service.getThesisProposalTeacher.mockRejectedValue(new Error());
+        jest.spyOn(thesisDao, 'getThesisProposalTeacher').mockRejectedValueOnce(new Error());
 
         const response = await request(app)
             .get('/api/thesis-proposals/1')
@@ -456,18 +518,8 @@ describe('GET /api/thesis-proposals/:id (student)', () => {
         expect(response.status).toBe(401);
     });
 
-    // TODO: keep ?
     test('should return error 500 if dao throws an error', async () => {
-        const mockUser = {
-            id: 's1',
-            surname: 'R',
-            name: 'M',
-            email: 'r.m@email.com',
-            role: 'student',
-        };
-        usersService.getUserInfo.mockResolvedValue(mockUser);
-
-        service.getThesisProposal.mockRejectedValue(new Error());
+        jest.spyOn(thesisDao, 'getThesisProposal').mockRejectedValueOnce(new Error());
 
         const response = await request(app)
             .get('/api/thesis-proposals/1')
@@ -505,21 +557,8 @@ describe('GET /api/thesis-proposals (teacher)', () => {
         });
     });
 
-    // TODO: keep ?
     test('should handle errors and return 500', async () => {
-        const mockUser = {
-            id: 'd1',
-            surname: 'R',
-            name: 'M',
-            email: 'r.m@email.com',
-            role: 'teacher',
-        };
-
-        usersService.getUserInfo.mockResolvedValue(mockUser);
-
-        // Mock an error in thesisDao.getAllKeywords
-        const mockError = new Error('Mocked error during getAllKeywords');
-        service.listThesisProposalsTeacher.mockRejectedValueOnce(mockError);
+        jest.spyOn(thesisDao, 'listThesisProposalsTeacher').mockRejectedValueOnce(new Error());
 
         // Send a request to the endpoint
         const response = await request(app)
@@ -529,7 +568,6 @@ describe('GET /api/thesis-proposals (teacher)', () => {
         // Assertions
         expect(response.status).toBe(500);
         expect(response.body).toEqual('Internal Server Error');
-        expect(service.listThesisProposalsTeacher).toHaveBeenCalled();
     });
 });
 
@@ -666,19 +704,10 @@ describe('PUT /api/thesis-proposals/:id', () => {
         );
     });
 
-    // TODO: keep ?
     test('should return 500 error', async () => {
-        const mockUser = {
-            id: 'd1',
-            surname: 'R',
-            name: 'M',
-            email: 'd1@email.com',
-            role: 'teacher',
-        };
-        usersService.getUserInfo.mockResolvedValue(mockUser);
+        jest.spyOn(thesisDao, 'listApplicationsForTeacherThesisProposal').mockRejectedValueOnce(new Error());
 
-        // Mock Request body
-        const mockBody = {
+        const body = {
             title: 'TitoloTesi',
             internal_co_supervisors_id: ['d277137'],
             external_co_supervisors_id: [1],
@@ -690,30 +719,13 @@ describe('PUT /api/thesis-proposals/:id', () => {
             cds: ['Group1'],
             keywords: ['keyword'],
             expiration: '2025-11-10T23:59:59.999Z'
-        }
-
-        const creationDate = new AdvancedDate().toISOString();
-
-        const mockedThesisProposal = {
-            proposal_id: 1,
-            title: "TitoloTesi",
-            type: "compilativa",
-            description: "description",
-            required_knowledge: "required knowledge",
-            notes: "notes",
-            level: "Bachelor",
-            creation_date: creationDate,
-            expiration: "2025-11-10T23:59:59.999Z",
-        }
-
-        // Mock the thesis DAO methods
-        service.listApplicationsForTeacherThesisProposal.mockRejectedValue(new Error('Database Error'));
+        };
 
         // Make the request to your API
         const response = await request(app)
             .put(`/api/thesis-proposals/1`)
             .set('Authorization', `Bearer ${teacherAccessToken}`)
-            .send(mockBody);
+            .send(body);
 
         // Assert the response
         expect(response.status).toBe(500);
@@ -810,8 +822,9 @@ describe('GET /api/student/active-application', () => {
         expect(response.body).toEqual([{ proposal_id: 2 }]);
     });
 
-    // TODO: keep ?
     test('should return 500 if an error occurs', async () => {
+        jest.spyOn(thesisDao, 'getStudentActiveApplication').mockRejectedValueOnce(new Error());
+
         // Perform the request
         const response = await request(app)
                                .get('/api/student/active-application')
@@ -862,25 +875,12 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
         expect(response.body).toHaveProperty('message');
     });
 
-    // TODO: keep ?
     test('should handle errors and return status 500', async () => {
-        const mockUser = {
-            id: 'd1',
-            surname: 'R',
-            name: 'M',
-            email: 'r.m@email.com',
-            role: 'teacher',
-        };
-
-        usersService.getUserInfo.mockResolvedValue(mockUser);
+        jest.spyOn(thesisDao, 'updateApplicationStatus').mockRejectedValueOnce(new Error());
 
         // Arrange
         const proposalId = '1';
         const studentId = 's293605';
-
-        // Mock thesisDao functions
-        const mockError = new Error('Internal Server Error');
-        service.updateApplicationStatus.mockRejectedValue(mockError);
 
         // Act
         const response = await request(app)
@@ -891,7 +891,6 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
         // Assert
         expect(response.status).toBe(500);
         expect(response.body).toEqual('Internal Server Error');
-        expect(service.cancelOtherApplications).not.toHaveBeenCalled();
     });
 });
 
@@ -935,8 +934,9 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
         expect(response.body).toHaveProperty('message');
     });
 
-    // TODO: keep ?
     test('should handle errors and return status 500', async () => {
+        jest.spyOn(thesisDao, 'updateApplicationStatus').mockRejectedValueOnce(new Error());
+
         // Arrange
         const proposalId = '1';
         const studentId = 's293605';
@@ -1004,19 +1004,8 @@ describe('GET /api/student/applications-decision', () => {
         ]);
     });
 
-    // TODO: Keep ?
     test('should handle errors and return 500 status', async () => {
-
-        const mockUser = {
-            id: 's1',
-            surname: 'R',
-            name: 'M',
-            email: 'r.m@email.com',
-            role: 'student',
-        };
-        usersService.getUserInfo.mockResolvedValue(mockUser);
-
-        service.listApplicationsDecisionsFromStudent.mockRejectedValueOnce(new Error('Database error'));
+        jest.spyOn(thesisDao, 'listApplicationsDecisionsFromStudent').mockRejectedValueOnce(new Error());
 
         // Make the request to your API
         const response = await request(app)
@@ -1070,8 +1059,9 @@ describe('DELETE /api/thesis-proposals/:id', () => {
         expect(response.body).toEqual({ message: `No thesis proposal with id ${id} found to delete` });
     });
 
-    // TODO: keep ?
     test('should handle unexpected errors and return 500 Internal Server Error', async () => {
+        jest.spyOn(thesisDao, 'deleteThesisProposalById').mockRejectedValueOnce(new Error());
+
         // Make a request to the endpoint
         const response = await request(app)
             .delete('/api/thesis-proposals/unexpectedErrorId')
@@ -1080,6 +1070,5 @@ describe('DELETE /api/thesis-proposals/:id', () => {
         // Assertions
         expect(response.status).toBe(500);
         expect(response.body).toEqual({ message: 'Internal Server Error' });
-        expect(service.deleteThesisProposalById).toHaveBeenCalledWith('unexpectedErrorId', 'd1');
     });
 });
