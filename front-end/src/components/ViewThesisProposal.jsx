@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button, Descriptions, Modal, Skeleton, Typography, Tag, message, Upload } from "antd";
 import { UploadOutlined } from '@ant-design/icons';
 import { useAuth } from '../components/authentication/useAuth';
+import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
 import API from "../API";
 
@@ -258,6 +259,14 @@ function MyModal(props) {
       </Upload.Dragger>
     </Modal>
   )
+}
+
+MyModal.propTypes = {
+  setIsOpen: PropTypes.func.isRequired,
+  setLoading: PropTypes.func.isRequired,
+  setDisabled: PropTypes.func.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  loading: PropTypes.bool.isRequired
 }
 
 export { ViewThesisProposal };
