@@ -1,7 +1,6 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Avatar, Badge, Button, Form, Input, Layout } from "antd";
-import { UserOutlined, BellOutlined, FileAddOutlined, KeyOutlined, LogoutOutlined } from '@ant-design/icons';
+import { Badge, Layout } from "antd";
+import { BellOutlined, FileAddOutlined } from '@ant-design/icons';
 import { useAuth } from '../components/authentication/useAuth';
 import LoginButton from './authentication/LoginButton';
 import LogoutButton from './authentication/LogoutButton';

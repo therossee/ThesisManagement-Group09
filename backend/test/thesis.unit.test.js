@@ -5,6 +5,7 @@ const db = require('../db');
 const thesis = require('../thesis_dao');
 const UnauthorizedActionError = require("../errors/UnauthorizedActionError");
 const NoThesisProposalError = require("../errors/NoThesisProposalError");
+const { any } = require('zod');
 
 // Mocking the database
 jest.mock('../db', () => ({
@@ -13,6 +14,14 @@ jest.mock('../db', () => ({
   all: jest.fn(),
   get: jest.fn(),
   transaction: jest.fn().mockImplementation(callback => callback),
+}));
+
+jest.mock('../configuration_dao', () => ({
+    getIntegerValue: jest.fn().mockReturnValue(0),
+    setValue: jest.fn(),
+    KEYS: {
+        VIRTUAL_OFFSET_MS: 'virtual_clock_offset'
+    }
 }));
 
 afterAll(() => {
@@ -45,21 +54,26 @@ describe('createThesisProposal', () => {
       keywords: ['Keyword1', 'Keyword2'],
     };
 
-    const proposalId = await thesis.createThesisProposal(
-      proposalData.title,
-      proposalData.supervisor_id,
-      proposalData.internal_co_supervisors_id,
-      proposalData.external_co_supervisors_id,
-      proposalData.type,
-      proposalData.groups,
-      proposalData.description,
-      proposalData.required_knowledge,
-      proposalData.notes,
-      proposalData.expiration,
-      proposalData.level,
-      proposalData.cds,
-      proposalData.keywords
-    );
+    const proposal_details = { 
+      title: proposalData.title, 
+      supervisor_id: proposalData.supervisor_id, 
+      type: proposalData.type,
+      description: proposalData.description,
+      required_knowledge: proposalData.required_knowledge,
+      notes: proposalData.notes,
+      expiration: proposalData.expiration,
+      level: proposalData.level
+    }
+
+    const additional_details = {
+      internal_co_supervisors_id: proposalData.internal_co_supervisors_id,
+      external_co_supervisors_id: proposalData.external_co_supervisors_id,
+      unique_groups: proposalData.groups,
+      keywords: proposalData.keywords,
+      cds: proposalData.cds,
+    }
+
+    const proposalId = await thesis.createThesisProposal(proposalData, additional_details);
 
     expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
     expect(db.prepare).toHaveBeenCalledTimes(12); // 12 queries
@@ -81,21 +95,26 @@ describe('createThesisProposal', () => {
       keywords: ['Keyword1', 'Keyword2'],
     };
 
-    const proposalId = await thesis.createThesisProposal(
-      proposalData.title,
-      proposalData.supervisor_id,
-      proposalData.internal_co_supervisors_id,
-      proposalData.external_co_supervisors_id,
-      proposalData.type,
-      proposalData.groups,
-      proposalData.description,
-      proposalData.required_knowledge,
-      proposalData.notes,
-      proposalData.expiration,
-      proposalData.level,
-      proposalData.cds,
-      proposalData.keywords
-    );
+    const proposal_details = { 
+      title: proposalData.title, 
+      supervisor_id: proposalData.supervisor_id, 
+      type: proposalData.type,
+      description: proposalData.description,
+      required_knowledge: proposalData.required_knowledge,
+      notes: proposalData.notes,
+      expiration: proposalData.expiration,
+      level: proposalData.level
+    }
+
+    const additional_details = {
+      internal_co_supervisors_id: proposalData.internal_co_supervisors_id,
+      external_co_supervisors_id: proposalData.external_co_supervisors_id,
+      unique_groups: proposalData.groups,
+      keywords: proposalData.keywords,
+      cds: proposalData.cds,
+    }
+
+    const proposalId = await thesis.createThesisProposal(proposalData, additional_details);
 
     expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
     expect(db.prepare).toHaveBeenCalledTimes(6);
@@ -117,24 +136,29 @@ describe('createThesisProposal', () => {
       keywords: ['Keyword1', 'Keyword2'],
     };
 
+    const proposal_details = { 
+      title: proposalData.title, 
+      supervisor_id: proposalData.supervisor_id, 
+      type: proposalData.type,
+      description: proposalData.description,
+      required_knowledge: proposalData.required_knowledge,
+      notes: proposalData.notes,
+      expiration: proposalData.expiration,
+      level: proposalData.level
+    }
+
+    const additional_details = {
+      internal_co_supervisors_id: proposalData.internal_co_supervisors_id,
+      external_co_supervisors_id: proposalData.external_co_supervisors_id,
+      unique_groups: proposalData.groups,
+      keywords: proposalData.keywords,
+      cds: proposalData.cds,
+    }
+
     // Adding "await" before the thesis.createThesisProposal
     await expect(
-      thesis.createThesisProposal(
-        proposalData.title,
-        proposalData.supervisor_id,
-        proposalData.internal_co_supervisors_id,
-        proposalData.external_co_supervisors_id,
-        proposalData.type,
-        proposalData.groups,
-        proposalData.description,
-        proposalData.required_knowledge,
-        proposalData.notes,
-        proposalData.expiration,
-        proposalData.level,
-        proposalData.cds,
-        proposalData.keywords
-      )
-    ).rejects.toEqual("The expiration date must be after the creation date");
+      thesis.createThesisProposal(proposal_details, additional_details)
+    ).rejects.toEqual(new Error("The expiration date must be after the creation date"));
   });
 });
 
@@ -482,7 +506,10 @@ describe('listThesisProposalsFromStudent', () => {
       const result = await thesis.listThesisProposalsFromStudent(studentId, currentDate, currentDate);
 
       expect(result).toEqual(mockedData);
-      expect(db.prepare().all).toHaveBeenCalledWith(studentId, expect.any(String), expect.any(String));
+      expect(db.prepare().all).toHaveBeenCalledWith(
+        studentId,  
+        expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+        expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/));
   });
 
   test('should return an empty list', async () => {
@@ -675,7 +702,7 @@ describe('applyForProposal', () => {
 
     db.prepare().get.mockReturnValueOnce();
 
-    await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual("The proposal doesn't belong to the student degree");;
+    await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual(new Error("The proposal doesn't belong to the student degree"));
   });
   test('applies for a proposal not active', async () => {
     // Mock data
@@ -685,7 +712,7 @@ describe('applyForProposal', () => {
     db.prepare().get.mockReturnValueOnce({ proposal_id: 1, cod_degree: 'L-01'});
     db.prepare().get.mockReturnValueOnce();
 
-    await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual("The proposal is not active");;
+    await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual(new Error("The proposal is not active"));;
   });
   test('applies for a proposal while he has already applied for another', async () => {
     // Mock data
@@ -696,7 +723,7 @@ describe('applyForProposal', () => {
     db.prepare().get.mockReturnValueOnce({ proposal_id: '1', title: 'Test Proposal', supervisor_id: 1, type: 'Test Type', description: 'Test Description', required_knowledge: 'Test Knowledge', notes: 'Test Notes', creation_date:'2020-10-21', expiration: '2023-12-31', level: 'Test Level' });
     db.prepare().get.mockReturnValueOnce({ proposal_id: 1, cod_degree: 'L-01', status: 'waiting for approval'});
 
-    await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual("The user has already applied for other proposals");;
+    await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual(new Error("The user has already applied for other proposals"));
   });
 });
 
@@ -728,6 +755,7 @@ describe('listThesisProposalsTeacher', () => {
         )
         AND P.expiration > ?
         AND creation_date < ?
+        AND is_archived = 0
         AND is_deleted = 0;`;
     // Mock the SQLite database query
     db.prepare.mockClear().mockReturnValueOnce({ all: jest.fn(() => mockProposals) });
@@ -778,6 +806,7 @@ describe('listApplicationsForTeacherThesisProposal', () => {
       AND ta.creation_date < ?
       AND tp.expiration > ?
       AND tp.creation_date < ?
+      AND tp.is_archived = 0
       AND tp.is_deleted = 0;`;
     // Assertions
     expect(result).toEqual(mockApplications);
@@ -1166,4 +1195,125 @@ describe('deleteThesisProposalById', () => {
         expect(res).toEqual(mockedApplications);
         expect(db.prepare).toHaveBeenCalledTimes(3);
     });
+});
+
+describe('archiveThesisProposalById', () => {
+  test('archives a thesis proposal without accepted applications', async () => {
+    const proposalId = 1;
+    const supervisorId = 'd1';
+
+    db.prepare().get.mockReturnValueOnce(null); // No accepted applications
+    db.prepare().run.mockReturnValueOnce({ changes: 1 }); // Successful archiving
+
+    const result = await thesis.archiveThesisProposalById(proposalId, supervisorId);
+    
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+    expect(db.prepare().run).toHaveBeenCalledWith(
+      proposalId, 
+      supervisorId,
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
+    );
+
+    expect(result).toEqual([]);
+  });
+
+  test('rejects with UnauthorizedActionError for a thesis with accepted applications', async () => {
+    const proposalId = 1;
+    const supervisorId = 'd1';
+
+    db.prepare().get.mockReturnValueOnce({});
+
+    await expect(thesis.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(UnauthorizedActionError);
+
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+  });
+
+  test('rejects with the appropriate error for an unsuccessful archiving (inexistent thesis)', async () => {
+   
+    const proposalId = 1;
+    const supervisorId = 'd1';
+    
+
+    db.prepare().get.mockReturnValueOnce(null);
+    db.prepare().run.mockReturnValueOnce({ changes: 0 });
+
+    db.prepare().get.mockReturnValueOnce(null); // No thesis proposal with the given id
+
+    await expect(thesis.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(NoThesisProposalError); // No thesis proposal with the given id
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+    expect(db.prepare().run).toHaveBeenCalledWith(
+      proposalId,
+      supervisorId,
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
+    );
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+  });
+
+  test('rejects with the appropriate error for an unsuccessful archiving (thesis not already created)', async () => {
+   
+    const proposalId = 1;
+    const supervisorId = 'd1';
+    
+
+    db.prepare().get.mockReturnValueOnce(null);
+    db.prepare().run.mockReturnValueOnce({ changes: 0 });
+
+    db.prepare().get.mockReturnValueOnce({ creation_date: '2030-11-10T23:59:59.999Z'}); 
+
+    await expect(thesis.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(NoThesisProposalError); // No thesis proposal with the given id
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+    expect(db.prepare().run).toHaveBeenCalledWith(
+      proposalId,
+      supervisorId,
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
+    );
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+  });
+
+  test('rejects with the appropriate error for an unsuccessful archiving (expired thesis)', async () => {
+   
+    const proposalId = 1;
+    const supervisorId = 'd1';
+    
+
+    db.prepare().get.mockReturnValueOnce(null);
+    db.prepare().run.mockReturnValueOnce({ changes: 0 });
+
+    db.prepare().get.mockReturnValueOnce({ expiration: '2020-11-10T23:59:59.999Z'}); // Expired thesis
+
+    await expect(thesis.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(new UnauthorizedActionError('You can\'t archive a thesis already expired'));
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+    expect(db.prepare().run).toHaveBeenCalledWith(
+      proposalId,
+      supervisorId,
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
+    );
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+  });
+
+  test('rejects with the appropriate error for an unsuccessful archiving (supervisor not owner of the proposal)', async () => {
+   
+    const proposalId = 1;
+    const supervisorId = 'd1';
+    
+
+    db.prepare().get.mockReturnValueOnce(null);
+    db.prepare().run.mockReturnValueOnce({ changes: 0 });
+
+    db.prepare().get.mockReturnValueOnce({ expiration: '2030-11-10T23:59:59.999Z', creation_date: '2020-11-10T23:59:59.999Z'}); // No thesis proposal with the given id
+
+    await expect(thesis.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(new UnauthorizedActionError('You are not the supervisor of this thesis') ); // No thesis proposal with the given id
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+    expect(db.prepare().run).toHaveBeenCalledWith(
+      proposalId,
+      supervisorId,
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
+    );
+    expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+  });
 });
