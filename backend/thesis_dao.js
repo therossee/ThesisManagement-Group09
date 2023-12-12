@@ -547,7 +547,7 @@ exports.applyForProposal = (proposal_id, student_id) => {
     }
 
     // Check if the user has already applied for other proposals
-    const checkAlreadyApplied = `SELECT * FROM thesisApplication WHERE student_id=? AND status='waiting for approval' OR status='accepted'`;
+    const checkAlreadyApplied = `SELECT * FROM thesisApplication WHERE student_id=? AND (status='waiting for approval' OR status='accepted')`;
     const already_applied = db.prepare(checkAlreadyApplied).get(student_id);
     if(already_applied){
       reject(new UnauthorizedActionError("The user has already applied for other proposals"));
