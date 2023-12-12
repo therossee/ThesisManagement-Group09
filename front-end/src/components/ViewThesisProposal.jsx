@@ -198,17 +198,19 @@ function ViewThesisProposal() {
     const applyForProposal = () => {
       setLoading(true);
       addApplication();
+      setIsOpen(false);
     }
 
     async function addApplication() {
       try {
         await API.applyForProposal(id, uploadedFile);
         message.success("Succesfully applied");
-        setIsOpen(false);
+        setUploadedFile(null);
         setDisabled(true);
         setLoading(false);
       } catch (err) {
         message.error(err.message ? err.message : err);
+        setUploadedFile(null);
         setDisabled(false);
         setLoading(false);
       }
