@@ -198,13 +198,13 @@ function ViewThesisProposal() {
     const applyForProposal = () => {
       setLoading(true);
       addApplication();
-      setIsOpen(false);
     }
 
     async function addApplication() {
       try {
-        const res = await API.applyForProposal(id, uploadedFile);
+        await API.applyForProposal(id, uploadedFile);
         message.success("Succesfully applied");
+        setIsOpen(false);
         setDisabled(true);
         setLoading(false);
       } catch (err) {
@@ -220,6 +220,7 @@ function ViewThesisProposal() {
         onCancel={() => { setUploadedFile(null); setIsOpen(false) }}
         onOk={applyForProposal}
         okText="Send"
+        okButtonProps={{ loading: loading }}
         cancelText="Cancel"
       >
         <Upload.Dragger

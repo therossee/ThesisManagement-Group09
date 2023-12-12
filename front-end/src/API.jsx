@@ -5,19 +5,19 @@ const URL = 'http://localhost:3000/api';
 
 async function logOut() {
     await fetch("http://localhost:3000/logout", {
-      method: "POST",
-      credentials: "include",
+        method: "POST",
+        credentials: "include",
     });
     window.location.replace("http://localhost:5173");
 }
-  
+
 const redirectToLogin = () => {
     window.location.replace("http://localhost:3000/login");
 };
 
 
 async function getUser() {
-    const response = await fetch(URL+'/user', {
+    const response = await fetch(URL + '/user', {
         method: 'GET',
         credentials: 'include',
     });
@@ -135,8 +135,6 @@ async function applyForProposal(id, attached_file) {
     formData.append('file', attached_file);
     formData.append('thesis_proposal_id', id);
 
-    console.log(attached_file);
-    
     const response = await fetch(URL + '/student/applications', {
         method: 'POST',
         body: formData,
@@ -144,7 +142,6 @@ async function applyForProposal(id, attached_file) {
     });
     if (response.ok) {
         const apply = await response.json();
-        console.log(apply);
         return apply;
     } else {
         const errDetail = await response.json();
@@ -317,24 +314,24 @@ async function getStudentApplicationsHistory() {
 }
 
 async function archiveProposalById(id) {
-    const response = await fetch(URL +  `/thesis-proposals/archive/${id} `, {
+    const response = await fetch(URL + `/thesis-proposals/archive/${id} `, {
         method: 'PATCH',
         credentials: 'include'
     });
     if (response.ok) {
-        return response; 
+        return response;
     } else {
         throw response;
     }
 }
 
 async function deleteProposalById(id) {
-    const response = await fetch(URL +  `/thesis-proposals/${id} `, {
+    const response = await fetch(URL + `/thesis-proposals/${id} `, {
         method: 'DELETE',
         credentials: 'include'
     });
     if (response.ok) {
-        return response; 
+        return response;
     } else {
         throw response;
     }
