@@ -684,6 +684,58 @@ async (req, res) => {
   }
 });
 
+app.get('/api/teacher/checkfile/:app_id/:stud_id',
+isLoggedIn,
+isTeacher,
+async (req, res) => {
+  try{
+    const application_id = req.params.app_id;
+    const student_id = req.params.stud_id;
+    const dir = path.join(__dirname, uploads, student_id, application_id);
+    if(fs.existsSync(dir)){
+      fs.readdir(dir, (err, files) => {
+        if (err) {
+          console.error(err);
+          res.status(500).json('Internal Server Error');
+        } else {
+          const fileName = files[0]; // Prende il primo file
+          res.json({ exists: true, fileName: fileName });
+        }
+      });
+    }else{
+      res.json({ exists: false });
+    }
+  }catch(e){
+    console.error(e);
+    res.status(500).json('Internal Server Error');
+  }
+});
+
+app.get('/api/teacher/uploads/:app_id/:stud_id',
+isLoggedIn,
+isTeacher,
+async (req, res) => {
+  try{
+    const application_id = req.params.app_id;
+    const student_id = req.params.stud_id;
+    const dir = path.join(__dirname, uploads, student_id, application_id);
+    if(fs.existsSync(dir)){
+      fs.readdir(dir, (err, files) => {
+        if (err) {
+          console.error(err);
+          res.status(500).json('Internal Server Error');
+        } else {
+          const file = path.join(dir, files[0]); // Prende il primo file
+          res.sendFile(file);
+        }
+      });
+    }
+  }catch(e){
+    console.error(e);
+    res.status(500).json('Internal Server Error');
+  }
+});
+
 module.exports = { app };
 
 /**

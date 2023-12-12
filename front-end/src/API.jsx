@@ -377,11 +377,38 @@ async function getStudentCVById(id) {
     }
 }
 
+// GET file exists
+async function checkFileExists(applicationId, student_id) {
+    const response = await fetch(URL + `/teacher/checkfile/${student_id}/${applicationId}`, {
+        method: 'GET',
+        credentials: 'include',
+    });
+    if (response.ok) {
+        const data = await response.json();
+        return data;
+    } else {
+        throw response;
+    }
+}
+
+// GET optional attached file of a student application
+async function getApplicationFile(applicationId, student_id) {
+    const response = await fetch(URL + `/teacher/uploads/${student_id}/${applicationId}`, {
+        method: 'GET',
+        credentials: 'include',
+    });
+    if (response.ok) {
+        return response.blob();
+    } else {
+        throw response;
+    }
+}
+
 const API = {
     logOut, redirectToLogin,
     getUser,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById
+    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById, checkFileExists, getApplicationFile
 };
 export default API;
