@@ -198,11 +198,12 @@ function ViewThesisProposal() {
     const applyForProposal = () => {
       setLoading(true);
       addApplication();
+      setIsOpen(false);
     }
 
     async function addApplication() {
       try {
-        await API.applyForProposal(id);
+        await API.applyForProposal(id, uploadedFile);
         message.success("Succesfully applied");
         setDisabled(true);
         setLoading(false);
@@ -217,10 +218,9 @@ function ViewThesisProposal() {
       <Modal title="Application"
         open={isOpen}
         onCancel={() => { setUploadedFile(null); setIsOpen(false) }}
-        footer={[
-          <Button key="cancel" type="primary" danger onClick={() => { setUploadedFile(null); setIsOpen(false) }}>Cancel</Button>,
-          <Button key="submit" type="primary" onClick={() => console.log(uploadedFile)}>Send</Button>
-        ]}
+        onOk={applyForProposal}
+        okText="Send"
+        cancelText="Cancel"
       >
         <Upload.Dragger
           beforeUpload={beforeUpload}
