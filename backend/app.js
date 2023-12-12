@@ -207,7 +207,8 @@ app.post('/api/teacher/thesis_proposals',
 isLoggedIn,
 isTeacher,
 async (req,res) => {
-  const supervisor_id = req.user.id;
+  try{
+    const supervisor_id = req.user.id;
   const {title, internal_co_supervisors_id, external_co_supervisors_id, type, description, required_knowledge, notes, level, cds, keywords} = req.body;
   let expiration = req.body.expiration;
 
@@ -259,6 +260,10 @@ async (req,res) => {
     console.error(error);
     res.status(500).json(`Failed to create thesis proposal. ${error.message || error}`);
   });
+  }catch(error){
+    console.error(error);
+    res.status(500).json(`Internal Server Error`);
+  } 
 });
 
 app.get('/api/teachers',
