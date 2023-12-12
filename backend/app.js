@@ -23,7 +23,7 @@ const { ZodError } = require("zod");
 const { USER_ROLES } = require("./enums");
 
 /*** init express and setup the middlewares ***/
-const app = express();
+const app = express().disable("x-powered-by");
 app.use(morgan("dev"));
 app.use(express.json());
 
