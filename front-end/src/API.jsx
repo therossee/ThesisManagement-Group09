@@ -50,6 +50,7 @@ async function getClock() {
 async function updateClock(date) {
     return fetch(URL + '/system/virtual-clock', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
