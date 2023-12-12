@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Input, Button, Space, Table, Form, Drawer, DatePicker, Tag, Tooltip } from 'antd';
+import { Input, Button, Space, Table, Form, Drawer, DatePicker, Tag, Tooltip, message } from 'antd';
 import { SearchOutlined, EyeOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
@@ -23,6 +23,8 @@ function StudentThesisProposals() {
 
     // Store filter date range
     const [dateRange, setDateRange] = useState([]);
+
+    const [messageApi, contextHolder] = message.useMessage();
 
     // Set virtual clock date to prevent filtering for a date before virtual clock one
     const date = dayjs();
