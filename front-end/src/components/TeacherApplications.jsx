@@ -100,7 +100,7 @@ function TeacherApplications() {
                         dataSource={x.applications}
                         renderItem={(student) => (
                             <List.Item key={student.id}>
-                                <div className="wrapper-enlight" onClick={() => { setStudentInfo(student); setIsOpen(true) }}>
+                                <div className="wrapper-enlight" onClick={() => { setStudentInfo(student); setIsOpen(true) }} onKeyDown={() => {}}>
                                 <List.Item.Meta
                                     avatar={<Avatar icon={<UserOutlined />} />}
                                     style={{padding: ".5%"}}

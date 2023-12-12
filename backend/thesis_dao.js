@@ -567,14 +567,11 @@ exports.applyForProposal = (proposal_id, student_id, file) => {
       const res = db.prepare(insertApplicationQuery).run(proposal_id, student_id, currentDate);
 
       if (file) {
-        console.log(file);
-        console.log(file.originalFilename);
         if(file.mimetype !== 'application/pdf'){
-          reject("The file must be a pdf");
+          reject(new Error("The file must be a pdf"));
           return;
         }
         const dir = path.join(__dirname, 'uploads', student_id.toString(), res.lastInsertRowid.toString());
-        console.log();
         // Use try-catch to handle any errors during file writing
         try {
           const writePath = path.join(dir, file.originalFilename);
