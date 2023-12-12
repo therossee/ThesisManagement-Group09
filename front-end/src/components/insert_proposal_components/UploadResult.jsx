@@ -49,7 +49,7 @@ function UploadResult(props) {
 
   UploadResult.propTypes = {
     proposalId: PropTypes.number,
-    error: PropTypes.string,
+    error: PropTypes.number,
     update: PropTypes.bool,
   };
 
