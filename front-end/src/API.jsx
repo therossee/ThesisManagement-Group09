@@ -131,13 +131,14 @@ async function getThesisProposalbyId(id) {
     }
 }
 
-async function applyForProposal(id) {
+async function applyForProposal(id, attached_file) {
+    const formData = new FormData();
+    formData.append('file', attached_file);
+    formData.append('thesis_proposal_id', id);
+
     const response = await fetch(URL + '/student/applications', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ thesis_proposal_id: id }),
+        body: formData,
         credentials: 'include',
     });
     if (response.ok) {
@@ -145,7 +146,7 @@ async function applyForProposal(id) {
         return apply;
     } else {
         const errDetail = await response.json();
-        throw new Error({status: response.status, message: errDetail });
+        throw new Error({ status: response.status, message: errDetail });
     }
 }
 

@@ -11,6 +11,7 @@ const express = require('express');
 const session = require('express-session');
 const morgan = require('morgan');
 const cors = require('cors');
+const formidable = require('formidable');
 
 const thesisDao = require('./thesis_dao.js');
 const usersDao = require('./users_dao.js');
@@ -524,24 +525,35 @@ app.patch('/api/thesis-proposals/archive/:id',
 );
 
 app.post('/api/student/applications',
-isLoggedIn,
-isStudent,
-async(req,res) => {
-    const student_id = req.user.id;
-    const {thesis_proposal_id} = req.body;
-    await thesisDao.applyForProposal(thesis_proposal_id, student_id).then((applicationId)=>{
-      res.status(201).json(
-        {
+  isLoggedIn,
+  isStudent,
+  (req, res) => {
+    const form = new formidable.IncomingForm();
+    form.parse(req, async (err, fields, files) => {
+      if (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal Server Error' });
+        return;
+      }
+
+      const student_id = req.user.id;
+      const thesis_proposal_id = fields.thesis_proposal_id;
+      const upload = (files.file) ? files.file[0] : undefined;
+
+      try {
+        const applicationId = await thesisDao.applyForProposal(thesis_proposal_id, student_id, upload);
+        res.status(201).json({
+          application_id: applicationId,
           thesis_proposal_id: thesis_proposal_id,
           student_id: student_id,
           status: 'waiting for approval'
         });
-    })
-  .catch((error) => {
-    console.error(error);
-    res.status(500).json(`Failed to apply for proposal. ${error.message || error}`);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json(`Failed to apply for proposal. ${error.message || error}`);
+      }
+    });
   });
-});
 
 app.get('/api/teacher/applications/:proposal_id',
 isLoggedIn,
