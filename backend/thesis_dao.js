@@ -528,7 +528,7 @@ exports.applyForProposal = (proposal_id, student_id, file) => {
     const checkProposalDegree = `SELECT * FROM proposalCds WHERE proposal_id=? AND cod_degree=(SELECT cod_degree FROM student WHERE id=?)`;
     const proposal_correct = db.prepare(checkProposalDegree).get(proposal_id, student_id);
     if (!proposal_correct) {
-      reject("The proposal doesn't belong to the student degree");
+      reject(new UnauthorizedActionError("The proposal doesn't belong to the student degree"));
       return;
     }
 
@@ -544,7 +544,7 @@ exports.applyForProposal = (proposal_id, student_id, file) => {
 
     const proposal_active = db.prepare(checkProposalActive).get(proposal_id, currentDate, currentDate);
     if (!proposal_active) {
-      reject("The proposal is not active");
+      reject(new Error("The proposal is not active"));
       return;
     }
 
@@ -552,7 +552,7 @@ exports.applyForProposal = (proposal_id, student_id, file) => {
     const checkAlreadyApplied = `SELECT * FROM thesisApplication WHERE student_id=? AND status='waiting for approval' OR status='accepted'`;
     const already_applied = db.prepare(checkAlreadyApplied).get(student_id);
     if (already_applied) {
-      reject("The user has already applied for other proposals");
+      reject(new UnauthorizedActionError("The user has already applied for other proposals"));
       return;
     }
 
@@ -585,7 +585,7 @@ exports.applyForProposal = (proposal_id, student_id, file) => {
 
           // Rollback the SQLite transaction if there's an error
           db.prepare('ROLLBACK;').run();
-          reject(fileError); // Reject the promise with the file error
+          reject(new Error(fileError)); // Reject the promise with the file error
           return;
         }
       }
@@ -598,7 +598,7 @@ exports.applyForProposal = (proposal_id, student_id, file) => {
 
       // Rollback the SQLite transaction if there's an error
       db.prepare('ROLLBACK;').run();
-      reject(error); // Reject the promise with the main error
+      reject(new Error(error)); // Reject the promise with the main error
     }
   })
 }

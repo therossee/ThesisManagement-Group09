@@ -146,7 +146,7 @@ async function applyForProposal(id, attached_file) {
         return apply;
     } else {
         const errDetail = await response.json();
-        throw { status: response.status, message: errDetail };
+        throw new Error({ status: response.status, message: errDetail });
     }
 }
 
