@@ -572,7 +572,9 @@ exports.applyForProposal = (proposal_id, student_id, file) => {
 
         // Use try-catch to handle any errors during file writing
         try {
-          console.log(file);
+          if(file.originalFilename.toString().toLowerCase().includes('.pdf')){
+            throw new Error('File not allowed');
+          }
           fs.mkdirSync(dir, { recursive: true });
           fs.writeFileSync(path.join(dir, file.originalFilename), fs.readFileSync(file.filepath));
         } catch (fileError) {
