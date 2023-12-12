@@ -25,7 +25,7 @@ function StudentThesisProposals() {
     const [dateRange, setDateRange] = useState([]);
 
     // Set virtual clock date to prevent filtering for a date before virtual clock one
-    const date = dayjs();
+    const [date, setDate] = useState(dayjs());
 
     const filterTitle = () => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
@@ -65,8 +65,8 @@ function StudentThesisProposals() {
 
     useEffect(() => {
         API.getClock()
-            .then((x) => {
-                setClock(dayjs().add(x.offset, 'ms'));
+            .then((clock) => {
+                setDate(dayjs().add(clock.offset, 'ms'));
             })
             .catch((err) => { messageApi.error(err.message ? err.message : err) });
         API.getThesisProposals()
