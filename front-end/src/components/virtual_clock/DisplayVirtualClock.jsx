@@ -44,7 +44,7 @@ function DisplayVirtualClock() {
         } else if (dayjs.tz().isAfter(date)) {
             return <Text type="secondary">The clock is <strong>{formatOffset()}</strong> behind the real time</Text>;
         } else {
-            return ''
+            return <Text type="secondary">The clock is <strong>exactly</strong> at the real time</Text>;
         }
     };
 
