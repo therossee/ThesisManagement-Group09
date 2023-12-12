@@ -24,7 +24,7 @@ function StudentThesisProposals() {
     // Store filter date range
     const [dateRange, setDateRange] = useState([]);
 
-    const [messageApi, contextHolder] = message.useMessage();
+    const messageApi = message.useMessage();
 
     // Set virtual clock date to prevent filtering for a date before virtual clock one
     const date = dayjs();
