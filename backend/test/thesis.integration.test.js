@@ -752,7 +752,7 @@ describe('POST /api/student/applications', () => {
     test('applies for a thesis proposal not logged as a student', async () => {
         const response = await request(app)
             .post('/api/student/applications')
-            .send(body);
+            .send({ thesis_proposal_id: 2 });
 
         expect(response.status).toBe(401);
     });
