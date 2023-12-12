@@ -57,7 +57,7 @@ function TeacherApplications() {
     const acceptApplication = async (proposalId, student) => {
         setButtonsLoading(true);
         try {
-            await API.acceptThesisApplications(proposalId, student.id); 
+            await API.acceptThesisApplications(proposalId, student.id);
             message.success("Accepted the application of " + student.surname + " " + student.name);
             setDirty(true);
             setButtonsLoading(false)
@@ -71,7 +71,7 @@ function TeacherApplications() {
     const rejectApplication = async (proposalId, student) => {
         setButtonsLoading(true);
         try {
-            await API.rejectThesisApplications(proposalId, student.id); 
+            await API.rejectThesisApplications(proposalId, student.id);
             message.success("Rejected the application of " + student.surname + " " + student.name);
             setDirty(true);
             setButtonsLoading(false);
@@ -99,26 +99,33 @@ function TeacherApplications() {
                         itemLayout="horizontal"
                         dataSource={x.applications}
                         renderItem={(student) => (
-                            <div style={{ paddingRight: "1%", paddingLeft: "1%" }}>
-                                <List.Item key={student.id} onClick={() => {setStudentInfo(student); setIsOpen(true)}}>
-                                    <List.Item.Meta
-                                        avatar={<Avatar icon={<UserOutlined />} />}
-                                        title={student.surname + " " + student.name}
-                                    />
-                                    <Flex wrap="wrap" gap="small">
-                                        <Tooltip title="Accept Application">
-                                            <Button loading={buttonsLoading} disabled={buttonsLoading} icon={<CheckOutlined />} onClick={() => acceptApplication(x.id, student)} ghost type="primary" />
-                                        </Tooltip>
-                                        <Tooltip title="Reject Application">
-                                            <Button loading={buttonsLoading} disabled={buttonsLoading} icon={<CloseOutlined />} onClick={() => rejectApplication(x.id, student)} ghost danger />
-                                        </Tooltip>
-                                    </Flex>
-                                </List.Item>
-                            </div>
+                            <List.Item key={student.id} onClick={() => { setStudentInfo(student); setIsOpen(true) }} >
+                                <List.Item.Meta
+                                    avatar={<Avatar icon={<UserOutlined />} />}
+                                    style={{ paddingLeft: "1%" }}
+                                    title={student.surname + " " + student.name}
+                                />
+                                <Flex wrap="wrap" gap="small" style={{ paddingRight: "1%" }}>
+                                    <Tooltip title="Accept Application">
+                                        <Button ghost type="primary"
+                                            loading={buttonsLoading}
+                                            disabled={buttonsLoading}
+                                            icon={<CheckOutlined />}
+                                            onClick={(e) => { e.stopPropagation(); acceptApplication(x.id, student) }} />
+                                    </Tooltip>
+                                    <Tooltip title="Reject Application">
+                                        <Button ghost danger
+                                            loading={buttonsLoading}
+                                            disabled={buttonsLoading}
+                                            icon={<CloseOutlined />}
+                                            onClick={(e) => { e.stopPropagation(); rejectApplication(x.id, student) }} />
+                                    </Tooltip>
+                                </Flex>
+                            </List.Item>
                         )}
                     />
                 </div>
-            </div>
+            </div >
 
         ))
         return ApplicationList;
