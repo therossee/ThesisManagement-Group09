@@ -17,10 +17,11 @@ const morgan = require('morgan');
 const cors = require('cors');
 const multer = require('multer');
 
+let appId = -1;
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const id = req.user.id;
-    const dir = path.join(__dirname, 'uploads', id.toString());
+    const dir = path.join(__dirname, 'uploads', id.toString(), appId.toString());
     fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },
@@ -521,14 +522,15 @@ app.patch('/api/thesis-proposals/archive/:id',
 app.post('/api/student/applications',
   isLoggedIn,
   isStudent,
-  upload.single('file'),
   async (req, res) => {
     const student_id = req.user.id;
     const { thesis_proposal_id } = req.body;
     await thesisDao.applyForProposal(thesis_proposal_id, student_id).then
       ((applicationId) => {
+        appId = applicationId;
         res.status(201).json(
           {
+            application_id: applicationId,
             thesis_proposal_id: thesis_proposal_id,
             student_id: student_id,
             status: 'waiting for approval'
@@ -538,6 +540,19 @@ app.post('/api/student/applications',
         console.error(error);
         res.status(500).json(`Failed to apply for proposal. ${error.message || error}`);
       });
+  });
+
+  app.post('/api/student/upload',
+  isLoggedIn,
+  isStudent,
+  upload.single('file'),
+  async (req, res) => {
+    try{
+      appId = -1;
+    }catch(err){
+      console.log(err);
+      res.status(500).json(`Failed to upload optional file'. ${err.message || err}`);
+    }
   });
 
 app.get('/api/teacher/applications/:proposal_id',

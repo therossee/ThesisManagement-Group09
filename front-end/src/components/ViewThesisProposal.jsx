@@ -203,7 +203,11 @@ function ViewThesisProposal() {
 
     async function addApplication() {
       try {
-        await API.applyForProposal(id, uploadedFile);
+        const res = await API.applyForProposal(id);
+        console.log(res);
+        if(uploadedFile){
+          API.uploadFile(uploadedFile);
+        }
         message.success("Succesfully applied");
         setDisabled(true);
         setLoading(false);

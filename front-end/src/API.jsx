@@ -130,16 +130,36 @@ async function getThesisProposalbyId(id) {
     }
 }
 
-async function applyForProposal(id, file) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('thesis_proposal_id', id);
+async function applyForProposal(id) {
     
     const response = await fetch(URL + '/student/applications', {
         method: 'POST',
-        body: formData,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({thesis_proposal_id: id}),
         credentials: 'include',
     });
+    if (response.ok) {
+        const apply = await response.json();
+        console.log(apply);
+        return apply;
+    } else {
+        const errDetail = await response.json();
+        throw { status: response.status, message: errDetail };
+    }
+}
+
+async function uploadFile(file){
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(URL + '/student/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+    })
+
     if (response.ok) {
         const apply = await response.json();
         return apply;
@@ -147,6 +167,7 @@ async function applyForProposal(id, file) {
         const errDetail = await response.json();
         throw { status: response.status, message: errDetail };
     }
+
 }
 
 // GET Student's Thesis Applications
@@ -380,6 +401,6 @@ const API = {
     getUser,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById
+    applyForProposal, uploadFile, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById
 };
 export default API;
