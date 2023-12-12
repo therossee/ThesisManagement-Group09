@@ -18,10 +18,8 @@ RUN cp -r /build/frontend/dist/* . && rm -rf /build
 ##              BACKEND                      ##
 ###############################################
 WORKDIR /app/backend
-COPY ./backend/*.js ./
-COPY ./backend/*.pem ./
+COPY ./backend/*.js ./backend/*.pem ./backend/package*.json ./
 COPY ./backend/errors/*.js ./errors/
-COPY ./backend/package*.json ./
 RUN npm install --production --ignore-scripts && \
     npm rebuild better-sqlite3 ljharb-monorepo-symlink-test
 
