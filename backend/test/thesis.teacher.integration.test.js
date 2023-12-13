@@ -760,7 +760,7 @@ describe('DELETE /api/thesis-proposals/:id', () => {
 
         // Assertions
         expect(response.status).toBe(404);
-        expect(response.body).toEqual({ message: `No thesis proposal with id ${id} found to delete` });
+        expect(response.body).toEqual({ message: `No thesis proposal with id ${id} found` });
     });
     test('should handle unexpected errors and return 500 Internal Server Error', async () => {
         jest.spyOn(thesisDao, 'deleteThesisProposalById').mockRejectedValueOnce(new Error());
@@ -768,6 +768,122 @@ describe('DELETE /api/thesis-proposals/:id', () => {
         // Make a request to the endpoint
         const response = await agent
             .delete('/api/thesis-proposals/unexpectedErrorId')
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual({ message: 'Internal Server Error' });
+    });
+});
+
+describe('PATCH /api/thesis-proposals/archive/:id', () => {
+    test('should archive a thesis proposal', async () => {
+        const id = 1;
+
+        // Make a request to the endpoint
+        const response = await agent
+            .patch(`/api/thesis-proposals/archive/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(204);
+    });
+    test('should not archive a thesis proposal that has applications approved', async () => {
+        const id = 3;
+
+        // Make a request to the endpoint
+        const response = await agent
+            .patch(`/api/thesis-proposals/archive/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ message: 'Some applications has been accepted and, therefore, you can\'t archive this thesis'});
+    });
+    test('should not archive a inexistent thesis proposal', async () => {
+        const id = 4;
+
+        // Make a request to the endpoint
+        const response = await agent
+            .patch(`/api/thesis-proposals/archive/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({ message: 'No thesis proposal with id 4 found'});
+    });
+    test('should not archive a thesis proposal created in the future', async () => {
+        
+        db.prepare('INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(4, 'Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2030-10-10T10:45:50.121Z', '2032-11-10T23:59:59.999Z', 'LM');
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+        .run(4, 'L-08');
+
+        const id = 4;
+
+        // Make a request to the endpoint
+        const response = await agent
+            .patch(`/api/thesis-proposals/archive/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({ message: 'No thesis proposal with id 4 found'});
+    });
+    test('should not archive a thesis proposal already expired (and archived)', async () => {
+        
+        db.prepare('INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(4, 'Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2020-10-10T10:45:50.121Z', '2022-11-10T23:59:59.999Z', 'LM');
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+        .run(4, 'L-08');
+
+        const id = 4;
+
+        // Make a request to the endpoint
+        const response = await agent
+            .patch(`/api/thesis-proposals/archive/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ message: 'You can\'t archive a thesis already expired'});
+    });
+    test('should not archive a thesis proposal if you are not the supervisor', async () => {
+        
+        db.prepare('INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(4, 'Title', 'd370335', 'research project', 'Description', 'Required knowledge', 'Notes', '2022-10-10T10:45:50.121Z', '2025-11-10T23:59:59.999Z', 'LM');
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+        .run(4, 'L-08');
+
+        const id = 4;
+
+        // Make a request to the endpoint
+        const response = await agent
+            .patch(`/api/thesis-proposals/archive/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ message: 'You are not the supervisor of this thesis'});
+    });
+    test('should handle errors and return the appropriate response', async () => {
+        const id = 'nonExistingProposalId';
+
+        // Make a request to the endpoint
+        const response = await agent
+            .patch(`/api/thesis-proposals/archive/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({ message: `No thesis proposal with id ${id} found` });
+    });
+    test('should handle unexpected errors and return 500 Internal Server Error', async () => {
+        jest.spyOn(thesisDao, 'archiveThesisProposalById').mockRejectedValueOnce(new Error());
+
+        // Make a request to the endpoint
+        const response = await agent
+            .patch('/api/thesis-proposals/archive/unexpectedErrorId')
             .set('credentials', 'include');
 
         // Assertions
