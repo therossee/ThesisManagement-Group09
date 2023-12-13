@@ -57,13 +57,16 @@ search_confirm_button = driver.find_element(By.XPATH, "//span[normalize-space()=
 search_confirm_button.click();
 print("Search confirm button clicked")
 
+result_failed = "Test failed: no proposal found"
+
 driver.implicitly_wait(5)
 text_to_find = "OPTIMIZATION OF CHECK-IN PROCESSES IN AMAZON LOGISTICS"
 text_found  = driver.find_element(By.XPATH, "//td[contains(text(),'OPTIMIZATION OF CHECK-IN PROCESSES IN AMAZON LOGIS')]")
 if text_found.text == text_to_find :
-    print("Test passed, proposal: \"" + text_found.text+"\" found")
+    result1 = "Test passed, proposal: \"" + text_found.text+"\" found"
+    print(result1)
 else:
-    print("Test failed: no proposal found")
+    print(result_failed)
 
 
 #TEST 2: DELETE THE SEARCH FILTER
@@ -89,9 +92,10 @@ driver.implicitly_wait(5)
 text_to_find = "PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFORMANCE OPTIMIZATION"
 text_found  = driver.find_element(By.XPATH, "//td[contains(text(),'PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFOR')]")
 if text_found.text == text_to_find :
-    print("Test passed, proposal: \"" + text_found.text+"\" found")
+    result2 = "Test passed, proposal: \"" + text_found.text+"\" found"
+    print(result2)
 else:
-    print("Test failed: no proposal found")
+    print(result_failed)
 
 
 #TEST 3: FILTER BY LEVEL (FILTERING SYMBOL)
@@ -114,9 +118,10 @@ driver.implicitly_wait(5)
 text_to_find = "PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFORMANCE OPTIMIZATION"
 text_found  = driver.find_element(By.XPATH, "//td[contains(text(),'PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFOR')]")
 if text_found.text == text_to_find :
-    print("Test passed, proposal: \"" + text_found.text+"\" found")
+    result3 = "Test passed, proposal: \"" + text_found.text+"\" found"
+    print(result3)
 else:
-    print("Test failed: no proposal found")
+    print(result_failed)
 
 #LOGOUT
 driver.implicitly_wait(5)

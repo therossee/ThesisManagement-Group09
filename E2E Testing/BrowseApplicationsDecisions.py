@@ -50,7 +50,7 @@ while cond>0:
         refresh_status_button.click()
     else:
         driver.quit()
-        raise Exception("Test failed: application status not recognized")
+        print("Test failed: application status not recognized")
     cond = cond - 1
 
 

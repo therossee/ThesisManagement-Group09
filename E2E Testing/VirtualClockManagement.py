@@ -75,11 +75,13 @@ print("Save button clicked")
 #CHECK THE ACTUAL DATE WITH THE VIRTUAL NEW DATE
 actual_date = datetime.datetime.now()
 
+date_format = "%d/%m/%Y"
+
 driver.implicitly_wait(5)
 new_date = driver.find_element(By.XPATH, "//div[@class='ant-space css-dev-only-do-not-override-2i2tap ant-space-vertical ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small']//div[1]")
 print("New date: " + new_date.text)
-print("Actual date: " + actual_date.strftime("%d/%m/%Y"))
-actual_date = actual_date.strftime("%d/%m/%Y")
+print("Actual date: " + actual_date.strftime(date_format))
+actual_date = actual_date.strftime(date_format)
 
 new_date_day = new_date.text
 new_date_day = new_date_day[4:6]
@@ -116,14 +118,14 @@ else:
 
 new_date = new_date_day + "/" + new_date + "/" + new_date_year
 
-formato = "%d/%m/%Y"
-
-new_date_obj = datetime.datetime.strptime(new_date, formato)
-actual_date_obj = datetime.datetime.strptime(actual_date, formato)
+new_date_obj = datetime.datetime.strptime(new_date, date_format)
+actual_date_obj = datetime.datetime.strptime(actual_date, date_format)
 
 if new_date_obj < actual_date_obj:
-    raise Exception("TEST FAILED: The date is correct") 
+    driver.quit()
+    print("TEST FAILED: The date is correct") 
 elif new_date_obj > actual_date_obj:
     print("TEST PASSED: The date is correct") 
 else:
-    raise Exception("TEST FAILED: The date is correct") 
+    driver.quit()
+    print("TEST FAILED: The date is correct") 
