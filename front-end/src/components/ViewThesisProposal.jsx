@@ -1,6 +1,6 @@
 import { React, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button, Descriptions, Modal, Skeleton, Typography, Tag, message, Upload } from "antd";
+import { Alert, Button, Descriptions, Modal, Skeleton, Typography, Tag, message, Upload } from "antd";
 import { UploadOutlined } from '@ant-design/icons';
 import { useAuth } from '../components/authentication/useAuth';
 import PropTypes from 'prop-types';
@@ -188,7 +188,7 @@ function MyModal(props) {
     }
     const isSizeValid = file.size / 1024 / 1024 < 10; // 10MB limit
     if (!isSizeValid) {
-      message.error('File size exceeds the limit (5MB).');
+      message.error('File size exceeds the limit (10MB).');
       return Upload.LIST_IGNORE; // Prevent file load
     }
     return true; // Continue
@@ -221,7 +221,7 @@ function MyModal(props) {
   async function addApplication() {
     try {
       await API.applyForProposal(id, uploadedFile);
-      message.success("Succesfully applied");
+      message.success("Successfully applied");
       setUploadedFile(null);
       setDisabled(true);
       setLoading(false);
@@ -242,6 +242,7 @@ function MyModal(props) {
       okButtonProps={{ loading: loading }}
       cancelText="Cancel"
     >
+      <Alert message="PDF upload is optional" type="info" showIcon closable style={{marginBottom: "7px"}}/>
       <Upload.Dragger
         beforeUpload={beforeUpload}
         onChange={onChange}
@@ -254,7 +255,7 @@ function MyModal(props) {
         <p className="ant-upload-drag-icon">
           <UploadOutlined />
         </p>
-        <p className="ant-upload-text">Click or drag file to this area to upload</p>
+        <p className="ant-upload-text">Click or drag to this area to upload a PDF file</p>
         <p className="ant-upload-hint">Max one PDF allowed (10MB)</p>
       </Upload.Dragger>
     </Modal>

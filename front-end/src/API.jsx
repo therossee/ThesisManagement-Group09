@@ -5,19 +5,19 @@ const URL = 'http://localhost:3000/api';
 
 async function logOut() {
     await fetch("http://localhost:3000/logout", {
-      method: "POST",
-      credentials: "include",
+        method: "POST",
+        credentials: "include",
     });
     window.location.replace("http://localhost:5173");
 }
-  
+
 const redirectToLogin = () => {
     window.location.replace("http://localhost:3000/login");
 };
 
 
 async function getUser() {
-    const response = await fetch(URL+'/user', {
+    const response = await fetch(URL + '/user', {
         method: 'GET',
         credentials: 'include',
     });
@@ -178,6 +178,7 @@ async function getTeacherThesisApplications(proposalId) {
             name: x.name,
             surname: x.surname,
             status: x.status,
+            application_id: x.application_id,
             id: x.id
         }));
     } else {
@@ -316,24 +317,24 @@ async function getStudentApplicationsHistory() {
 }
 
 async function archiveProposalById(id) {
-    const response = await fetch(URL +  `/thesis-proposals/archive/${id} `, {
+    const response = await fetch(URL + `/thesis-proposals/archive/${id} `, {
         method: 'PATCH',
         credentials: 'include'
     });
     if (response.ok) {
-        return response; 
+        return response;
     } else {
         throw response;
     }
 }
 
 async function deleteProposalById(id) {
-    const response = await fetch(URL +  `/thesis-proposals/${id} `, {
+    const response = await fetch(URL + `/thesis-proposals/${id} `, {
         method: 'DELETE',
         credentials: 'include'
     });
     if (response.ok) {
-        return response; 
+        return response;
     } else {
         throw response;
     }
@@ -377,11 +378,27 @@ async function getStudentCVById(id) {
     }
 }
 
+// getPDF
+async function getPDF(student_id, applicationId) {
+    const response = await fetch(URL + `/teacher/uploads/${student_id}/${applicationId}`, {
+        method: 'GET',
+        credentials: 'include',
+    });
+    if (response.ok) {
+            const file = await response.blob();
+            if (file.type === "application/pdf")
+                return file;
+            return null;
+    } else {
+        throw response.json();
+    }
+}
+
 const API = {
     logOut, redirectToLogin,
     getUser,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById
+    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById, getPDF
 };
 export default API;
