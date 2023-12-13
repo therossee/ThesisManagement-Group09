@@ -693,7 +693,6 @@ app.get('/api/teacher/uploads/:stud_id/:app_id',
       const application_id = req.params.app_id;
       const student_id = req.params.stud_id;
       const dir = path.join(__dirname, 'uploads', student_id, application_id);
-      let fulldir = "";
 
       if (fs.existsSync(dir)) {
         const files = await fs.promises.readdir(dir);
