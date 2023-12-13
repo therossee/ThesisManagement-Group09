@@ -101,7 +101,7 @@ function TeacherApplications() {
                         dataSource={x.applications}
                         renderItem={(student) => (
                             <List.Item key={student.id}>
-                                <div className="wrapper-enlight" onClick={() => { setStudentInfo(student); setApplicationId(student.application_id); setIsOpen(true) }} onKeyDown={() => { }} role="button">
+                                <button className="wrapper-enlight" onClick={() => { setStudentInfo(student); setApplicationId(student.application_id); setIsOpen(true) }} onKeyDown={() => { }}>
                                     <List.Item.Meta
                                         avatar={<Avatar icon={<UserOutlined />} />}
                                         style={{ padding: ".5%" }}
@@ -123,7 +123,7 @@ function TeacherApplications() {
                                                 onClick={(e) => { e.stopPropagation(); rejectApplication(x.id, student) }} />
                                         </Tooltip>
                                     </Flex>
-                                </div>
+                                </button>
                             </List.Item>
                         )}
                     />
