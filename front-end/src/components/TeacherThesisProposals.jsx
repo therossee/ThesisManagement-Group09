@@ -32,8 +32,8 @@ function TeacherThesisProposals() {
         {
             title: 'Co-Supervisors',
             dataIndex: 'coSupervisors',
-            render: (_, x) => x.coSupervisors.map((cosupervisor, i) => (
-                <Tag color="blue" key={i}>
+            render: (_, x) => x.coSupervisors.map( cosupervisor => (
+                <Tag color="blue" key={cosupervisor.name + " " + cosupervisor.surname}>
                     {cosupervisor.name + " " + cosupervisor.surname}
                 </Tag>
             )),
@@ -41,8 +41,8 @@ function TeacherThesisProposals() {
         {
             title: 'Keywords',
             dataIndex: 'keywords',
-            render: (_, x) => x.keywords.map((keyword, i) => (
-                <Tag color="blue" key={i}>
+            render: (_, x) => x.keywords.map( keyword => (
+                <Tag color="blue" key={keyword}>
                     {keyword}
                 </Tag>
             )),
@@ -55,8 +55,8 @@ function TeacherThesisProposals() {
         {
             title: 'Groups',
             dataIndex: 'groups',
-            render: (_, x) => x.groups.map((group, i) => (
-                <Tag color="blue" key={i}>
+            render: (_, x) => x.groups.map( group => (
+                <Tag color="blue" key={group}>
                     {group}
                 </Tag>
             )),
@@ -64,8 +64,8 @@ function TeacherThesisProposals() {
         {
             title: 'CdS',
             dataIndex: 'CdS',
-            render: (_, x) => x.cds.map((cds, i) => (
-                <Tag color="blue" key={i}>
+            render: (_, x) => x.cds.map( cds => (
+                <Tag color="blue" key={cds.title_degree}>
                     {cds.title_degree}
                 </Tag>
             )),
@@ -88,12 +88,12 @@ function TeacherThesisProposals() {
                         <EditOutlined style={{ fontSize: '20px' }} onClick={() => navigate(`/edit-proposal/${record.id}`)} />
                     </Tooltip>
                     <Tooltip title="Delete Proposal">
-                        <Popconfirm 
+                        <Popconfirm
                         title="Confirm action"
                         description="Are you sure you want to delete this proposal?"
-                        icon={<QuestionCircleOutlined style={{ color: 'red' }} />} 
-                        onConfirm={() => deleteProposalById(record.id)} 
-                        okText="Yes" 
+                        icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+                        onConfirm={() => deleteProposalById(record.id)}
+                        okText="Yes"
                         cancelText="No"
                         >
                          <DeleteOutlined style={{ fontSize: '20px' }} />
@@ -182,9 +182,7 @@ function TeacherThesisProposals() {
     }
 
     return (
-
         <Table {...tableProps} columns={columns} dataSource={data} />
-
     )
 }
 
