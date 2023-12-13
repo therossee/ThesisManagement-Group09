@@ -697,6 +697,17 @@ app.get('/api/teacher/uploads/:stud_id/:app_id',
     try {
       const application_id = req.params.app_id;
       const student_id = req.params.stud_id;
+
+      const student = await usersDao.getStudentById(student_id);
+      if(!student){
+        return res.status(404).json({ message: `Student with id ${student_id} not found.` });
+      }
+
+      const application = await thesisDao.getApplicationById(application_id);
+      if(!application || application.student_id !== student_id){
+        return res.status(404).json({ message: `Application with id ${application_id} not found.` });
+      }
+      
       const dir = path.join(__dirname, 'uploads', student_id, application_id);
 
       if (fs.existsSync(dir)) {
