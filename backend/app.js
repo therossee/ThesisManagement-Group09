@@ -684,41 +684,43 @@ async (req, res) => {
   }
 });
 
-app.get('/api/teacher/checkfile/:app_id/:stud_id',
+app.get('/api/teacher/checkfile/:stud_id/:app_id',
 isLoggedIn,
 isTeacher,
 async (req, res) => {
   try{
     const application_id = req.params.app_id;
     const student_id = req.params.stud_id;
-    const dir = path.join(__dirname, uploads, student_id, application_id);
-    if(fs.existsSync(dir)){
+    const dir = path.join(__dirname, 'uploads', student_id, application_id);
+
+    const exists = fs.existsSync(dir);
+    console.log(exists);
+    if(exists){
       fs.readdir(dir, (err, files) => {
-        if (err) {
+        if(err){
           console.error(err);
           res.status(500).json('Internal Server Error');
-        } else {
-          const fileName = files[0]; // Prende il primo file
-          res.json({ exists: true, fileName: fileName });
+        }else{
+          res.status(200).json({ exists: true, fileName: files[0] });
         }
       });
     }else{
-      res.json({ exists: false });
+      res.status(200).json({ exists: false });
     }
   }catch(e){
     console.error(e);
-    res.status(500).json('Internal Server Error');
+    res.status(500).json('Sono sotto');
   }
 });
 
-app.get('/api/teacher/uploads/:app_id/:stud_id',
+app.get('/api/teacher/uploads/:stud_id/:app_id',
 isLoggedIn,
 isTeacher,
 async (req, res) => {
   try{
     const application_id = req.params.app_id;
     const student_id = req.params.stud_id;
-    const dir = path.join(__dirname, uploads, student_id, application_id);
+    const dir = path.join(__dirname, 'uploads', student_id, application_id);
     if(fs.existsSync(dir)){
       fs.readdir(dir, (err, files) => {
         if (err) {

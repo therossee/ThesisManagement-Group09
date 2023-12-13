@@ -174,10 +174,12 @@ async function getTeacherThesisApplications(proposalId) {
     const applications = await response.json();
 
     if (response.ok) {
+        console.log(applications);
         return applications.map((x) => ({
             name: x.name,
             surname: x.surname,
             status: x.status,
+            application_id: x.application_id,
             id: x.id
         }));
     } else {
@@ -378,7 +380,7 @@ async function getStudentCVById(id) {
 }
 
 // GET file exists
-async function checkFileExists(applicationId, student_id) {
+async function checkFileExists(student_id, applicationId) {
     const response = await fetch(URL + `/teacher/checkfile/${student_id}/${applicationId}`, {
         method: 'GET',
         credentials: 'include',

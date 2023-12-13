@@ -6,24 +6,34 @@ import API from '../API';
 
 function StudentCV(props) {
 
-    const { isOpen, setIsOpen, studentInfo } = props;
+    const { isOpen, setIsOpen, studentInfo, applicationId } = props;
     const { Title, Text } = Typography;
 
     const [isLoading, setIsLoading] = useState(true);
 
     // Store exams info
     const [data, setData] = useState(true);
+    const [filename, setFilename] = useState(null);
 
     useEffect(() => {
         setIsLoading(true);
         API.getStudentCVById(studentInfo.id)
             .then((x) => {
-                setIsLoading(false);
                 setData(x);
             })
             .catch((err) => {
                 message.error(err.message ? err.message : err);
+            });
+        API.checkFileExists(studentInfo.id, applicationId)
+            .then(x => {
+                console.log(x);
+                if(x){
+                    setFilename(x.fileName);
+                }
                 setIsLoading(false);
+            })
+            .catch((err) => {
+                message.error(err.message ? err.message : err);
             });
         
     }, []);
@@ -84,6 +94,7 @@ function StudentCV(props) {
                                     <Col span={1}><Text type="secondary">{x.cfu}</Text></Col>
                                 </Row>
                             ))}
+                            {filename && (<a href={`${URL}/teacher/uploads/${studentInfo.id}/${applicationId}`}>{filename}</a>)}
                         </>
                         :
                         <Flex vertical style={{justify:"center", align:"center", marginTop:"30px"}}>

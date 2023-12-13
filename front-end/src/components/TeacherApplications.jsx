@@ -20,6 +20,7 @@ function TeacherApplications() {
 
     // Which student should be seen in the drawer?
     const [studentInfo, setStudentInfo] = useState(null);
+    const [applicationId, setApplicationId] = useState(-1);
 
     const { Title } = Typography;
 
@@ -42,6 +43,7 @@ function TeacherApplications() {
                             }
                         })
                     );
+                    console.log(newData);
                     setData(newData);
                     setIsLoading(false);
                     setDirty(false);
@@ -100,7 +102,7 @@ function TeacherApplications() {
                         dataSource={x.applications}
                         renderItem={(student) => (
                             <List.Item key={student.id}>
-                                <div className="wrapper-enlight" onClick={() => { setStudentInfo(student); setIsOpen(true) }} onKeyDown={() => {}} role="button">
+                                <div className="wrapper-enlight" onClick={() => { setStudentInfo(student); setApplicationId(student.application_id); setIsOpen(true) }} onKeyDown={() => {}} role="button">
                                 <List.Item.Meta
                                     avatar={<Avatar icon={<UserOutlined />} />}
                                     style={{padding: ".5%"}}
@@ -137,7 +139,7 @@ function TeacherApplications() {
         data.length > 0 ?
             <>
                 <Alert message="To view a specific applicant's CV and eventually the file uploaded within the application, simply click anywhere in the corresponding row." type="info" showIcon closable />
-                {isOpen && <StudentCV isOpen={isOpen} setIsOpen={setIsOpen} studentInfo={studentInfo} />}
+                {isOpen && <StudentCV isOpen={isOpen} setIsOpen={setIsOpen} studentInfo={studentInfo} applicationId={applicationId}/>}
                 <ApplicationsList />
             </>
             :
