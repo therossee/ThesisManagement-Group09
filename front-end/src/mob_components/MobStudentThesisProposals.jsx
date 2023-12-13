@@ -190,8 +190,9 @@ function MobStudentThesisProposals() {
                         Title
                         <Input clearable name='searchTitle' placeholder="Insert here" value={searchTitle} onChange={e => { setSearchTitle(e); }} />
                     </Form.Item>
+                    <Collapse accordion>
+                    <Collapse.Panel key="level" title="Level">
                     <Form.Item>
-                        Level
                         <Selector options={data.reduce((accumulator, x) => {
                             // Check if there is alreadythe obj
                             const existingObject = accumulator.find(item => item.value === x.level);
@@ -206,9 +207,9 @@ function MobStudentThesisProposals() {
                         }, [])} placeholder="Level" onChange={(arr, extend) => setLevels(...arr, extend.items)}
                             multiple key={resetTrigger}/>
                     </Form.Item>
-
+                    </Collapse.Panel>
+                    <Collapse.Panel key="supervisors" title="Supervisors">
                     <Form.Item>
-                        Supervisors
                         <Selector options={data.reduce((accumulator, x) => {
                             // Check if there is already the obj
                             const existingObject = accumulator.find(item => item.value === x.supervisor.id);
@@ -227,8 +228,9 @@ function MobStudentThesisProposals() {
                             multiple
                             key={resetTrigger} />
                     </Form.Item>
+                    </Collapse.Panel>
+                    <Collapse.Panel key="co-supervisors" title="Co-Supervisors">
                     <Form.Item>
-                        Co-Supervisors
                         <Selector options={data.reduce((accumulator, x) => {
                             x.coSupervisors.forEach(cosupervisor => {
                                 // Check if there is already the obj
@@ -246,6 +248,8 @@ function MobStudentThesisProposals() {
                             multiple
                             key={resetTrigger} />
                     </Form.Item>
+                    </Collapse.Panel>
+                    <Collapse.Panel title="Keywords" key="keywords">
                     <Form.Item>
                         Keywords
                         <Selector multiple options={data.reduce((accumulator, x) => {
@@ -264,6 +268,8 @@ function MobStudentThesisProposals() {
                         }, [])} placeholder="Keywords" onChange={(arr, extend) => setKeywords(extend.items)}
                             key={resetTrigger} />
                     </Form.Item>
+                    </Collapse.Panel>
+                    <Collapse.Panel key="types" title="Types">
                     <Form.Item>
                         Types
                         <Selector
@@ -282,6 +288,8 @@ function MobStudentThesisProposals() {
                             }, [])} placeholder="Type" onChange={(arr, extend) => setTypes(extend.items)}
                             key={resetTrigger} />
                     </Form.Item>
+                    </Collapse.Panel>
+                    <Collapse.Panel key="groups" title="Groups">
                     <Form.Item>
                         Groups
                         <Selector multiple options={data.reduce((accumulator, x) => {
@@ -300,7 +308,8 @@ function MobStudentThesisProposals() {
                         }, [])} placeholder="Groups" onChange={(arr, extend) => setGroups(extend.items)}
                             key={resetTrigger} />
                     </Form.Item>
-
+                    </Collapse.Panel>
+                    </Collapse>
                     <Form.Item>
                         Expiration interval
                         <div>
