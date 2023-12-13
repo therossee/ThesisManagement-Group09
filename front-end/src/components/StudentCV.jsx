@@ -6,8 +6,6 @@ import API from '../API';
 
 function StudentCV(props) {
 
-    const URL = 'http://localhost:3000';
-
     const { isOpen, setIsOpen, studentInfo, applicationId } = props;
     const { Title, Text } = Typography;
 
@@ -58,7 +56,7 @@ function StudentCV(props) {
             open={isOpen}
             onClose={() => setIsOpen(false)}
             extra={
-                <Button disabled={!file} onClick={() => openPDF({file})}>View attached PDF</Button>
+                <Button disabled={!file} onClick={() => openPDF({ file })}>View attached PDF</Button>
             }>
             {isLoading ?
                 <Skeleton active />

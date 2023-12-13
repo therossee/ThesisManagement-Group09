@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Input, Button, Space, Table, Form, Drawer, DatePicker, Tag, Tooltip } from 'antd';
+import { Input, Button, Space, Table, Form, Drawer, DatePicker, Tag, Tooltip, message } from 'antd';
 import { SearchOutlined, EyeOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
@@ -68,14 +68,14 @@ function StudentThesisProposals() {
             .then((clock) => {
                 setDate(dayjs().add(clock.offset, 'ms'));
             })
-            .catch((err) => { messageApi.error(err.message ? err.message : err) });
+            .catch((err) => { message.error(err.message ? err.message : err) });
         API.getThesisProposals()
             .then((x) => {
                 setData(handleReceivedData(x));
                 setIsLoadingTable(false);
             })
-            .catch((err) => { messageApi.error(err.message ? err.message : err) });
-        
+            .catch((err) => { message.error(err.message ? err.message : err) });
+
     }, []);
 
     const navigate = useNavigate();
