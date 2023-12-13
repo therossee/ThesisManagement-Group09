@@ -59,11 +59,15 @@ print("Search confirm button clicked")
 
 result_failed = "Test failed: no proposal found"
 
+passed_string = "Test passed, proposal: \""
+
+found_string = "\" found"
+
 driver.implicitly_wait(5)
 text_to_find = "OPTIMIZATION OF CHECK-IN PROCESSES IN AMAZON LOGISTICS"
 text_found  = driver.find_element(By.XPATH, "//td[contains(text(),'OPTIMIZATION OF CHECK-IN PROCESSES IN AMAZON LOGIS')]")
 if text_found.text == text_to_find :
-    result1 = "Test passed, proposal: \"" + text_found.text+"\" found"
+    result1 = passed_string + text_found.text+ found_string
     print(result1)
 else:
     print(result_failed)
@@ -92,7 +96,7 @@ driver.implicitly_wait(5)
 text_to_find = "PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFORMANCE OPTIMIZATION"
 text_found  = driver.find_element(By.XPATH, "//td[contains(text(),'PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFOR')]")
 if text_found.text == text_to_find :
-    result2 = "Test passed, proposal: \"" + text_found.text+"\" found"
+    result2 = passed_string  + text_found.text+ found_string
     print(result2)
 else:
     print(result_failed)
@@ -118,7 +122,7 @@ driver.implicitly_wait(5)
 text_to_find = "PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFORMANCE OPTIMIZATION"
 text_found  = driver.find_element(By.XPATH, "//td[contains(text(),'PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFOR')]")
 if text_found.text == text_to_find :
-    result3 = "Test passed, proposal: \"" + text_found.text+"\" found"
+    result3 = passed_string + text_found.text+ found_string
     print(result3)
 else:
     print(result_failed)

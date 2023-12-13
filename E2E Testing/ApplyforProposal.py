@@ -52,15 +52,16 @@ print(status_string.text)
 driver.implicitly_wait(5)
 refresh_status_button = driver.find_element(By.XPATH, "//span[normalize-space()='Refresh List']")
  
+string_status = "Continue with the test"
 if status_string.text == "accepted":
     driver.quit()
     print("Test failed: cannot apply for a proposal if already one is accepted")
 elif status_string.text == "waiting for approval":
-    print("Continue with the test")
+    print(string_status)
 elif status_string.text == "rejected":
-    print("Continue with the test")
+    print(string_status)
 else:
-    print("Continue with the test")
+    print(string_status)
 
 #TEST 2: APPLY FOR A PROPOSAL
 #Click on thesis proposals

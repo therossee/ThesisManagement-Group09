@@ -121,11 +121,8 @@ new_date = new_date_day + "/" + new_date + "/" + new_date_year
 new_date_obj = datetime.datetime.strptime(new_date, date_format)
 actual_date_obj = datetime.datetime.strptime(actual_date, date_format)
 
-if new_date_obj < actual_date_obj:
+if new_date_obj < actual_date_obj or new_date_obj == actual_date_obj:
     driver.quit()
-    print("TEST FAILED: The date is correct") 
+    print("TEST FAILED: The virtual date it's before the actual date") 
 elif new_date_obj > actual_date_obj:
-    print("TEST PASSED: The date is correct") 
-else:
-    driver.quit()
-    print("TEST FAILED: The date is correct") 
+    print("TEST PASSED: The date is correct")

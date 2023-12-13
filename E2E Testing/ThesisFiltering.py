@@ -57,12 +57,13 @@ search_confirm_button = driver.find_element(By.XPATH, "//span[normalize-space()=
 search_confirm_button.click();
 print("Search confirm button clicked")
 
-
+string_passed = "Test passed, proposal: \""
+string_found = "\" found"
 
 driver.implicitly_wait(5)
 text_to_find = "OPTIMIZATION OF CHECK-IN PROCESSES IN AMAZON LOGISTICS"
 text_found  = driver.find_element(By.XPATH, "//td[contains(text(),'OPTIMIZATION OF CHECK-IN PROCESSES IN AMAZON LOGIS')]")
-result = "Test passed, proposal: \"" + text_found.text+"\" found"
+result = string_passed + text_found.text+string_found
 result_failed = "Test failed: no proposal found"
 if text_found.text == text_to_find :
     print(result)
@@ -93,7 +94,7 @@ driver.implicitly_wait(5)
 text_to_find = "PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFORMANCE OPTIMIZATION"
 XPATH_text_found = "//td[contains(text(),'PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFOR')]"
 text_found  = driver.find_element(By.XPATH, XPATH_text_found)
-result = "Test passed, proposal: \"" + text_found.text+"\" found"
+result = string_passed + text_found.text+string_found
 if text_found.text == text_to_find :
     print(result)
 else:
@@ -119,7 +120,7 @@ print("Filter confirm button clicked")
 driver.implicitly_wait(5)
 text_to_find = "PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFORMANCE OPTIMIZATION"
 text_found  = driver.find_element(By.XPATH, XPATH_text_found)
-result = "Test passed, proposal: \"" + text_found.text+"\" found"
+result = string_passed + text_found.text+string_found
 if text_found.text == text_to_find :
     print(result)
 else:
@@ -145,7 +146,7 @@ print("Filter confirm button clicked")
 
 driver.implicitly_wait(5)
 text_found  = driver.find_element(By.XPATH, XPATH_text_found)
-result = "Test passed, proposal: \"" + text_found.text+"\" found"
+result = string_passed + text_found.text+string_found
 if text_found.text == text_to_find :
     print(result)
 else:
@@ -171,7 +172,7 @@ print("Filter ok button clicked")
 driver.implicitly_wait(5)
 text_to_find = "Isabella Gatti"
 text_found  = driver.find_element(By.XPATH, "//body[1]/div[1]/div[1]/div[1]/main[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/table[1]/tbody[1]/tr[2]/td[3]/span[1]")
-result = "Test passed, proposal: \"" + text_found.text+"\" found"
+result = string_passed + text_found.text+string_found
 if text_found.text == text_to_find :
     print(result)
 else:
