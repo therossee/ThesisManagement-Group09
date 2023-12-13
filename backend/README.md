@@ -16,13 +16,24 @@ The validators are the JSON schemas that are used to validate the requests using
 There are the Data Access Object modules for accessing thesis/users/degree data.
 The controllers are responsible for handling the requests and responses. They are located in the `controllers` directory.
 In this directory, each controller has its own file with all the methods that handle the requests for that controller.
-### Index
+### App.js
 Contains the API for the working project.
 
-### Authentication APIs
+### Authentication Middleware
+Several middleware functions are defined to check user authentication and roles. These include:
 
-- POST `/api/user`
-    - Get the current logged-in user
+- `isLoggedIn`: Checks if the user is authenticated.
+- `isStudent`, `isTeacher`, `isTester`: Checks if the authenticated user has the specified role.
+
+### Authentication APIs
+- GET `/login`
+    - Endpoint for initiating SAML authentication
+- POST `/sso/callback`
+    - Endpoint for receiving SAML responses 
+- POST `/logout`
+    - Endpoint for logging out
+- GET `/api/user`
+    - Returns information about the authenticated user.
 
 ### Virtual Clock APIs
 
@@ -36,7 +47,7 @@ Contains the API for the working project.
 
 - POST `/api/teacher/thesis_proposals`
     - Inserts a new thesis proposal in the database
-    - The body requires title, internal supervisors, external supervisors, type, description, required knowledge, note, level, cds and keywords
+    - The body requires title, internal supervisors, external supervisors, type, description, required knowledge, notes, level, cds and keywords
     - Authenticated by the teacher, responds with the thesis proposal in json format
 
 - GET `/api/teachers`
