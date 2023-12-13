@@ -4,7 +4,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys # for sending keys suchn as ENTER, RETURN...
 from selenium.webdriver.common.by import By
-
+import datetime
 
 options = Options()
 options.add_experimental_option("detach", True) # keep browser open after test
@@ -62,7 +62,7 @@ print("Year button clicked")
 
 #SELECT THE DAY
 driver.implicitly_wait(5)
-day_button = driver.find_element(By.XPATH, "//td[@title='2024-12-11']//div[@class='ant-picker-cell-inner'][normalize-space()='11']")
+day_button = driver.find_element(By.XPATH, "//div[@class='ant-picker-cell-inner'][normalize-space()='24']")
 day_button.click();
 print("Day button clicked")
 
@@ -71,3 +71,59 @@ driver.implicitly_wait(5)
 save_button = driver.find_element(By.XPATH, "//span[normalize-space()='SAVE NEW CLOCK']")
 save_button.click();
 print("Save button clicked")
+
+#CHECK THE ACTUAL DATE WITH THE VIRTUAL NEW DATE
+actual_date = datetime.datetime.now()
+
+driver.implicitly_wait(5)
+new_date = driver.find_element(By.XPATH, "//div[@class='ant-space css-dev-only-do-not-override-2i2tap ant-space-vertical ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small']//div[1]")
+print("New date: " + new_date.text)
+print("Actual date: " + actual_date.strftime("%d/%m/%Y"))
+actual_date = actual_date.strftime("%d/%m/%Y")
+
+new_date_day = new_date.text
+new_date_day = new_date_day[4:6]
+
+new_date_year = new_date.text
+new_date_year = new_date_year[8:12]
+
+new_date_month = new_date.text
+new_date_month = new_date_month[0:2]
+if new_date_month == "Dec":
+    new_date = "12"
+elif new_date_month == "Nov":
+    new_date = "11"
+elif new_date_month == "Oct":
+    new_date = "10"
+elif new_date_month == "Sep":
+    new_date = "09"
+elif new_date_month == "Aug":
+    new_date = "08"
+elif new_date_month == "Jul":
+    new_date = "07"
+elif new_date_month == "Jun":
+    new_date = "06"
+elif new_date_month == "May":
+    new_date = "05"
+elif new_date_month == "Apr":
+    new_date = "04"
+elif new_date_month == "Mar":
+    new_date = "03"
+elif new_date_month == "Feb":
+    new_date = "02"
+else:
+    new_date = "01"
+
+new_date = new_date_day + "/" + new_date + "/" + new_date_year
+
+formato = "%d/%m/%Y"
+
+new_date_obj = datetime.datetime.strptime(new_date, formato)
+actual_date_obj = datetime.datetime.strptime(actual_date, formato)
+
+if new_date_obj < actual_date_obj:
+    raise Exception("TEST FAILED: The date is correct") 
+elif new_date_obj > actual_date_obj:
+    print("TEST PASSED: The date is correct") 
+else:
+    raise Exception("TEST FAILED: The date is correct") 
