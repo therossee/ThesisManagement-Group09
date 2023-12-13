@@ -18,6 +18,32 @@ function resetTestDatabase() {
 }
 resetTestDatabase();
 
+
+/** SAML Passport mock */
+jest.mock('passport-saml', () => {
+    const Strategy = jest.requireActual('passport-saml').Strategy;
+    return {
+        Strategy: class MockStrategy extends Strategy {
+            authenticate(req, options) {
+                if (!req.headers['x-user-id'] || !req.headers['x-user-name'] || !req.headers['x-user-roles']) {
+                    this.fail('Missing mock authentication headers');
+                }
+
+                const user = {
+                    id: req.headers['x-user-id'],
+                    name: req.headers['x-user-name'],
+                    roles: req.headers['x-user-roles'].split(','),
+                };
+
+                console.log('Mocking Passport-SAML authentication with user:', user);
+
+                this.success(user);
+            }
+        },
+    };
+});
+
+
 /** Extend Jest */
 
 /**

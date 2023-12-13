@@ -5,28 +5,12 @@ const { resetTestDatabase } = require('./integration_config');
 const dayjs = require('dayjs');
 const request = require("supertest");
 const { app } = require("../app");
+const utils = require("./utils");
 const AdvancedDate = require("../AdvancedDate");
 
-// Mock Passport-SAML authenticate method
-jest.mock('passport-saml', () => {
-    const Strategy = jest.requireActual('passport-saml').Strategy;
-    return {
-      Strategy: class MockStrategy extends Strategy {
-        authenticate(req, options) {
-          const user = {
-            id: 'd279620',
-            name: 'Marco Rossi',
-            roles: ['teacher', 'tester'],
-          };
-          this.success(user);
-        }
-      },
-    };
-});
-
+let agent;
 beforeAll(async () => {
-    agent = request.agent(app);
-    await agent.get('/login');
+    agent = await utils.getMarcoRossiAgent();
 });
 
 describe('[INTEGRATION] Virtual Clock APIs', () => {
