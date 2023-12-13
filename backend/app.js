@@ -538,7 +538,7 @@ app.post('/api/student/applications',
       }
 
       const student_id = req.user.id;
-      const thesis_proposal_id = fields.thesis_proposal_id;
+      const thesis_proposal_id = fields.thesis_proposal_id[0];
       const upload = (files.file) ? files.file[0] : undefined;
 
       try {
