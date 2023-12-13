@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button, Descriptions, Modal, Skeleton, Typography, Tag, message, Upload } from "antd";
 import { UploadOutlined } from '@ant-design/icons';
 import { useAuth } from '../components/authentication/useAuth';
+import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
 import API from "../API";
 
@@ -246,7 +247,7 @@ function ViewThesisProposal() {
 
   return (
     <>
-      <MyModal />
+      <MyModal setIsOpen={setIsOpen} setLoading={setLoading} setDisabled={setDisabled} isOpen={isOpen} loading={loading} />
       <Button type="link" onClick={() => navigate("/proposals")}>&lt; Back to Thesis Proposals</Button>
       <div style={{ paddingLeft: "2%", marginRight: "2%" }}>
         <Descriptions title={data.title} layout="vertical" items={items} />
@@ -254,6 +255,104 @@ function ViewThesisProposal() {
       </div>
     </>
   )
+}
+
+function MyModal(props) {
+
+  const { setIsOpen, setLoading, setDisabled, isOpen, loading } = props;
+
+  const { id } = useParams();
+
+  // Handling file uplaoded
+  const [uploadedFile, setUploadedFile] = useState(null);
+
+  const beforeUpload = file => {
+    const isPDF = file.type === 'application/pdf';
+    if (!isPDF) {
+      message.error('You can only upload PDF files!');
+      return Upload.LIST_IGNORE; // Prevent file load
+    }
+    const isSizeValid = file.size / 1024 / 1024 < 10; // 10MB limit
+    if (!isSizeValid) {
+      message.error('File size exceeds the limit (5MB).');
+      return Upload.LIST_IGNORE; // Prevent file load
+    }
+    return true; // Continue
+  };
+
+  const handleUpload = ({ file, onSuccess, onError }) => {
+    try {
+      setUploadedFile(file);
+      onSuccess();
+    }
+    catch {
+      onError();
+    }
+  }
+
+  const onChange = info => {
+    if (info.file.status === 'done') {
+      message.success(`${info.file.name} loaded`);
+    } else if (info.file.status === 'error') {
+      message.error(`${info.file.name} failed to load`);
+    }
+  }
+
+  const applyForProposal = () => {
+    setLoading(true);
+    addApplication();
+    setIsOpen(false);
+  }
+
+  async function addApplication() {
+    try {
+      await API.applyForProposal(id, uploadedFile);
+      message.success("Succesfully applied");
+      setUploadedFile(null);
+      setDisabled(true);
+      setLoading(false);
+    } catch (err) {
+      message.error(err.message ? err.message : err);
+      setUploadedFile(null);
+      setDisabled(false);
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Modal title="Application"
+      open={isOpen}
+      onCancel={() => { setUploadedFile(null); setIsOpen(false) }}
+      onOk={applyForProposal}
+      okText="Send"
+      okButtonProps={{ loading: loading }}
+      cancelText="Cancel"
+    >
+      <Upload.Dragger
+        beforeUpload={beforeUpload}
+        onChange={onChange}
+        customRequest={handleUpload}
+        file={uploadedFile}
+        maxCount={1}
+        multiple={false}
+        onRemove={() => setUploadedFile(null)}
+      >
+        <p className="ant-upload-drag-icon">
+          <UploadOutlined />
+        </p>
+        <p className="ant-upload-text">Click or drag file to this area to upload</p>
+        <p className="ant-upload-hint">Max one PDF allowed (10MB)</p>
+      </Upload.Dragger>
+    </Modal>
+  )
+}
+
+MyModal.propTypes = {
+  setIsOpen: PropTypes.func.isRequired,
+  setLoading: PropTypes.func.isRequired,
+  setDisabled: PropTypes.func.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  loading: PropTypes.bool.isRequired
 }
 
 export { ViewThesisProposal };
