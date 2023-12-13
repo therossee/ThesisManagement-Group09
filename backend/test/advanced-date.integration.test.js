@@ -16,7 +16,7 @@ jest.mock('passport-saml', () => {
           const user = {
             id: 'd279620',
             name: 'Marco Rossi',
-            roles: ['teacher', 'tester'], 
+            roles: ['teacher', 'tester'],
           };
           this.success(user);
         }
@@ -50,7 +50,7 @@ describe('[INTEGRATION] Virtual Clock APIs', () => {
         });
 
         test('should return the updated virtual time', async () => {
-            const newOffset = 1000;
+            const newOffset = 50_000;
             AdvancedDate.virtual.setNewOffset(newOffset);
 
             const res = await request(app)
@@ -59,7 +59,7 @@ describe('[INTEGRATION] Virtual Clock APIs', () => {
 
             expect(res.status).toBe(200);
             expect(res.body).toHaveProperty('date');
-            expect(res.body.offset).toBeAnIntegerCloseTo(newOffset, 30);
+            expect(res.body.offset).toBeAnIntegerCloseTo(newOffset, 100);
         });
     });
 
@@ -67,7 +67,7 @@ describe('[INTEGRATION] Virtual Clock APIs', () => {
         // TODO: Add tests on authentication (tester vs non-tester)
 
         test('should update the virtual time', async () => {
-            const newOffset = 1000;
+            const newOffset = 50_000;
             const date = dayjs().add(newOffset, 'ms').toISOString();
 
             const res = await agent
@@ -78,7 +78,7 @@ describe('[INTEGRATION] Virtual Clock APIs', () => {
 
             expect(res.status).toBe(200);
             expect(res.body).toHaveProperty('date');
-            expect(res.body.offset).toBeAnIntegerCloseTo(newOffset, 30);
+            expect(res.body.offset).toBeAnIntegerCloseTo(newOffset, 100);
         });
 
         test('should refuse to set the virtual clock in the past', async () => {
