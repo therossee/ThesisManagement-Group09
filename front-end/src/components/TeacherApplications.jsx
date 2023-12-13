@@ -43,7 +43,6 @@ function TeacherApplications() {
                             }
                         })
                     );
-                    console.log(newData);
                     setData(newData);
                     setIsLoading(false);
                     setDirty(false);

@@ -174,7 +174,6 @@ async function getTeacherThesisApplications(proposalId) {
     const applications = await response.json();
 
     if (response.ok) {
-        console.log(applications);
         return applications.map((x) => ({
             name: x.name,
             surname: x.surname,
@@ -379,7 +378,7 @@ async function getStudentCVById(id) {
     }
 }
 
-// GET file exists
+// GET file name
 async function checkFileExists(student_id, applicationId) {
     const response = await fetch(URL + `/teacher/checkfile/${student_id}/${applicationId}`, {
         method: 'GET',
@@ -393,14 +392,17 @@ async function checkFileExists(student_id, applicationId) {
     }
 }
 
-// GET optional attached file of a student application
-async function getApplicationFile(applicationId, student_id) {
+// OPENS PDF
+async function openPDF(student_id, applicationId){
     const response = await fetch(URL + `/teacher/uploads/${student_id}/${applicationId}`, {
         method: 'GET',
         credentials: 'include',
     });
     if (response.ok) {
-        return response.blob();
+        const data = await response.blob();
+        const fileURL = window.URL.createObjectURL(data);
+        window.open(fileURL, '__blank');
+        return data;
     } else {
         throw response;
     }
@@ -411,6 +413,6 @@ const API = {
     getUser,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById, checkFileExists, getApplicationFile
+    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById, checkFileExists, openPDF
 };
 export default API;

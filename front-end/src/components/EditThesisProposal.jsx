@@ -43,7 +43,6 @@ function EditThesisProposal() {
     useEffect(() => {
         API.getThesisProposalbyId(id)
             .then((x) => {
-                console.log(x);
                 let proposal;
                     proposal = {
                         title: x.title,

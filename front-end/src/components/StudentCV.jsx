@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Avatar, Col, Drawer, Flex, message, Row, Skeleton, Tag, Typography } from 'antd';
+import { Avatar, Col, Drawer, Flex, message, Row, Skeleton, Tag, Typography, Button } from 'antd';
 import { UserOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import PropTypes from 'prop-types';
 import API from '../API';
 
 function StudentCV(props) {
+
+    const URL = 'http://localhost:3000';
 
     const { isOpen, setIsOpen, studentInfo, applicationId } = props;
     const { Title, Text } = Typography;
@@ -26,8 +28,7 @@ function StudentCV(props) {
             });
         API.checkFileExists(studentInfo.id, applicationId)
             .then(x => {
-                console.log(x);
-                if(x){
+                if (x.exists) {
                     setFilename(x.fileName);
                 }
                 setIsLoading(false);
@@ -35,8 +36,12 @@ function StudentCV(props) {
             .catch((err) => {
                 message.error(err.message ? err.message : err);
             });
-        
+
     }, []);
+
+    const openPDF = () => {
+        API.openPDF(studentInfo.id, applicationId);
+    }
 
     function color(mark) {
         let colorCode;
@@ -94,10 +99,12 @@ function StudentCV(props) {
                                     <Col span={1}><Text type="secondary">{x.cfu}</Text></Col>
                                 </Row>
                             ))}
-                            {filename && (<a href={`${URL}/teacher/uploads/${studentInfo.id}/${applicationId}`}>{filename}</a>)}
+                            {filename && (<>
+                                <Button onClick={openPDF}>{filename}</Button>
+                            </>)}
                         </>
                         :
-                        <Flex vertical style={{justify:"center", align:"center", marginTop:"30px"}}>
+                        <Flex vertical style={{ justify: "center", align: "center", marginTop: "30px" }}>
                             <Title level={5}>No Exams found</Title>
                         </Flex>
                     }
