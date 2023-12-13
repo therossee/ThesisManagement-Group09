@@ -13,7 +13,7 @@ function UploadResult(props) {
         
         <Result
           status="success"
-          title="Proposal updated succesfully!"
+          title="Proposal updated successfully!"
           extra={
             <Button ghost type="primary" onClick={() => navigate("/")}>
               Back Home
@@ -21,7 +21,7 @@ function UploadResult(props) {
           }
         />) : (<Result
           status="success"
-          title="Proposal added succesfully!"
+          title="Proposal added successfully!"
           extra={
             <Button ghost type="primary" onClick={() => navigate("/")}>
               Back Home

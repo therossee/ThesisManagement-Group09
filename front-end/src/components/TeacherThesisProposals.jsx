@@ -170,7 +170,6 @@ function TeacherThesisProposals() {
 
 
     async function archiveProposalById(id) {
-        console.log(id);
         try {
             await API.archiveProposalById(id);
             message.success("Proposal archived successfully");

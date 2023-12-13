@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Avatar, Col, Drawer, Flex, message, Row, Skeleton, Tag, Typography } from 'antd';
+import { Avatar, Col, Drawer, Flex, message, Row, Skeleton, Tag, Typography, Button } from 'antd';
 import { UserOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import PropTypes from 'prop-types';
 import API from '../API';
 
 function StudentCV(props) {
 
-    const { isOpen, setIsOpen, studentInfo } = props;
+    const { isOpen, setIsOpen, studentInfo, applicationId } = props;
     const { Title, Text } = Typography;
 
     const [isLoading, setIsLoading] = useState(true);
@@ -14,18 +14,24 @@ function StudentCV(props) {
     // Store exams info
     const [data, setData] = useState(true);
 
+    // Store optional PDF
+    const [file, setFile] = useState(null);
+
     useEffect(() => {
-        setIsLoading(true);
-        API.getStudentCVById(studentInfo.id)
-            .then((x) => {
-                setIsLoading(false);
-                setData(x);
-            })
-            .catch((err) => {
+        const fetchData = async () => {
+            try {
+                setIsLoading(true);
+                const exams = await API.getStudentCVById(studentInfo.id);
+                setData(exams);
+                const pdf = await API.getPDF(studentInfo.id, applicationId);
+                setFile(pdf);
+            } catch (err) {
                 message.error(err.message ? err.message : err);
+            } finally {
                 setIsLoading(false);
-            });
-        
+            }
+        };
+        fetchData();
     }, []);
 
     function color(mark) {
@@ -45,7 +51,13 @@ function StudentCV(props) {
     }
 
     return (
-        <Drawer size="large" open={isOpen} onClose={() => setIsOpen(false)}>
+        <Drawer
+            size="large"
+            open={isOpen}
+            onClose={() => setIsOpen(false)}
+            extra={
+                <Button disabled={!file} onClick={() => openPDF({ file })}>View attached PDF</Button>
+            }>
             {isLoading ?
                 <Skeleton active />
                 :
@@ -86,7 +98,7 @@ function StudentCV(props) {
                             ))}
                         </>
                         :
-                        <Flex vertical style={{justify:"center", align:"center", marginTop:"30px"}}>
+                        <Flex vertical style={{ justify: "center", align: "center", marginTop: "30px" }}>
                             <Title level={5}>No Exams found</Title>
                         </Flex>
                     }
@@ -108,14 +120,24 @@ function ColorLegenda() {
     )
 }
 
+function openPDF(props) {
+    const url = URL.createObjectURL(props.file);
+    window.open(url, '_blank');
+}
+
 StudentCV.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     setIsOpen: PropTypes.func.isRequired,
+    applicationId: PropTypes.number.isRequired,
     studentInfo: PropTypes.shape({
         name: PropTypes.string.isRequired,
         surname: PropTypes.string.isRequired,
         id: PropTypes.string.isRequired,
     }),
+}
+
+openPDF.propTypes = {
+    file: PropTypes.object.isRequired,
 }
 
 export default StudentCV;
