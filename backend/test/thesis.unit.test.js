@@ -1432,3 +1432,30 @@ describe('archiveThesisProposalById', () => {
     expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
   });
 });
+
+describe('getApplicationById', () => {
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
+
+  test('should return the application with given the id', async () => {
+    const applicationId = 1;
+    const expectedResult =
+    {
+      "id": 1,
+      "proposal_id": 1,
+      "student_id": 's12345',
+      "status": "accepted",
+      "creation_date": "2020-10-21T21:37:01.176Z",
+    };
+
+    jest.spyOn(require('../db').prepare(), 'get').mockReturnValue(expectedResult);
+
+    const result = await thesis.getApplicationById(applicationId);
+    const expectedQuery = `SELECT * FROM thesisApplication WHERE id = ?`;
+
+    expect(result).toEqual(expectedResult);
+    expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
+  });
+});
