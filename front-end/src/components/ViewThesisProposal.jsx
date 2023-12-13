@@ -254,7 +254,7 @@ function MyModal(props) {
         <p className="ant-upload-drag-icon">
           <UploadOutlined />
         </p>
-        <p className="ant-upload-text">Click or drag file to this area to upload</p>
+        <p className="ant-upload-text">Click or drag to this area to upload an optional PDF file</p>
         <p className="ant-upload-hint">Max one PDF allowed (10MB)</p>
       </Upload.Dragger>
     </Modal>
