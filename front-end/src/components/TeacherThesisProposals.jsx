@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Popconfirm, message, Space, Table, Tag, Tooltip } from 'antd';
-import { EditOutlined, EyeOutlined, DeleteOutlined, InboxOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { message, Popconfirm, Space, Table, Tag, Tooltip } from 'antd';
+import { DeleteOutlined, EditOutlined, EyeOutlined, InboxOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import API from '../API';
 
 function TeacherThesisProposals() {
 
     // Array of objs for storing table data
-    const [data, setData] = useState([])
+    const [data, setData] = useState([]);
 
     // Loading table data fetching
     const [isLoadingTable, setIsLoadingTable] = useState(true);
@@ -146,15 +146,12 @@ function TeacherThesisProposals() {
     }, [dirty]);
 
     function handleReceivedData(data) {
-
-        const formattedData = data.map((x) => ({
+        return data.map((x) => ({
             // Take all fields from API.jsx
             ...x,
             // Concatenate internal/external co-supervisors
             coSupervisors: [].concat(x.internalCoSupervisors, x.externalCoSupervisors),
         }));
-
-        return formattedData;
     }
 
     async function deleteProposalById(id) {
