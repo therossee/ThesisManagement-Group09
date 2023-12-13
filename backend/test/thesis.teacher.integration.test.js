@@ -5,6 +5,7 @@ const { resetTestDatabase } = require('./integration_config');
 const request = require("supertest");
 const { app } = require("../app");
 const thesisDao = require('../thesis_dao');
+const usersDao = require('../users_dao');
 const db = require('../db');
 
 // Mock Passport-SAML authenticate method
@@ -889,5 +890,75 @@ describe('PATCH /api/thesis-proposals/archive/:id', () => {
         // Assertions
         expect(response.status).toBe(500);
         expect(response.body).toEqual({ message: 'Internal Server Error' });
+    });
+});
+
+describe('GET /api/teacher/uploads/:stud_id/:app_id', () => {
+    test('returns a file for a valid student and application ID', async () => {
+        db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
+        .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
+
+        const studentId = 's318952'; 
+        const applicationId = 2; 
+    
+        // Make the request
+        const response = await agent
+          .get(`/api/teacher/uploads/${studentId}/${applicationId}`)
+          .set('credentials', 'include')
+          .expect(200);
+    
+        // Assert the response contains the file or is empty
+        if (Object.keys(response.body).length > 0) {
+          expect(response.body).toBeDefined();
+          // Add more assertions if needed for the file content
+        } else {
+          expect(response.body).toEqual({});
+        }
+    });
+    
+    test('returns 404 for non-existing student', async () => {
+      const nonExistingStudentId = 10000;
+      const nonExistingApplicationId = 10000;
+  
+      // Make the request
+      const response = await agent
+        .get(`/api/teacher/uploads/${nonExistingStudentId}/${nonExistingApplicationId}`)
+        .set('credentials', 'include')
+        .expect(404);
+  
+      // Assert the response
+      expect(response.body).toEqual({message : 'Student with id 10000 not found.'});
+    });
+
+    test('returns 404 for non-existing application', async () => {
+        const nonExistingStudentId = 's318952';
+        const nonExistingApplicationId = 10000;
+    
+        // Make the request
+        const response = await agent
+          .get(`/api/teacher/uploads/${nonExistingStudentId}/${nonExistingApplicationId}`)
+          .set('credentials', 'include')
+          .expect(404);
+    
+        // Assert the response
+        expect(response.body).toEqual({message : 'Application with id 10000 not found.'});
+    });
+
+    test('handle unexpected errors and return status 500', async () => {
+        db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
+        .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
+
+        const nonExistingStudentId = 's318952';
+        const nonExistingApplicationId = 2;
+
+        jest.spyOn(usersDao, 'getStudentById').mockRejectedValueOnce(new Error());
+        // Make the request
+        const response = await agent
+          .get(`/api/teacher/uploads/${nonExistingStudentId}/${nonExistingApplicationId}`)
+          .set('credentials', 'include')
+          .expect(500);
+    
+        // Assert the response
+        expect(response.body).toEqual('Internal Server Error');
     });
 });
