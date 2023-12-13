@@ -15,33 +15,26 @@ function StudentCV(props) {
 
     // Store exams info
     const [data, setData] = useState(true);
-    const [filename, setFilename] = useState(null);
+
+    // Store optional PDF
+    const [file, setFile] = useState(null);
 
     useEffect(() => {
-        setIsLoading(true);
-        API.getStudentCVById(studentInfo.id)
-            .then((x) => {
-                setData(x);
-            })
-            .catch((err) => {
+        const fetchData = async () => {
+            try {
+                setIsLoading(true);
+                const exams = await API.getStudentCVById(studentInfo.id);
+                setData(exams);
+                const pdf = await API.getPDF(studentInfo.id, applicationId);
+                setFile(pdf);
+            } catch (err) {
                 message.error(err.message ? err.message : err);
-            });
-        API.checkFileExists(studentInfo.id, applicationId)
-            .then(x => {
-                if (x.exists) {
-                    setFilename(x.fileName);
-                }
+            } finally {
                 setIsLoading(false);
-            })
-            .catch((err) => {
-                message.error(err.message ? err.message : err);
-            });
-
+            }
+        };
+        fetchData();
     }, []);
-
-    const openPDF = () => {
-        API.openPDF(studentInfo.id, applicationId);
-    }
 
     function color(mark) {
         let colorCode;
@@ -60,7 +53,13 @@ function StudentCV(props) {
     }
 
     return (
-        <Drawer size="large" open={isOpen} onClose={() => setIsOpen(false)}>
+        <Drawer
+            size="large"
+            open={isOpen}
+            onClose={() => setIsOpen(false)}
+            extra={
+                <Button disabled={!file} onClick={() => openPDF({file})}>View attached PDF</Button>
+            }>
             {isLoading ?
                 <Skeleton active />
                 :
@@ -99,9 +98,6 @@ function StudentCV(props) {
                                     <Col span={1}><Text type="secondary">{x.cfu}</Text></Col>
                                 </Row>
                             ))}
-                            {filename && (<>
-                                <Button onClick={openPDF}>{filename}</Button>
-                            </>)}
                         </>
                         :
                         <Flex vertical style={{ justify: "center", align: "center", marginTop: "30px" }}>
@@ -126,14 +122,24 @@ function ColorLegenda() {
     )
 }
 
+function openPDF(props) {
+    const url = URL.createObjectURL(props.file);
+    window.open(url, '_blank');
+}
+
 StudentCV.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     setIsOpen: PropTypes.func.isRequired,
+    applicationId: PropTypes.number.isRequired,
     studentInfo: PropTypes.shape({
         name: PropTypes.string.isRequired,
         surname: PropTypes.string.isRequired,
         id: PropTypes.string.isRequired,
     }),
+}
+
+openPDF.propTypes = {
+    file: PropTypes.object.isRequired,
 }
 
 export default StudentCV;

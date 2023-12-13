@@ -685,34 +685,6 @@ app.get('/api/student/:id/career',
     }
   });
 
-app.get('/api/teacher/checkfile/:stud_id/:app_id',
-  isLoggedIn,
-  isTeacher,
-  async (req, res) => {
-    try {
-      const application_id = req.params.app_id;
-      const student_id = req.params.stud_id;
-      const dir = path.join(__dirname, 'uploads', student_id, application_id);
-
-      const exists = fs.existsSync(dir);
-      if (exists) {
-        fs.readdir(dir, (err, files) => {
-          if (err) {
-            console.error(err);
-            res.status(500).json('Internal Server Error');
-          } else {
-            res.status(200).json({ exists: true, fileName: files[0] });
-          }
-        });
-      } else {
-        res.status(200).json({ exists: false });
-      }
-    } catch (e) {
-      console.error(e);
-      res.status(500).json('Internal Server Error');
-    }
-  });
-
 app.get('/api/teacher/uploads/:stud_id/:app_id',
   isLoggedIn,
   isTeacher,
@@ -721,18 +693,19 @@ app.get('/api/teacher/uploads/:stud_id/:app_id',
       const application_id = req.params.app_id;
       const student_id = req.params.stud_id;
       const dir = path.join(__dirname, 'uploads', student_id, application_id);
+      let fulldir = "";
+
       if (fs.existsSync(dir)) {
-        fs.readdir(dir, (err, files) => {
-          if (err) {
-            console.error(err);
-            res.status(500).json('Internal Server Error');
-          } else {
-            res.sendFile(path.join(dir, files[0]));
-          }
-        });
+        const files = await fs.promises.readdir(dir);
+        if (files.length > 0) {
+          res.sendFile(path.join(dir, files[0]));
+        } else {
+          res.status(200).json({});
+        }
+      } else {
+        res.status(200).json({});
       }
-    } catch (e) {
-      console.error(e);
+    } catch {
       res.status(500).json('Internal Server Error');
     }
   });
