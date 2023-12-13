@@ -607,7 +607,7 @@ describe('GET /api/teacher/applications/:proposal_id', () => {
         // Assertions
         expect(response.status).toBe(200);
         expect(response.body).toEqual([
-            { id: 's321529', name: 'Matteo', surname: 'Ladrat', status: 'waiting for approval' }
+            { application_id: 2, id: 's321529', name: 'Matteo', surname: 'Ladrat', status: 'waiting for approval' }
         ]);
     });
 });
