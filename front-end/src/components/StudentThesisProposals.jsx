@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Input, Button, Space, Table, Form, Drawer, DatePicker, Tag, Tooltip, message } from 'antd';
-import { SearchOutlined, EyeOutlined } from '@ant-design/icons';
+import { Button, DatePicker, Drawer, Form, Input, message, Space, Table, Tag, Tooltip } from 'antd';
+import { EyeOutlined, SearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
@@ -13,7 +13,7 @@ dayjs.extend(isSameOrAfter);
 function StudentThesisProposals() {
 
     // Array of objs for storing table data
-    const [data, setData] = useState([])
+    const [data, setData] = useState([]);
 
     // Loading table data fetching
     const [isLoadingTable, setIsLoadingTable] = useState(true);
@@ -23,8 +23,6 @@ function StudentThesisProposals() {
 
     // Store filter date range
     const [dateRange, setDateRange] = useState([]);
-
-    const messageApi = message.useMessage();
 
     // Set virtual clock date to prevent filtering for a date before virtual clock one
     const [date, setDate] = useState(dayjs());
@@ -322,15 +320,12 @@ function StudentThesisProposals() {
     };
 
     function handleReceivedData(data) {
-
-        const formattedData = data.map((x) => ({
+        return data.map((x) => ({
             // Take all fields from API.jsx
             ...x,
             // Concatenate internal/external co-supervisors
             coSupervisors: [].concat(x.internalCoSupervisors, x.externalCoSupervisors),
         }));
-
-        return formattedData;
     }
 
     function MoreFilters() {
