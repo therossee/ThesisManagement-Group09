@@ -1,12 +1,11 @@
 import { React, useState, useEffect } from "react";
 import { Space, Badge, Button, Skeleton, message, Typography, Tooltip, FloatButton, Timeline } from "antd";
 import { ReloadOutlined } from '@ant-design/icons';
-import { useAuth } from "./authentication/useAuth";
+import PropTypes from 'prop-types';
 import API from "../API";
 
 function StudentApplications() {
 
-    const { accessToken } = useAuth();
     const [isLoading, setIsLoading] = useState(true);
     const [dirty, setDirty] = useState(true);
     const [data, setData] = useState([]);
@@ -14,30 +13,28 @@ function StudentApplications() {
     const { Title } = Typography;
 
     useEffect(() => {
-        if (accessToken) {
-            const fetchData = async () => {
-                try {
-                    if (dirty) {
-                        setIsLoading(true);
-                        const proposals = await API.getStudentApplicationsHistory(accessToken);
-                        setData(proposals);
-                        setIsLoading(false);
-                        setDirty(false);
-                    }
-                } catch (err) {
-                    message.error(err.message ? err.message : err);
+        const fetchData = async () => {
+            try {
+                if (dirty) {
+                    setIsLoading(true);
+                    const proposals = await API.getStudentApplicationsHistory();
+                    setData(proposals);
                     setIsLoading(false);
                     setDirty(false);
                 }
-            };
-            fetchData();
-        }
-    }, [dirty, accessToken]);
+            } catch (err) {
+                message.error(err.message ? err.message : err);
+                setIsLoading(false);
+                setDirty(false);
+            }
+        };
+        fetchData();
+    }, [dirty]);
 
 
     const items = data.map((x, index) => ({
         children: (
-            <div key={index} style={{ marginBottom: '10px' }}>
+            <div key={x.application_id} style={{ marginBottom: '10px' }}>
                 <Title level={5} style={{ margin: "0" }}>{x.title}</Title>
                 <MyBadge text={x.status} />
             </div>
@@ -63,21 +60,25 @@ function StudentApplications() {
         return color;
     }
 
+    let content;
+    if(isLoading){
+        content = <Skeleton active/>
+    }else if (data.length > 0){
+        content = <Timeline reverse={true} mode="alternate" items={items} style={{ marginTop: "15px" }} />
+    }else{
+        content = (
+        <Space direction="vertical" style={{ width: '100%', alignItems: 'center' }}>
+            <Title level={4} >No application requests found.</Title>
+        </Space>
+        );
+    }
+
     return (
         <>
             <Button type="link" icon={<ReloadOutlined />} loading={dirty} disabled={dirty} onClick={() => (setDirty(true))}>Refresh List</Button>
-            {isLoading ?
-                <Skeleton active />
-                :
-                data.length > 0 ?
-                    <Timeline reverse={true} mode="alternate" items={items} style={{ marginTop: "15px" }} />
-                    :
-                    <Space direction="vertical" style={{ width: '100%', alignItems: 'center' }}>
-                        <Title level={4} >No application requests found.</Title>
-                    </Space>}
+            {content}
             <Tooltip title="Back to Top">
-                <FloatButton.BackTop style={{ marginBottom: "40px" }} >
-                </FloatButton.BackTop>
+                <FloatButton.BackTop style={{ marginBottom: "40px" }} />
             </Tooltip>
         </>
     );
@@ -105,5 +106,9 @@ function MyBadge(props) {
         <Badge status={status} text={props.text} />
     )
 }
+
+MyBadge.propTypes = {
+    text: PropTypes.string.isRequired,
+};
 
 export default StudentApplications;

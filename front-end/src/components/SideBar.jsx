@@ -8,7 +8,7 @@ const { Sider } = Layout;
 
 function SideBar() {
 
-  const { isAuthenticated, isTeacher } = useAuth();
+  const { isAuthenticated, isTeacher, isTester } = useAuth();
   const navigate = useNavigate();
 
   // Define the menu items, using directly the route path as key
@@ -17,7 +17,7 @@ function SideBar() {
     isAuthenticated && { label: "Thesis Proposals", key: "/proposals", icon: <FileTextOutlined /> },
     isAuthenticated && { label: isTeacher ? "Thesis Applications" : "Applications History", key: "/applications", icon: isTeacher ? <AuditOutlined /> : <HistoryOutlined /> },
     { type: 'divider' },
-    { label: "Administration", key: "/admin/virtual-clock", icon: <SettingOutlined /> }
+    isTester && { label: "Administration", key: "/admin/virtual-clock", icon: <SettingOutlined /> }
   ];
 
   // Handle menu item clicks
