@@ -568,7 +568,7 @@ exports.applyForProposal = (proposal_id, student_id, file) => {
 
       if (file) {
         if(file.mimetype !== 'application/pdf'){
-          reject(new Error("The file must be a pdf"));
+          reject(new Error("The file must be a PDF"));
           return;
         }
         const dir = path.join(__dirname, 'uploads', student_id.toString(), res.lastInsertRowid.toString());
