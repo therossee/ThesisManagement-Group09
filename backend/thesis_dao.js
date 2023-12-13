@@ -3,17 +3,19 @@
 /* Data Access Object (DAO) module for accessing thesis data */
 
 const db = require('./db');
+const fs = require('fs');
+const path = require('path');
 const AdvancedDate = require('./AdvancedDate');
 const NoThesisProposalError = require("./errors/NoThesisProposalError");
 const UnauthorizedActionError = require("./errors/UnauthorizedActionError");
 
-exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id, external_co_supervisors_id, type, groups, description, required_knowledge, notes, expiration, level, cds, keywords) => {
+exports.createThesisProposal = (proposal_details, additional_details) => {
   return new Promise((resolve, reject) => {
 
     let currentDate = new AdvancedDate();
-    const exp = new AdvancedDate(expiration);
+    const exp = new AdvancedDate(proposal_details.expiration);
     if(exp.isBefore(currentDate)){
-      reject("The expiration date must be after the creation date");
+      reject(new Error("The expiration date must be after the creation date"));
       return;
     }
 
@@ -45,31 +47,31 @@ exports.createThesisProposal = (title, supervisor_id, internal_co_supervisors_id
 
     // Self-called transaction
     db.transaction(() => {
-      const res = db.prepare(insertThesisProposalQuery).run(title, supervisor_id, type, description, required_knowledge, notes, currentDate, expiration, level);
+      const res = db.prepare(insertThesisProposalQuery).run(proposal_details.title, proposal_details.supervisor_id, proposal_details.type, proposal_details.description, proposal_details.required_knowledge, proposal_details.notes, currentDate, proposal_details.expiration, proposal_details.level);
       const proposalId = res.lastInsertRowid;
 
       // Keywords insertion
-      keywords.forEach(keyword => {
+      additional_details.keywords.forEach(keyword => {
         db.prepare(insertProposalKeywordQuery).run(proposalId, keyword);
       });
 
-      if (internal_co_supervisors_id.length > 0) {
-        internal_co_supervisors_id.forEach(internal_co_supervisor_id => {
+      if (additional_details.internal_co_supervisors_id.length > 0) {
+        additional_details.internal_co_supervisors_id.forEach(internal_co_supervisor_id => {
           db.prepare(insertInternalCoSupervisorsQuery).run(proposalId, internal_co_supervisor_id);
         });
       }
 
-      if (external_co_supervisors_id.length > 0) {
-        external_co_supervisors_id.forEach(external_co_supervisor_id => {
+      if (additional_details.external_co_supervisors_id.length > 0) {
+        additional_details.external_co_supervisors_id.forEach(external_co_supervisor_id => {
           db.prepare(insertExternalCoSupervisorsQuery).run(proposalId, external_co_supervisor_id);
         });
       }
 
-      groups.forEach(group => {
+      additional_details.unique_groups.forEach(group => {
         db.prepare(insertGroupsQuery).run(proposalId, group);
       });
 
-      cds.forEach(cod_degree => {
+      additional_details.cds.forEach(cod_degree => {
         db.prepare(insertCdsQuery).run(proposalId, cod_degree);
       });
 
@@ -518,15 +520,15 @@ exports.getSupervisorOfProposal = (proposalId) => {
  * @property {string} email
  */
 
-exports.applyForProposal = (proposal_id, student_id) => {
+exports.applyForProposal = (proposal_id, student_id, file) => {
   return new Promise((resolve, reject) => {
     const currentDate = new AdvancedDate().toISOString();
 
     //  Check if the proposal belong to the degree of the student
     const checkProposalDegree = `SELECT * FROM proposalCds WHERE proposal_id=? AND cod_degree=(SELECT cod_degree FROM student WHERE id=?)`;
     const proposal_correct = db.prepare(checkProposalDegree).get(proposal_id, student_id);
-    if(!proposal_correct){
-      reject("The proposal doesn't belong to the student degree");
+    if (!proposal_correct) {
+      reject(new UnauthorizedActionError("The proposal doesn't belong to the student degree"));
       return;
     }
 
@@ -541,25 +543,60 @@ exports.applyForProposal = (proposal_id, student_id) => {
                                 )`;
 
     const proposal_active = db.prepare(checkProposalActive).get(proposal_id, currentDate, currentDate);
-    if(!proposal_active){
-      reject("The proposal is not active");
+    if (!proposal_active) {
+      reject(new Error("The proposal is not active"));
       return;
     }
 
     // Check if the user has already applied for other proposals
-    const checkAlreadyApplied = `SELECT * FROM thesisApplication WHERE student_id=? AND status='waiting for approval' OR status='accepted'`;
+    const checkAlreadyApplied = `SELECT * FROM thesisApplication WHERE student_id=? AND (status='waiting for approval' OR status='accepted')`;
     const already_applied = db.prepare(checkAlreadyApplied).get(student_id);
-    if(already_applied){
-      reject("The user has already applied for other proposals");
+    if (already_applied) {
+      reject(new UnauthorizedActionError("The user has already applied for other proposals"));
       return;
     }
 
     const insertApplicationQuery = `
     INSERT INTO thesisApplication (proposal_id, student_id, creation_date)
-    VALUES (?, ?, ?); `; // at first the application has default status 'waiting for approval'
+    VALUES (?, ?, ?); `; // at first, the application has the default status 'waiting for approval'
 
-    const res = db.prepare(insertApplicationQuery).run(proposal_id, student_id, currentDate);
-    resolve(res.lastInsertRowid);
+    // Start a transaction
+    db.prepare('BEGIN TRANSACTION;').run();
+
+    try {
+      const res = db.prepare(insertApplicationQuery).run(proposal_id, student_id, currentDate);
+
+      if (file) {
+        if(file.mimetype !== 'application/pdf'){
+          reject(new Error("The file must be a pdf"));
+          return;
+        }
+        const dir = path.join(__dirname, 'uploads', student_id.toString(), res.lastInsertRowid.toString());
+        // Use try-catch to handle any errors during file writing
+        try {
+          const writePath = path.join(dir, file.originalFilename);
+          fs.mkdirSync(dir, { recursive: true });
+          fs.writeFileSync(writePath, fs.readFileSync(file.filepath));
+        } catch (fileError) {
+          console.error('Error writing file:', fileError);
+
+          // Rollback the SQLite transaction if there's an error
+          db.prepare('ROLLBACK;').run();
+          reject(new Error(fileError)); // Reject the promise with the file error
+          return;
+        }
+      }
+
+      // Commit the transaction if everything is successful
+      db.prepare('COMMIT;').run();
+      resolve(res.lastInsertRowid);
+    } catch (error) {
+      console.error('Error inserting application:', error);
+
+      // Rollback the SQLite transaction if there's an error
+      db.prepare('ROLLBACK;').run();
+      reject(new Error(error)); // Reject the promise with the main error
+    }
   })
 }
 

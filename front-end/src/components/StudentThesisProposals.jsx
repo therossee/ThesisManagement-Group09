@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Input, Button, Space, message, Table, Form, Drawer, DatePicker, Tag, Tooltip } from 'antd';
+import { Input, Button, Space, Table, Form, Drawer, DatePicker, Tag, Tooltip } from 'antd';
 import { SearchOutlined, EyeOutlined } from '@ant-design/icons';
-import { useAuth } from './authentication/useAuth';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
@@ -27,8 +26,6 @@ function StudentThesisProposals() {
 
     // Set virtual clock date to prevent filtering for a date before virtual clock one
     const [date, setDate] = useState(dayjs());
-
-    const { accessToken } = useAuth();
 
     const filterTitle = () => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
@@ -67,24 +64,18 @@ function StudentThesisProposals() {
     });
 
     useEffect(() => {
-        if (accessToken) {
-            API.getThesisProposals(accessToken)
-                .then((x) => {
-                    setData(handleReceivedData(x));
-                    setIsLoadingTable(false);
-                })
-                .catch((err) => { message.error(err.message ? err.message : err) });
-        }
-    }, [accessToken]);
-
-    useEffect(() => {
         API.getClock()
             .then((clock) => {
                 setDate(dayjs().add(clock.offset, 'ms'));
             })
-            .catch((err) => {
-                message.error(err.message ? err.message : err);
+            .catch((err) => { messageApi.error(err.message ? err.message : err) });
+        API.getThesisProposals()
+            .then((x) => {
+                setData(handleReceivedData(x));
+                setIsLoadingTable(false);
             })
+            .catch((err) => { messageApi.error(err.message ? err.message : err) });
+        
     }, []);
 
     const navigate = useNavigate();
