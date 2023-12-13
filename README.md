@@ -637,15 +637,3 @@ Error Responses:
     | creation_date | date    | **NOT NULL**                                         |
     | status        | text    | **DEFAULT 'waiting for approval'**         |
 
-- Table `student_auth0`:
-    | Column   | Type | Constraints                        |
-    | -------- | ---- | ---------------------------------- |
-    | id       | text | **PK**, **FK** [student](#student)(id) |
-    | id_auth0  | text | **NOT NULL**                       |
-
-- Table `teacher_auth0`:
-    | Column   | Type | Constraints                        |
-    | -------- | ---- | ---------------------------------- |
-    | id       | text | **PK**, **FK** [teacher](#teacher)(id) |
-    | id_auth0  | text | **NOT NULL**                       |
-
