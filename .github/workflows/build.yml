@@ -12,12 +12,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0 
+          fetch-depth: 0
       - name: Install dependencies
         run: npm install
         working-directory: backend
       - name: Test and coverage
         run: npm run test:coverage
+        env:
+          TM_DOTENV_KEY: ${{ secrets.TM_DOTENV_KEY }}
+          TM_DOTENV_KEY_CI: ${{ secrets.TM_DOTENV_KEY }}
         working-directory: backend
         continue-on-error: true
       - name: SonarCloud Scan
