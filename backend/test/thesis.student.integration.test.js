@@ -4,25 +4,9 @@ const { resetTestDatabase } = require('./integration_config');
 
 const request = require("supertest");
 const { app } = require("../app");
+const utils = require("./utils");
 const thesisDao = require('../thesis_dao');
 const db = require('../db');
-
-// Mock Passport-SAML authenticate method
-jest.mock('passport-saml', () => {
-    const Strategy = jest.requireActual('passport-saml').Strategy;
-    return {
-      Strategy: class MockStrategy extends Strategy {
-        authenticate(req, options) {
-          const user = {
-            id: 's318952',
-            name: 'Sylvie Molinatto',
-            roles: ['student'], 
-          };
-          this.success(user);
-        }
-      },
-    };
-});
 
 beforeEach(() => {
     // Be sure that we are using a full clean database before each test
@@ -30,9 +14,9 @@ beforeEach(() => {
     jest.restoreAllMocks();
 });
 
+let agent;
 beforeAll(async () => {
-    agent = request.agent(app);
-    await agent.get('/login');
+    agent = await utils.getMolinattoSylvieAgent(app);
 });
 
 describe('GET /api/thesis-proposals (student)', () => {
@@ -68,10 +52,10 @@ describe('GET /api/thesis-proposals (student)', () => {
                     coSupervisors: {
                         internal: [],
                         external: [
-                            { 
+                            {
                                 id: 1,
-                                name: 'Alice', 
-                                surname: 'Amato', 
+                                name: 'Alice',
+                                surname: 'Amato',
                                 email: 'alice.amato@email.com',
                                 co_supervisor_id: "1",
                                 proposal_id: 1
@@ -109,10 +93,10 @@ describe('GET /api/thesis-proposals (student)', () => {
                         external: [
                             {
                                 id: 2,
-                                name: 'Benjamin', 
-                                surname: 'Bianchi', 
+                                name: 'Benjamin',
+                                surname: 'Bianchi',
                                 email: 'benjamin.bianchi@email.com',
-                                co_supervisor_id: "2", 
+                                co_supervisor_id: "2",
                                 proposal_id: 2,
                             }
                         ]
@@ -170,10 +154,10 @@ describe('GET /api/thesis-proposals/:id (student)', () => {
             coSupervisors: {
                 internal: [],
                 external: [
-                    { 
+                    {
                         id: 1,
-                        name: 'Alice', 
-                        surname: 'Amato', 
+                        name: 'Alice',
+                        surname: 'Amato',
                         email: 'alice.amato@email.com',
                         co_supervisor_id: "1",
                         proposal_id: 1
@@ -228,7 +212,7 @@ describe('GET /api/thesis-proposals/:id (student)', () => {
 
 describe('POST /api/student/applications', () => {
     test('applies for a thesis proposal and returns 201', async () => {
-        
+
         const body = { thesis_proposal_id: 2 };
 
         const response = await agent
@@ -242,6 +226,8 @@ describe('POST /api/student/applications', () => {
             student_id: 's318952',
             status: 'waiting for approval',
         });
+
+        console.log(response.body);
     });
     test('applies for a thesis proposal not logged', async () => {
         const response = await request(app)

@@ -8,9 +8,12 @@ const { app } = require("../app");
 const utils = require("./utils");
 const AdvancedDate = require("../AdvancedDate");
 
-let agent;
+let testerAgent, nonTesterAgent;
 beforeAll(async () => {
-    agent = await utils.getMarcoRossiAgent();
+    [testerAgent, nonTesterAgent] = await Promise.all([
+        utils.getMarcoRossiAgent(app),
+        utils.getMolinattoSylvieAgent(app),
+    ]);
 });
 
 describe('[INTEGRATION] Virtual Clock APIs', () => {
@@ -48,14 +51,11 @@ describe('[INTEGRATION] Virtual Clock APIs', () => {
     });
 
     describe('POST - /api/system/virtual-clock', () => {
-        // TODO: Add tests on authentication (tester vs non-tester)
-
         test('should update the virtual time', async () => {
             const newOffset = 50_000;
             const date = dayjs().add(newOffset, 'ms').toISOString();
 
-            const res = await agent
-                .post('/api/system/virtual-clock')
+            const res = await testerAgent.post('/api/system/virtual-clock')
                 .set('Content-Type', 'application/json')
                 .set('credentials', 'include')
                 .send({ newDate: date });
@@ -74,8 +74,7 @@ describe('[INTEGRATION] Virtual Clock APIs', () => {
             const offsetInVirtualPast = offsetInFuture - 2000;
             const date = dayjs().add(offsetInVirtualPast, 'ms').toISOString();
 
-            const res = await agent
-                .post('/api/system/virtual-clock')
+            const res = await testerAgent.post('/api/system/virtual-clock')
                 .set('Content-Type', 'application/json')
                 .set('credentials', 'include')
                 .send({ newDate: date });
@@ -85,8 +84,7 @@ describe('[INTEGRATION] Virtual Clock APIs', () => {
         });
 
         test('should return 400 if the newDate property isn\'t a string', async () => {
-            const res = await agent
-                        .post('/api/system/virtual-clock')
+            const res = await testerAgent.post('/api/system/virtual-clock')
                         .set('Content-Type', 'application/json')
                         .set('credentials', 'include')
                         .send({ newDate: 1000 });
@@ -97,8 +95,7 @@ describe('[INTEGRATION] Virtual Clock APIs', () => {
         });
 
         test('should return 400 if the newDate property isn\'t a valid date', async () => {
-            const res = await agent
-                        .post('/api/system/virtual-clock')
+            const res = await testerAgent.post('/api/system/virtual-clock')
                         .set('Content-Type', 'application/json')
                         .set('credentials', 'include')
                         .send({ newDate: 'invalid date' });
@@ -106,6 +103,16 @@ describe('[INTEGRATION] Virtual Clock APIs', () => {
             expect(res.status).toBe(400);
             expect(res.body).toHaveProperty('message');
             expect(res.body).toHaveProperty('errors');
+        });
+
+        test('should return 403 if the user is not a tester', async () => {
+            const res = await nonTesterAgent.post('/api/system/virtual-clock')
+                        .set('Content-Type', 'application/json')
+                        .set('credentials', 'include')
+                        .send({ newDate: 'invalid date' });
+
+            expect(res.status).toBe(403);
+            expect(res.body).toEqual('Unauthorized');
         });
     });
 });

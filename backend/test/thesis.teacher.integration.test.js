@@ -4,34 +4,18 @@ const { resetTestDatabase } = require('./integration_config');
 
 const request = require("supertest");
 const { app } = require("../app");
+const utils = require("./utils");
 const thesisDao = require('../thesis_dao');
 const db = require('../db');
-
-// Mock Passport-SAML authenticate method
-jest.mock('passport-saml', () => {
-    const Strategy = jest.requireActual('passport-saml').Strategy;
-    return {
-      Strategy: class MockStrategy extends Strategy {
-        authenticate(req, options) {
-          const user = {
-            id: 'd279620',
-            name: 'Marco Rossi',
-            roles: ['teacher'], 
-          };
-          this.success(user);
-        }
-      },
-    };
-});
 
 beforeEach(() => {
     // Be sure that we are using a full clean database before each test
     resetTestDatabase();
     jest.restoreAllMocks();
 });
+let agent;
 beforeAll(async () => {
-    agent = request.agent(app);
-    await agent.get('/login');
+    agent = await utils.getMarcoRossiAgent(app);
 });
 
 describe('GET /api/teachers', () => {
@@ -365,10 +349,10 @@ describe('GET /api/thesis-proposals/:id (teacher)', () => {
             coSupervisors: {
                 internal: [],
                 external: [
-                    { 
+                    {
                         id: 1,
-                        name: 'Alice', 
-                        surname: 'Amato', 
+                        name: 'Alice',
+                        surname: 'Amato',
                         email: 'alice.amato@email.com',
                         co_supervisor_id: "1",
                         proposal_id: 1

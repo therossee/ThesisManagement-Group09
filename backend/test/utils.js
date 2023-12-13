@@ -3,8 +3,30 @@ const { app } = require('../app');
 
 const agents = { };
 
-async function getMarcoRossiAgent() {
-    const id = 'd279620';
+/**
+ * Return a supertest agent logged as Marco Rossi (teacher + tester).
+ *
+ * @param {import('express').Express} app
+ */
+async function getMarcoRossiAgent(app) {
+    return _getAgent(app, 'd279620', 'Marco Rossi', 'teacher,tester');
+}
+
+/**
+ * Return a supertest agent logged as Molinatto Sylvie (student).
+ *
+ * @param {import('express').Express} app
+ */
+async function getMolinattoSylvieAgent(app) {
+    return _getAgent(app, 's318952', 'Sylvie Molinatto', 'student');
+}
+
+module.exports = {
+    getMarcoRossiAgent,
+    getMolinattoSylvieAgent,
+};
+
+async function _getAgent(app, id, name, roles) {
     if (agents[id]) {
         return agents[id];
     }
@@ -13,13 +35,9 @@ async function getMarcoRossiAgent() {
 
     await agent.get('/login')
         .set('X-User-Id', id)
-        .set('X-User-Name', 'Marco Rossi')
-        .set('X-User-Roles', 'teacher,tester');
+        .set('X-User-Name', name)
+        .set('X-User-Roles', roles);
     agents[id] = agent;
 
     return agent;
 }
-
-module.exports = {
-    getMarcoRossiAgent
-};
