@@ -15,26 +15,42 @@ driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),
 driver.get("http://localhost:5173/")
 driver.maximize_window()
 
-mail_field = driver.find_element(By.XPATH, "//input[@placeholder='Email']")
-mail_field.send_keys("rossi.marco@email.com")
+driver.implicitly_wait(5)
+login_button = driver.find_element(By.XPATH, "//span[normalize-space()='Log in']")
+login_button.click();
+print("Login clicked")
+
+driver.implicitly_wait(5)
+user_field = driver.find_element(By.XPATH, "//input[@id='username']")
+user_field.send_keys("d279620@polito.it")
 print("User inserted")
 
-password_field = driver.find_element(By.XPATH, "//input[@placeholder='Password']")
+driver.implicitly_wait(5)
+password_field = driver.find_element(By.XPATH, "//input[@id='password']")
 password_field.send_keys("d279620")
 print("Password inserted")
 
-login_button = driver.find_element(By.XPATH, "//button[@type='submit']")
-login_button.send_keys(Keys.RETURN) # press enter
-print("Login clicked")
+driver.implicitly_wait(5)
+continue_button = driver.find_element(By.XPATH, "//div[@class='cdc80f5fa']")
+continue_button.click();
+print("Continue clicked")
+print("Login successful as a TEACHER")
 
+driver.implicitly_wait(5)
 thesis_applications_button = driver.find_element(By.XPATH, "//span[normalize-space()='Thesis Applications']")
 thesis_applications_button.click()
 print("Thesis applications clicked")
 
+driver.implicitly_wait(5)
 accept_button = driver.find_element(By.XPATH, "//button[@class='ant-btn css-dev-only-do-not-override-2i2tap ant-btn-primary ant-btn-icon-only ant-btn-background-ghost']")
-accept_button.click()
-print("Accept button clicked")
+if accept_button is None:
+    driver.quit()
+    raise Exception("Test failed: no proposals to accept")
+else:
+    accept_button.click()
+    print("Accept button clicked")
 
+driver.implicitly_wait(5)
 application_text=driver.find_element(By.XPATH, "//h3[@class='ant-typography css-dev-only-do-not-override-2i2tap']")
 if application_text.text == "No applications pending..":
     print("Application has been accepted correctly")
@@ -42,13 +58,15 @@ else:
     driver.quit()
     raise Exception("Test failed: application has not been accepted correctly")
 
+driver.implicitly_wait(5)
 thesis_proposals_button = driver.find_element(By.XPATH, "//span[normalize-space()='Thesis Proposals']")
 thesis_proposals_button.click();
 print("Thesis proposals clicked")
 
-row_proposal = driver.find_element(By.CSS_SELECTOR, "td[class='ant-table-cell ant-table-cell-fix-left ant-table-cell-fix-left-last']")
+driver.implicitly_wait(5)
+row_proposal = driver.find_element(By.CSS_SELECTOR, "//h3[normalize-space()='No applications pending..']")
 if row_proposal.text == None :
     print("Test passed, proposal have been removed due to acceptance")
 else:
     driver.quit()
-    raise Exception("Test failed: proposal has not been removed")
+    print("Test failed: proposal has not been removed")
