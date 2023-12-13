@@ -141,7 +141,6 @@ This test case is related to the possibility of seeing all the applications for 
 ### [8] Browse application decisions
 This test case is related to the verification that each student can see the history of their applications and the decision for each of them.
 
-
 1. Go to the [home page](http://localhost:5173/)
 2. Login as a student
 3. Click on "Applications History" placed in the left bar, under "Thesis Proposals" [Application History](http://localhost:5173/applications)
@@ -181,5 +180,29 @@ This test case is related to the student's point of view: we want to verify that
 4. Accept one of them/reject one of them
 5. Go to the student's private mail and check if the notification mail is arrived
 6. After seeing that everything was as espected come back to [Thesis Applications page](http://localhost:5173/applications)
+7. Log out
+    - You should be again on the [home page](http://localhost:5173/)
+
+### [12] Archive Proposal
+This test case is related to the possibility for the teacher to archive a Thesis Proposal.
+
+1. Go to the [home page](http://localhost:5173/)
+2. Log in as a teacher
+3. Click on 'Thesis Proposal'. You are now in [Thesis Proposal page](http://localhost:5173/proposals) and you can see the thesis proposals you created
+4. On the 'Action' column click on the last button ('Archive proposal')
+5. A small window will open and you'll read "Are you sure you want to archive this proposal?" -> click on 'yes'
+6. A pop-up message will be displayed to inform you that the proposal has been archived succesfully
+7. Log out
+    - You should be again on the [home page](http://localhost:5173/)
+
+### [13] Access applicant cv and see the uploaded pdf file
+This test case is related to the possibility to see the appliant's cv (list of exams).
+
+1. Go to the [home page](http://localhost:5173/)
+2. Log in as a teacher
+3. Click on 'Thesis Applications' in the left bar. You are now in [Thesis Applicaitons page](http://localhost:5173/applications) and you can see all the applications for the thesis
+4. Under the upper bar (top of the page) you'll see the instructions to see the cv of a student: "To view a specific applicant's CV and eventually the file uploaded within the application, simply click anywhere in the corresponding row." -> click on a row of a student
+5. The cv will be visible on the right part of the page, with all th relevant informations of the student (name, surname, id) and the list of all the marks of the exams obtained. On the top of this page there is a button "View attached pdf" (it is enabled only if the student attached a pdf file) -> click on it
+6. You should see the pdf file
 7. Log out
     - You should be again on the [home page](http://localhost:5173/)
