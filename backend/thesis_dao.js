@@ -725,6 +725,14 @@ exports.getThesisProposalTeacher = (proposalId, teacherId) => {
   })
 };
 
+exports.getApplicationById = (applicationId) => {
+  return new Promise((resolve) => {
+    const query = `SELECT * FROM thesisApplication WHERE id = ?`;
+    const res = db.prepare(query).get(applicationId);
+    resolve(res);
+  })
+};
+
 
 /**
  * @typedef {Object} ThesisApplicationRow
