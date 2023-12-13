@@ -170,7 +170,7 @@ app.get('/api/user',
       console.error(e);
       res.status(500).json('Internal Server Error');
     }
-  });
+});
 
 /*** APIs ***/
 
@@ -456,8 +456,7 @@ app.put('/api/thesis-proposals/:id',
         res.status(500).json('Internal Server Error');
       }
     }
-  }
-);
+  });
 
 app.delete('/api/thesis-proposals/:id',
   isLoggedIn,
@@ -489,8 +488,7 @@ app.delete('/api/thesis-proposals/:id',
       console.error(e);
       res.status(500).json({ message: 'Internal Server Error' });
     }
-  }
-);
+  });
 
 app.patch('/api/thesis-proposals/archive/:id',
   isLoggedIn,
@@ -522,8 +520,7 @@ app.patch('/api/thesis-proposals/archive/:id',
       console.error(e);
       res.status(500).json({ message: 'Internal Server Error' });
     }
-  }
-);
+  });
 
 app.post('/api/student/applications',
   isLoggedIn,
