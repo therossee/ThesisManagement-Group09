@@ -7,6 +7,9 @@ const { app } = require("../app");
 const thesisDao = require('../thesis_dao');
 const usersDao = require('../users_dao');
 const db = require('../db');
+const path = require('path');
+const fs = require('fs');
+const fse = require('fs-extra');
 
 // Mock Passport-SAML authenticate method
 jest.mock('passport-saml', () => {
@@ -894,26 +897,9 @@ describe('PATCH /api/thesis-proposals/archive/:id', () => {
 });
 
 describe('GET /api/teacher/uploads/:stud_id/:app_id', () => {
-    test('returns a file for a valid student and application ID', async () => {
-        db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
-        .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
-
-        const studentId = 's318952'; 
-        const applicationId = 2; 
-    
-        // Make the request
-        const response = await agent
-          .get(`/api/teacher/uploads/${studentId}/${applicationId}`)
-          .set('credentials', 'include')
-          .expect(200);
-    
-        // Assert the response contains the file or is empty
-        if (Object.keys(response.body).length > 0) {
-          expect(response.body).toBeDefined();
-          // Add more assertions if needed for the file content
-        } else {
-          expect(response.body).toEqual({});
-        }
+    afterAll(async () => {
+        // Use fs-extra's remove method to delete the directory and its contents
+        await fse.remove('uploads');
     });
     
     test('returns 404 for non-existing student', async () => {
@@ -960,5 +946,61 @@ describe('GET /api/teacher/uploads/:stud_id/:app_id', () => {
     
         // Assert the response
         expect(response.body).toEqual('Internal Server Error');
+    });
+
+    test('should return an empty JSON object if directory doesn\'t exist', async () => {
+        db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
+        .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
+
+        const studentId = 's318952'; 
+        const applicationId = 2; 
+    
+        // Make the request
+        const response = await agent
+          .get(`/api/teacher/uploads/${studentId}/${applicationId}`)
+          .set('credentials', 'include')
+          .expect(200);
+    
+        expect(response.body).toEqual({});
+    });
+
+    test('should return an empty JSON object if directory exists but is empty', async () => {
+        
+        db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
+        .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
+        
+        const studentId = 's318952';
+        const applicationId = 2;
+        const dir = path.join(__dirname, '../uploads', studentId, applicationId.toString());
+    
+        // Create the directory without any files
+        fs.mkdirSync(dir, { recursive: true });
+    
+        const response = await agent
+          .get(`/api/teacher/uploads/${studentId}/${applicationId}`)
+          .expect(200);
+    
+        expect(response.body).toEqual({});
+    });
+
+    test('should return the first file if directory exists and contains files', async () => {
+        db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
+        .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
+
+         // Create a directory with a sample PDF file
+        const dir = path.join(__dirname, '../uploads', 's318952', '2');
+        fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(path.join(dir, 'sample.pdf'), Buffer.alloc(0));
+
+        const studentId = 's318952'; 
+        const applicationId = 2; 
+    
+        // Make the request
+        const response = await agent
+          .get(`/api/teacher/uploads/${studentId}/${applicationId}`)
+          .set('credentials', 'include')
+          .expect(200);
+    
+        expect(response.header['content-type']).toEqual('application/pdf');
     });
 });
