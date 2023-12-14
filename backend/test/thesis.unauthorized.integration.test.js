@@ -2,41 +2,21 @@ require('jest');
 // [i] This line setup the test database + load the environment variables. DON'T (RE)MOVE IT
 const { resetTestDatabase } = require('./integration_config');
 
-const request = require("supertest");
 const { app } = require("../app");
-const fs = require('fs');
-
-
-// Mock Passport-SAML authenticate method
-jest.mock('passport-saml', () => {
-    const Strategy = jest.requireActual('passport-saml').Strategy;
-    return {
-      Strategy: class MockStrategy extends Strategy {
-        authenticate(req, options) {
-          const user = {
-            id: 's318952',
-            name: 'Sylvie Molinatto',
-            roles: [''], 
-          };
-          this.success(user);
-        }
-      },
-    };
-});
+const utils = require("./utils");
 
 beforeEach(() => {
-    // Be sure that we are using a full clean database before each test
-    resetTestDatabase();
-    jest.restoreAllMocks();
+  // Be sure that we are using a full clean database before each test
+  resetTestDatabase();
+  jest.restoreAllMocks();
 });
-
+let agent;
 beforeAll(async () => {
-    agent = request.agent(app);
-    await agent.get('/login');
+  agent = await utils.getMolinattoSylvieAgent(app, false);
 });
 
 describe('Unauthorized user', () => {
-  
+
   test('GET /api/thesis-proposals' , async () => {
     const response = await agent.get('/api/thesis-proposals');
     expect(response.statusCode).toBe(403);
@@ -52,11 +32,10 @@ describe('Unauthorized user', () => {
   test('GET /api/student/active-application' , async () => {
     const response = await agent.get('/api/student/active-application');
     expect(response.statusCode).toBe(403);
-  })
+  });
   test('POST /api/system/virtual-clock' , async () => {
     const response = await agent.post('/api/system/virtual-clock');
     expect(response.statusCode).toBe(403);
   })
 
 });
-
