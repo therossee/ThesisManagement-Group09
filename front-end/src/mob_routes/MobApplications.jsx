@@ -1,4 +1,4 @@
-import Errors from "./Errors";
+import Errors from "../routes/Errors";
 import MobTeacherApplications from "../mob_components/MobTeacherApplications";
 import StudentApplications from "../components/StudentApplications";
 import { useAuth } from '../components/authentication/useAuth';

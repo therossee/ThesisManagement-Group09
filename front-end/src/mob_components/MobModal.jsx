@@ -1,8 +1,8 @@
-import { Popup, AutoCenter, Button } from 'antd-mobile';
+import { Popup, AutoCenter } from 'antd-mobile';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Alert, message, Upload } from 'antd';
+import { Alert, message, Upload, Button } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import API from '../API';
 
@@ -69,14 +69,13 @@ function MobModal(props) {
     }
 
     return (
-        <div style={{paddingBottom:"60px"}}>
         <Popup title="Application"
             visible={isOpen}
             confirmText="Send"
             okButtonProps={{ loading: loading }}
             cancelText="Cancel"
-        >
-            <Alert message="PDF upload is optional" type="info" showIcon closable style={{ marginBottom: "7px" }} />
+               >
+            <Alert message="PDF upload is optional" type="info" showIcon closable style={{ marginBottom: "7px", marginRight: "3%", marginLeft:"3%", marginTop:"3%"}} />
             <AutoCenter>
             <Upload
                 beforeUpload={beforeUpload}
@@ -93,11 +92,12 @@ function MobModal(props) {
 
             </div>
             </Upload>
-            <Button onClick={applyForProposal}>Ok</Button>
+                <div style={{marginBottom:"10%", alignItems: "center", marginLeft:"2%", marginRight:"2%"}}>
+            <Button type="primary" onClick={applyForProposal}>Ok</Button>
             <Button onClick={() => { setUploadedFile(null); setIsOpen(false) }}>Cancel</Button>
+            </div>
             </AutoCenter>
         </Popup>
-        </div>
     );
 
 }

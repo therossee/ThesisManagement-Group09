@@ -9,7 +9,7 @@ import MobProposals from './mob_routes/MobProposals';
 import ViewProposal from './routes/ViewProposal';
 import MobTopBar from './mob_components/MobTopBar';
 import './css/style.css';
-import Applications from './routes/Applications';
+import MobApplications from './mob_routes/MobApplications';
 import { Tabs } from './mob_components/Tabs'
 
 const { Content, Footer } = Layout;
@@ -25,7 +25,7 @@ function MobLayout() {
                             <Route path="/" element={<MobHome />} />
                             <Route path="/admin/virtual-clock" element={<VirtualClock />} />
                             <Route path="/proposals" element={<MobProposals />} />
-                            <Route path="/applications" element={<Applications />} />
+                            <Route path="/applications" element={<MobApplications />} />
                             <Route path="/insert-proposal" element={<MobThesisProposal/>} />
                             <Route path="/view-proposal/:id" element={<ViewProposal />} />
                             <Route path="/edit-proposal/:id" element={<MobEditProposal />} />
