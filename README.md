@@ -530,6 +530,11 @@ Error Responses:
     - `500 Internal Server Error` 
 
 ## Database Tables
+- Table `configuration`:
+    | Column            | Type     | Constraints                           |
+    | ----------------- | -------- | ------------------------------------- |
+    | key               | text     | **PK**                                |
+    | value             | text     | **NOT NULL**                          |
 
 - Table `student`:
     | Column            | Type     | Constraints                           |
