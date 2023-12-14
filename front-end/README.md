@@ -34,7 +34,8 @@ This is the front end of the project. It is a mobile/web interface  developed us
   
 ## components
 - `Authentication` : Folder with three components: login button, logout button and usaAuth for the authentication provider
-- `InsertThesisProposal`: Form to insert new thesis proposal by a teacher divided in a 3 step form:
+- `InsertThesisProposal`: Form to insert new thesis proposal by a teacher or copy a proposal with a given id.
+It is divided in a 3 step form:
    - `InsertBody.jsx` : Designed to handle the creation of data related to thesis proposals.
    - `ReviewProposals.jsx` : Designed to view and review the data of a thesis proposal. Uses a table to show proposal details, including title, internal/external supervisors, keywords, type, description, and other associated fields.
    - `UploadResult.jsx`: Designed to display a result message after attempting to upload a thesis proposal. Depending on the result (success or error), it shows an appropriate message along with a button to return to the main page.
