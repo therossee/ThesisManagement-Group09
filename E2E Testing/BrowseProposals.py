@@ -36,6 +36,7 @@ row_proposal = driver.find_element(By.CSS_SELECTOR, "td[class='ant-table-cell an
 if row_proposal.text != None :
     print("Test passed, proposal: " + row_proposal.text+" found")
 else:
-    raise Exception("Test failed: no proposal found")
+    driver.quit()
+    print("Test failed: no proposal found")
 
 

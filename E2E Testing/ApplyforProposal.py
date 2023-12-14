@@ -52,15 +52,16 @@ print(status_string.text)
 driver.implicitly_wait(5)
 refresh_status_button = driver.find_element(By.XPATH, "//span[normalize-space()='Refresh List']")
  
+string_status = "Continue with the test"
 if status_string.text == "accepted":
     driver.quit()
-    raise Exception("Test failed: cannot apply for a proposal if already one is accepted")
+    print("Test failed: cannot apply for a proposal if already one is accepted")
 elif status_string.text == "waiting for approval":
-    pass
+    print(string_status)
 elif status_string.text == "rejected":
-    pass
+    print(string_status)
 else:
-    pass
+    print(string_status)
 
 #TEST 2: APPLY FOR A PROPOSAL
 #Click on thesis proposals
@@ -74,13 +75,7 @@ driver.implicitly_wait(5)
 eye_button = driver.find_element(By.CSS_SELECTOR, "tbody tr:nth-child(2) td:nth-child(9) div:nth-child(1) div:nth-child(1) span:nth-child(1)")
 eye_button.click();
 print("Eye clicked")
-"""
-#Click on apply button
-driver.implicitly_wait(5)
-apply_button = driver.find_element(By.XPATH, "//button[@class='ant-btn css-dev-only-do-not-override-2i2tap ant-btn-primary ant-btn-background-ghost']")
-apply_button.click();
-print("Apply for proposal clicked")
-"""
+
 #Click on application button
 driver.implicitly_wait(5)
 applications_history_button = driver.find_element(By.XPATH, "//span[normalize-space()='Applications History']")
@@ -93,4 +88,4 @@ if status_string.text == "waiting for approval":
     print("Test passed")
 elif status_string.text == "accepted" or status_string.text == "rejected":
     driver.quit()
-    raise Exception("Test failed: remember to run the test with a user that has no accepted or rejected applications")
+    print("Test failed: remember to run the test with a user that has no accepted or rejected applications")

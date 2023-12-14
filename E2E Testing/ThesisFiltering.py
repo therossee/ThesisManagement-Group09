@@ -57,13 +57,18 @@ search_confirm_button = driver.find_element(By.XPATH, "//span[normalize-space()=
 search_confirm_button.click();
 print("Search confirm button clicked")
 
+string_passed = "Test passed, proposal: \""
+string_found = "\" found"
+
 driver.implicitly_wait(5)
 text_to_find = "OPTIMIZATION OF CHECK-IN PROCESSES IN AMAZON LOGISTICS"
 text_found  = driver.find_element(By.XPATH, "//td[contains(text(),'OPTIMIZATION OF CHECK-IN PROCESSES IN AMAZON LOGIS')]")
+result = string_passed + text_found.text+string_found
+result_failed = "Test failed: no proposal found"
 if text_found.text == text_to_find :
-    print("Test passed, proposal: \"" + text_found.text+"\" found")
+    print(result)
 else:
-    print("Test failed: no proposal found")
+    print(result_failed)
 
 
 #TEST 2: DELETE THE SEARCH FILTER
@@ -87,11 +92,13 @@ print("Search confirm button clicked")
 
 driver.implicitly_wait(5)
 text_to_find = "PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFORMANCE OPTIMIZATION"
-text_found  = driver.find_element(By.XPATH, "//td[contains(text(),'PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFOR')]")
+XPATH_text_found = "//td[contains(text(),'PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFOR')]"
+text_found  = driver.find_element(By.XPATH, XPATH_text_found)
+result = string_passed + text_found.text+string_found
 if text_found.text == text_to_find :
-    print("Test passed, proposal: \"" + text_found.text+"\" found")
+    print(result)
 else:
-    print("Test failed: no proposal found")
+    print(result_failed)
 
 
 #TEST 3: FILTER BY LEVEL (FILTERING SYMBOL)
@@ -112,11 +119,12 @@ print("Filter confirm button clicked")
 
 driver.implicitly_wait(5)
 text_to_find = "PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFORMANCE OPTIMIZATION"
-text_found  = driver.find_element(By.XPATH, "//td[contains(text(),'PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFOR')]")
+text_found  = driver.find_element(By.XPATH, XPATH_text_found)
+result = string_passed + text_found.text+string_found
 if text_found.text == text_to_find :
-    print("Test passed, proposal: \"" + text_found.text+"\" found")
+    print(result)
 else:
-    print("Test failed: no proposal found")
+    print(result_failed)
 
 
 #TEST 4: FILTER BY LEVEL, RESET FILTER (FILTERING SYMBOL)
@@ -124,7 +132,7 @@ else:
 driver.implicitly_wait(5)
 filter_button = driver.find_element(By.XPATH, "//th[@aria-label='Level']//span[@aria-label='filter']//*[name()='svg']")
 filter_button.click();
-print("Filter button clicked")
+print("Filter 2 button clicked ")
 
 driver.implicitly_wait(5)
 filter_reset_button = driver.find_element(By.XPATH, "//button[@class='ant-btn css-dev-only-do-not-override-2i2tap ant-btn-link ant-btn-sm']//span[contains(text(),'Reset')]")
@@ -137,19 +145,19 @@ filter_confirm_button.click();
 print("Filter confirm button clicked")
 
 driver.implicitly_wait(5)
-text_to_find = "PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFORMANCE OPTIMIZATION"
-text_found  = driver.find_element(By.XPATH, "//td[contains(text(),'PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFOR')]")
+text_found  = driver.find_element(By.XPATH, XPATH_text_found)
+result = string_passed + text_found.text+string_found
 if text_found.text == text_to_find :
-    print("Test passed, proposal: \"" + text_found.text+"\" found")
+    print(result)
 else:
-    print("Test failed: no proposal found")
+    print(result_failed)
 
 #TEST 5: SUPERVISOR FILTER - SEARCH FOR A SUPERVISOR
 
 driver.implicitly_wait(5)
 filter_button = driver.find_element(By.XPATH, "//th[3]//div[1]//span[2]//span[1]")
 filter_button.click();
-print("Filter button clicked")
+print("Filter 3 button clicked")
 
 driver.implicitly_wait(5)
 filter_search_field = driver.find_element(By.XPATH, "//input[@placeholder='Search in filters']")
@@ -164,8 +172,9 @@ print("Filter ok button clicked")
 driver.implicitly_wait(5)
 text_to_find = "Isabella Gatti"
 text_found  = driver.find_element(By.XPATH, "//body[1]/div[1]/div[1]/div[1]/main[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/table[1]/tbody[1]/tr[2]/td[3]/span[1]")
+result = string_passed + text_found.text+string_found
 if text_found.text == text_to_find :
-    print("Test passed, supervisor: \"" + text_found.text+"\" found")
+    print(result)
 else:
     print("Test failed: no supervisor found")
 
