@@ -1,6 +1,8 @@
 import { React, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { BrowserView, MobileView } from "react-device-detect";
 import { Alert, Button, Descriptions, Modal, Skeleton, Typography, Tag, message, Upload } from "antd";
+import MobModal from '../mob_components/MobModal'
 import { UploadOutlined } from '@ant-design/icons';
 import { useAuth } from '../components/authentication/useAuth';
 import PropTypes from 'prop-types';
@@ -161,12 +163,22 @@ function ViewThesisProposal() {
 
   return (
     <>
-      <MyModal setIsOpen={setIsOpen} setLoading={setLoading} setDisabled={setDisabled} isOpen={isOpen} loading={loading} />
-      <Button type="link" onClick={() => navigate("/proposals")}>&lt; Back to Thesis Proposals</Button>
-      <div style={{ paddingLeft: "2%", marginRight: "2%" }}>
-        <Descriptions title={data.title} layout="vertical" items={items} />
-        {!isTeacher && <Button ghost type="primary" disabled={disabled} loading={loading} onClick={() => setIsOpen(true)}>Apply for proposal</Button>}
-      </div>
+      <BrowserView>
+        <MyModal setIsOpen={setIsOpen} setLoading={setLoading} setDisabled={setDisabled} isOpen={isOpen} loading={loading} />
+        <Button type="link" onClick={() => navigate("/proposals")}>&lt; Back to Thesis Proposals</Button>
+        <div style={{ paddingLeft: "2%", marginRight: "2%" }}>
+          <Descriptions title={data.title} layout="vertical" items={items} />
+          {!isTeacher && <Button ghost type="primary" disabled={disabled} loading={loading} onClick={() => setIsOpen(true)}>Apply for proposal</Button>}
+        </div>
+      </BrowserView>
+      <MobileView>
+        <MobModal setIsOpen={setIsOpen} setLoading={setLoading} setDisabled={setDisabled} isOpen={isOpen} loading={loading} />
+        <Button type="link" onClick={() => navigate("/proposals")}>&lt; Back to Thesis Proposals</Button>
+        <div style={{paddingBottom: "60px"}}>
+          <Descriptions title={data.title} layout="vertical" items={items} />
+          {!isTeacher && <Button ghost type="primary" disabled={disabled} loading={loading} onClick={() => setIsOpen(true)}>Apply for proposal</Button>}
+        </div>
+    </MobileView >
     </>
   )
 }
@@ -242,7 +254,7 @@ function MyModal(props) {
       okButtonProps={{ loading: loading }}
       cancelText="Cancel"
     >
-      <Alert message="PDF upload is optional" type="info" showIcon closable style={{marginBottom: "7px"}}/>
+      <Alert message="PDF upload is optional" type="info" showIcon closable style={{ marginBottom: "7px" }} />
       <Upload.Dragger
         beforeUpload={beforeUpload}
         onChange={onChange}

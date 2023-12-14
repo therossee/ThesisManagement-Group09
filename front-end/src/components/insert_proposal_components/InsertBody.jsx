@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Form, Input, Select, DatePicker, Button } from "antd";
 import { Option } from "antd/lib/mentions";
+import PropTypes from "prop-types";
 
 function InsertBody(props) {
     const [selectedInt, setSelectedInt] = useState([]);
@@ -8,7 +9,7 @@ function InsertBody(props) {
     const [selectedKw, setSelectedKw] = useState([]);
     const [selectedCds, setSelectedCds] = useState([]);
     const [newKeyword, setNewKeyword] = useState("");
-    const [lev, setSelLev] = useState("");
+    const [lev, setLev] = useState("");
     const [selDegrees, setSelDegrees] = useState([]);
     const { keywords, intCoSupervisors, extCoSupervisors, degrees, form, date } = props;
     const unselectedInt = intCoSupervisors.filter((x) => !selectedInt.includes(x));
@@ -17,13 +18,13 @@ function InsertBody(props) {
   
     useEffect(() => {
       if (form.getFieldValue("degreeLevel") === "L") {
-        setSelLev("L");
+        setLev("L");
         setSelDegrees(degrees.filter((x) => x.cod_degree.includes("L-")));
       } else if (form.getFieldValue("degreeLevel") === "LM") {
-        setSelLev("LM");
+        setLev("LM");
         setSelDegrees(degrees.filter((x) => x.cod_degree.includes("LM-")));
       } else {
-        setSelLev("");
+        setLev("");
         setSelDegrees([]);
       }
     }, [degrees]);
@@ -44,7 +45,7 @@ function InsertBody(props) {
     };
   
     const handleDegreeSelection = (lev) => {
-      setSelLev(lev);
+      setLev(lev);
       form.setFieldValue("cds", []);
       const str = lev === "L" ? "L-" : "LM-";
       setSelDegrees(degrees.filter((x) => x.cod_degree.includes(str)));
@@ -57,6 +58,12 @@ function InsertBody(props) {
     const onFinish = (values) => {
       props.saveData(values);
     };
+
+    const intCoSupOpt = unselectedInt.map((x) => ({
+      value: x.id, // assuming x.id is a string or number
+      label: `${x.name} ${x.surname}`, // assuming x.name and x.surname are strings
+      searchValue: `${x.id} ${x.name} ${x.surname}`, // combine id, name, and surname for search
+    }));
   
     return (
       <Form form={form} layout="vertical" onFinish={onFinish}
@@ -79,11 +86,7 @@ function InsertBody(props) {
             placeholder="Select internal co-Supervisors"
             value={selectedInt}
             onChange={setSelectedInt}
-            options={unselectedInt.map((x) => ({
-              value: x.id, // assuming x.id is a string or number
-              label: `${x.name} ${x.surname}`, // assuming x.name and x.surname are strings
-              searchValue: `${x.id} ${x.name} ${x.surname}`, // combine id, name, and surname for search
-            }))}
+            options={intCoSupOpt}
             filterOption={(input, option) =>
               option.searchValue.toLowerCase().includes(input.toLowerCase())
             }
@@ -148,7 +151,12 @@ function InsertBody(props) {
         ]}>
           <Input.TextArea rows={6} />
         </Form.Item>
-        <Form.Item label="Required Knowledge" name="requiredKnowledge" >
+        <Form.Item label="Required Knowledge" name="requiredKnowledge" rules={[
+          {
+          required: true,
+          message: 'Please insert required knowledge for this thesis!',
+          },
+        ]}>
           <Input.TextArea rows={4} />
         </Form.Item>
         <Form.Item label="Notes" name="notes">
@@ -216,5 +224,15 @@ function InsertBody(props) {
       </Form>
     );
   }
+
+    InsertBody.propTypes = {
+        keywords: PropTypes.arrayOf(PropTypes.string),
+        intCoSupervisors: PropTypes.arrayOf(PropTypes.object),
+        extCoSupervisors: PropTypes.arrayOf(PropTypes.object),
+        degrees: PropTypes.arrayOf(PropTypes.object),
+        form: PropTypes.objectOf(PropTypes.any),
+        date: PropTypes.objectOf(PropTypes.any),
+        saveData: PropTypes.func,
+    }
   
   export { InsertBody };
