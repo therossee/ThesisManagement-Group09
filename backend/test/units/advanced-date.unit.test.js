@@ -1,25 +1,11 @@
 require('jest');
+// [i] This line load the environment variables + setup extension of "jest". DON'T (RE)MOVE IT
+require('../integration_config');
 
 const dayjs = require('dayjs');
 const configuration = require('../../configuration_dao');
 const AdvancedDate = require("../../AdvancedDate");
 const InvalidNewVirtualOffsetError = require("../../errors/InvalidNewVirtualOffsetError");
-
-function toBeAnIntegerCloseTo(received, expected, delta) {
-    const pass = Number.isInteger(received) && Math.abs(received - expected) <= delta;
-    if (pass) {
-        return {
-            message: () => `expected ${received} not to be an integer close to ${expected} (with a tolerance of ${delta})`,
-            pass: true,
-        };
-    } else {
-        return {
-            message: () => `expected ${received} to be an integer close to ${expected} (with a tolerance of ${delta})`,
-            pass: false,
-        };
-    }
-}
-expect.extend({ toBeAnIntegerCloseTo });
 
 
 jest.mock('../../configuration_dao', () => ({

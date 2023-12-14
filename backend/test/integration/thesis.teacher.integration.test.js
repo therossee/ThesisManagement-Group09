@@ -582,6 +582,73 @@ describe('PUT /api/thesis-proposals/:id', () => {
             }
         );
     });
+    test('should return 400 if expiration date is invalid', async () => {
+        const responseGet = await agent
+            .get('/api/thesis-proposals/1')
+            .set('Accept', 'application/json')
+            .set('credentials', 'include')
+            .send();
+        expect(responseGet.status).toBe(200);
+
+        const body = responseGet.body;
+        const updatedBody = {
+            title: body.title + ' updated',
+            type: body.type + ' updated',
+            description: body.description + ' updated',
+            required_knowledge: body.requiredKnowledge + ' updated',
+            notes: body.notes + ' updated',
+            expiration: 'something-invalid',
+            level: body.level,
+            cds: ['L-08'],
+            keywords: [...body.keywords, 'another keyword'],
+            internal_co_supervisors_id: [],
+            external_co_supervisors_id: []
+        };
+        const response = await agent
+            .put(`/api/thesis-proposals/1`)
+            .set('credentials', 'include')
+            .send(updatedBody);
+
+        expect(response.status).toBe(400);
+        expect(response.body.message).toEqual("Some properties are missing or invalid.");
+        expect(response.body).toHaveProperty('errors');
+        expect(response.body.errors).toHaveLength(1);
+        expect(response.body.errors[0].code).toEqual('invalid_date');
+    });
+
+    test('should return 400 if expiration date is in the past', async () => {
+        const responseGet = await agent
+            .get('/api/thesis-proposals/1')
+            .set('Accept', 'application/json')
+            .set('credentials', 'include')
+            .send();
+        expect(responseGet.status).toBe(200);
+
+        const body = responseGet.body;
+        const updatedBody = {
+            title: body.title + ' updated',
+            type: body.type + ' updated',
+            description: body.description + ' updated',
+            required_knowledge: body.requiredKnowledge + ' updated',
+            notes: body.notes + ' updated',
+            expiration: '2000-11-10',
+            level: body.level,
+            cds: ['L-08'],
+            keywords: [...body.keywords, 'another keyword'],
+            internal_co_supervisors_id: [],
+            external_co_supervisors_id: []
+        };
+        const response = await agent
+            .put(`/api/thesis-proposals/1`)
+            .set('credentials', 'include')
+            .send(updatedBody);
+
+        expect(response.status).toBe(400);
+        expect(response.body.message).toEqual("Some properties are missing or invalid.");
+        expect(response.body).toHaveProperty('errors');
+        expect(response.body.errors).toHaveLength(1);
+        expect(response.body.errors[0].code).toEqual('invalid_date');
+    });
 
     test('should return 500 error', async () => {
         jest.spyOn(thesisDao, 'listApplicationsForTeacherThesisProposal').mockRejectedValueOnce(new Error());

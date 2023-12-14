@@ -11,28 +11,28 @@ jest.mock('../../db', () => ({
 }));
 
 describe('getStudentDegree', () => {
- test('returns student degree for a valid student ID', async () => {
-   // Mock the necessary data for a valid student ID
-   const validStudentId = 'Mock id';
-   const mockDegree = {
-     cod_degree: 'Mock cod_degree',
-     title_degree: 'Mock title_degree',
-   };
-   db.prepare().get.mockReturnValueOnce(mockDegree);
-   // Call the function and assert the result
-   const result = await users.getStudentDegree(validStudentId);
-   expect(result).toEqual(mockDegree);
- });
+  test('returns student degree for a valid student ID', async () => {
+    // Mock the necessary data for a valid student ID
+    const validStudentId = 'Mock id';
+    const mockDegree = {
+      cod_degree: 'Mock cod_degree',
+      title_degree: 'Mock title_degree',
+    };
+    db.prepare().get.mockReturnValueOnce(mockDegree);
+    // Call the function and assert the result
+    const result = await users.getStudentDegree(validStudentId);
+    expect(result).toEqual(mockDegree);
+  });
 
- // Test case for an invalid student ID
- test('returns null for an invalid student ID', async () => {
-   // Mock the necessary data for an invalid student ID
-   const invalidStudentId = 'Invalid id';
+  // Test case for an invalid student ID
+  test('returns null for an invalid student ID', async () => {
+    // Mock the necessary data for an invalid student ID
+    const invalidStudentId = 'Invalid id';
 
-   // Call the function and assert the result
-   const result = await users.getStudentDegree(invalidStudentId);
-   expect(result).toBeNull();
- });
+    // Call the function and assert the result
+    const result = await users.getStudentDegree(invalidStudentId);
+    expect(result).toBeNull();
+  });
 });
 
 describe('getStudentById', () => {
