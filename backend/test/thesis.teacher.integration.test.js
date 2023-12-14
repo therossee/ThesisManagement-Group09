@@ -615,6 +615,21 @@ describe('GET /api/teacher/applications/:proposal_id', () => {
             { application_id: 2, id: 's321529', name: 'Matteo', surname: 'Ladrat', status: 'waiting for approval' }
         ]);
     });
+
+    test('should handle internal server errors', async () => {
+        db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
+            .run('s321529', 2, new Date().toISOString(), 'waiting for approval');
+
+        jest.spyOn(thesisDao, 'listApplicationsForTeacherThesisProposal').mockRejectedValueOnce(new Error());
+        // Send a request to the endpoint
+        const response = await agent
+            .get('/api/teacher/applications/2')
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Internal Server Error');
+    });
 });
 
 describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
@@ -687,6 +702,17 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
         // Assert
         expect(response.status).toBe(400);
         expect(response.body).toEqual({ message: 'Missing required fields.' });
+    });
+    test('should refuse if the thesis doesn\'t exist', async () => {
+        // Act
+        const response = await agent
+            .patch("/api/teacher/applications/accept/5")
+            .send({ student_id: 's318952' })
+            .set('credentials', 'include');
+
+        // Assert
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({ message: 'Thesis proposal with id 5 not found, cannot accept this application.' });
     });
     test('should return 404 error if no application has been found', async () => {
         // Act
@@ -788,12 +814,23 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
         expect(response.status).toBe(400);
         expect(response.body).toEqual({ message: 'Missing required fields.' });
     });
+    test('should refuse if the thesis doesn\'t exist', async () => {
+        // Act
+        const response = await agent
+            .patch("/api/teacher/applications/reject/5")
+            .send({ student_id: 's318952' })
+            .set('credentials', 'include');
+
+        // Assert
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({ message: 'Thesis proposal with id 5 not found, cannot reject this application.' });
+    });
     test('should return 404 error if no application has been found', async () => {
         // Act
         const response = await agent
-            .patch("/api/teacher/applications/reject/234567")
+            .patch("/api/teacher/applications/reject/2")
             .set('credentials', 'include')
-            .send({ student_id: 's321529' });
+            .send({ student_id: 's4' });
 
         // Assert
         expect(response.status).toBe(404);
@@ -964,6 +1001,61 @@ describe('DELETE /api/thesis-proposals/:id', () => {
         // Assertions
         expect(response.status).toBe(403);
         expect(response.body).toEqual({ message: 'Some applications has been accepted and, therefore, you can\'t delete this thesis' });
+    });
+    test('should refuse to delete a inexistent thesis proposal', async () => {
+        const id = 4;
+
+        // Make a request to the endpoint
+        const response = await agent
+            .delete(`/api/thesis-proposals/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({ message: 'No thesis proposal with id 4 found' });
+    });
+    test('should refuse to delete a inexistent thesis proposal (because created in the future)', async () => {
+        db.prepare('INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_deleted, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(4, 'Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2030-10-10T10:45:50.121Z', '2032-11-10T23:59:59.999Z', 'LM', 0, 0);
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+        .run(4, 'L-08');
+
+        // Make a request to the endpoint
+        const response = await agent
+            .delete(`/api/thesis-proposals/4`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({ message: 'No thesis proposal with id 4 found' });
+    });
+    test('should refuse to delete an expired thesis proposal', async () => {
+        db.prepare('INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(4, 'Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2020-10-10T10:45:50.121Z', '2022-11-10T23:59:59.999Z', 'LM');
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+        .run(4, 'L-08');
+        // Make a request to the endpoint
+        const response = await agent
+            .delete(`/api/thesis-proposals/4`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ message: 'You can\'t delete a thesis already expired' });
+    });
+    test('should refuse to delete a thesis for which the teacher is not the supervisor', async () => {
+        db.prepare('INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(4, 'Title', 'd370335', 'research project', 'Description', 'Required knowledge', 'Notes', '2020-10-10T10:45:50.121Z', '2032-11-10T23:59:59.999Z', 'LM');
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+        .run(4, 'L-08');
+        // Make a request to the endpoint
+        const response = await agent
+            .delete(`/api/thesis-proposals/4`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ message: 'You are not the supervisor of this thesis' });
     });
     test('should handle errors and return the appropriate response', async () => {
         const id = 'nonExistingProposalId';
