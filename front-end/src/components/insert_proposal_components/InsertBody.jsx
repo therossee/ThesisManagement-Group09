@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { Form, Input, Select, DatePicker, Button } from "antd";
-import { Form as MobForm, Input as MobInput, TextArea, Button as MobButton, AutoCenter } from "antd-mobile";
-import { BrowserView, MobileView } from "react-device-detect";
 import { Option } from "antd/lib/mentions";
 
 function InsertBody(props) {

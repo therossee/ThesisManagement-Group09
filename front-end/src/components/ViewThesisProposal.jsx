@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { BrowserView, MobileView } from "react-device-detect";
 import { Alert, Button, Descriptions, Modal, Skeleton, Typography, Tag, message, Upload } from "antd";
 import MobModal from '../mob_components/MobModal'
-import { AutoCenter } from "antd-mobile";
 import { UploadOutlined } from '@ant-design/icons';
 import { useAuth } from '../components/authentication/useAuth';
 import PropTypes from 'prop-types';
