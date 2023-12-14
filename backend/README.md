@@ -132,3 +132,6 @@ Several middleware functions are defined to check user authentication and roles.
     - Authenticated by a teacher, gets the career of the student with the given id
     - Error if a student with the given id doesn't exist
 
+- GET `/api/teacher/uploads/:stud_id/:app_id`
+    - Authenticated by a teacher, gets uploads associated with a specific student's application for a teacher.
+    - Error if a student with the given id or a application with a given id doesn't exist.
