@@ -47,7 +47,7 @@ function MobReview(props) {
       },
       { field: "Level", value: level },
       { field: "CdS", 
-      value: selCds.map((x) =>
+      value: selCds.map((x, i) =>
       <Fragment key={x.cod_degree}>
         {`${x.cod_degree} - ${x.title_degree}`}
         {i < selCds.length - 1 && <br />}
