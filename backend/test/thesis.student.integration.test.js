@@ -470,7 +470,7 @@ describe('POST /api/student/applications', () => {
     
     });
 
-    test.skip('should reject a non-PDF file', async () => {
+    test('should reject a non-PDF file', async () => {
         // Create a sample file to be uploaded
         const filePath = path.join(uploadDir, 'sample.txt');
         fs.writeFileSync(filePath, 'This is a sample file.');
