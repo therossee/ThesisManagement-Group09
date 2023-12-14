@@ -13,7 +13,9 @@ This is the front end of the project. It is a mobile/web interface  developed us
 - Route `/proposals`: display the active proposals of a teacher
 - Route `/applications`: Displays all the applications of students for thesis created by the logged-in teacher.
 - Route `/insert-proposal/`: Displays the proposal form for the teacher to insert a new thesis proposal.
+- Route `/insert-proposal/:id`: If an ID is present, the form fields for inserting a proposal are populated with the corresponding values. Otherwise, if no ID is provided, the insert proposal form remains blank, similar to the previous state
 - Route `/view-proposal/:id`: Displays the specific proposal to view.
+- Route `/edit-proposal/:id`: Displays the form with the specific proposal to edit.
 - Route`/*`: Error page 
 
 
@@ -25,7 +27,8 @@ This is the front end of the project. It is a mobile/web interface  developed us
 - `Home.jsx` : React component for the home page.
 - `InsertProposal.jsx` : React conditional component to filter if a teacher enters InsertThesisProposal, otherwise error.
 - `Proposals.jsx` : React conditional component to filter if a logged-in user is a student. In this case enters ThesisProposals, otherwise error.
-- `ViewProposal.jsx` : React component for viewThesisProposal.
+- `ViewProposal.jsx` : React component for view a ThesisProposal.
+- `EditProposal.jsx` : React component for edit a ThesisProposal.
 - `Applications.jsx` : React conditional component to filter if a logged-in user is a teacher. In this case enters ApplicationsProposals, otherwise error.
 - `VirtualClock.jsx` :  React component for virtual clock management
   
@@ -47,7 +50,8 @@ Main functions:
   - `LoginForm` : Form for the login inserted in the topbar.
   - `IsLoggedInForm` : Form when the user has alredy logged in.
 - `ViewThesisProposal` : Allows users to view specific details of a thesis proposal. Provides a detailed view of the proposal, including title, level, type, expiration date, description, required knowledge, supervisor, co-supervisors, groups, notes, keywords and, if the user is a lecturer, also the course of study (CdS). Students have the opportunity to apply for the proposal..
-
+- `EditThesisProposal` : Allows the logged-in teacher to view the form to edit a specific thesis Proposal.
+- `StudentCV` : Designed to display the curriculum vitae (CV) of a student. It provides an interface to view information about the student's exams, including the date, course code, teaching, mark, and credit units (CFU). The component also offers the ability to view an attached PDF document.
 
 ## Main React Components
 - `API.jsx` : Main API functions as:
