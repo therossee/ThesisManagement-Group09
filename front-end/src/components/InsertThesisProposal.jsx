@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Form, message, Spin, Steps, Tooltip, FloatButton, Button } from 'antd';
+import { useParams } from "react-router-dom";
 import dayjs from 'dayjs';
 import { ReviewProposal } from './insert_proposal_components/ReviewProposal.jsx';
 import { UploadResult } from './insert_proposal_components/UploadResult.jsx';
@@ -23,6 +24,7 @@ const steps = [
 
 function InsertThesisProposal() {
 
+  const copyId = useParams().id;
   const [keywords, setKeywords] = useState([]);
   const [intCoSupervisors, setIntCoSupervisors] = useState([]);
   const [extCoSupervisors, setExtCoSupervisors] = useState([]);
@@ -37,6 +39,29 @@ function InsertThesisProposal() {
   const [messageApi, contextHolder] = message.useMessage();
   const [date, setDate] = useState(dayjs());
 
+  useEffect(() => {
+    if (copyId) {
+      API.getThesisProposalbyId(copyId)
+        .then((x) => {
+          let proposal;
+          proposal = {
+            title: x.title,
+            intCoSupervisors: x.internalCoSupervisors.map((x) => x.id),
+            extCoSupervisors: x.externalCoSupervisors.map((x) => x.id),
+            type: x.type,
+            description: x.description,
+            requiredKnowledge: x.requiredKnowledge,
+            notes: x.notes,
+            keywords: x.keywords,
+            expirationDate: dayjs(x.expiration),
+            cds: x.cds.map((x) => x.cod_degree),
+            degreeLevel: x.level
+          }
+          form.setFieldsValue(proposal);
+          setFormData(proposal);
+        })
+    }
+  }, []);
 
   useEffect(() => {
     API.getTeachers()
