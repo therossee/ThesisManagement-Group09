@@ -10,6 +10,7 @@ const db = require('../db');
 const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
+const imap = require("imap");
 
 // Mock Passport-SAML authenticate method
 jest.mock('passport-saml', () => {
@@ -626,13 +627,57 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
         // Act
         const response = await agent
           .patch("/api/teacher/applications/accept/2")
-          .send({ student_id: 's321529' })
+          .send({ student_id: 's318952' })
           .set('credentials', 'include')
           .expect(200);
 
         // Assert
         expect(response.body).toEqual({ message: 'Thesis accepted and others rejected successfully' });
-    });
+
+        // Wait for a moment to allow the email to be processed (adjust the timing as needed)
+        await new Promise((resolve) => setTimeout(resolve, 8000));
+
+        // Set up IMAP client
+        const imapClient = new imap({
+        user: process.env.TM_SMTP_USERNAME, 
+        password: process.env.TM_SMTP_PASSWORD,
+        host: "imap.ethereal.email", // IMAP server host
+        port: 993, // IMAP server port
+        tls: true,
+        tlsOptions: { rejectUnauthorized: false }, 
+        });
+
+        // Connect to the IMAP server
+        await new Promise((resolve, reject) => {
+        imapClient.once("ready", resolve);
+        imapClient.once("error", reject);
+        imapClient.connect();
+        });
+
+        // Open the Inbox
+        const openInbox = await new Promise((resolve, reject) => {
+        imapClient.openBox("INBOX", true, (err, box) => {
+            if (err) reject(err);
+            resolve(box);
+        });
+        });
+
+        const subject = 'Application status changed - PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API';
+        // Search for the email (adjust criteria as needed)
+        const searchResults = await new Promise((resolve, reject) => {
+            imapClient.search(['UNSEEN', ['TO', 's318952@studenti.polito.it'], ['SUBJECT', subject]], (err, results) => {
+            if (err) reject(err);
+            resolve(results);
+            });
+        });
+
+        // Assert that the email has been received
+        expect(searchResults.length).toBeGreaterThan(0);
+
+        // Close the IMAP connection
+        imapClient.end();
+
+    },13000);
     test('should return 400 error if is missing student_id', async () => {
         // Act
         const response = await agent
