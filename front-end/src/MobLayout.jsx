@@ -26,7 +26,7 @@ function MobLayout() {
                             <Route path="/admin/virtual-clock" element={<VirtualClock />} />
                             <Route path="/proposals" element={<MobProposals />} />
                             <Route path="/applications" element={<MobApplications />} />
-                            <Route path="/insert-proposal" element={<MobThesisProposal/>} />
+                            <Route path="/insert-proposal/:id?" element={<MobThesisProposal/>} />
                             <Route path="/view-proposal/:id" element={<ViewProposal />} />
                             <Route path="/edit-proposal/:id" element={<MobEditProposal />} />
                             <Route path="/*" element={<Errors code="404"/>} />

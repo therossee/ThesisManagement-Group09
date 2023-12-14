@@ -122,7 +122,6 @@ function MobStudentThesisProposals() {
 
     const applyFilters2 = (intermediate) => {
         let filteredResults = [...intermediate];
-        console.log(intermediate);
         if (dateRange && dateRange.length > 1) {
             const date0 = dayjs(dateRange[0]);
             const date1 = dayjs(dateRange[1]);
@@ -154,7 +153,6 @@ function MobStudentThesisProposals() {
             uniqueIds.add(item.id);
             return true; // Not a duplicate, include in results
         });
-        console.log(filteredResults);
         setFilteredData(filteredResults);
     }
 

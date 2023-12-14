@@ -3,7 +3,6 @@ import { Form, Input, TextArea, Button, AutoCenter } from "antd-mobile";
 import { Select } from 'antd';
 import Flatpickr from "react-flatpickr";
 import { Option } from "antd/lib/mentions";
-import dayjs from "dayjs";
 import PropTypes from "prop-types";
 
 function MobInsertBody(props) {
@@ -11,7 +10,6 @@ function MobInsertBody(props) {
   const [selectedExt, setSelectedExt] = useState([]);
   const [selectedKw, setSelectedKw] = useState([]);
   const [selectedCds, setSelectedCds] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(dayjs());
   const [newKeyword, setNewKeyword] = useState("");
   const [lev, setSelLev] = useState("");
   const [selDegrees, setSelDegrees] = useState([]);
@@ -78,7 +76,7 @@ function MobInsertBody(props) {
           message: 'Please input a title!',
         },
       ]}>
-        <Input />
+        <TextArea />
       </Form.Item>
       <Form.Item label="Internal co-Supervisors" name="intCoSupervisors">
         <Select
@@ -182,7 +180,7 @@ function MobInsertBody(props) {
           }}
           disabled={disabledDate}
           defaultDate={date}
-          onChange={(date) => {setSelectedDate(date[0]); form.setFieldValue('expirationDate', new Date(date[0]))}}
+          onChange={(date) => {form.setFieldValue('expirationDate', new Date(date[0]))}}
         />
         </div>
       </Form.Item>

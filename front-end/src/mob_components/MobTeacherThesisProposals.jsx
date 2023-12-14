@@ -113,7 +113,7 @@ function MobTeacherThesisProposals() {
                                     <Button onClick={() => deleteProposalById(x.id)}>Delete</Button>
                                     <Button onClick={() => archiveProposalById(x.id)}>Archive</Button>
                                 </>
-                                <Button onClick={() =>{}}>Copy</Button>
+                                <Button onClick={() => navigate(`/insert-proposal/${x.id}`)}>Copy</Button>
 
                             </Collapse.Panel>
                         ))}

@@ -22,7 +22,6 @@ function MobEditThesisProposal() {
     const [formData, setFormData] = useState(null);
     const [form] = Form.useForm();
     const [proposalId, setProposalId] = useState(-1);
-    const [messageApi, contextHolder] = message.useMessage();
     const [date, setDate] = useState(new Date());
 
 
@@ -55,35 +54,35 @@ function MobEditThesisProposal() {
                 setIntCoSupervisors(obj.teachers);
             })
             .catch((err) => {
-                messageApi.error("Failed to fetch teachers!");
+                message.error("Failed to fetch teachers!");
             });
         API.getExtCoSupervisors()
             .then((obj) => {
                 setExtCoSupervisors(obj.externalCoSupervisors);
             })
             .catch((err) => {
-                messageApi.error("Failed to fetch external co-supervisors!");
+                message.error("Failed to fetch external co-supervisors!");
             });
         API.getAllDegrees()
             .then((obj) => {
                 setDegrees(obj);
             })
             .catch((err) => {
-                messageApi.error("Failed to fetch degrees!");
+                message.error("Failed to fetch degrees!");
             });
         API.getAllKeywords()
             .then((obj) => {
                 setKeywords(obj.keywords);
             })
             .catch((err) => {
-                messageApi.error("Failed to fetch keywords!");
+                message.error("Failed to fetch keywords!");
             });
         API.getClock()
             .then((clock) => {
                 setDate(dayjs().add(clock.offset, 'ms'));
             })
             .catch((err) => {
-                messageApi.error("Failed to fetch virtual clock!");
+                message.error("Failed to fetch virtual clock!");
             })
             .finally(() => {
                 setTimeout(() => {
@@ -147,7 +146,6 @@ function MobEditThesisProposal() {
                 </div>
                 :
                 <>
-                    {contextHolder}
                     <div>
                         <div>
                             {current === 0 && (

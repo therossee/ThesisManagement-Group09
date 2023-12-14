@@ -6,8 +6,10 @@ import { MobReview } from './insert_proposal_components/MobReview.jsx';
 import { MobResult } from './insert_proposal_components/MobResult.jsx';
 import { MobInsertBody } from './insert_proposal_components/MobInsertBody.jsx';
 import API from '../API.jsx';
+import {useParams} from "react-router-dom";
 
 function MobInsertThesisProposal() {
+
 
   const [keywords, setKeywords] = useState([]);
   const [intCoSupervisors, setIntCoSupervisors] = useState([]);
@@ -17,11 +19,43 @@ function MobInsertThesisProposal() {
   const [degrees, setDegrees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [current, setCurrent] = useState(0);
+  const copyId = useParams().id;
   const [formData, setFormData] = useState(null);
   const [form] = Form.useForm();
   const [proposalId, setProposalId] = useState(-1);
-  const [messageApi, contextHolder] = message.useMessage();
   const [date, setDate] = useState(dayjs());
+
+  useEffect(() => {
+    if (copyId) {
+      API.getThesisProposalbyId(copyId)
+          .then((x) => {
+            let proposal;
+            proposal = {
+              title: x.title,
+              intCoSupervisors: x.internalCoSupervisors.map((x) => x.id),
+              extCoSupervisors: x.externalCoSupervisors.map((x) => x.id),
+              type: x.type,
+              description: x.description,
+              requiredKnowledge: x.requiredKnowledge,
+              notes: x.notes,
+              keywords: x.keywords,
+              expirationDate: new Date(x.expiration),
+              cds: x.cds.map((x) => x.cod_degree),
+              degreeLevel: x.level
+            }
+            form.setFieldsValue(proposal);
+            setFormData(proposal);
+          })
+          .catch((err) => {
+            message.error(err.message ? err.message : err);
+          })
+          .finally(() => {
+            setTimeout(() => {
+              setLoading(false);
+            }, 200);
+          });
+    }
+  }, []);
 
 
   useEffect(() => {
@@ -30,38 +64,35 @@ function MobInsertThesisProposal() {
         setIntCoSupervisors(obj.teachers);
       })
       .catch((err) => {
-        messageApi.error("Failed to fetch teachers!");
+        message.error("Failed to fetch teachers!" + err.message ? err.message : err);
       });
     API.getExtCoSupervisors()
       .then((obj) => {
         setExtCoSupervisors(obj.externalCoSupervisors);
       })
       .catch((err) => {
-        messageApi.error("Failed to fetch external co-supervisors!");
+        message.error("Failed to fetch external co-supervisors!" + err.message ? err.message : err);
       });
     API.getAllDegrees()
       .then((obj) => {
         setDegrees(obj);
       })
       .catch((err) => {
-        messageApi.error("Failed to fetch degrees!");
+        message.error("Failed to fetch degrees!" + err.message ? err.message : err);
       });
     API.getAllKeywords()
       .then((obj) => {
         setKeywords(obj.keywords);
       })
       .catch((err) => {
-        messageApi.error("Failed to fetch keywords!");
+        message.error("Failed to fetch keywords!" + err.message ? err.message : err);
       });
     API.getClock()
       .then((clock) => {
         setDate(dayjs().add(clock.offset, 'ms'));
       })
       .catch((err) => {
-        messageApi.error("Failed to fetch virtual clock!");
-      })
-      .finally(() => {
-        setLoading(false);
+        message.error("Failed to fetch virtual clock!" + err.message ? err.message : err);
       })
   }, [current]);
 
@@ -119,7 +150,6 @@ function MobInsertThesisProposal() {
         </div>
         :
         <>
-          {contextHolder}
           <div style={{ marginRight: "2%", marginTop: "3%" }}>
             <div>
               {current === 0 && (
