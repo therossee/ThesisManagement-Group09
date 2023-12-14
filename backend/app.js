@@ -170,7 +170,7 @@ app.get('/api/user',
       console.error(e);
       res.status(500).json('Internal Server Error');
     }
-  });
+});
 
 /*** APIs ***/
 
@@ -209,7 +209,8 @@ app.post('/api/teacher/thesis_proposals',
   isLoggedIn,
   isTeacher,
   async (req, res) => {
-    const supervisor_id = req.user.id;
+    try{
+      const supervisor_id = req.user.id;
     const { title, internal_co_supervisors_id, external_co_supervisors_id, type, description, required_knowledge, notes, level, cds, keywords } = req.body;
     let expiration = req.body.expiration;
 
@@ -261,6 +262,10 @@ app.post('/api/teacher/thesis_proposals',
         console.error(error);
         res.status(500).json(`Failed to create thesis proposal. ${error.message || error}`);
       });
+    }catch(e){
+      console.error(e);
+      res.status(500).json('Internal Server Error');
+    } 
   });
 
 app.get('/api/teachers',
@@ -451,8 +456,7 @@ app.put('/api/thesis-proposals/:id',
         res.status(500).json('Internal Server Error');
       }
     }
-  }
-);
+  });
 
 app.delete('/api/thesis-proposals/:id',
   isLoggedIn,
@@ -484,8 +488,7 @@ app.delete('/api/thesis-proposals/:id',
       console.error(e);
       res.status(500).json({ message: 'Internal Server Error' });
     }
-  }
-);
+  });
 
 app.patch('/api/thesis-proposals/archive/:id',
   isLoggedIn,
@@ -517,8 +520,7 @@ app.patch('/api/thesis-proposals/archive/:id',
       console.error(e);
       res.status(500).json({ message: 'Internal Server Error' });
     }
-  }
-);
+  });
 
 app.post('/api/student/applications',
   isLoggedIn,
@@ -533,7 +535,7 @@ app.post('/api/student/applications',
       }
 
       const student_id = req.user.id;
-      const thesis_proposal_id = fields.thesis_proposal_id;
+      const thesis_proposal_id = fields.thesis_proposal_id[0];
       const upload = (files.file) ? files.file[0] : undefined;
 
       try {
@@ -692,6 +694,17 @@ app.get('/api/teacher/uploads/:stud_id/:app_id',
     try {
       const application_id = req.params.app_id;
       const student_id = req.params.stud_id;
+
+      const student = await usersDao.getStudentById(student_id);
+      if(!student){
+        return res.status(404).json({ message: `Student with id ${student_id} not found.` });
+      }
+
+      const application = await thesisDao.getApplicationById(application_id);
+      if(!application || application.student_id !== student_id){
+        return res.status(404).json({ message: `Application with id ${application_id} not found.` });
+      }
+      
       const dir = path.join(__dirname, 'uploads', student_id, application_id);
 
       if (fs.existsSync(dir)) {
