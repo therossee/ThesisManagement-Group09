@@ -568,7 +568,7 @@ exports.applyForProposal = (proposal_id, student_id, file) => {
 
       if (file) {
         if(file.mimetype !== 'application/pdf'){
-          reject(new Error("The file must be a pdf"));
+          reject(new Error("The file must be a PDF"));
           return;
         }
         const dir = path.join(__dirname, 'uploads', student_id.toString(), res.lastInsertRowid.toString());
@@ -625,7 +625,7 @@ exports.listThesisProposalsTeacher = (teacherId) => {
 exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
   return new Promise((resolve) => {
     const currentDate = new AdvancedDate().toISOString();
-    const getApplications = `SELECT s.name, s.surname, ta.status, s.id
+    const getApplications = `SELECT s.name, s.surname, ta.status, s.id, ta.id AS application_id
     FROM thesisApplication ta, thesisProposal tp, student s
     WHERE ta.proposal_id = tp.proposal_id 
       AND s.id = ta.student_id
@@ -721,6 +721,14 @@ exports.getThesisProposalTeacher = (proposalId, teacherId) => {
     const query = `SELECT * FROM thesisProposal WHERE proposal_id = ? AND supervisor_id = ? 
                    AND expiration > ? AND creation_date < ? AND is_deleted = 0 AND is_archived = 0;`;
     const res = db.prepare(query).get(proposalId, teacherId, currentDate, currentDate);
+    resolve(res);
+  })
+};
+
+exports.getApplicationById = (applicationId) => {
+  return new Promise((resolve) => {
+    const query = `SELECT * FROM thesisApplication WHERE id = ?`;
+    const res = db.prepare(query).get(applicationId);
     resolve(res);
   })
 };

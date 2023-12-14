@@ -114,7 +114,7 @@ describe('getStudentCareer', () => {
 
     expect(db.prepare().all).toHaveBeenCalledWith(invalidStudentId);
 
-    expect(result).toBeNull();
+    expect(result).toBeUndefined();
   });
 
 });

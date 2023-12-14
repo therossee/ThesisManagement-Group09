@@ -1,4 +1,4 @@
-import { React, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import API from "../API";
 import { Alert, message, Divider, List, Skeleton, Avatar, Button, Flex, Typography, Tooltip } from 'antd';
 import { UserOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
@@ -20,6 +20,7 @@ function TeacherApplications() {
 
     // Which student should be seen in the drawer?
     const [studentInfo, setStudentInfo] = useState(null);
+    const [applicationId, setApplicationId] = useState(-1);
 
     const { Title } = Typography;
 
@@ -100,29 +101,29 @@ function TeacherApplications() {
                         dataSource={x.applications}
                         renderItem={(student) => (
                             <List.Item key={student.id}>
-                                <div className="wrapper-enlight" onClick={() => {setStudentInfo(student); setIsOpen(true) }} onKeyDown={()=>{}} role="button">
-                                <List.Item.Meta
-                                    avatar={<Avatar icon={<UserOutlined />} />}
-                                    style={{padding: ".5%"}}
-                                    title={student.surname + " " + student.name}
-                                />
-                                <Flex wrap="wrap" gap="small" style={{padding: ".5%"}}>
-                                    <Tooltip title="Accept Application">
-                                        <Button ghost type="primary"
-                                            loading={buttonsLoading}
-                                            disabled={buttonsLoading}
-                                            icon={<CheckOutlined />}
-                                            onClick={(e) => { e.stopPropagation(); acceptApplication(x.id, student) }} />
-                                    </Tooltip>
-                                    <Tooltip title="Reject Application">
-                                        <Button ghost danger
-                                            loading={buttonsLoading}
-                                            disabled={buttonsLoading}
-                                            icon={<CloseOutlined />}
-                                            onClick={(e) => { e.stopPropagation(); rejectApplication(x.id, student) }} />
-                                    </Tooltip>
-                                </Flex>
-                                </div>
+                                <button className="wrapper-enlight" onClick={() => { setStudentInfo(student); setApplicationId(student.application_id); setIsOpen(true) }} onKeyDown={() => { }}>
+                                    <List.Item.Meta
+                                        avatar={<Avatar icon={<UserOutlined />} />}
+                                        style={{ padding: ".5%" }}
+                                        title={student.surname + " " + student.name}
+                                    />
+                                    <Flex wrap="wrap" gap="small" style={{ padding: ".5%" }}>
+                                        <Tooltip title="Accept Application">
+                                            <Button ghost type="primary"
+                                                loading={buttonsLoading}
+                                                disabled={buttonsLoading}
+                                                icon={<CheckOutlined />}
+                                                onClick={(e) => { e.stopPropagation(); acceptApplication(x.id, student) }} />
+                                        </Tooltip>
+                                        <Tooltip title="Reject Application">
+                                            <Button ghost danger
+                                                loading={buttonsLoading}
+                                                disabled={buttonsLoading}
+                                                icon={<CloseOutlined />}
+                                                onClick={(e) => { e.stopPropagation(); rejectApplication(x.id, student) }} />
+                                        </Tooltip>
+                                    </Flex>
+                                </button>
                             </List.Item>
                         )}
                     />
@@ -137,7 +138,7 @@ function TeacherApplications() {
         data.length > 0 ?
             <>
                 <Alert message="To view a specific applicant's CV and eventually the file uploaded within the application, simply click anywhere in the corresponding row." type="info" showIcon closable />
-                {isOpen && <StudentCV isOpen={isOpen} setIsOpen={setIsOpen} studentInfo={studentInfo} />}
+                {isOpen && <StudentCV isOpen={isOpen} setIsOpen={setIsOpen} studentInfo={studentInfo} applicationId={applicationId} />}
                 <ApplicationsList />
             </>
             :

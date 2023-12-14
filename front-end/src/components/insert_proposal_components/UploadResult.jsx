@@ -1,4 +1,5 @@
 import { Result, Button } from "antd";
+import PropTypes from 'prop-types';
 import { useNavigate } from "react-router-dom";
 
 function UploadResult(props) {
@@ -13,7 +14,7 @@ function UploadResult(props) {
         
         <Result
           status="success"
-          title="Proposal updated succesfully!"
+          title="Proposal updated successfully!"
           extra={
             <Button ghost type="primary" onClick={() => navigate("/")}>
               Back Home
@@ -21,7 +22,7 @@ function UploadResult(props) {
           }
         />) : (<Result
           status="success"
-          title="Proposal added succesfully!"
+          title="Proposal added successfully!"
           extra={
             <Button ghost type="primary" onClick={() => navigate("/")}>
               Back Home
@@ -45,5 +46,11 @@ function UploadResult(props) {
       );
     }
   }
+
+  UploadResult.propTypes = {
+    proposalId: PropTypes.number,
+    error: PropTypes.number,
+    update: PropTypes.bool,
+  };
 
   export { UploadResult };
