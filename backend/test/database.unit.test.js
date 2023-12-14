@@ -1,7 +1,15 @@
 require('jest');
+// [i] This line setup the test database + load the environment variables. DON'T (RE)MOVE IT
+const { resetTestDatabase } = require('./integration_config');
+
 const db = require('../db');
 
 describe('[DATABASE] Check database access using SQLite3', () => {
+    beforeEach(() => {
+        // Be sure that we are using a full clean database before each test
+        resetTestDatabase();
+    });
+
     test('should open the database without errors', () => {
         expect(db).toBeDefined();
       });
@@ -9,7 +17,7 @@ describe('[DATABASE] Check database access using SQLite3', () => {
         const rows = await db.prepare('SELECT * FROM student').all();
 
         expect(rows.length).toBeGreaterThan(0);
-        
+
         for (const row of rows) {
             expect(row).toHaveProperty('id');
             expect(row).toHaveProperty('surname');
@@ -19,7 +27,6 @@ describe('[DATABASE] Check database access using SQLite3', () => {
             expect(row).toHaveProperty('email');
             expect(row).toHaveProperty('cod_degree');
             expect(row).toHaveProperty('enrollment_year');
-            
         }
     });
     test('should return the list of teachers', async () => {
@@ -35,6 +42,6 @@ describe('[DATABASE] Check database access using SQLite3', () => {
             expect(row).toHaveProperty('cod_group');
             expect(row).toHaveProperty('cod_department');
         }
-        
+
     });
 });

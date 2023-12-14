@@ -1,6 +1,13 @@
 -- Enable foreign key support
 PRAGMA foreign_keys = ON;
 
+-- ------------------------------------------
+--                  WARNING
+--   Do not change schema without updating
+--     "init_test.sql" since it should be
+--                 the mirror
+-- ------------------------------------------
+
 -- Drop the existing tables if they exist
 DROP TABLE IF EXISTS thesisApplication;
 DROP TABLE IF EXISTS proposalGroup;
@@ -144,11 +151,12 @@ CREATE TABLE thesisApplication (
 
 -- Insert Data
 
--- Insert data into the degree table
+-- Insert data into the configuration table
 INSERT INTO configuration (key, value)
 VALUES
     ('virtual_clock_offset', '0');
 
+-- Insert data into the degree table
 INSERT INTO degree (cod_degree, title_degree)
 VALUES
     ('L-07', 'Ingegneria Civile e Ambientale'),

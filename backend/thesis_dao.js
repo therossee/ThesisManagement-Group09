@@ -3,6 +3,8 @@
 /* Data Access Object (DAO) module for accessing thesis data */
 
 const db = require('./db');
+const fs = require('fs');
+const path = require('path');
 const AdvancedDate = require('./AdvancedDate');
 const NoThesisProposalError = require("./errors/NoThesisProposalError");
 const UnauthorizedActionError = require("./errors/UnauthorizedActionError");
@@ -518,14 +520,14 @@ exports.getSupervisorOfProposal = (proposalId) => {
  * @property {string} email
  */
 
-exports.applyForProposal = (proposal_id, student_id) => {
+exports.applyForProposal = (proposal_id, student_id, file) => {
   return new Promise((resolve, reject) => {
     const currentDate = new AdvancedDate().toISOString();
 
     //  Check if the proposal belong to the degree of the student
     const checkProposalDegree = `SELECT * FROM proposalCds WHERE proposal_id=? AND cod_degree=(SELECT cod_degree FROM student WHERE id=?)`;
     const proposal_correct = db.prepare(checkProposalDegree).get(proposal_id, student_id);
-    if(!proposal_correct){
+    if (!proposal_correct) {
       reject(new UnauthorizedActionError("The proposal doesn't belong to the student degree"));
       return;
     }
@@ -541,25 +543,60 @@ exports.applyForProposal = (proposal_id, student_id) => {
                                 )`;
 
     const proposal_active = db.prepare(checkProposalActive).get(proposal_id, currentDate, currentDate);
-    if(!proposal_active){
+    if (!proposal_active) {
       reject(new Error("The proposal is not active"));
       return;
     }
 
     // Check if the user has already applied for other proposals
-    const checkAlreadyApplied = `SELECT * FROM thesisApplication WHERE student_id=? AND status='waiting for approval' OR status='accepted'`;
+    const checkAlreadyApplied = `SELECT * FROM thesisApplication WHERE student_id=? AND (status='waiting for approval' OR status='accepted')`;
     const already_applied = db.prepare(checkAlreadyApplied).get(student_id);
-    if(already_applied){
+    if (already_applied) {
       reject(new UnauthorizedActionError("The user has already applied for other proposals"));
       return;
     }
 
     const insertApplicationQuery = `
     INSERT INTO thesisApplication (proposal_id, student_id, creation_date)
-    VALUES (?, ?, ?); `; // at first the application has default status 'waiting for approval'
+    VALUES (?, ?, ?); `; // at first, the application has the default status 'waiting for approval'
 
-    const res = db.prepare(insertApplicationQuery).run(proposal_id, student_id, currentDate);
-    resolve(res.lastInsertRowid);
+    // Start a transaction
+    db.prepare('BEGIN TRANSACTION;').run();
+
+    try {
+      const res = db.prepare(insertApplicationQuery).run(proposal_id, student_id, currentDate);
+
+      if (file) {
+        if(file.mimetype !== 'application/pdf'){
+          reject(new Error("The file must be a pdf"));
+          return;
+        }
+        const dir = path.join(__dirname, 'uploads', student_id.toString(), res.lastInsertRowid.toString());
+        // Use try-catch to handle any errors during file writing
+        try {
+          const writePath = path.join(dir, file.originalFilename);
+          fs.mkdirSync(dir, { recursive: true });
+          fs.writeFileSync(writePath, fs.readFileSync(file.filepath));
+        } catch (fileError) {
+          console.error('Error writing file:', fileError);
+
+          // Rollback the SQLite transaction if there's an error
+          db.prepare('ROLLBACK;').run();
+          reject(new Error(fileError)); // Reject the promise with the file error
+          return;
+        }
+      }
+
+      // Commit the transaction if everything is successful
+      db.prepare('COMMIT;').run();
+      resolve(res.lastInsertRowid);
+    } catch (error) {
+      console.error('Error inserting application:', error);
+
+      // Rollback the SQLite transaction if there's an error
+      db.prepare('ROLLBACK;').run();
+      reject(new Error(error)); // Reject the promise with the main error
+    }
   })
 }
 
@@ -588,7 +625,7 @@ exports.listThesisProposalsTeacher = (teacherId) => {
 exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
   return new Promise((resolve) => {
     const currentDate = new AdvancedDate().toISOString();
-    const getApplications = `SELECT s.name, s.surname, ta.status, s.id
+    const getApplications = `SELECT s.name, s.surname, ta.status, s.id, ta.id AS application_id
     FROM thesisApplication ta, thesisProposal tp, student s
     WHERE ta.proposal_id = tp.proposal_id 
       AND s.id = ta.student_id

@@ -7,9 +7,22 @@
   background-color: white;
 }
 
-.ant-list-items:hover {
+.wrapper-enlight{
+  display: flex;
+  width: 100%;
+  padding: 0;
+  justify-content: space-between;
+
+  border: none;
   border-radius: 15px;
+
+  background: transparent;
+}
+.wrapper-enlight:hover {
   background-color: rgb(22, 119, 255, 0.05);
+}
+.wrapper-enlight .ant-list-item-meta-title {
+  text-align: left;
 }
 
 .footer-style {
