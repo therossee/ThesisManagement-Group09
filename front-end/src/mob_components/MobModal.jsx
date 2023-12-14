@@ -15,7 +15,7 @@ function MobModal(props) {
     // Handling file uplaoded
     const [uploadedFile, setUploadedFile] = useState(null);
 
-    const beforeUpload = file => {
+    const fileAdd = file => {
         const isPDF = file.type === 'application/pdf';
         if (!isPDF) {
             message.error('You can only upload PDF files!');
@@ -29,7 +29,7 @@ function MobModal(props) {
         return true; // Continue
     };
 
-    const handleUpload = ({ file, onSuccess, onError }) => {
+    const uploadHandler = ({ file, onSuccess, onError }) => {
         try {
             setUploadedFile(file);
             onSuccess();
@@ -39,7 +39,7 @@ function MobModal(props) {
         }
     }
 
-    const onChange = info => {
+    const statusAdd = info => {
         if (info.file.status === 'done') {
             message.success(`${info.file.name} loaded`);
         } else if (info.file.status === 'error') {
@@ -81,9 +81,9 @@ function MobModal(props) {
             </AutoCenter>
             <AutoCenter>
                 <Upload
-                    beforeUpload={beforeUpload}
-                    onChange={onChange}
-                    customRequest={handleUpload}
+                    beforeUpload={fileAdd}
+                    onChange={statusAdd}
+                    customRequest={uploadHandler}
                     file={uploadedFile}
                     maxCount={1}
                     multiple={false}
