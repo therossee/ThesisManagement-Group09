@@ -70,32 +70,37 @@ function MobModal(props) {
 
     return (
         <Popup title="Application"
-            visible={isOpen}
-            confirmText="Send"
-            okButtonProps={{ loading: loading }}
-            cancelText="Cancel"
-               >
+               visible={isOpen}
+               confirmText="Send"
+               okButtonProps={{ loading: loading }}
+               cancelText="Cancel"
+        >
             <Alert message="PDF upload is optional" type="info" showIcon closable style={{ marginBottom: "7px", marginRight: "3%", marginLeft:"3%", marginTop:"3%"}} />
             <AutoCenter>
-            <Upload
-                beforeUpload={beforeUpload}
-                onChange={onChange}
-                customRequest={handleUpload}
-                file={uploadedFile}
-                maxCount={1}
-                multiple={false}
-                onRemove={() => setUploadedFile(null)}
-            >
-            <div style={{ marginLeft: "5%", marginRight:"5%", marginTop:"10%" }}>
-                    <Button><UploadOutlined />Upload PDF</Button>
-                <p className="ant-upload-hint">Max one PDF allowed (10MB)</p>
+                <h3>Are you sure you want to apply?</h3>
+            </AutoCenter>
+            <AutoCenter>
+                <Upload
+                    beforeUpload={beforeUpload}
+                    onChange={onChange}
+                    customRequest={handleUpload}
+                    file={uploadedFile}
+                    maxCount={1}
+                    multiple={false}
+                    onRemove={() => setUploadedFile(null)}
+                >
 
-            </div>
-            </Upload>
-                <div style={{marginBottom:"10%", alignItems: "center", marginLeft:"2%", marginRight:"2%"}}>
-            <Button type="primary" onClick={applyForProposal}>Ok</Button>
-            <Button onClick={() => { setUploadedFile(null); setIsOpen(false) }}>Cancel</Button>
-            </div>
+                    <p>Max one PDF allowed (10MB)</p>
+                    <AutoCenter>
+                        <Button><UploadOutlined />Upload PDF</Button>
+                    </AutoCenter>
+                </Upload>
+            </AutoCenter>
+            <AutoCenter>
+                <div style={{marginTop: "7%", marginBottom:"10%"}}>
+                    <Button type="primary" onClick={applyForProposal}>Ok</Button>
+                    <Button onClick={() => { setUploadedFile(null); setIsOpen(false) }}>Cancel</Button>
+                </div>
             </AutoCenter>
         </Popup>
     );

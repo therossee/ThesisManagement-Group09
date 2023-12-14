@@ -56,7 +56,7 @@ function MobCV(props) {
                         <ColorLegenda />
                         <Avatar icon={<UserOutlined />} size={64} />
                         <h4 style={{ marginTop: '15px' }}>{studentInfo.surname} {studentInfo.name}</h4>
-                        <Tag color="#1677ff" style={{ borderRadius: "10px", marginLeft: "4px", marginTop: '-7px' }}>
+                        <Tag color="#1677ff" style={{ borderRadius: "10px", marginLeft: "4px", marginTop: '-12px' }}>
                             <Text style={{ color: "white" }}>
                                 {studentInfo.id}
                             </Text>
@@ -101,6 +101,7 @@ function MobCV(props) {
 
 function ColorLegenda() {
     return (
+        <AutoCenter>
         <Row style={{ marginBottom: '10px', marginLeft: "3%", marginRight: "3%", marginTop: "3%" }}>
             <Tag color="#f5222d">Less than 20</Tag>
             <Tag color="#fa8c16">20 to 21</Tag>
@@ -108,6 +109,7 @@ function ColorLegenda() {
             <Tag color="#a0d911">24 to 26</Tag>
             <Tag color="#52c41a">27 and above</Tag>
         </Row>
+            </AutoCenter>
     )
 }
 
