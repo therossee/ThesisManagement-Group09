@@ -181,6 +181,12 @@ VALUES
     (2, 'Bianchi', 'Benjamin', 'benjamin.bianchi@email.com'),
     (3, 'Colombo', 'Chiara', 'chiara.colombo@email.com');
 
+-- Insert data into the career table
+INSERT INTO career (id, cod_course, title_course, cfu, grade, date)
+VALUES ('s318952', 'COURSE_CODE_1', 'Course Title 1', 5, 30, '2023-01-01'),
+       ('s318952', 'COURSE_CODE_2', 'Course Title 2', 4, 25, '2023-02-01'),
+       ('s318952', 'COURSE_CODE_3', 'Course Title 3', 3, 27, '2023-03-01');
+
 -- Insert data into the thesis proposal table
 INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)
 VALUES

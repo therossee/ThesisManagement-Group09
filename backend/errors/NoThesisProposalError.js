@@ -5,7 +5,7 @@ class NoThesisProposalError extends AppError {
      * @param {number | string} id
      */
     constructor(id) {
-        super(`No thesis proposal with id ${id} found to delete`, 404);
+        super(`No thesis proposal with id ${id} found`, 404);
     }
 }
 
