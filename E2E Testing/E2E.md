@@ -17,17 +17,17 @@ This test case is related to the virtual clock management. During this test case
 is correctly updated and impact correctly the output of the system.
 
 1. Go to the [home page](http://localhost:5173/)
-2. Click on the menu button "Administration"
-    - You should access to the [virtual clock administration page](http://localhost:5173/admin/virtual-clock)
-    - The clock should be set to the current time in your timezone
-3. Click on edit button
-    - The clock shown on the input should be set to the current time in your timezone
-4. Change the time by adding some days, hours, minutes and seconds 
-   - Don't forget to click on "OK"
-5. Save the changes by clicking on the "SAVE NEW CLOCK" button
-   - You should see the same page as step 2 but with the new clock you indicated
-6. Click on the button "RESET OFFSET"
-   - The clock shown should be set to the current time in your timezone
+2. Login as a teacher
+3. Click on the menu button "Administration"
+     - You should access the [virtual clock administration page](http://localhost:5173/admin/virtual-clock)
+     - The clock should be set to the current time in your timezone
+4. Click on the edit button
+     - The clock shown on the input should be set to the current time in your timezone
+5. Click on the bar when is shown the date and the time -> you can now modify them -> choose another date and a new time
+6. Save the changes by clicking on the "SAVE NEW CLOCK" button
+    - You should see the same page as step 3 but with the new clock you indicated and the information of exactly how much ahead the clock is
+7. You can edit it again by clicking on 'Edit' button aviable -> click on it
+8. If you changed your mind, you can click on the button "Cancel" and leave it as it is
 
 -> Each time you update the clock you can use the search thesis proposal page to check if the status of a proposal is
 accordingly updated
@@ -205,4 +205,21 @@ This test case is related to the possibility to see the appliant's cv (list of e
 5. The cv will be visible on the right part of the page, with all th relevant informations of the student (name, surname, id) and the list of all the marks of the exams obtained. On the top of this page there is a button "View attached pdf" (it is enabled only if the student attached a pdf file) -> click on it
 6. You should see the pdf file
 7. Log out
+    - You should be again on the [home page](http://localhost:5173/)
+
+### [14] Copy proposal
+This test case is related to copy a proposal: we want to create a new thesis proposal with some common fields of an existing one.
+
+1. Go to the [home page](http://localhost:5173/)
+2. Log in as a teacher
+3. Click on ['Thesis Proposal'](http://localhost:5173/proposals) in the left bar
+4. Choose a proposal to copy and click on the button in the middle of 'Actions' column for it (icon of a file)
+5. It will appear the format of the insertion of a proposal with all the fields completed (as the Proposal we want to copy)
+6. Do the modifications you prefer
+7. Click on 'Submit' at the end of the page
+8. You are now on a page "review proposal" -> check the changes you made are correct
+9. Click on 'Next' button at the end of the page -> you should be informed that the proposal is now uploaded successfully
+10. Click on 'Back Home' button
+11. Click on ['Thesis Proposal'](http://localhost:5173/proposals) again and check your proposal is correctly shown
+12. Log out
     - You should be again on the [home page](http://localhost:5173/)
