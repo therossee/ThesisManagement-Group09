@@ -18,30 +18,30 @@ function MobTeacherThesisProposals() {
 
     const navigate = useNavigate();
 
-    const [isLoadingTable, setIsLoadingTable] = useState(true);
+    const [loadData, setLoadData] = useState(true);
 
-    const [data, setData] = useState([]);
+    const [thesisData, setThesisData] = useState([]);
 
-    const [dirty, setDirty] = useState(true);
+    const [refresh, setRefresh] = useState(true);
 
 
 
     useEffect(() => {
-        if(dirty) {
-            setIsLoadingTable(true);
+        if(refresh) {
+            setLoadData(true);
             API.getThesisProposals()
                 .then((x) => {
-                    setData(handleReceivedData(x));
-                    setIsLoadingTable(false);
-                    setDirty(false)
+                    setThesisData(handleReceivedData(x));
+                    setLoadData(false);
+                    setRefresh(false)
                 })
                 .catch((err) => {
                     message.error(err.message ? err.message : err);
-                    setDirty(false);
-                    setIsLoadingTable(false);
+                    setRefresh(false);
+                    setLoadData(false);
                 });
         }
-    }, [dirty]);
+    }, [refresh]);
 
     function handleReceivedData(data) {
 
@@ -54,37 +54,37 @@ function MobTeacherThesisProposals() {
 
     }
 
-    async function deleteProposalById(id) {
+    async function deleteProposal(id) {
         try {
             await API.deleteProposalById(id);
             message.success("Thesis proposal deleted successfully");
-            setDirty(true);
+            setRefresh(true);
         } catch (err) {
             message.error(err.message ? err.message : err);
-            setIsLoadingTable(false);
+            setLoadData(false);
         }
     }
 
 
-    async function archiveProposalById(id) {
+    async function archiveProposal(id) {
         try {
             await API.archiveProposalById(id);
             message.success("Proposal archived successfully");
-            setDirty(true);
+            setRefresh(true);
         } catch (err) {
             message.error(err.message ? err.message : err);
-            setIsLoadingTable(false);
+            setLoadData(false);
         }
 
     }
 
     return (<>
-        {isLoadingTable ? (<p>loading</p>) : (
+        {loadData ? (<p>loading</p>) : (
             <div style={{ paddingBottom: "60px", position: "relative" }}>
                 <p>{userData? userData.name : ""}, your active proposals</p>
-                <div style={{ marginTop: "5px" }} key={data}>
+                <div style={{ marginTop: "5px" }} key={thesisData}>
                     <Collapse accordion >
-                        {data.map((x) => (
+                        {thesisData.map((x) => (
                             <Collapse.Panel key={x.id} title={x.title}>
                                 <p>Level: {x.level}</p>
                                 <p>Supervisor: {x.supervisor.name + " " + x.supervisor.surname}</p>
@@ -110,8 +110,8 @@ function MobTeacherThesisProposals() {
                                 <>
                                     <Button onClick={() => navigate(`/view-proposal/${x.id}`)}>View</Button>
                                     <Button onClick={() => navigate(`/edit-proposal/${x.id}`)}>Edit</Button>
-                                    <Button onClick={() => deleteProposalById(x.id)}>Delete</Button>
-                                    <Button onClick={() => archiveProposalById(x.id)}>Archive</Button>
+                                    <Button onClick={() => deleteProposal(x.id)}>Delete</Button>
+                                    <Button onClick={() => archiveProposal(x.id)}>Archive</Button>
                                 </>
                                 <Button onClick={() => navigate(`/insert-proposal/${x.id}`)}>Copy</Button>
 
