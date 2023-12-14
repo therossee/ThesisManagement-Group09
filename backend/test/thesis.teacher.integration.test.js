@@ -145,6 +145,46 @@ describe('POST /api/teacher/thesis_proposals', () => {
         });
     });
 
+    test('should create a new thesis proposal', async () => {
+        const requestBody = {
+            title: 'Test Thesis',
+            internal_co_supervisors_id: [], 
+            external_co_supervisors_id: [1],
+            type: 'Bachelor',
+            description: 'Test description',
+            required_knowledge: 'Test knowledge',
+            notes: 'Test notes',
+            expiration: '2030-12-31',
+            level: 'Bachelor',
+            cds: ['L-08'],
+            keywords: ['test', 'keywords'],
+        };
+
+        const response = await agent
+            .post('/api/teacher/thesis_proposals')
+            .set('Accept', 'application/json')
+            .set('credentials', 'include')
+            .send(requestBody);
+
+        expect(response.status).toBe(201);
+        expect(response.body).toEqual({
+            id: expect.any(Number),
+            supervisor_id: 'd279620', // Marco Rossi
+            title: requestBody.title,
+            internal_co_supervisors_id: requestBody.internal_co_supervisors_id,
+            external_co_supervisors_id: requestBody.external_co_supervisors_id,
+            type: requestBody.type,
+            description: requestBody.description,
+            required_knowledge: requestBody.required_knowledge,
+            notes: requestBody.notes,
+            expiration: `${requestBody.expiration}T23:59:59.999Z`,
+            level: requestBody.level,
+            cds: requestBody.cds,
+            groups: ["Group1"],
+            keywords: requestBody.keywords
+        });
+    });
+
     test('should return error 400 if some required field is missing', async () => {
         const requestBody = {
             title: 'Test Thesis',
