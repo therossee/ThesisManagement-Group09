@@ -68,8 +68,13 @@ function MobStudentThesisProposals() {
     }
 
     const applyFilters = () => {
-        let filteredResults = [...data];
+        setIsLoading(true);
+        applyFilters2(applyFilters1());
+        setIsLoading(false);
+    }
 
+    const applyFilters1 = () => {
+        let filteredResults = [...data];
         // Priority 1: Filter for "Title"
         if (searchTitle) {
             filteredResults = filteredResults.filter(item => item.title.toLowerCase().includes(searchTitle.toLowerCase()));
@@ -110,10 +115,14 @@ function MobStudentThesisProposals() {
 
         // Priority 7: Filter for "Level"
         if (levels && levels.length > 0) {
-            const lv = levels.map(level => level.value);
-            filteredResults = filteredResults.filter(item => lv.includes(item.level));
+            filteredResults = filteredResults.filter(item => item.level === levels);
         }
+        return filteredResults;
+    };
 
+    const applyFilters2 = (intermediate) => {
+        let filteredResults = [...intermediate];
+        console.log(intermediate);
         if (dateRange && dateRange.length > 1) {
             const date0 = dayjs(dateRange[0]);
             const date1 = dayjs(dateRange[1]);
@@ -124,17 +133,17 @@ function MobStudentThesisProposals() {
         }
 
         // Filter for "Description"
-        if (description) {
+        if (description !== "") {
             filteredResults = filteredResults.filter(item => item.description.toLowerCase().includes(description.toLowerCase()));
         }
 
         // Filter for "Knowledge"
-        if (knowledge) {
+        if (knowledge !== "") {
             filteredResults = filteredResults.filter(item => item.requiredKnowledge.toLowerCase().includes(knowledge.toLowerCase()));
         }
 
         // Filter for "Notes"
-        if (notes) {
+        if (notes !== "") {
             filteredResults = filteredResults.filter(item => item.notes.toLowerCase().includes(notes.toLowerCase()));
         }
         const uniqueIds = new Set();
@@ -145,8 +154,9 @@ function MobStudentThesisProposals() {
             uniqueIds.add(item.id);
             return true; // Not a duplicate, include in results
         });
+        console.log(filteredResults);
         setFilteredData(filteredResults);
-    };
+    }
 
     const handleReset = () => {
         setSearchTitle('');
@@ -369,14 +379,10 @@ function MobStudentThesisProposals() {
 
 function CustomCollapse(props) {
     const navigate = useNavigate();
-    const [filteredData, setFilteredData] = useState(props.filteredData);
-
-    useEffect(() => {
-        setFilteredData(props.filteredData);
-    }, [props])
+    const filteredData = props.filteredData;
 
     return (
-        <div style={{ marginTop: "5px" }} key={props.filteredData}>
+        <div name={filteredData} style={{ marginTop: "5px" }} key={filteredData}>
             <Collapse accordion >
                 {filteredData.map((x) => (
                     <Collapse.Panel key={x.id} title={x.title}>
