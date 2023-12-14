@@ -385,21 +385,21 @@ function CustomCollapse(props) {
                         <p>Level: {x.level}</p>
                         <p>Supervisor: {x.supervisor.name + " " + x.supervisor.surname}</p>
                         {x.coSupervisors && (
-                            <p>Co-supervisors: {x.coSupervisors.map((cosupervisor, i) => (
-                                <Tag color="blue" key={cosupervisor.id}>
-                                    {cosupervisor.name + " " + cosupervisor.surname}
+                            <p>Co-supervisors: {x.coSupervisors.map((cosup) => (
+                                <Tag color="blue" key={cosup.id}>
+                                    {cosup.name + " " + cosup.surname}
                                 </Tag>
                             ))}</p>
                         )}
-                        <p>Keywords: {x.keywords.map((keyword) => (
-                            <Tag color="blue" key={keyword}>
-                                {keyword}
+                        <p>Keywords: {x.keywords.map((kw) => (
+                            <Tag color="blue" key={kw}>
+                                {kw}
                             </Tag>
                         ))}</p>
                         <p>Type: {x.type}</p>
-                        <p>Groups: {x.groups.map((group) => (
-                            <Tag color="blue" key={group}>
-                                {group}
+                        <p>Groups: {x.groups.map((gr) => (
+                            <Tag color="blue" key={gr}>
+                                {gr}
                             </Tag>
                         ))}</p>
                         <p>Expiration: {x.expiration}</p>

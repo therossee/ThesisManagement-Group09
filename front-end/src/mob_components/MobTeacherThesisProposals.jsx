@@ -7,6 +7,7 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import API from '../API';
 import { useAuth } from '../components/authentication/useAuth';
+import { CopyOutlined, DeleteOutlined, EditOutlined, EyeOutlined, InboxOutlined } from '@ant-design/icons';
 import 'flatpickr/dist/themes/material_blue.css';
 
 dayjs.extend(isSameOrBefore);
@@ -108,12 +109,12 @@ function MobTeacherThesisProposals() {
                                 ))}</p>
                                 <p>Expiration: {x.expiration}</p>
                                 <>
-                                    <Button onClick={() => navigate(`/view-proposal/${x.id}`)}>View</Button>
-                                    <Button onClick={() => navigate(`/edit-proposal/${x.id}`)}>Edit</Button>
-                                    <Button onClick={() => deleteProposal(x.id)}>Delete</Button>
-                                    <Button onClick={() => archiveProposal(x.id)}>Archive</Button>
+                                    <Button onClick={() => navigate(`/view-proposal/${x.id}`)}><EyeOutlined/>View</Button>
+                                    <Button onClick={() => navigate(`/edit-proposal/${x.id}`)}><EditOutlined/>Edit</Button>
+                                    <Button onClick={() => deleteProposal(x.id)}><DeleteOutlined/>Delete</Button>
+                                    <Button onClick={() => archiveProposal(x.id)}><InboxOutlined/>Archive</Button>
                                 </>
-                                <Button onClick={() => navigate(`/insert-proposal/${x.id}`)}>Copy</Button>
+                                <Button onClick={() => navigate(`/insert-proposal/${x.id}`)}><CopyOutlined/>Copy</Button>
 
                             </Collapse.Panel>
                         ))}
