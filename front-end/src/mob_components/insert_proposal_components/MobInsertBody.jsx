@@ -6,17 +6,17 @@ import { Option } from "antd/lib/mentions";
 import PropTypes from "prop-types";
 
 function MobInsertBody(props) {
-  const [selectedInt, setSelectedInt] = useState([]);
-  const [selectedExt, setSelectedExt] = useState([]);
-  const [selectedKw, setSelectedKw] = useState([]);
-  const [selectedCds, setSelectedCds] = useState([]);
-  const [newKeyword, setNewKeyword] = useState("");
+  const [selIntCoSup, setSelIntCoSup] = useState([]);
+  const [selExtCoSup, setSelExtCoSup] = useState([]);
+  const [selKeywords, setSelKeywords] = useState([]);
+  const [selCdS, setSelCdS] = useState([]);
+  const [newKw, setNewKw] = useState("");
   const [lev, setLev] = useState("");
   const [selDegrees, setSelDegrees] = useState([]);
   const { keywords, intCoSupervisors, extCoSupervisors, degrees, form, date } = props;
-  const unselectedInt = intCoSupervisors.filter((x) => !selectedInt.includes(x));
-  const unselectedExt = extCoSupervisors.filter((x) => !selectedExt.includes(x));
-  const unselectedCds = selDegrees.filter((x) => !selectedCds.includes(x));
+  const unselectedInt = intCoSupervisors.filter((x) => !selIntCoSup.includes(x));
+  const unselectedExt = extCoSupervisors.filter((x) => !selExtCoSup.includes(x));
+  const unselectedCds = selDegrees.filter((x) => !selCdS.includes(x));
 
   useEffect(() => {
     if (form.getFieldValue("degreeLevel") === "L") {
@@ -33,18 +33,18 @@ function MobInsertBody(props) {
 
 
   const handleInputChange = (value) => {
-    setNewKeyword(value);
+    setNewKw(value);
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && newKeyword.trim() !== '') {
-      setSelectedKw([...selectedKw, newKeyword]);
-      setNewKeyword('');
+    if (e.key === 'Enter' && newKw.trim() !== '') {
+      setSelKeywords([...selKeywords, newKw]);
+      setNewKw('');
     }
   };
 
   const handleSelectKwChange = (values) => {
-    setSelectedKw(values);
+    setSelKeywords(values);
   };
 
   const handleDegreeSelection = (lev) => {
@@ -82,8 +82,8 @@ function MobInsertBody(props) {
         <Select
           mode="multiple"
           placeholder="Select internal co-Supervisors"
-          value={selectedInt}
-          onChange={setSelectedInt}
+          value={selIntCoSup}
+          onChange={setSelIntCoSup}
           options={unselectedInt.map((x) => ({
             value: x.id, // assuming x.id is a string or number
             label: `${x.name} ${x.surname}`, // assuming x.name and x.surname are strings
@@ -99,8 +99,8 @@ function MobInsertBody(props) {
         <Select
           mode="multiple"
           placeholder="Select external co-Supervisors"
-          value={selectedExt}
-          onChange={setSelectedExt}
+          value={selExtCoSup}
+          onChange={setSelExtCoSup}
           options={unselectedExt.map((x) => ({
             value: x.id, // assuming x.id is a string or number
             label: `${x.name} ${x.surname}`, // assuming x.name and x.surname are strings
@@ -121,7 +121,7 @@ function MobInsertBody(props) {
         <Select
           mode="multiple"
           placeholder="Select keywords"
-          value={selectedKw}
+          value={selKeywords}
           onChange={handleSelectKwChange}
           onInputKeyDown={handleKeyDown}
           onSearch={handleInputChange}
@@ -133,9 +133,9 @@ function MobInsertBody(props) {
               {kw}
             </Option>
           ))}
-          {newKeyword.trim() !== '' && !keywords.includes(newKeyword) && (
-            <Option key={newKeyword} value={newKeyword} label={newKeyword}>
-              {newKeyword}
+          {newKw.trim() !== '' && !keywords.includes(newKw) && (
+            <Option key={newKw} value={newKw} label={newKw}>
+              {newKw}
             </Option>
           )}
         </Select>
@@ -216,8 +216,8 @@ function MobInsertBody(props) {
         <Select
           mode="multiple"
           placeholder="Select one or more CdS"
-          value={selectedCds}
-          onChange={setSelectedCds}
+          value={selCdS}
+          onChange={setSelCdS}
           options={unselectedCds.map((x) => ({
             value: x.cod_degree, // assuming x.id is a string or number
             label: `${x.title_degree}`, // assuming x.name and x.surname are strings
