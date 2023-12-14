@@ -19,10 +19,6 @@ function MobStudentThesisProposals() {
     const [form2] = Form.useForm();
     const flatpickrRef = useRef(null);
 
-    const [messageApi, messageBox] = message.useMessage();
-
-    const [clock, setClock] = useState(dayjs());
-
     // Array of objs for storing table data
     const [data, setData] = useState([]);
 
@@ -50,31 +46,25 @@ function MobStudentThesisProposals() {
     }
 
     useEffect(() => {
-        API.getClock()
-            .then((x) => {
-                setClock(dayjs().add(x.offset, 'ms'));
-            })
-            .catch((err) => { messageApi.error(err.message ? err.message : err) });
         API.getThesisProposals()
             .then((x) => {
                 setData(handleReceivedData(x));
                 setFilteredData(handleReceivedData(x));
                 setIsLoading(false);
             })
-            .catch((err) => { messageApi.error(err.message ? err.message : err) });
+            .catch((err) => { message.error(err.message ? err.message : err) });
     }, []);
 
 
     function handleReceivedData(data) {
 
-        const formattedData = data.map((x) => ({
+        return data.map((x) => ({
             // Take all fields from API.jsx
             ...x,
             // Concatenate internal/external co-supervisors
             coSupervisors: [].concat(x.internalCoSupervisors, x.externalCoSupervisors),
         }));
 
-        return formattedData;
     }
 
     const applyFilters = () => {
@@ -116,6 +106,12 @@ function MobStudentThesisProposals() {
             const ids = groups.map(group => group.value);
             filteredResults = filteredResults.filter(item => 
                 item.groups.some(group => ids.includes(group.id)));
+        }
+
+        // Priority 7: Filter for "Level"
+        if (levels && levels.length > 0) {
+            const lv = levels.map(level => level.value);
+            filteredResults = filteredResults.filter(item => lv.includes(item.level));
         }
 
         if (dateRange && dateRange.length > 1) {
@@ -170,11 +166,12 @@ function MobStudentThesisProposals() {
     }
 
     return (
+        <>
+            {isLoading ? (<p>Loading...</p>) : (
         <JumboTabs>
             <JumboTabs.Tab title='Proposals' key='list-proposals'>
                 <>
                     <div style={{ paddingBottom: "60px", position: "relative" }}>
-                        {messageBox}
                         <p>Active proposals for your CdS</p>
                         <CustomCollapse filteredData={filteredData} />
                     </div>
@@ -365,7 +362,9 @@ function MobStudentThesisProposals() {
                 </Form>
             </JumboTabs.Tab>
         </JumboTabs>
-    )
+            )}
+        </>);
+
 }
 
 function CustomCollapse(props) {

@@ -64,7 +64,6 @@ function MobCV(props) {
                         <Button style={{marginTop: "5px"}} disabled={!file} onClick={() => openPDF({ file })}>View attached PDF</Button>
                     </Flex>
                     {data.length > 0 ?
-                        <>
                             <Collapse style={{marginTop: "2%"}}>
                             {data.map((x) => {
                                 const title = x.code + " - " + x.teaching;
@@ -82,7 +81,6 @@ function MobCV(props) {
                                 </Collapse.Panel>);
                                 })}
                         </Collapse>
-                        </>
                         :
                         <Flex vertical style={{ justify: "center", align: "center", marginTop: "30px" }}>
                             <Title level={5}>No Exams found</Title>
