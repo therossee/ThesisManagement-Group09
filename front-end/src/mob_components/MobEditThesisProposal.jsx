@@ -12,13 +12,13 @@ function MobEditThesisProposal() {
 
     const id = useParams().id;
     const [keywords, setKeywords] = useState([]);
-    const [intCoSupervisors, setIntCoSupervisors] = useState([]);
-    const [extCoSupervisors, setExtCoSupervisors] = useState([]);
-    const [error, setError] = useState(-1);
+    const [intCoSup, setIntCoSup] = useState([]);
+    const [extCoSup, setExtCoSup] = useState([]);
+    const [errCode, setErrCode] = useState(-1);
     const [insert, setInsert] = useState(false);
     const [degrees, setDegrees] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [current, setCurrent] = useState(0);
+    const [loadData, setLoadData] = useState(true);
+    const [curr, setCurr] = useState(0);
     const [formData, setFormData] = useState(null);
     const [form] = Form.useForm();
     const [proposalId, setProposalId] = useState(-1);
@@ -51,45 +51,45 @@ function MobEditThesisProposal() {
     useEffect(() => {
         API.getTeachers()
             .then((obj) => {
-                setIntCoSupervisors(obj.teachers);
+                setIntCoSup(obj.teachers);
             })
             .catch((err) => {
-                message.error("Failed to fetch teachers!");
+                message.error("Failed to fetch teachers!" + err ? err.message : "");
             });
         API.getExtCoSupervisors()
             .then((obj) => {
-                setExtCoSupervisors(obj.externalCoSupervisors);
+                setExtCoSup(obj.externalCoSupervisors);
             })
             .catch((err) => {
-                message.error("Failed to fetch external co-supervisors!");
+                message.error("Failed to fetch external co-supervisors!" + err ? err.message : "");
             });
         API.getAllDegrees()
             .then((obj) => {
                 setDegrees(obj);
             })
             .catch((err) => {
-                message.error("Failed to fetch degrees!");
+                message.error("Failed to fetch degrees!" + err ? err.message : "");
             });
         API.getAllKeywords()
             .then((obj) => {
                 setKeywords(obj.keywords);
             })
             .catch((err) => {
-                message.error("Failed to fetch keywords!");
+                message.error("Failed to fetch keywords!" + err ? err.message : "");
             });
         API.getClock()
             .then((clock) => {
                 setDate(dayjs().add(clock.offset, 'ms'));
             })
             .catch((err) => {
-                message.error("Failed to fetch virtual clock!");
+                message.error("Failed to fetch virtual clock!" + err ? err.message : "");
             })
             .finally(() => {
                 setTimeout(() => {
-                    setLoading(false);
+                    setLoadData(false);
                 }, 200);
             })
-    }, [current]);
+    }, [curr]);
 
     useEffect(() => {
         if (insert) {
@@ -113,7 +113,7 @@ function MobEditThesisProposal() {
                 })
                 .catch((err) => {
                     setProposalId(-1);
-                    setError(err.status);
+                    setErrCode(err.status);
                     next();
                 });
             setInsert(false);
@@ -126,11 +126,11 @@ function MobEditThesisProposal() {
 
 
     const next = () => {
-        setCurrent(current + 1);
+        setCurr(curr + 1);
     };
 
     const prev = () => {
-        setCurrent(current - 1);
+        setCurr(curr - 1);
     };
 
     const saveFormData = (data) => {
@@ -140,7 +140,7 @@ function MobEditThesisProposal() {
 
     return (
         <>
-            {loading ?
+            {loadData ?
                 <div style={{ marginLeft: "49%", marginRight: "25%", marginTop: "25%" }}>
                     <Spin tip="Loading" size="large" />
                 </div>
@@ -148,17 +148,17 @@ function MobEditThesisProposal() {
                 <>
                     <div>
                         <div>
-                            {current === 0 && (
+                            {curr === 0 && (
                                 <>
                                     <div>
                                         <h2>Edit Body</h2>
                                     </div>
-                                    <MobInsertBody saveData={saveFormData} intCoSupervisors={intCoSupervisors} extCoSupervisors={extCoSupervisors} keywords={keywords} degrees={degrees} form={form} date={date} />
+                                    <MobInsertBody saveData={saveFormData} intCoSupervisors={intCoSup} extCoSupervisors={extCoSup} keywords={keywords} degrees={degrees} form={form} date={date} />
                                 </>
                             )}
-                            {current === 1 && (
+                            {curr === 1 && (
                                 <div>
-                                    <MobReview formData={formData} intCoSupervisors={intCoSupervisors} extCoSupervisors={extCoSupervisors} degrees={degrees} />
+                                    <MobReview formData={formData} intCoSupervisors={intCoSup} extCoSupervisors={extCoSup} degrees={degrees} />
                                     <div style={{ paddingLeft: "35%", paddingBottom: "60px" }}>
                                         <Button
                                             style={{
@@ -180,8 +180,8 @@ function MobEditThesisProposal() {
                             )}
                         </div>
                         <div>
-                            {current === 2 &&
-                                <MobResult update={true} proposalId={proposalId} error={error} />
+                            {curr === 2 &&
+                                <MobResult update={true} proposalId={proposalId} error={errCode} />
                             }
                         </div>
                     </div>

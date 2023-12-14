@@ -29,8 +29,8 @@ function MobInsertThesisProposal() {
     if (copyId) {
       API.getThesisProposalbyId(copyId)
           .then((x) => {
-            let proposal;
-            proposal = {
+            let proposalData;
+            proposalData = {
               title: x.title,
               intCoSupervisors: x.internalCoSupervisors.map((x) => x.id),
               extCoSupervisors: x.externalCoSupervisors.map((x) => x.id),
@@ -43,8 +43,8 @@ function MobInsertThesisProposal() {
               cds: x.cds.map((x) => x.cod_degree),
               degreeLevel: x.level
             }
-            form.setFieldsValue(proposal);
-            setFormData(proposal);
+            form.setFieldsValue(proposalData);
+            setFormData(proposalData);
           })
           .catch((err) => {
             message.error(err.message ? err.message : err);
