@@ -7,18 +7,18 @@ import MobCV from "../mob_components/MobCV";
 function MobTeacherApplications() {
 
     // List of objects for storing thesis info and applications
-    const [applicationData, setApplicationData] = useState([]);
+    const [appData, setAppData] = useState([]);
 
-    const [isLoading, setIsLoading] = useState(false);
+    const [loadData, setLoadData] = useState(false);
 
-    const [buttonsLoading, setButtonsLoading] = useState(false);
+    const [loadButtons, setLoadButtons] = useState(false);
 
-    const [dirty, setDirty] = useState(true);
+    const [refresh, setRefresh] = useState(true);
 
     // Which student should be seen in the drawer?
-    const [studentInfo, setStudentInfo] = useState(null);
+    const [studInfo, setStudInfo] = useState(null);
 
-    const [applicationId, setApplicationId] = useState(-1);
+    const [appId, setAppId] = useState(-1);
 
     const [tab, setTab] = useState("list");
 
@@ -27,8 +27,8 @@ function MobTeacherApplications() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                if (dirty) {
-                    setIsLoading(true);
+                if (refresh) {
+                    setLoadData(true);
                     let newData = [];
                     const proposals = await API.getThesisProposals();
                     await Promise.all(
@@ -43,9 +43,9 @@ function MobTeacherApplications() {
                             }
                         })
                     );
-                    setApplicationData(newData);
-                    setIsLoading(false);
-                    setDirty(false);
+                    setAppData(newData);
+                    setLoadData(false);
+                    setRefresh(false);
                 }
             } catch (err) {
                 message.error(err.message ? err.message : err);
@@ -53,39 +53,39 @@ function MobTeacherApplications() {
         };
 
         fetchData();
-    }, [dirty]);
+    }, [refresh]);
 
     const acceptApplication = async (proposalId, student) => {
-        setButtonsLoading(true);
+        setLoadButtons(true);
         try {
             await API.acceptThesisApplications(proposalId, student.id);
             message.success("Accepted the application of " + student.surname + " " + student.name);
-            setDirty(true);
-            setButtonsLoading(false)
+            setRefresh(true);
+            setLoadButtons(false)
         } catch (err) {
             message.error(err.message ? err.message : err);
-            setButtonsLoading(false);
+            setLoadButtons(false);
         }
     };
 
 
     const rejectApplication = async (proposalId, student) => {
-        setButtonsLoading(true);
+        setLoadButtons(true);
         try {
             await API.rejectThesisApplications(proposalId, student.id);
             message.success("Rejected the application of " + student.surname + " " + student.name);
-            setDirty(true);
-            setButtonsLoading(false);
+            setRefresh(true);
+            setLoadButtons(false);
         } catch (err) {
             message.error(err.message ? err.message : err);
-            setButtonsLoading(false);
+            setLoadButtons(false);
         }
     };
 
     function ApplicationsList() {
-        let ApplicationList = applicationData.map((x) => (
+        let ApplicationList = appData.map((x) => (
             <div key={x.id} >
-                <Skeleton loading={isLoading} active title={false}>
+                <Skeleton loading={loadData} active title={false}>
                     <Divider orientation="center">
                         <div style={{ whiteSpace: "normal" }}>
                             <Title level={4} style={{ margin: "0" }}>
@@ -96,12 +96,12 @@ function MobTeacherApplications() {
                 </Skeleton>
                 <div style={{ marginRight: "5%", marginLeft: "5%" }}>
                     <List
-                        loading={isLoading}
+                        loading={loadData}
                         itemLayout="horizontal"
                         dataSource={x.applications}
                         renderItem={(student) => (
                             <List.Item key={student.id}>
-                                <div className="wrapper-enlight" onClick={() => { setStudentInfo(student); setApplicationId(student.application_id); setTab("cv") }} onKeyDown={() => { }} role="button">
+                                <div className="wrapper-enlight" onClick={() => { setStudInfo(student); setAppId(student.application_id); setTab("cv") }} onKeyDown={() => { }} role="button">
                                     <List.Item.Meta
                                         avatar={<Avatar icon={<UserOutlined />} />}
                                         style={{ padding: ".5%" }}
@@ -110,15 +110,15 @@ function MobTeacherApplications() {
                                     <Flex wrap="wrap" gap="small" style={{ padding: ".5%" }}>
                                         <Tooltip title="Accept Application">
                                             <Button ghost type="primary"
-                                                loading={buttonsLoading}
-                                                disabled={buttonsLoading}
+                                                loading={loadButtons}
+                                                disabled={loadButtons}
                                                 icon={<CheckOutlined />}
                                                 onClick={(e) => { e.stopPropagation(); acceptApplication(x.id, student) }} />
                                         </Tooltip>
                                         <Tooltip title="Reject Application">
                                             <Button ghost danger
-                                                loading={buttonsLoading}
-                                                disabled={buttonsLoading}
+                                                loading={loadButtons}
+                                                disabled={loadButtons}
                                                 icon={<CloseOutlined />}
                                                 onClick={(e) => { e.stopPropagation(); rejectApplication(x.id, student) }} />
                                         </Tooltip>
@@ -135,7 +135,7 @@ function MobTeacherApplications() {
     }
 
     return (
-        applicationData.length > 0 ?
+        appData.length > 0 ?
             <>
                 {tab === "list" &&
                     <>
@@ -144,7 +144,7 @@ function MobTeacherApplications() {
                     </>
                 }
                 {tab === "cv" &&
-                <MobCV studentInfo={studentInfo} applicationId={applicationId} setTab={setTab} />
+                <MobCV studentInfo={studInfo} applicationId={appId} setTab={setTab} />
                 }
             </>
             :
