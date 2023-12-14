@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Avatar, Col, Drawer, Flex, message, Row, Skeleton, Tag, Typography, Button } from 'antd';
-import { Popup, Collapse } from 'antd-mobile';
-import { UserOutlined, ArrowDownOutlined } from '@ant-design/icons';
+import { Avatar, Flex, message, Row, Skeleton, Tag, Typography } from 'antd';
+import {Collapse, Button, AutoCenter} from 'antd-mobile';
+import { UserOutlined } from '@ant-design/icons';
 import PropTypes from 'prop-types';
 import API from '../API';
 function MobCV(props) {
-    const { isVisible, setIsVisible, studentInfo, applicationId } = props;
+    const { setTab, studentInfo, applicationId } = props;
     const { Title, Text } = Typography;
     const [isLoading, setIsLoading] = useState(true);
     // Store exams info
@@ -46,11 +46,7 @@ function MobCV(props) {
     }
 
     return (
-        <Popup
-            visible={isVisible}
-            onClose={() => setIsVisible(false)}
-            animationType="slide-up"
-        >
+        <>
             {isLoading ?
                 <Skeleton active />
                 :
@@ -67,9 +63,9 @@ function MobCV(props) {
                         </Tag>
                         <Button style={{marginTop: "5px"}} disabled={!file} onClick={() => openPDF({ file })}>View attached PDF</Button>
                     </Flex>
-                    <Collapse style={{marginTop: "2%"}}>
                     {data.length > 0 ?
                         <>
+                            <Collapse style={{marginTop: "2%"}}>
                             {data.map((x) => {
                                 const title = x.code + " - " + x.teaching;
                                 // <Collapse.Panel
@@ -78,23 +74,28 @@ function MobCV(props) {
                                     <h4>Taken in</h4><p>{x.date}</p>
                                     <h4>Mark</h4>
                                     <Tag color={color(x.mark)} style={{ borderRadius: "20px" }}>
-                                        <Text style={{ color: "white" }}>
+                                        <Text style={{ color: "white", size: "16px" }}>
                                             {x.mark}
                                         </Text>
                                     </Tag>
 
                                 </Collapse.Panel>);
                                 })}
+                        </Collapse>
                         </>
                         :
                         <Flex vertical style={{ justify: "center", align: "center", marginTop: "30px" }}>
                             <Title level={5}>No Exams found</Title>
                         </Flex>
                     }
-                    </Collapse>
+                    <AutoCenter>
+                    <div style={{marginTop: "2%", paddingBottom: "60px", alignItems: "center"}}>
+                        <Button type="primary"  onClick={() => setTab("list")}>Close</Button>
+                    </div>
+                    </AutoCenter>
                 </>
             }
-        </Popup>
+        </>
     )
 }
 
@@ -117,8 +118,7 @@ function openPDF(props) {
 
 
 MobCV.propTypes = {
-    isVisible: PropTypes.bool.isRequired,
-    setIsOpen: PropTypes.func.isRequired,
+    setTab: PropTypes.func.isRequired,
     studentInfo: PropTypes.shape({
         id: PropTypes.number.isRequired,
         name: PropTypes.string.isRequired,

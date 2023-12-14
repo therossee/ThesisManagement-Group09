@@ -20,7 +20,10 @@ function MobTeacherApplications() {
 
     // Which student should be seen in the drawer?
     const [studentInfo, setStudentInfo] = useState(null);
+
     const [applicationId, setApplicationId] = useState(-1);
+
+    const [tab, setTab] = useState("list");
 
     const { Title } = Typography;
 
@@ -101,7 +104,7 @@ function MobTeacherApplications() {
                         dataSource={x.applications}
                         renderItem={(student) => (
                             <List.Item key={student.id}>
-                                <div className="wrapper-enlight" onClick={() => { setStudentInfo(student); setApplicationId(student.application_id); setIsVisible(true) }} onKeyDown={() => { }} role="button">
+                                <div className="wrapper-enlight" onClick={() => { setStudentInfo(student); setApplicationId(student.application_id); setTab("cv") }} onKeyDown={() => { }} role="button">
                                     <List.Item.Meta
                                         avatar={<Avatar icon={<UserOutlined />} />}
                                         style={{ padding: ".5%" }}
@@ -137,9 +140,15 @@ function MobTeacherApplications() {
     return (
         applicationData.length > 0 ?
             <>
+                {tab === "list" &&
+                    <>
                 <Alert message="To view a specific applicant's CV and eventually the file uploaded within the application, simply tap anywhere in the corresponding row." type="info" showIcon closable />
-                {isVisible && <MobCV isVisible={isVisible} setIsVisible={setIsVisible} studentInfo={studentInfo} applicationId={applicationId} />}
                 <ApplicationsList />
+                    </>
+                }
+                {tab === "cv" &&
+                <MobCV studentInfo={studentInfo} applicationId={applicationId} setTab={setTab} />
+                }
             </>
             :
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
