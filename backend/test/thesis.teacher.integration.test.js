@@ -730,6 +730,71 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
     });
 });
 
+describe('GET /api/student/:id/career', () => {
+    test('should return the student\'s career', async () => {
+        // Act
+        const response = await agent
+            .get('/api/student/s318952/career')
+            .set('credentials', 'include');
+
+        // Assert
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual([
+            {
+                cod_course: 'COURSE_CODE_1',
+                title_course: 'Course Title 1',
+                cfu: 5,
+                grade: 30,
+                date: '2023-01-01'
+            },
+            {
+                cod_course: 'COURSE_CODE_2',
+                title_course: 'Course Title 2',
+                cfu: 4,
+                grade: 25,
+                date: '2023-02-01'
+            },
+            {
+                cod_course: 'COURSE_CODE_3',
+                title_course: 'Course Title 3',
+                cfu: 3,
+                grade: 27,
+                date: '2023-03-01'
+            }
+        ]);
+    });
+    test('should return null if the student don\'t have exams', async () => {
+        // Act
+        const response = await agent
+            .get('/api/student/s320213/career')
+            .set('credentials', 'include');
+
+        // Assert
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual([]);
+    });
+    test('should return 404 if the student don\'t exist', async () => {
+        // Act
+        const response = await agent
+            .get('/api/student/s12345/career')
+            .set('credentials', 'include');
+
+        // Assert
+        expect(response.status).toBe(404);
+    });
+    test('should return 500 if internal server error happens', async () => {
+        
+        jest.spyOn(usersDao, 'getStudentById').mockRejectedValueOnce(new Error());
+        const response = await agent
+            .get('/api/student/s318952/career')
+            .set('credentials', 'include');
+
+        // Assert
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Internal Server Error');
+    });
+});
+
 describe('DELETE /api/thesis-proposals/:id', () => {
     test('should delete a thesis proposal and notify application status change', async () => {
         const id = 1;
