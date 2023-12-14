@@ -94,6 +94,11 @@ function MobInsertThesisProposal() {
       .catch((err) => {
         message.error("Failed to fetch virtual clock!" + err.message ? err.message : err);
       })
+        .finally(() => {
+          if(!copyId) {
+            setLoading(false);
+          }
+        });
   }, [current]);
 
   useEffect(() => {
