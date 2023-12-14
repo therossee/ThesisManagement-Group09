@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { TabBar } from 'antd-mobile';
 import { useAuth } from '../components/authentication/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { HomeOutlined, FileTextOutlined, FileAddOutlined, KeyOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { HomeOutlined, FileTextOutlined, FileAddOutlined, ToTopOutlined, ClockCircleOutlined } from '@ant-design/icons';
 
 function Tabs() {
     const { isAuthenticated, isTester, isTeacher } = useAuth();
@@ -83,8 +83,8 @@ function Tabs() {
             {isAuthenticated && (
             <TabBar.Item 
                 title="Applications"
-                key="/applications" icon={<KeyOutlined />} 
-                selectedIcon={<KeyOutlined />}
+                key="/applications" icon={<ToTopOutlined />}
+                selectedIcon={<ToTopOutlined />}
                 selected={selectedTab === 'applicationsTab'}
                 onPress={() => setSelectedTab('applicationsTab')}/>
             )}  
