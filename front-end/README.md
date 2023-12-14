@@ -56,7 +56,9 @@ Main functions:
 ## Main React Components
 - `API.jsx` : Main API functions as:
   - APIs for auth:
-     - `getUserInfo`: retrieves user information.
+     - `getUser`: Fetches user information from the server.
+     - `logOut`: Initiates the logout process by sending a POST request to the appropriate endpoint
+     - `redirectToLogin`: Redirects the user to the login page
   - Virtual Clock APIs :
       - `getClock`: function to obtain the setted data and offset 
       - `updateClock`: function to update the system virtual clock
