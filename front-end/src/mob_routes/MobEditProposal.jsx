@@ -1,5 +1,5 @@
-import Errors from "../components/Errors";
-import { MobEditThesisProposal } from "../components/EditThesisProposal"
+import Errors from "../routes/Errors";
+import { MobEditThesisProposal } from "../mob_components/MobEditThesisProposal"
 import { useAuth } from '../components/authentication/useAuth';
 
 function MobEditProposal() {

@@ -76,7 +76,7 @@ function MobInsertThesisProposal() {
         required_knowledge: formData.requiredKnowledge,
         notes: formData.notes,
         keywords: formData.keywords,
-        expiration: dayjs(formData.expirationDate[0]).format("YYYY-MM-DD"),
+        expiration: dayjs(formData.expirationDate).format("YYYY-MM-DD"),
         cds: formData.cds,
         level: formData.degreeLevel
       }
@@ -157,7 +157,7 @@ function MobInsertThesisProposal() {
             </div>
             <div>
               {current === 2 &&
-                <MobResult proposalId={proposalId} error={error} />
+                <MobResult update={false} proposalId={proposalId} error={error} />
               }
             </div>
           </div>

@@ -4,6 +4,7 @@ import { Select } from 'antd';
 import Flatpickr from "react-flatpickr";
 import { Option } from "antd/lib/mentions";
 import dayjs from "dayjs";
+import PropTypes from "prop-types";
 
 function MobInsertBody(props) {
   const [selectedInt, setSelectedInt] = useState([]);
@@ -64,6 +65,7 @@ function MobInsertBody(props) {
   };
 
   return (
+    <div style={{marginRight: "5px", marginLeft: "5px"}}>
     <Form form={form} layout="vertical" onFinish={onFinish}
       onValuesChange={(changedValues) => {
         if (changedValues.degreeLevel) {
@@ -156,7 +158,12 @@ function MobInsertBody(props) {
       ]}>
         <TextArea rows={6} />
       </Form.Item>
-      <Form.Item label="Required Knowledge" name="requiredKnowledge" >
+      <Form.Item label="Required Knowledge" name="requiredKnowledge" rules={[
+        {
+        required: true,
+        message: 'Please enter the required knowledge for this thesis!',
+        }
+      ]}>
         <TextArea rows={4} />
       </Form.Item>
       <Form.Item label="Notes" name="notes">
@@ -175,7 +182,7 @@ function MobInsertBody(props) {
           }}
           disabled={disabledDate}
           defaultDate={date}
-          onChange={(date) => {setSelectedDate(date[0]); form.setFieldValue('expirationDate', date[0])}}
+          onChange={(date) => {setSelectedDate(date[0]); form.setFieldValue('expirationDate', new Date(date[0]))}}
         />
         </div>
       </Form.Item>
@@ -223,6 +230,7 @@ function MobInsertBody(props) {
             option.searchValue.toLowerCase().includes(input.toLowerCase())
           }
           style={{width: '100%'}}
+          maxTagTextLength={30}
         />
       </Form.Item>
       <Form.Item>
@@ -235,7 +243,18 @@ function MobInsertBody(props) {
         </div>
       </Form.Item>
     </Form>
+    </div>
   );
 }
+
+MobInsertBody.propTypes = {
+  keywords: PropTypes.array.isRequired,
+  intCoSupervisors: PropTypes.array.isRequired,
+  extCoSupervisors: PropTypes.array.isRequired,
+  degrees: PropTypes.array.isRequired,
+  form: PropTypes.object.isRequired,
+  date: PropTypes.object.isRequired,
+  saveData: PropTypes.func.isRequired,
+};
 
 export { MobInsertBody };

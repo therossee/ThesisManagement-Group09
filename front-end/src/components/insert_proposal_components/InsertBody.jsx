@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Form, Input, Select, DatePicker, Button } from "antd";
+import { Form as MobForm, Input as MobInput, TextArea, Button as MobButton, AutoCenter } from "antd-mobile";
+import { BrowserView, MobileView } from "react-device-detect";
 import { Option } from "antd/lib/mentions";
 
 function InsertBody(props) {
@@ -57,6 +59,12 @@ function InsertBody(props) {
     const onFinish = (values) => {
       props.saveData(values);
     };
+
+    const intCoSupOpt = unselectedInt.map((x) => ({
+      value: x.id, // assuming x.id is a string or number
+      label: `${x.name} ${x.surname}`, // assuming x.name and x.surname are strings
+      searchValue: `${x.id} ${x.name} ${x.surname}`, // combine id, name, and surname for search
+    }));
   
     return (
       <Form form={form} layout="vertical" onFinish={onFinish}
@@ -79,11 +87,7 @@ function InsertBody(props) {
             placeholder="Select internal co-Supervisors"
             value={selectedInt}
             onChange={setSelectedInt}
-            options={unselectedInt.map((x) => ({
-              value: x.id, // assuming x.id is a string or number
-              label: `${x.name} ${x.surname}`, // assuming x.name and x.surname are strings
-              searchValue: `${x.id} ${x.name} ${x.surname}`, // combine id, name, and surname for search
-            }))}
+            options={intCoSupOpt}
             filterOption={(input, option) =>
               option.searchValue.toLowerCase().includes(input.toLowerCase())
             }
@@ -148,7 +152,12 @@ function InsertBody(props) {
         ]}>
           <Input.TextArea rows={6} />
         </Form.Item>
-        <Form.Item label="Required Knowledge" name="requiredKnowledge" >
+        <Form.Item label="Required Knowledge" name="requiredKnowledge" rules={[
+          {
+          required: true,
+          message: 'Please insert required knowledge for this thesis!',
+          },
+        ]}>
           <Input.TextArea rows={4} />
         </Form.Item>
         <Form.Item label="Notes" name="notes">

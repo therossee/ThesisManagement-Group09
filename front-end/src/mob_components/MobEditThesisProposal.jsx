@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { message, Spin, Tooltip, FloatButton } from 'antd';
-import { Form, Button, AutoCenter } from 'antd-mobile'
+import { Form, Button } from 'antd-mobile'
 import dayjs from 'dayjs';
-import { ReviewProposal } from './insert_proposal_components/ReviewProposal.jsx';
-import { useParams } from 'react-router-dom';
+import { MobReview } from './insert_proposal_components/MobReview.jsx';
 import { MobResult } from './insert_proposal_components/MobResult.jsx';
+import { useParams } from 'react-router-dom';
 import { MobInsertBody } from './insert_proposal_components/MobInsertBody.jsx';
 import API from '../API.jsx';
 
@@ -23,7 +23,7 @@ function MobEditThesisProposal() {
     const [form] = Form.useForm();
     const [proposalId, setProposalId] = useState(-1);
     const [messageApi, contextHolder] = message.useMessage();
-    const [date, setDate] = useState(dayjs());
+    const [date, setDate] = useState(new Date());
 
 
     useEffect(() => {
@@ -36,13 +36,14 @@ function MobEditThesisProposal() {
                     extCoSupervisors: x.externalCoSupervisors.map((x) => x.id),
                     type: x.type,
                     description: x.description,
-                    requiredKnowledge: x.requiredKnowledge,
-                    notes: x.notes,
+                    requiredKnowledge: x.requiredKnowledge ?? "",
+                    notes: x.notes ?? "",
                     keywords: x.keywords,
-                    expirationDate: dayjs(x.expiration),
+                    expirationDate: dayjs(x.expiration).toDate(),
                     cds: x.cds.map((x) => x.cod_degree),
                     degreeLevel: x.level
                 }
+                setDate(dayjs(x.expiration).toDate());
                 form.setFieldsValue(proposal);
                 setFormData(proposal);
             })
@@ -102,7 +103,7 @@ function MobEditThesisProposal() {
                 required_knowledge: formData.requiredKnowledge,
                 notes: formData.notes,
                 keywords: formData.keywords,
-                expiration: formData.expirationDate.format("YYYY-MM-DD"),
+                expiration: dayjs(formData.expirationDate).format("YYYY-MM-DD"),
                 cds: formData.cds,
                 level: formData.degreeLevel
             }
@@ -122,12 +123,7 @@ function MobEditThesisProposal() {
 
     const addProposal = () => {
         setInsert(true);
-    }
-
-    const items = steps.map((item) => ({
-        key: item.title,
-        title: item.title,
-    }));
+    };
 
 
     const next = () => {
@@ -152,7 +148,7 @@ function MobEditThesisProposal() {
                 :
                 <>
                     {contextHolder}
-                    <div style={{ marginLeft: "16%", marginRight: "15%", marginTop: "3%" }}>
+                    <div>
                         <div>
                             {current === 0 && (
                                 <>
@@ -163,9 +159,9 @@ function MobEditThesisProposal() {
                                 </>
                             )}
                             {current === 1 && (
-                                <div style={{ marginLeft: "10%" }}>
-                                    <ReviewProposal formData={formData} intCoSupervisors={intCoSupervisors} extCoSupervisors={extCoSupervisors} degrees={degrees} />
-                                    <div style={{ paddingLeft: "35%" }}>
+                                <div>
+                                    <MobReview formData={formData} intCoSupervisors={intCoSupervisors} extCoSupervisors={extCoSupervisors} degrees={degrees} />
+                                    <div style={{ paddingLeft: "35%", paddingBottom: "60px" }}>
                                         <Button
                                             style={{
                                                 margin: "0 8px",
@@ -186,8 +182,8 @@ function MobEditThesisProposal() {
                             )}
                         </div>
                         <div>
-                            {current === steps.length - 1 &&
-                                <ModResult update={true} proposalId={proposalId} error={error} />
+                            {current === 2 &&
+                                <MobResult update={true} proposalId={proposalId} error={error} />
                             }
                         </div>
                     </div>

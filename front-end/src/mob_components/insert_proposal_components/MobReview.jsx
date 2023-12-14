@@ -17,7 +17,7 @@ function MobReview(props) {
     if (formData.extCoSupervisors !== undefined) {
       extCoSup = extCoSupervisors.filter((x) => formData.extCoSupervisors.includes(x.id));
     }
-    const expiration = dayjs(formData.expirationDate[0]);
+    const expiration = dayjs(formData.expirationDate);
 
     const selCds = degrees.filter((x) => formData.cds.includes(x.cod_degree));
     const data = [
