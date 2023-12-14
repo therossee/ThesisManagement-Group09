@@ -65,10 +65,13 @@ Main functions:
   - Thesis Proposals APIs
       - `getThesisProposals`: Gets the thesis proposals for a user.
       - `getThesisProposalById`: Gets a specific thesis proposal with a given Id
-      - `applyForProposal`: Function to apply to a proposal with a given Id
+      - `applyForProposal`: Function to apply to a proposal with a given Id and possibly upload a file.
+      - `archiveProposalById`: Function to archive a proposal with the given id
+      - `deleteProposalById`: Funcion to delete a proposal with a given id
+      - `updateProposal`: Function to update an edited proposal with a given id
   - Applications APIs
       - `getStudentActiveApplication`: Gets all the active application for a student
-      - `getTeacherThesisApplications` : Gets all the application for a  proposal with a given Id
+      - `getTeacherThesisApplications` : Gets all the application for a proposal with a given Id
       - `insertProposal`: function to insert a proposal in the database
       - `acceptThesisApplications` : function to accept Student Applications on a Thesis Proposal and automatically reject all the other student applied.
       - `rejectThesisApplications` : function to reject Student Applications on a Thesis Proposal
@@ -78,6 +81,8 @@ Main functions:
       - `getTeachers` : Gets all the teachers 
       - `getAllKeywords` : Gets all the keywords
       - `getAllDegrees` : Gets all the degrees
+      - `getStudentCVById`: Get student career with a given id
+      - `getPDF`: Get all the document in pdf format uploaded by the student with a given student_id for a specific application (application_id)
      
 - `App.jsx` : Main component of the application. It manages user authentication, sets notifications for API errors during login, and defines the basic structure of the application.
 - `main.jsx` : root render for the App
