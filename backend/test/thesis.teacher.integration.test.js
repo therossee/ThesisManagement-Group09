@@ -635,7 +635,7 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
         expect(response.body).toEqual({ message: 'Thesis accepted and others rejected successfully' });
 
         // Wait for a moment to allow the email to be processed (adjust the timing as needed)
-        await new Promise((resolve) => setTimeout(resolve, 8000));
+        await new Promise((resolve) => setTimeout(resolve, 5000));
 
         // Set up IMAP client
         const imapClient = new imap({
@@ -677,7 +677,7 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
         // Close the IMAP connection
         imapClient.end();
 
-    },13000);
+    },10000);
     test('should return 400 error if is missing student_id', async () => {
         // Act
         const response = await agent
