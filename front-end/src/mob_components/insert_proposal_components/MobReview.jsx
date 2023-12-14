@@ -1,6 +1,7 @@
 import { Table, Typography, Tag } from "antd";
-import { Fragment, useEffect } from "react";
+import { Fragment } from "react";
 import dayjs from 'dayjs';
+import PropTypes from "prop-types";
 
 const { Title } = Typography;
 
@@ -46,8 +47,8 @@ function MobReview(props) {
       },
       { field: "Level", value: level },
       { field: "CdS", 
-      value: selCds.map((x, i) => 
-      <Fragment key={i}>
+      value: selCds.map((x) =>
+      <Fragment key={x.cod_degree}>
         {`${x.cod_degree} - ${x.title_degree}`}
         {i < selCds.length - 1 && <br />}
       </Fragment>
@@ -83,5 +84,12 @@ function MobReview(props) {
       </>
     );
   }
+
+    MobReview.propTypes = {
+        formData: PropTypes.object.isRequired,
+        intCoSupervisors: PropTypes.array.isRequired,
+        extCoSupervisors: PropTypes.array.isRequired,
+        degrees: PropTypes.array.isRequired,
+    }
 
   export { MobReview };

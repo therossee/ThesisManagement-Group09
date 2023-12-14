@@ -89,20 +89,20 @@ function MobTeacherThesisProposals() {
                                 <p>Level: {x.level}</p>
                                 <p>Supervisor: {x.supervisor.name + " " + x.supervisor.surname}</p>
                                 {x.coSupervisors && (
-                                    <p>Co-supervisors: {x.coSupervisors.map((cosupervisor, i) => (
-                                        <Tag color="blue" key={i}>
+                                    <p>Co-supervisors: {x.coSupervisors.map((cosupervisor) => (
+                                        <Tag color="blue" key={cosupervisor.id}>
                                             {cosupervisor.name + " " + cosupervisor.surname}
                                         </Tag>
                                     ))}</p>
                                 )}
-                                <p>Keywords: {x.keywords.map((keyword, i) => (
-                                    <Tag color="blue" key={i}>
+                                <p>Keywords: {x.keywords.map((keyword) => (
+                                    <Tag color="blue" key={keyword}>
                                         {keyword}
                                     </Tag>
                                 ))}</p>
                                 <p>Type: {x.type}</p>
-                                <p>Groups: {x.groups.map((group, i) => (
-                                    <Tag color="blue" key={i}>
+                                <p>Groups: {x.groups.map((group) => (
+                                    <Tag color="blue" key={group}>
                                         {group}
                                     </Tag>
                                 ))}</p>

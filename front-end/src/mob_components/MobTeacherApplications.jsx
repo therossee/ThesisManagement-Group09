@@ -1,4 +1,4 @@
-import { React, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import API from "../API";
 import { Button, Alert, message, Divider, List, Skeleton, Avatar, Flex, Typography, Tooltip } from 'antd';
 import { UserOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
@@ -14,9 +14,6 @@ function MobTeacherApplications() {
     const [buttonsLoading, setButtonsLoading] = useState(false);
 
     const [dirty, setDirty] = useState(true);
-
-    // Popup for viewing student CV
-    const [isVisible, setIsVisible] = useState(false);
 
     // Which student should be seen in the drawer?
     const [studentInfo, setStudentInfo] = useState(null);
