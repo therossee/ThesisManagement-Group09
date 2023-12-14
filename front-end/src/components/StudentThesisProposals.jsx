@@ -186,7 +186,7 @@ function StudentThesisProposals() {
                 return accumulator;
             }, []),
             render: (_, x) => x.coSupervisors.map((cosupervisor, i) => (
-                <Tag color="blue" key={i}>
+                <Tag color="blue" key={cosupervisor.id}>
                     {cosupervisor.name + " " + cosupervisor.surname}
                 </Tag>
             )),
@@ -210,8 +210,8 @@ function StudentThesisProposals() {
                 });
                 return accumulator;
             }, []),
-            render: (_, x) => x.keywords.map((keyword, i) => (
-                <Tag color="blue" key={i}>
+            render: (_, x) => x.keywords.map((keyword) => (
+                <Tag color="blue" key={keyword}>
                     {keyword}
                 </Tag>
             )),
@@ -253,8 +253,8 @@ function StudentThesisProposals() {
                 });
                 return accumulator;
             }, []),
-            render: (_, x) => x.groups.map((group, i) => (
-                <Tag color="blue" key={i}>
+            render: (_, x) => x.groups.map((group) => (
+                <Tag color="blue" key={group}>
                     {group}
                 </Tag>
             )),
