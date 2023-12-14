@@ -7,29 +7,29 @@ import API from '../API';
 function MobCV(props) {
     const { setTab, studentInfo, applicationId } = props;
     const { Title, Text } = Typography;
-    const [isLoading, setIsLoading] = useState(true);
+    const [loadData, setLoadData] = useState(true);
     // Store exams info
-    const [data, setData] = useState(true);
+    const [examCV, setExamCV] = useState([]);
     // Store optional PDF
     const [file, setFile] = useState(null);
     useEffect(() => {
         const fetchData = async () => {
             try {
-                setIsLoading(true);
+                setLoadData(true);
                 const exams = await API.getStudentCVById(studentInfo.id);
-                setData(exams);
+                setExamCV(exams);
                 const pdf = await API.getPDF(studentInfo.id, applicationId);
                 setFile(pdf);
             } catch (err) {
                 message.error(err.message ? err.message : err);
             } finally {
-                setIsLoading(false);
+                setLoadData(false);
             }
         };
         fetchData();
     }, []);
 
-    function color(mark) {
+    function setColor(mark) {
         let colorCode;
         if (mark < 20) {
             colorCode = "#f5222d";
@@ -47,7 +47,7 @@ function MobCV(props) {
 
     return (
         <>
-            {isLoading ?
+            {loadData ?
                 <Skeleton active />
                 :
                 <>
@@ -63,16 +63,16 @@ function MobCV(props) {
                         </Tag>
                         <Button style={{marginTop: "5px"}} disabled={!file} onClick={() => openPDF({ file })}>View attached PDF</Button>
                     </Flex>
-                    {data.length > 0 ?
+                    {examCV.length > 0 ?
                             <Collapse style={{marginTop: "2%"}}>
-                            {data.map((x) => {
+                            {examCV.map((x) => {
                                 const title = x.code + " - " + x.teaching;
                                 // <Collapse.Panel
                                 return (<Collapse.Panel
                                 key={x.code} title={title}>
                                     <h4>Taken in</h4><p>{x.date}</p>
                                     <h4>Mark</h4>
-                                    <Tag color={color(x.mark)} style={{ borderRadius: "20px" }}>
+                                    <Tag color={setColor(x.mark)} style={{ borderRadius: "20px" }}>
                                         <Text style={{ color: "white", size: "16px" }}>
                                             {x.mark}
                                         </Text>

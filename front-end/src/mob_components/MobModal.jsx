@@ -47,13 +47,13 @@ function MobModal(props) {
         }
     }
 
-    const applyForProposal = () => {
+    const apply = () => {
         setLoading(true);
-        addApplication();
+        sendApplication();
         setIsOpen(false);
     }
 
-    async function addApplication() {
+    async function sendApplication() {
         try {
             await API.applyForProposal(id, uploadedFile);
             message.success("Successfully applied");
@@ -98,7 +98,7 @@ function MobModal(props) {
             </AutoCenter>
             <AutoCenter>
                 <div style={{marginTop: "7%", marginBottom:"10%"}}>
-                    <Button type="primary" onClick={applyForProposal}>Ok</Button>
+                    <Button type="primary" onClick={apply}>Ok</Button>
                     <Button onClick={() => { setUploadedFile(null); setIsOpen(false) }}>Cancel</Button>
                 </div>
             </AutoCenter>
