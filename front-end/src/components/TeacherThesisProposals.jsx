@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { message, Popconfirm, Space, Table, Tag, Tooltip } from 'antd';
-import { DeleteOutlined, EditOutlined, EyeOutlined, InboxOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { CopyOutlined, DeleteOutlined, EditOutlined, EyeOutlined, InboxOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import API from '../API';
 
 function TeacherThesisProposals() {
@@ -32,7 +32,7 @@ function TeacherThesisProposals() {
         {
             title: 'Co-Supervisors',
             dataIndex: 'coSupervisors',
-            render: (_, x) => x.coSupervisors.map( cosupervisor => (
+            render: (_, x) => x.coSupervisors.map(cosupervisor => (
                 <Tag color="blue" key={cosupervisor.name + " " + cosupervisor.surname}>
                     {cosupervisor.name + " " + cosupervisor.surname}
                 </Tag>
@@ -41,7 +41,7 @@ function TeacherThesisProposals() {
         {
             title: 'Keywords',
             dataIndex: 'keywords',
-            render: (_, x) => x.keywords.map( keyword => (
+            render: (_, x) => x.keywords.map(keyword => (
                 <Tag color="blue" key={keyword}>
                     {keyword}
                 </Tag>
@@ -55,7 +55,7 @@ function TeacherThesisProposals() {
         {
             title: 'Groups',
             dataIndex: 'groups',
-            render: (_, x) => x.groups.map( group => (
+            render: (_, x) => x.groups.map(group => (
                 <Tag color="blue" key={group}>
                     {group}
                 </Tag>
@@ -64,7 +64,7 @@ function TeacherThesisProposals() {
         {
             title: 'CdS',
             dataIndex: 'CdS',
-            render: (_, x) => x.cds.map( cds => (
+            render: (_, x) => x.cds.map(cds => (
                 <Tag color="blue" key={cds.title_degree}>
                     {cds.title_degree}
                 </Tag>
@@ -87,16 +87,19 @@ function TeacherThesisProposals() {
                     <Tooltip title="Edit Proposal">
                         <EditOutlined style={{ fontSize: '20px' }} onClick={() => navigate(`/edit-proposal/${record.id}`)} />
                     </Tooltip>
+                    <Tooltip title="Copy Proposal">
+                        <CopyOutlined style={{ fontSize: '20px' }} onClick={() => navigate(`/insert-proposal/${record.id}`)} />
+                    </Tooltip>
                     <Tooltip title="Delete Proposal">
                         <Popconfirm
-                        title="Confirm action"
-                        description="Are you sure you want to delete this proposal?"
-                        icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
-                        onConfirm={() => deleteProposalById(record.id)}
-                        okText="Yes"
-                        cancelText="No"
+                            title="Confirm action"
+                            description="Are you sure you want to delete this proposal?"
+                            icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+                            onConfirm={() => deleteProposalById(record.id)}
+                            okText="Yes"
+                            cancelText="No"
                         >
-                         <DeleteOutlined style={{ fontSize: '20px' }} />
+                            <DeleteOutlined style={{ fontSize: '20px' }} />
                         </Popconfirm>
                     </Tooltip>
                     <Tooltip title="Archive Proposal">
@@ -109,7 +112,7 @@ function TeacherThesisProposals() {
                             okText="Yes"
                             onConfirm={() => archiveProposalById(record.id)}
                             onCancel={() => { }}
-                            >
+                        >
                             <InboxOutlined style={{ fontSize: '20px' }} />
                         </Popconfirm>
                     </Tooltip>
