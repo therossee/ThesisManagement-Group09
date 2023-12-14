@@ -974,7 +974,7 @@ describe('DELETE /api/thesis-proposals/:id', () => {
     });
     test('should delete a thesis proposal and cancel pending applications', async () => {
         db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
-            .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
+            .run('s318952', 1, new Date().toISOString(), 'waiting for approval');
         
         const id = 1;
 
@@ -1125,6 +1125,19 @@ describe('DELETE /api/thesis-proposals/:id', () => {
 
 describe('PATCH /api/thesis-proposals/archive/:id', () => {
     test('should archive a thesis proposal', async () => {
+        const id = 1;
+
+        // Make a request to the endpoint
+        const response = await agent
+            .patch(`/api/thesis-proposals/archive/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(204);
+    });
+    test('should archive a thesis proposal and notify students with pending applications', async () => {
+        db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
+            .run('s318952', 1, new Date().toISOString(), 'waiting for approval');
         const id = 1;
 
         // Make a request to the endpoint
