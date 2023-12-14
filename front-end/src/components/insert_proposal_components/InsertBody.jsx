@@ -26,7 +26,7 @@ function InsertBody(props) {
         setSelLev("");
         setSelDegrees([]);
       }
-    }, []);
+    }, [degrees]);
   
     const handleInputChange = (value) => {
       setNewKeyword(value);
