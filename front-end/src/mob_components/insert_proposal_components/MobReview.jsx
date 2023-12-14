@@ -20,8 +20,8 @@ function MobReview(props) {
     }
     const expiration = dayjs(formData.expirationDate);
 
-    const selCds = degrees.filter((x) => formData.cds.includes(x.cod_degree));
-    const data = [
+    const selectedCdS = degrees.filter((x) => formData.cds.includes(x.cod_degree));
+    const inputData = [
       { field: "Title", value: formData.title },
       {
         field: "Int. co-Sup",
@@ -47,15 +47,15 @@ function MobReview(props) {
       },
       { field: "Level", value: level },
       { field: "CdS", 
-      value: selCds.map((x, i) =>
+      value: selectedCdS.map((x, i) =>
       <Fragment key={x.cod_degree}>
         {`${x.cod_degree} - ${x.title_degree}`}
-        {i < selCds.length - 1 && <br />}
+        {i < selectedCdS.length - 1 && <br />}
       </Fragment>
     ), },
     ];
   
-    const columns = [
+    const cols = [
       {
         title: "Field",
         dataIndex: "field",
@@ -75,8 +75,8 @@ function MobReview(props) {
       <>
         <Title level={2}>Review Proposal</Title>
         <Table
-          dataSource={data}
-          columns={columns}
+          dataSource={inputData}
+          columns={cols}
           size="middle"
           showHeader={false}
           pagination={false}
