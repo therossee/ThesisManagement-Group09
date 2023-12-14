@@ -32,7 +32,6 @@ exports.getStudentById = (id) => {
         if (!row) {
             resolve(null);
         }
-
         resolve({ id: row.id, surname: row.surname, name: row.name, email: row.email });
     })
 };
@@ -56,11 +55,6 @@ exports.getStudentCareer = (id) => {
     return new Promise((resolve, reject) => {
         const sql = 'SELECT cod_course, title_course, cfu, grade, date FROM career WHERE id = ?';
         const rows = db.prepare(sql).all(id);
-        if(!rows){
-            resolve(null);
-        }
-        else{
-            resolve(rows);
-        }
+        resolve(rows);
     });
 }

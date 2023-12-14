@@ -5,7 +5,7 @@ const db = require('../db');
 const thesis = require('../thesis_dao');
 const UnauthorizedActionError = require("../errors/UnauthorizedActionError");
 const NoThesisProposalError = require("../errors/NoThesisProposalError");
-const { any } = require('zod');
+const fs = require('fs');
 
 // Mocking the database
 jest.mock('../db', () => ({
@@ -23,6 +23,9 @@ jest.mock('../configuration_dao', () => ({
         VIRTUAL_OFFSET_MS: 'virtual_clock_offset'
     }
 }));
+
+jest.mock('fs');
+jest.mock('path');
 
 afterAll(() => {
   jest.restoreAllMocks(); // Restore original functionality after all tests
@@ -680,7 +683,7 @@ describe('applyForProposal', () => {
     jest.clearAllMocks();
   });
 
-  test('applies for a proposal and resolves with applicationId', async () => {
+  test('applies for a proposal without a file and resolves with applicationId', async () => {
       // Mock data
       const proposal_id = 1;
       const student_id = '1';
@@ -694,6 +697,118 @@ describe('applyForProposal', () => {
       const applicationId = await thesis.applyForProposal(proposal_id, student_id);
 
       expect(applicationId).toBe(1);
+  });
+  test('applies for a proposal with a file and resolves with an applicationId', async () => {
+    
+    // Mock data
+    const proposal_id = 1;
+    const student_id = "1";
+
+    db.prepare().get.mockReturnValueOnce({ proposal_id: 1, cod_degree: 'L-01'});
+    db.prepare().get.mockReturnValueOnce({ proposal_id: '1', title: 'Test Proposal', supervisor_id: 1, type: 'Test Type', description: 'Test Description', required_knowledge: 'Test Knowledge', notes: 'Test Notes', creation_date:'2020-10-21', expiration: '2023-12-31', level: 'Test Level' });
+    db.prepare().get.mockReturnValueOnce();
+    db.prepare().run.mockReturnValueOnce({ lastInsertRowid: 1 });
+
+    // Mock the file-related functions
+    const file = {
+      mimetype: 'application/pdf',
+      originalFilename: 'mocked-file.pdf',
+      filepath: '/path/to/mocked-file.pdf',
+    };
+    fs.existsSync.mockReturnValue(true); // Simulate file existence
+    fs.mkdirSync.mockReturnValue(null);
+    fs.writeFileSync.mockImplementation(() => {});
+
+    // Call the function
+    const result = await thesis.applyForProposal(proposal_id, student_id, file);
+
+    // Assertions
+    expect(result).toBe(1);
+
+    // Verify that the correct database methods were called with the expected arguments
+    expect(db.prepare().get).toHaveBeenCalledTimes(3);
+    expect(db.prepare().get).toHaveBeenCalledWith(proposal_id, student_id);
+    expect(db.prepare().get).toHaveBeenCalledWith(proposal_id, expect.any(String), expect.any(String));
+    expect(db.prepare().get).toHaveBeenCalledWith(student_id);
+    expect(db.prepare().run).toHaveBeenCalledWith(proposal_id, student_id, expect.any(String));
+  });
+  test('applies for a proposal with a wrong format file', async () => {
+    
+    // Mock data
+    const proposal_id = 1;
+    const student_id = "1";
+
+    db.prepare().get.mockReturnValueOnce({ proposal_id: 1, cod_degree: 'L-01'});
+    db.prepare().get.mockReturnValueOnce({ proposal_id: '1', title: 'Test Proposal', supervisor_id: 1, type: 'Test Type', description: 'Test Description', required_knowledge: 'Test Knowledge', notes: 'Test Notes', creation_date:'2020-10-21', expiration: '2023-12-31', level: 'Test Level' });
+    db.prepare().get.mockReturnValueOnce();
+    db.prepare().run.mockReturnValueOnce({ lastInsertRowid: 1 });
+
+    // Mock the file-related functions
+    const file = {
+      mimetype: 'application/json',
+      originalFilename: 'mocked-file.pdf',
+      filepath: '/path/to/mocked-file.pdf',
+    };
+    fs.existsSync.mockReturnValue(true); // Simulate file existence
+    fs.mkdirSync.mockReturnValue(null);
+    fs.writeFileSync.mockImplementation(() => {});
+
+    // Call the function
+    await expect(thesis.applyForProposal(proposal_id, student_id, file)).rejects.toEqual(new Error('The file must be a PDF'));
+
+  });
+  test('handle properly file errors', async () => {
+    
+    // Mock data
+    const proposal_id = 1;
+    const student_id = "1";
+
+    db.prepare().get.mockReturnValueOnce({ proposal_id: 1, cod_degree: 'L-01'});
+    db.prepare().get.mockReturnValueOnce({ proposal_id: '1', title: 'Test Proposal', supervisor_id: 1, type: 'Test Type', description: 'Test Description', required_knowledge: 'Test Knowledge', notes: 'Test Notes', creation_date:'2020-10-21', expiration: '2023-12-31', level: 'Test Level' });
+    db.prepare().get.mockReturnValueOnce();
+    db.prepare().run.mockReturnValueOnce({ lastInsertRowid: 1 });
+
+    // Mock the file-related functions
+    const file = {
+      mimetype: 'application/pdf',
+      originalFilename: 'mocked-file.pdf',
+      filepath: '/path/to/mocked-file.pdf',
+    };
+    fs.existsSync.mockReturnValue(true); // Simulate file existence
+    fs.mkdirSync.mockReturnValue(null);
+    fs.writeFileSync.mockImplementation(() => {
+      throw new Error();
+    });
+
+    // Call the function
+    await expect(thesis.applyForProposal(proposal_id, student_id, file)).rejects.toEqual(new Error('Error'));
+
+  });
+  test('handle properly db errors', async () => {
+    
+    // Mock data
+    const proposal_id = 1;
+    const student_id = "1";
+
+    db.prepare().get.mockReturnValueOnce({ proposal_id: 1, cod_degree: 'L-01'});
+    db.prepare().get.mockReturnValueOnce({ proposal_id: '1', title: 'Test Proposal', supervisor_id: 1, type: 'Test Type', description: 'Test Description', required_knowledge: 'Test Knowledge', notes: 'Test Notes', creation_date:'2020-10-21', expiration: '2023-12-31', level: 'Test Level' });
+    db.prepare().get.mockReturnValueOnce();
+    db.prepare().run.mockReturnValueOnce();
+    db.prepare().run.mockImplementation(() => { throw new Error();});
+
+    // Mock the file-related functions
+    const file = {
+      mimetype: 'application/pdf',
+      originalFilename: 'mocked-file.pdf',
+      filepath: '/path/to/mocked-file.pdf',
+    };
+    fs.existsSync.mockReturnValue(true); // Simulate file existence
+    fs.mkdirSync.mockReturnValue(null);
+    fs.writeFileSync.mockImplementation(() => {});
+
+    // Call the function
+    await expect(thesis.applyForProposal(proposal_id, student_id, file)).rejects.toEqual(new Error());
+
   });
   test('applies for a proposal not belonging to his cds', async () => {
     // Mock data
@@ -797,7 +912,7 @@ describe('listApplicationsForTeacherThesisProposal', () => {
 
     // Call the function
     const result = await thesis.listApplicationsForTeacherThesisProposal(1, 'd1');
-    const expectedQuery = `SELECT s.name, s.surname, ta.status, s.id
+    const expectedQuery = `SELECT s.name, s.surname, ta.status, s.id, ta.id AS application_id
     FROM thesisApplication ta, thesisProposal tp, student s
     WHERE ta.proposal_id = tp.proposal_id 
       AND s.id = ta.student_id
@@ -1315,5 +1430,32 @@ describe('archiveThesisProposalById', () => {
       expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
     );
     expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+  });
+});
+
+describe('getApplicationById', () => {
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  });
+
+  test('should return the application with given the id', async () => {
+    const applicationId = 1;
+    const expectedResult =
+    {
+      "id": 1,
+      "proposal_id": 1,
+      "student_id": 's12345',
+      "status": "accepted",
+      "creation_date": "2020-10-21T21:37:01.176Z",
+    };
+
+    jest.spyOn(require('../db').prepare(), 'get').mockReturnValue(expectedResult);
+
+    const result = await thesis.getApplicationById(applicationId);
+    const expectedQuery = `SELECT * FROM thesisApplication WHERE id = ?`;
+
+    expect(result).toEqual(expectedResult);
+    expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
   });
 });

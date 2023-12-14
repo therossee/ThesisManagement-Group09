@@ -6,6 +6,10 @@ const request = require("supertest");
 const { app } = require("../app");
 const thesisDao = require('../thesis_dao');
 const db = require('../db');
+const path = require('path');
+const fs = require('fs');
+const fse = require('fs-extra');
+const formidable = require('formidable');
 
 // Mock Passport-SAML authenticate method
 jest.mock('passport-saml', () => {
@@ -227,28 +231,272 @@ describe('GET /api/thesis-proposals/:id (student)', () => {
 });
 
 describe('POST /api/student/applications', () => {
-    test('applies for a thesis proposal and returns 201', async () => {
-        
-        const body = { thesis_proposal_id: 2 };
+  
+    const uploadDir = path.join(__dirname, 'temp-uploads');
+  
+    beforeAll(() => {
+      fse.ensureDirSync(uploadDir);
+    });
+  
+    afterAll(async() => {
+      fse.removeSync(uploadDir);
+      await fse.remove('uploads');
+    });
 
+    test('should create a new application for a valid request', async () => {
+        // Create a sample file to be uploaded
+        const filePath = path.join(uploadDir, 'sample.pdf');
+        fs.writeFileSync(filePath, 'This is a sample file.');
+    
+        const thesis_proposal_id = '2';
+    
+        const form = new formidable.IncomingForm();
+
+        // Simulate file upload by adding a 'file' field to the form
+        form.on('file', (field, file) => {
+            form.files[field] = file;
+        });
+    
+        // Simulate the fields in the form
+        form.fields = {
+            thesis_proposal_id: '2',
+        };
+    
         const response = await agent
             .post('/api/student/applications')
             .set('credentials', 'include')
-            .send(body);
-
-        expect(response.status).toBe(201);
+            .field('thesis_proposal_id', thesis_proposal_id)
+            .attach('file', filePath)
+            .expect(201);
+    
         expect(response.body).toEqual({
-            thesis_proposal_id: body.thesis_proposal_id,
+            application_id: 2,
+            thesis_proposal_id: '2',
             student_id: 's318952',
             status: 'waiting for approval',
         });
+  
     });
-    test('applies for a thesis proposal not logged', async () => {
+
+    test('should return 401 status error for if a not logged user try to apply to a thesis proposal', async () => {
         const response = await request(app)
             .post('/api/student/applications')
             .send({ thesis_proposal_id: 2 });
 
         expect(response.status).toBe(401);
+    });
+
+    test('should reject if the student apply for a proposal of another course of study', async () => {
+    
+        const thesis_proposal_id = '3';
+    
+        const form = new formidable.IncomingForm();
+
+        // Simulate the fields in the form
+        form.fields = {
+            thesis_proposal_id: '3',
+        };
+
+        const response = await agent
+            .post('/api/student/applications')
+            .set('credentials', 'include')
+            .field('thesis_proposal_id', thesis_proposal_id)
+            .expect(500);
+
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Failed to apply for proposal. The proposal doesn\'t belong to the student degree');
+    });
+
+    test('should reject if the student apply for an archived proposal', async () => {
+    
+        db.prepare('INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(4, 'Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2020-10-10T10:45:50.121Z', '2022-11-10T23:59:59.999Z', 'LM');
+
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+        .run(4, 'L-08');
+
+        const thesis_proposal_id = '4';
+    
+        const form = new formidable.IncomingForm();
+
+        // Simulate the fields in the form
+        form.fields = {
+            thesis_proposal_id: '4',
+        };
+
+        const response = await agent
+            .post('/api/student/applications')
+            .set('credentials', 'include')
+            .field('thesis_proposal_id', thesis_proposal_id)
+            
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Failed to apply for proposal. The proposal is not active');
+
+    });
+
+    test('should reject if the student has already applied for another proposal', async () => {
+    
+        db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
+        .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
+       
+
+        const thesis_proposal_id = '2';
+    
+        const form = new formidable.IncomingForm();
+
+        // Simulate the fields in the form
+        form.fields = {
+            thesis_proposal_id: '2',
+        };
+
+        const response = await agent
+            .post('/api/student/applications')
+            .set('credentials', 'include')
+            .field('thesis_proposal_id', thesis_proposal_id)
+            
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Failed to apply for proposal. The user has already applied for other proposals');
+
+    });
+
+    test('should handle file writing error', async () => {
+        // Create a sample file to be uploaded
+        const filePath = path.join(uploadDir, 'sample.pdf');
+        fs.writeFileSync(filePath, 'This is a sample file.');
+    
+        const thesis_proposal_id = '2';
+    
+        const form = new formidable.IncomingForm();
+
+        // Simulate file upload by adding a 'file' field to the form
+        form.on('file', (field, file) => {
+            form.files[field] = file;
+        });
+    
+        // Simulate the fields in the form
+        form.fields = {
+            thesis_proposal_id: '2',
+        };
+
+        // Mock the fs.mkdirSync method to throw an error when called
+        jest.spyOn(fs, 'mkdirSync').mockImplementation(() => {
+            throw new Error('Simulated mkdirSync error');
+        });
+    
+        const response = await agent
+            .post('/api/student/applications')
+            .set('credentials', 'include')
+            .field('thesis_proposal_id', thesis_proposal_id)
+            .attach('file', filePath);
+
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Failed to apply for proposal. Error: Simulated mkdirSync error');
+    });
+
+    test('should handle error while inserting application', async () => {
+        // Create a sample file to be uploaded
+        const filePath = path.join(uploadDir, 'sample.pdf');
+        fs.writeFileSync(filePath, 'This is a sample file.');
+    
+        const thesis_proposal_id = '2';
+    
+        const form = new formidable.IncomingForm();
+
+        // Simulate file upload by adding a 'file' field to the form
+        form.on('file', (field, file) => {
+            form.files[field] = file;
+        });
+    
+        // Simulate the fields in the form
+        form.fields = {
+            thesis_proposal_id: '2',
+        };
+
+        // Mock the database operation to throw an error when called
+        jest.spyOn(db, 'prepare').mockImplementation(() => {
+            throw new Error('Simulated database insertion error');
+        });
+
+        const response = await agent
+            .post('/api/student/applications')
+            .set('credentials', 'include')
+            .field('thesis_proposal_id', thesis_proposal_id)
+            .attach('file', filePath)
+            .expect(500);
+        
+        expect(response.body).toEqual('Failed to apply for proposal. Simulated database insertion error');
+  
+    });
+  
+    test('should handle internal server error during form parsing', async () => {
+        // Create a sample file to be uploaded
+        const filePath = path.join(uploadDir, 'sample.pdf');
+        fs.writeFileSync(filePath, 'This is a sample file.');
+    
+        const thesis_proposal_id = '2';
+
+        // Spy on the form.parse method to mock its behavior
+        const formParseSpy = jest.spyOn(formidable.IncomingForm.prototype, 'parse');
+
+        // Simulate an error during form parsing
+        formParseSpy.mockImplementation((req, callback) => {
+        // Call the callback with an error
+        callback(new Error('Simulated form parsing error'), {}, {});
+        });
+    
+        const response = await agent
+          .post('/api/student/applications')
+          .set('credentials', 'include')
+          .field('thesis_proposal_id', thesis_proposal_id)
+          .attach('file', filePath)
+          .expect(500);
+    
+        expect(response.body).toEqual({ message: 'Internal Server Error' });
+    });
+
+    test('should handle generic errors gracefully', async () => {
+        // Simulate an error in the application process
+        jest.spyOn(thesisDao, 'applyForProposal').mockImplementation(() => {
+            throw new Error('Simulated error');
+        });
+    
+        const response = await agent
+            .post('/api/student/applications')
+            .set('credentials', 'include')
+            .field('thesis_proposal_id', '2')
+            .expect(500);
+    
+        expect(response.body).toEqual('Failed to apply for proposal. Simulated error');
+    
+    });
+
+    test.skip('should reject a non-PDF file', async () => {
+        // Create a sample file to be uploaded
+        const filePath = path.join(uploadDir, 'sample.txt');
+        fs.writeFileSync(filePath, 'This is a sample file.');
+    
+        const thesis_proposal_id = '2';
+    
+        const form = new formidable.IncomingForm();
+
+        // Simulate file upload by adding a 'file' field to the form
+        form.on('file', (field, file) => {
+            form.files[field] = file;
+        });
+    
+        // Simulate the fields in the form
+        form.fields = {
+            thesis_proposal_id: '2',
+        };
+    
+        const response = await agent
+            .post('/api/student/applications')
+            .set('credentials', 'include')
+            .field('thesis_proposal_id', thesis_proposal_id)
+            .attach('file', filePath);
+
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Failed to apply for proposal. The file must be a PDF');
     });
 });
 

@@ -5,7 +5,12 @@ const { resetTestDatabase } = require('./integration_config');
 const request = require("supertest");
 const { app } = require("../app");
 const thesisDao = require('../thesis_dao');
+const usersDao = require('../users_dao');
 const db = require('../db');
+const path = require('path');
+const fs = require('fs');
+const fse = require('fs-extra');
+const imap = require("imap");
 
 // Mock Passport-SAML authenticate method
 jest.mock('passport-saml', () => {
@@ -136,6 +141,46 @@ describe('POST /api/teacher/thesis_proposals', () => {
             level: requestBody.level,
             cds: requestBody.cds,
             groups: ["Group1", "Group2"],
+            keywords: requestBody.keywords
+        });
+    });
+
+    test('should create a new thesis proposal', async () => {
+        const requestBody = {
+            title: 'Test Thesis',
+            internal_co_supervisors_id: [], 
+            external_co_supervisors_id: [1],
+            type: 'Bachelor',
+            description: 'Test description',
+            required_knowledge: 'Test knowledge',
+            notes: 'Test notes',
+            expiration: '2030-12-31',
+            level: 'Bachelor',
+            cds: ['L-08'],
+            keywords: ['test', 'keywords'],
+        };
+
+        const response = await agent
+            .post('/api/teacher/thesis_proposals')
+            .set('Accept', 'application/json')
+            .set('credentials', 'include')
+            .send(requestBody);
+
+        expect(response.status).toBe(201);
+        expect(response.body).toEqual({
+            id: expect.any(Number),
+            supervisor_id: 'd279620', // Marco Rossi
+            title: requestBody.title,
+            internal_co_supervisors_id: requestBody.internal_co_supervisors_id,
+            external_co_supervisors_id: requestBody.external_co_supervisors_id,
+            type: requestBody.type,
+            description: requestBody.description,
+            required_knowledge: requestBody.required_knowledge,
+            notes: requestBody.notes,
+            expiration: `${requestBody.expiration}T23:59:59.999Z`,
+            level: requestBody.level,
+            cds: requestBody.cds,
+            groups: ["Group1"],
             keywords: requestBody.keywords
         });
     });
@@ -607,8 +652,23 @@ describe('GET /api/teacher/applications/:proposal_id', () => {
         // Assertions
         expect(response.status).toBe(200);
         expect(response.body).toEqual([
-            { id: 's321529', name: 'Matteo', surname: 'Ladrat', status: 'waiting for approval' }
+            { application_id: 2, id: 's321529', name: 'Matteo', surname: 'Ladrat', status: 'waiting for approval' }
         ]);
+    });
+
+    test('should handle internal server errors', async () => {
+        db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
+            .run('s321529', 2, new Date().toISOString(), 'waiting for approval');
+
+        jest.spyOn(thesisDao, 'listApplicationsForTeacherThesisProposal').mockRejectedValueOnce(new Error());
+        // Send a request to the endpoint
+        const response = await agent
+            .get('/api/teacher/applications/2')
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Internal Server Error');
     });
 });
 
@@ -622,13 +682,57 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
         // Act
         const response = await agent
           .patch("/api/teacher/applications/accept/2")
-          .send({ student_id: 's321529' })
+          .send({ student_id: 's318952' })
           .set('credentials', 'include')
           .expect(200);
 
         // Assert
         expect(response.body).toEqual({ message: 'Thesis accepted and others rejected successfully' });
-    });
+
+        // Wait for a moment to allow the email to be processed (adjust the timing as needed)
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        // Set up IMAP client
+        const imapClient = new imap({
+        user: process.env.TM_SMTP_USERNAME, 
+        password: process.env.TM_SMTP_PASSWORD,
+        host: "imap.ethereal.email", // IMAP server host
+        port: 993, // IMAP server port
+        tls: true,
+        tlsOptions: { rejectUnauthorized: false }, 
+        });
+
+        // Connect to the IMAP server
+        await new Promise((resolve, reject) => {
+        imapClient.once("ready", resolve);
+        imapClient.once("error", reject);
+        imapClient.connect();
+        });
+
+        // Open the Inbox
+        const openInbox = await new Promise((resolve, reject) => {
+        imapClient.openBox("INBOX", true, (err, box) => {
+            if (err) reject(err);
+            resolve(box);
+        });
+        });
+
+        const subject = 'Application status changed - PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API';
+        // Search for the email (adjust criteria as needed)
+        const searchResults = await new Promise((resolve, reject) => {
+            imapClient.search(['UNSEEN', ['TO', 's318952@studenti.polito.it'], ['SUBJECT', subject]], (err, results) => {
+            if (err) reject(err);
+            resolve(results);
+            });
+        });
+
+        // Assert that the email has been received
+        expect(searchResults.length).toBeGreaterThan(0);
+
+        // Close the IMAP connection
+        imapClient.end();
+
+    },10000);
     test('should return 400 error if is missing student_id', async () => {
         // Act
         const response = await agent
@@ -638,6 +742,17 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
         // Assert
         expect(response.status).toBe(400);
         expect(response.body).toEqual({ message: 'Missing required fields.' });
+    });
+    test('should refuse if the thesis doesn\'t exist', async () => {
+        // Act
+        const response = await agent
+            .patch("/api/teacher/applications/accept/5")
+            .send({ student_id: 's318952' })
+            .set('credentials', 'include');
+
+        // Assert
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({ message: 'Thesis proposal with id 5 not found, cannot accept this application.' });
     });
     test('should return 404 error if no application has been found', async () => {
         // Act
@@ -685,7 +800,50 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
 
         // Assert
         expect(response.body).toEqual({ message: 'Thesis successfully rejected' });
-    });
+
+        // Wait for a moment to allow the email to be processed (adjust the timing as needed)
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        // Set up IMAP client
+        const imapClient = new imap({
+        user: process.env.TM_SMTP_USERNAME, 
+        password: process.env.TM_SMTP_PASSWORD,
+        host: "imap.ethereal.email", // IMAP server host
+        port: 993, // IMAP server port
+        tls: true,
+        tlsOptions: { rejectUnauthorized: false }, 
+        });
+
+        // Connect to the IMAP server
+        await new Promise((resolve, reject) => {
+        imapClient.once("ready", resolve);
+        imapClient.once("error", reject);
+        imapClient.connect();
+        });
+
+        // Open the Inbox
+        const openInbox = await new Promise((resolve, reject) => {
+        imapClient.openBox("INBOX", true, (err, box) => {
+            if (err) reject(err);
+            resolve(box);
+        });
+        });
+
+        const subject = 'Application status changed - PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API';
+        // Search for the email (adjust criteria as needed)
+        const searchResults = await new Promise((resolve, reject) => {
+            imapClient.search(['UNSEEN', ['TO', '321529@studenti.polito.it'], ['SUBJECT', subject]], (err, results) => {
+            if (err) reject(err);
+            resolve(results);
+            });
+        });
+
+        // Assert that the email has been received
+        expect(searchResults.length).toBeGreaterThan(0);
+
+        // Close the IMAP connection
+        imapClient.end()
+    },10000);
     test('should return 400 error if is missing student_id', async () => {
         // Act
         const response = await agent
@@ -696,12 +854,23 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
         expect(response.status).toBe(400);
         expect(response.body).toEqual({ message: 'Missing required fields.' });
     });
+    test('should refuse if the thesis doesn\'t exist', async () => {
+        // Act
+        const response = await agent
+            .patch("/api/teacher/applications/reject/5")
+            .send({ student_id: 's318952' })
+            .set('credentials', 'include');
+
+        // Assert
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({ message: 'Thesis proposal with id 5 not found, cannot reject this application.' });
+    });
     test('should return 404 error if no application has been found', async () => {
         // Act
         const response = await agent
-            .patch("/api/teacher/applications/reject/234567")
+            .patch("/api/teacher/applications/reject/2")
             .set('credentials', 'include')
-            .send({ student_id: 's321529' });
+            .send({ student_id: 's4' });
 
         // Assert
         expect(response.status).toBe(404);
@@ -726,6 +895,71 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
     });
 });
 
+describe('GET /api/student/:id/career', () => {
+    test('should return the student\'s career', async () => {
+        // Act
+        const response = await agent
+            .get('/api/student/s318952/career')
+            .set('credentials', 'include');
+
+        // Assert
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual([
+            {
+                cod_course: 'COURSE_CODE_1',
+                title_course: 'Course Title 1',
+                cfu: 5,
+                grade: 30,
+                date: '2023-01-01'
+            },
+            {
+                cod_course: 'COURSE_CODE_2',
+                title_course: 'Course Title 2',
+                cfu: 4,
+                grade: 25,
+                date: '2023-02-01'
+            },
+            {
+                cod_course: 'COURSE_CODE_3',
+                title_course: 'Course Title 3',
+                cfu: 3,
+                grade: 27,
+                date: '2023-03-01'
+            }
+        ]);
+    });
+    test('should return ampty array if the student don\'t have exams', async () => {
+        // Act
+        const response = await agent
+            .get('/api/student/s320213/career')
+            .set('credentials', 'include');
+
+        // Assert
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual([]);
+    });
+    test('should return 404 if the student don\'t exist', async () => {
+        // Act
+        const response = await agent
+            .get('/api/student/s12345/career')
+            .set('credentials', 'include');
+
+        // Assert
+        expect(response.status).toBe(404);
+    });
+    test('should return 500 if internal server error happens', async () => {
+        
+        jest.spyOn(usersDao, 'getStudentById').mockRejectedValueOnce(new Error());
+        const response = await agent
+            .get('/api/student/s318952/career')
+            .set('credentials', 'include');
+
+        // Assert
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Internal Server Error');
+    });
+});
+
 describe('DELETE /api/thesis-proposals/:id', () => {
     test('should delete a thesis proposal and notify application status change', async () => {
         const id = 1;
@@ -738,6 +972,64 @@ describe('DELETE /api/thesis-proposals/:id', () => {
         // Assertions
         expect(response.status).toBe(204);
     });
+    test('should delete a thesis proposal and cancel pending applications', async () => {
+        db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
+            .run('s318952', 1, new Date().toISOString(), 'waiting for approval');
+        
+        const id = 1;
+
+        // Make a request to the endpoint
+        const response = await agent
+            .delete(`/api/thesis-proposals/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(204);
+
+         // Wait for a moment to allow the email to be processed (adjust the timing as needed)
+         await new Promise((resolve) => setTimeout(resolve, 5000));
+
+         // Set up IMAP client
+         const imapClient = new imap({
+         user: process.env.TM_SMTP_USERNAME, 
+         password: process.env.TM_SMTP_PASSWORD,
+         host: "imap.ethereal.email", // IMAP server host
+         port: 993, // IMAP server port
+         tls: true,
+         tlsOptions: { rejectUnauthorized: false }, 
+         });
+ 
+         // Connect to the IMAP server
+         await new Promise((resolve, reject) => {
+         imapClient.once("ready", resolve);
+         imapClient.once("error", reject);
+         imapClient.connect();
+         });
+ 
+         // Open the Inbox
+         const openInbox = await new Promise((resolve, reject) => {
+         imapClient.openBox("INBOX", true, (err, box) => {
+             if (err) reject(err);
+             resolve(box);
+         });
+         });
+ 
+         const subject = 'Application status changed - PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API';
+         // Search for the email (adjust criteria as needed)
+         const searchResults = await new Promise((resolve, reject) => {
+             imapClient.search(['UNSEEN', ['TO', 's318952@studenti.polito.it'], ['SUBJECT', subject]], (err, results) => {
+             if (err) reject(err);
+             resolve(results);
+             });
+         });
+ 
+         // Assert that the email has been received
+         expect(searchResults.length).toBeGreaterThan(0);
+ 
+         // Close the IMAP connection
+         imapClient.end();
+ 
+    },10000);
     test('should refuse to delete a thesis proposal with accepted application', async () => {
         const id = 3;
 
@@ -750,6 +1042,61 @@ describe('DELETE /api/thesis-proposals/:id', () => {
         expect(response.status).toBe(403);
         expect(response.body).toEqual({ message: 'Some applications has been accepted and, therefore, you can\'t delete this thesis' });
     });
+    test('should refuse to delete a inexistent thesis proposal', async () => {
+        const id = 4;
+
+        // Make a request to the endpoint
+        const response = await agent
+            .delete(`/api/thesis-proposals/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({ message: 'No thesis proposal with id 4 found' });
+    });
+    test('should refuse to delete a inexistent thesis proposal (because created in the future)', async () => {
+        db.prepare('INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_deleted, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(4, 'Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2030-10-10T10:45:50.121Z', '2032-11-10T23:59:59.999Z', 'LM', 0, 0);
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+        .run(4, 'L-08');
+
+        // Make a request to the endpoint
+        const response = await agent
+            .delete(`/api/thesis-proposals/4`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({ message: 'No thesis proposal with id 4 found' });
+    });
+    test('should refuse to delete an expired thesis proposal', async () => {
+        db.prepare('INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(4, 'Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2020-10-10T10:45:50.121Z', '2022-11-10T23:59:59.999Z', 'LM');
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+        .run(4, 'L-08');
+        // Make a request to the endpoint
+        const response = await agent
+            .delete(`/api/thesis-proposals/4`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ message: 'You can\'t delete a thesis already expired' });
+    });
+    test('should refuse to delete a thesis for which the teacher is not the supervisor', async () => {
+        db.prepare('INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(4, 'Title', 'd370335', 'research project', 'Description', 'Required knowledge', 'Notes', '2020-10-10T10:45:50.121Z', '2032-11-10T23:59:59.999Z', 'LM');
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+        .run(4, 'L-08');
+        // Make a request to the endpoint
+        const response = await agent
+            .delete(`/api/thesis-proposals/4`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ message: 'You are not the supervisor of this thesis' });
+    });
     test('should handle errors and return the appropriate response', async () => {
         const id = 'nonExistingProposalId';
 
@@ -760,7 +1107,7 @@ describe('DELETE /api/thesis-proposals/:id', () => {
 
         // Assertions
         expect(response.status).toBe(404);
-        expect(response.body).toEqual({ message: `No thesis proposal with id ${id} found to delete` });
+        expect(response.body).toEqual({ message: `No thesis proposal with id ${id} found` });
     });
     test('should handle unexpected errors and return 500 Internal Server Error', async () => {
         jest.spyOn(thesisDao, 'deleteThesisProposalById').mockRejectedValueOnce(new Error());
@@ -773,5 +1120,243 @@ describe('DELETE /api/thesis-proposals/:id', () => {
         // Assertions
         expect(response.status).toBe(500);
         expect(response.body).toEqual({ message: 'Internal Server Error' });
+    });
+});
+
+describe('PATCH /api/thesis-proposals/archive/:id', () => {
+    test('should archive a thesis proposal', async () => {
+        const id = 1;
+
+        // Make a request to the endpoint
+        const response = await agent
+            .patch(`/api/thesis-proposals/archive/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(204);
+    });
+    test('should archive a thesis proposal and notify students with pending applications', async () => {
+        db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
+            .run('s318952', 1, new Date().toISOString(), 'waiting for approval');
+        const id = 1;
+
+        // Make a request to the endpoint
+        const response = await agent
+            .patch(`/api/thesis-proposals/archive/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(204);
+    });
+    test('should not archive a thesis proposal that has applications approved', async () => {
+        const id = 3;
+
+        // Make a request to the endpoint
+        const response = await agent
+            .patch(`/api/thesis-proposals/archive/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ message: 'Some applications has been accepted and, therefore, you can\'t archive this thesis'});
+    });
+    test('should not archive a inexistent thesis proposal', async () => {
+        const id = 4;
+
+        // Make a request to the endpoint
+        const response = await agent
+            .patch(`/api/thesis-proposals/archive/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({ message: 'No thesis proposal with id 4 found'});
+    });
+    test('should not archive a thesis proposal created in the future', async () => {
+        
+        db.prepare('INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(4, 'Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2030-10-10T10:45:50.121Z', '2032-11-10T23:59:59.999Z', 'LM');
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+        .run(4, 'L-08');
+
+        const id = 4;
+
+        // Make a request to the endpoint
+        const response = await agent
+            .patch(`/api/thesis-proposals/archive/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({ message: 'No thesis proposal with id 4 found'});
+    });
+    test('should not archive a thesis proposal already expired (and archived)', async () => {
+        
+        db.prepare('INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(4, 'Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2020-10-10T10:45:50.121Z', '2022-11-10T23:59:59.999Z', 'LM');
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+        .run(4, 'L-08');
+
+        const id = 4;
+
+        // Make a request to the endpoint
+        const response = await agent
+            .patch(`/api/thesis-proposals/archive/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ message: 'You can\'t archive a thesis already expired'});
+    });
+    test('should not archive a thesis proposal if you are not the supervisor', async () => {
+        
+        db.prepare('INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .run(4, 'Title', 'd370335', 'research project', 'Description', 'Required knowledge', 'Notes', '2022-10-10T10:45:50.121Z', '2025-11-10T23:59:59.999Z', 'LM');
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+        .run(4, 'L-08');
+
+        const id = 4;
+
+        // Make a request to the endpoint
+        const response = await agent
+            .patch(`/api/thesis-proposals/archive/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ message: 'You are not the supervisor of this thesis'});
+    });
+    test('should handle errors and return the appropriate response', async () => {
+        const id = 'nonExistingProposalId';
+
+        // Make a request to the endpoint
+        const response = await agent
+            .patch(`/api/thesis-proposals/archive/${id}`)
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({ message: `No thesis proposal with id ${id} found` });
+    });
+    test('should handle unexpected errors and return 500 Internal Server Error', async () => {
+        jest.spyOn(thesisDao, 'archiveThesisProposalById').mockRejectedValueOnce(new Error());
+
+        // Make a request to the endpoint
+        const response = await agent
+            .patch('/api/thesis-proposals/archive/unexpectedErrorId')
+            .set('credentials', 'include');
+
+        // Assertions
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual({ message: 'Internal Server Error' });
+    });
+});
+
+describe('GET /api/teacher/uploads/:stud_id/:app_id', () => {
+    afterAll(async () => {
+        // Use fs-extra's remove method to delete the directory and its contents
+        await fse.remove('uploads');
+    });
+    
+    test('returns 404 for non-existing student', async () => {
+      const nonExistingStudentId = 10000;
+      const nonExistingApplicationId = 10000;
+  
+      // Make the request
+      const response = await agent
+        .get(`/api/teacher/uploads/${nonExistingStudentId}/${nonExistingApplicationId}`)
+        .set('credentials', 'include')
+        .expect(404);
+  
+      // Assert the response
+      expect(response.body).toEqual({message : 'Student with id 10000 not found.'});
+    });
+
+    test('returns 404 for non-existing application', async () => {
+        const nonExistingStudentId = 's318952';
+        const nonExistingApplicationId = 10000;
+    
+        // Make the request
+        const response = await agent
+          .get(`/api/teacher/uploads/${nonExistingStudentId}/${nonExistingApplicationId}`)
+          .set('credentials', 'include')
+          .expect(404);
+    
+        // Assert the response
+        expect(response.body).toEqual({message : 'Application with id 10000 not found.'});
+    });
+
+    test('handle unexpected errors and return status 500', async () => {
+        db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
+        .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
+
+        const nonExistingStudentId = 's318952';
+        const nonExistingApplicationId = 2;
+
+        jest.spyOn(usersDao, 'getStudentById').mockRejectedValueOnce(new Error());
+        // Make the request
+        const response = await agent
+          .get(`/api/teacher/uploads/${nonExistingStudentId}/${nonExistingApplicationId}`)
+          .set('credentials', 'include')
+          .expect(500);
+    
+        // Assert the response
+        expect(response.body).toEqual('Internal Server Error');
+    });
+
+    test('should return an empty JSON object if directory doesn\'t exist', async () => {
+        db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
+        .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
+
+        const studentId = 's318952'; 
+        const applicationId = 2; 
+    
+        // Make the request
+        const response = await agent
+          .get(`/api/teacher/uploads/${studentId}/${applicationId}`)
+          .set('credentials', 'include')
+          .expect(200);
+    
+        expect(response.body).toEqual({});
+    });
+
+    test('should return an empty JSON object if directory exists but is empty', async () => {
+        
+        db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
+        .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
+        
+        const studentId = 's318952';
+        const applicationId = 2;
+        const dir = path.join(__dirname, '../uploads', studentId, applicationId.toString());
+    
+        // Create the directory without any files
+        fs.mkdirSync(dir, { recursive: true });
+    
+        const response = await agent
+          .get(`/api/teacher/uploads/${studentId}/${applicationId}`)
+          .expect(200);
+    
+        expect(response.body).toEqual({});
+    });
+
+    test('should return the first file if directory exists and contains files', async () => {
+        db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
+        .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
+
+         // Create a directory with a sample PDF file
+        const dir = path.join(__dirname, '../uploads', 's318952', '2');
+        fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(path.join(dir, 'sample.pdf'), Buffer.alloc(0));
+
+        const studentId = 's318952'; 
+        const applicationId = 2; 
+    
+        // Make the request
+        const response = await agent
+          .get(`/api/teacher/uploads/${studentId}/${applicationId}`)
+          .set('credentials', 'include')
+          .expect(200);
+    
+        expect(response.header['content-type']).toEqual('application/pdf');
     });
 });
