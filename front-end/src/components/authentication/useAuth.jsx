@@ -1,4 +1,5 @@
 import { useState, createContext, useContext, useEffect, useMemo } from 'react';
+import PropTypes from 'prop-types';
 import API  from '../../API.jsx';
 
 // Context for handling user info and user-related functions
@@ -59,3 +60,7 @@ export function AuthProvider({ children }) {
         </AuthContext.Provider>
     );
 }
+
+AuthProvider.propTypes = {
+    children: PropTypes.node.isRequired,
+};
