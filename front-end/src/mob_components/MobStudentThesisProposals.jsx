@@ -178,12 +178,10 @@ function MobStudentThesisProposals() {
             {isLoading ? (<p>Loading...</p>) : (
         <JumboTabs>
             <JumboTabs.Tab title='Proposals' key='list-proposals'>
-                <>
                     <div style={{ paddingBottom: "60px", position: "relative" }}>
                         <p>Active proposals for your CdS</p>
                         <CustomCollapse filteredData={filteredData} />
                     </div>
-                </>
             </JumboTabs.Tab>
             <JumboTabs.Tab title='Filters' key='filters'>
                 <Form
@@ -388,19 +386,19 @@ function CustomCollapse(props) {
                         <p>Supervisor: {x.supervisor.name + " " + x.supervisor.surname}</p>
                         {x.coSupervisors && (
                             <p>Co-supervisors: {x.coSupervisors.map((cosupervisor, i) => (
-                                <Tag color="blue" key={i}>
+                                <Tag color="blue" key={cosupervisor.id}>
                                     {cosupervisor.name + " " + cosupervisor.surname}
                                 </Tag>
                             ))}</p>
                         )}
-                        <p>Keywords: {x.keywords.map((keyword, i) => (
-                            <Tag color="blue" key={i}>
+                        <p>Keywords: {x.keywords.map((keyword) => (
+                            <Tag color="blue" key={keyword}>
                                 {keyword}
                             </Tag>
                         ))}</p>
                         <p>Type: {x.type}</p>
-                        <p>Groups: {x.groups.map((group, i) => (
-                            <Tag color="blue" key={i}>
+                        <p>Groups: {x.groups.map((group) => (
+                            <Tag color="blue" key={group}>
                                 {group}
                             </Tag>
                         ))}</p>
