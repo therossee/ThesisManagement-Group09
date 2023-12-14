@@ -1,4 +1,5 @@
 import { Result, Button } from "antd";
+import PropTypes from 'prop-types';
 import { useNavigate } from "react-router-dom";
 
 function UploadResult(props) {
@@ -45,5 +46,11 @@ function UploadResult(props) {
       );
     }
   }
+
+  UploadResult.propTypes = {
+    proposalId: PropTypes.number,
+    error: PropTypes.number,
+    update: PropTypes.bool,
+  };
 
   export { UploadResult };
