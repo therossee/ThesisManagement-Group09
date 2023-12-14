@@ -1,13 +1,13 @@
 require('jest');
 // [i] This line setup the test database + load the environment variables. DON'T (RE)MOVE IT
-const { resetTestDatabase } = require('./integration_config');
+const { resetTestDatabase } = require('../integration_config');
 
 const request = require("supertest");
-const { app } = require("../app");
-const utils = require("./utils");
-const thesisDao = require('../thesis_dao');
-const usersDao = require('../users_dao');
-const db = require('../db');
+const { app } = require("../../app");
+const utils = require("../utils");
+const thesisDao = require('../../thesis_dao');
+const usersDao = require('../../users_dao');
+const db = require('../../db');
 const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
@@ -132,7 +132,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
     test('should create a new thesis proposal', async () => {
         const requestBody = {
             title: 'Test Thesis',
-            internal_co_supervisors_id: [], 
+            internal_co_supervisors_id: [],
             external_co_supervisors_id: [1],
             type: 'Bachelor',
             description: 'Test description',
@@ -678,12 +678,12 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
 
         // Set up IMAP client
         const imapClient = new imap({
-        user: process.env.TM_SMTP_USERNAME, 
+        user: process.env.TM_SMTP_USERNAME,
         password: process.env.TM_SMTP_PASSWORD,
         host: "imap.ethereal.email", // IMAP server host
         port: 993, // IMAP server port
         tls: true,
-        tlsOptions: { rejectUnauthorized: false }, 
+        tlsOptions: { rejectUnauthorized: false },
         });
 
         // Connect to the IMAP server
@@ -790,12 +790,12 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
 
         // Set up IMAP client
         const imapClient = new imap({
-        user: process.env.TM_SMTP_USERNAME, 
+        user: process.env.TM_SMTP_USERNAME,
         password: process.env.TM_SMTP_PASSWORD,
         host: "imap.ethereal.email", // IMAP server host
         port: 993, // IMAP server port
         tls: true,
-        tlsOptions: { rejectUnauthorized: false }, 
+        tlsOptions: { rejectUnauthorized: false },
         });
 
         // Connect to the IMAP server
@@ -932,7 +932,7 @@ describe('GET /api/student/:id/career', () => {
         expect(response.status).toBe(404);
     });
     test('should return 500 if internal server error happens', async () => {
-        
+
         jest.spyOn(usersDao, 'getStudentById').mockRejectedValueOnce(new Error());
         const response = await agent
             .get('/api/student/s318952/career')
@@ -959,7 +959,7 @@ describe('DELETE /api/thesis-proposals/:id', () => {
     test('should delete a thesis proposal and cancel pending applications', async () => {
         db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
             .run('s318952', 1, new Date().toISOString(), 'waiting for approval');
-        
+
         const id = 1;
 
         // Make a request to the endpoint
@@ -975,21 +975,21 @@ describe('DELETE /api/thesis-proposals/:id', () => {
 
          // Set up IMAP client
          const imapClient = new imap({
-         user: process.env.TM_SMTP_USERNAME, 
+         user: process.env.TM_SMTP_USERNAME,
          password: process.env.TM_SMTP_PASSWORD,
          host: "imap.ethereal.email", // IMAP server host
          port: 993, // IMAP server port
          tls: true,
-         tlsOptions: { rejectUnauthorized: false }, 
+         tlsOptions: { rejectUnauthorized: false },
          });
- 
+
          // Connect to the IMAP server
          await new Promise((resolve, reject) => {
          imapClient.once("ready", resolve);
          imapClient.once("error", reject);
          imapClient.connect();
          });
- 
+
          // Open the Inbox
          const openInbox = await new Promise((resolve, reject) => {
          imapClient.openBox("INBOX", true, (err, box) => {
@@ -997,7 +997,7 @@ describe('DELETE /api/thesis-proposals/:id', () => {
              resolve(box);
          });
          });
- 
+
          const subject = 'Application status changed - PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API';
          // Search for the email (adjust criteria as needed)
          const searchResults = await new Promise((resolve, reject) => {
@@ -1006,13 +1006,13 @@ describe('DELETE /api/thesis-proposals/:id', () => {
              resolve(results);
              });
          });
- 
+
          // Assert that the email has been received
          expect(searchResults.length).toBeGreaterThan(0);
- 
+
          // Close the IMAP connection
          imapClient.end();
- 
+
     },10000);
     test('should refuse to delete a thesis proposal with accepted application', async () => {
         const id = 3;
@@ -1157,7 +1157,7 @@ describe('PATCH /api/thesis-proposals/archive/:id', () => {
         expect(response.body).toEqual({ message: 'No thesis proposal with id 4 found'});
     });
     test('should not archive a thesis proposal created in the future', async () => {
-        
+
         db.prepare('INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
         .run(4, 'Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2030-10-10T10:45:50.121Z', '2032-11-10T23:59:59.999Z', 'LM');
         db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
@@ -1175,7 +1175,7 @@ describe('PATCH /api/thesis-proposals/archive/:id', () => {
         expect(response.body).toEqual({ message: 'No thesis proposal with id 4 found'});
     });
     test('should not archive a thesis proposal already expired (and archived)', async () => {
-        
+
         db.prepare('INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
         .run(4, 'Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2020-10-10T10:45:50.121Z', '2022-11-10T23:59:59.999Z', 'LM');
         db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
@@ -1193,7 +1193,7 @@ describe('PATCH /api/thesis-proposals/archive/:id', () => {
         expect(response.body).toEqual({ message: 'You can\'t archive a thesis already expired'});
     });
     test('should not archive a thesis proposal if you are not the supervisor', async () => {
-        
+
         db.prepare('INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
         .run(4, 'Title', 'd370335', 'research project', 'Description', 'Required knowledge', 'Notes', '2022-10-10T10:45:50.121Z', '2025-11-10T23:59:59.999Z', 'LM');
         db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
@@ -1241,17 +1241,17 @@ describe('GET /api/teacher/uploads/:stud_id/:app_id', () => {
         // Use fs-extra's remove method to delete the directory and its contents
         await fse.remove('uploads');
     });
-    
+
     test('returns 404 for non-existing student', async () => {
       const nonExistingStudentId = 10000;
       const nonExistingApplicationId = 10000;
-  
+
       // Make the request
       const response = await agent
         .get(`/api/teacher/uploads/${nonExistingStudentId}/${nonExistingApplicationId}`)
         .set('credentials', 'include')
         .expect(404);
-  
+
       // Assert the response
       expect(response.body).toEqual({message : 'Student with id 10000 not found.'});
     });
@@ -1259,13 +1259,13 @@ describe('GET /api/teacher/uploads/:stud_id/:app_id', () => {
     test('returns 404 for non-existing application', async () => {
         const nonExistingStudentId = 's318952';
         const nonExistingApplicationId = 10000;
-    
+
         // Make the request
         const response = await agent
           .get(`/api/teacher/uploads/${nonExistingStudentId}/${nonExistingApplicationId}`)
           .set('credentials', 'include')
           .expect(404);
-    
+
         // Assert the response
         expect(response.body).toEqual({message : 'Application with id 10000 not found.'});
     });
@@ -1283,7 +1283,7 @@ describe('GET /api/teacher/uploads/:stud_id/:app_id', () => {
           .get(`/api/teacher/uploads/${nonExistingStudentId}/${nonExistingApplicationId}`)
           .set('credentials', 'include')
           .expect(500);
-    
+
         // Assert the response
         expect(response.body).toEqual('Internal Server Error');
     });
@@ -1292,34 +1292,34 @@ describe('GET /api/teacher/uploads/:stud_id/:app_id', () => {
         db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
         .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
 
-        const studentId = 's318952'; 
-        const applicationId = 2; 
-    
+        const studentId = 's318952';
+        const applicationId = 2;
+
         // Make the request
         const response = await agent
           .get(`/api/teacher/uploads/${studentId}/${applicationId}`)
           .set('credentials', 'include')
           .expect(200);
-    
+
         expect(response.body).toEqual({});
     });
 
     test('should return an empty JSON object if directory exists but is empty', async () => {
-        
+
         db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
         .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
-        
+
         const studentId = 's318952';
         const applicationId = 2;
-        const dir = path.join(__dirname, '../uploads', studentId, applicationId.toString());
-    
+        const dir = path.join(__dirname, '../../uploads', studentId, applicationId.toString());
+
         // Create the directory without any files
         fs.mkdirSync(dir, { recursive: true });
-    
+
         const response = await agent
           .get(`/api/teacher/uploads/${studentId}/${applicationId}`)
           .expect(200);
-    
+
         expect(response.body).toEqual({});
     });
 
@@ -1328,19 +1328,19 @@ describe('GET /api/teacher/uploads/:stud_id/:app_id', () => {
         .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
 
          // Create a directory with a sample PDF file
-        const dir = path.join(__dirname, '../uploads', 's318952', '2');
+        const dir = path.join(__dirname, '../../uploads', 's318952', '2');
         fs.mkdirSync(dir, { recursive: true });
         fs.writeFileSync(path.join(dir, 'sample.pdf'), Buffer.alloc(0));
 
-        const studentId = 's318952'; 
-        const applicationId = 2; 
-    
+        const studentId = 's318952';
+        const applicationId = 2;
+
         // Make the request
         const response = await agent
           .get(`/api/teacher/uploads/${studentId}/${applicationId}`)
           .set('credentials', 'include')
           .expect(200);
-    
+
         expect(response.header['content-type']).toEqual('application/pdf');
     });
 });

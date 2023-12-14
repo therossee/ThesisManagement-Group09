@@ -1,12 +1,12 @@
 require('jest');
 // [i] This line setup the test database + load the environment variables. DON'T (RE)MOVE IT
-const { resetTestDatabase } = require('./integration_config');
+const { resetTestDatabase } = require('../integration_config');
 
 const request = require("supertest");
-const { app } = require("../app");
-const utils = require("./utils");
-const thesisDao = require('../thesis_dao');
-const db = require('../db');
+const { app } = require("../../app");
+const utils = require("../utils");
+const thesisDao = require('../../thesis_dao');
+const db = require('../../db');
 const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');

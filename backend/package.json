@@ -6,8 +6,8 @@
   "scripts": {
     "test": "jest --detectOpenHandles",
     "test:coverage": "jest --coverage --colors",
-    "test:unit": "npx jest --coverage --coverageDirectory=coverage/coverage_unit --colors --runInBand .*.unit.test.js",
-    "test:integration": "npx jest --coverage --coverageDirectory=coverage/coverage_integration  --runInBand --colors .*.integration.test.js",
+    "test:unit": "npx jest --coverage --coverageDirectory=coverage/coverage_unit --colors --runInBand units/*",
+    "test:integration": "npx jest --coverage --coverageDirectory=coverage/coverage_integration  --runInBand --colors integration/*",
     "start": "node index",
     "dev": "nodemon index"
   },

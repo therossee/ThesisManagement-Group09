@@ -1,12 +1,12 @@
 require('jest');
 // [i] This line setup the test database + load the environment variables. DON'T (RE)MOVE IT
-const { resetTestDatabase } = require('./integration_config');
+const { resetTestDatabase } = require('../integration_config');
 
 const dayjs = require('dayjs');
 const request = require("supertest");
-const { app } = require("../app");
-const utils = require("./utils");
-const AdvancedDate = require("../AdvancedDate");
+const { app } = require("../../app");
+const utils = require("../utils");
+const AdvancedDate = require("../../AdvancedDate");
 
 let testerAgent, nonTesterAgent;
 beforeAll(async () => {

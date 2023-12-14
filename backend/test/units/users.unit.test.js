@@ -1,10 +1,10 @@
 require('jest');
 
-const db = require('../db');
-const users = require('../users_dao');
+const db = require('../../db');
+const users = require('../../users_dao');
 
 // Mocking the database
-jest.mock('../db', () => ({
+jest.mock('../../db', () => ({
   prepare: jest.fn().mockReturnThis(),
   get: jest.fn(),
   all: jest.fn(),
@@ -21,7 +21,7 @@ describe('getStudentDegree', () => {
    db.prepare().get.mockReturnValueOnce(mockDegree);
    // Call the function and assert the result
    const result = await users.getStudentDegree(validStudentId);
-   expect(result).toEqual(mockDegree); 
+   expect(result).toEqual(mockDegree);
  });
 
  // Test case for an invalid student ID
@@ -59,7 +59,7 @@ describe('getStudentById', () => {
   });
 
   test('returns null for an invalid student ID', async () => {
-    
+
     const invalidStudentId ='1'/* invalid student ID */;
 
     // Mock the db.prepare.get function to return null
@@ -93,7 +93,7 @@ describe('getStudentCareer', () => {
   });
 
   test('returns empty array for a valid student ID with no career data', async () => {
-    
+
     const validStudentId = 's12345';
 
     db.prepare().all.mockReturnValueOnce([]);

@@ -1,9 +1,9 @@
 require('jest');
 
-const db = require('../db');
-const degree = require('../degree_dao');
+const db = require('../../db');
+const degree = require('../../degree_dao');
 
-jest.mock('../db', () => ({
+jest.mock('../../db', () => ({
     prepare: jest.fn().mockReturnThis(),
     run: jest.fn().mockReturnValue({ lastInsertRowid: 1 }),
     all: jest.fn(),

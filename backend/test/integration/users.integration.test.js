@@ -1,10 +1,10 @@
 require('jest');
 // [i] This line setup the test database + load the environment variables. DON'T (RE)MOVE IT
-const { resetTestDatabase } = require('./integration_config');
+const { resetTestDatabase } = require('../integration_config');
 
 const request = require("supertest");
-const { app } = require("../app");
-const utils = require("./utils");
+const { app } = require("../../app");
+const utils = require("../utils");
 
 beforeEach(() => {
     // Be sure that we are using a full clean database before each test

@@ -1,9 +1,9 @@
 require('jest');
 
 const dayjs = require('dayjs');
-const configuration = require('../configuration_dao');
-const AdvancedDate = require("../AdvancedDate");
-const InvalidNewVirtualOffsetError = require("../errors/InvalidNewVirtualOffsetError");
+const configuration = require('../../configuration_dao');
+const AdvancedDate = require("../../AdvancedDate");
+const InvalidNewVirtualOffsetError = require("../../errors/InvalidNewVirtualOffsetError");
 
 function toBeAnIntegerCloseTo(received, expected, delta) {
     const pass = Number.isInteger(received) && Math.abs(received - expected) <= delta;
@@ -22,7 +22,7 @@ function toBeAnIntegerCloseTo(received, expected, delta) {
 expect.extend({ toBeAnIntegerCloseTo });
 
 
-jest.mock('../configuration_dao', () => ({
+jest.mock('../../configuration_dao', () => ({
     getIntegerValue: jest.fn(),
     setValue: jest.fn(),
     KEYS: {

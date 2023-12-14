@@ -1,14 +1,14 @@
 require('jest');
 
-const AdvancedDate = require('../AdvancedDate');
-const db = require('../db');
-const thesis = require('../thesis_dao');
-const UnauthorizedActionError = require("../errors/UnauthorizedActionError");
-const NoThesisProposalError = require("../errors/NoThesisProposalError");
+const AdvancedDate = require('../../AdvancedDate');
+const db = require('../../db');
+const thesis = require('../../thesis_dao');
+const UnauthorizedActionError = require("../../errors/UnauthorizedActionError");
+const NoThesisProposalError = require("../../errors/NoThesisProposalError");
 const fs = require('fs');
 
 // Mocking the database
-jest.mock('../db', () => ({
+jest.mock('../../db', () => ({
   prepare: jest.fn().mockReturnThis(),
   run: jest.fn().mockReturnValue({ lastInsertRowid: 1 }),
   all: jest.fn(),
@@ -16,7 +16,7 @@ jest.mock('../db', () => ({
   transaction: jest.fn().mockImplementation(callback => callback),
 }));
 
-jest.mock('../configuration_dao', () => ({
+jest.mock('../../configuration_dao', () => ({
     getIntegerValue: jest.fn().mockReturnValue(0),
     setValue: jest.fn(),
     KEYS: {
@@ -57,9 +57,9 @@ describe('createThesisProposal', () => {
       keywords: ['Keyword1', 'Keyword2'],
     };
 
-    const proposal_details = { 
-      title: proposalData.title, 
-      supervisor_id: proposalData.supervisor_id, 
+    const proposal_details = {
+      title: proposalData.title,
+      supervisor_id: proposalData.supervisor_id,
       type: proposalData.type,
       description: proposalData.description,
       required_knowledge: proposalData.required_knowledge,
@@ -98,9 +98,9 @@ describe('createThesisProposal', () => {
       keywords: ['Keyword1', 'Keyword2'],
     };
 
-    const proposal_details = { 
-      title: proposalData.title, 
-      supervisor_id: proposalData.supervisor_id, 
+    const proposal_details = {
+      title: proposalData.title,
+      supervisor_id: proposalData.supervisor_id,
       type: proposalData.type,
       description: proposalData.description,
       required_knowledge: proposalData.required_knowledge,
@@ -139,9 +139,9 @@ describe('createThesisProposal', () => {
       keywords: ['Keyword1', 'Keyword2'],
     };
 
-    const proposal_details = { 
-      title: proposalData.title, 
-      supervisor_id: proposalData.supervisor_id, 
+    const proposal_details = {
+      title: proposalData.title,
+      supervisor_id: proposalData.supervisor_id,
       type: proposalData.type,
       description: proposalData.description,
       required_knowledge: proposalData.required_knowledge,
@@ -237,7 +237,7 @@ describe('getTeacherListExcept', () => {
     let mockDb;
 
     beforeAll(() => {
-      mockDb = require('../db');
+      mockDb = require('../../db');
     });
 
     afterAll(() => {
@@ -278,7 +278,7 @@ describe('getExternalCoSupervisors', () => {
   let mockDb;
 
   beforeAll(() => {
-    mockDb = require('../db');
+    mockDb = require('../../db');
   });
 
   afterAll(() => {
@@ -316,7 +316,7 @@ describe('getGroup', () => {
     let mockDb;
 
     beforeAll(() => {
-      mockDb = require('../db');
+      mockDb = require('../../db');
     });
 
     afterAll(() => {
@@ -437,7 +437,7 @@ describe('getThesisProposal', () => {
     };
 
     // Mock the get function to return a mock result
-    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(undefined).mockReturnValueOnce(expectedResult);
+    jest.spyOn(require('../../db').prepare(), 'get').mockReturnValueOnce(undefined).mockReturnValueOnce(expectedResult);
 
     // Act
     const result = await thesis.getThesisProposal(proposalId, studentId);
@@ -452,7 +452,7 @@ describe('getThesisProposal', () => {
     const studentId = "2";
 
     // Mock the get function to return undefined (indicating no thesis proposal)
-    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(undefined).mockReturnValueOnce(undefined);
+    jest.spyOn(require('../../db').prepare(), 'get').mockReturnValueOnce(undefined).mockReturnValueOnce(undefined);
 
     // Act
     const result = await thesis.getThesisProposal(proposalId, studentId);
@@ -467,7 +467,7 @@ describe('getThesisProposal', () => {
     const studentId = "1";
 
     // Mock the get function to return a mock result
-    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce({proposalId: 1, student_id:"1", status: 'accepted'});
+    jest.spyOn(require('../../db').prepare(), 'get').mockReturnValueOnce({proposalId: 1, student_id:"1", status: 'accepted'});
 
     // Act
     const result = await thesis.getThesisProposal(proposalId, studentId);
@@ -510,7 +510,7 @@ describe('listThesisProposalsFromStudent', () => {
 
       expect(result).toEqual(mockedData);
       expect(db.prepare().all).toHaveBeenCalledWith(
-        studentId,  
+        studentId,
         expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
         expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/));
   });
@@ -699,7 +699,7 @@ describe('applyForProposal', () => {
       expect(applicationId).toBe(1);
   });
   test('applies for a proposal with a file and resolves with an applicationId', async () => {
-    
+
     // Mock data
     const proposal_id = 1;
     const student_id = "1";
@@ -733,7 +733,7 @@ describe('applyForProposal', () => {
     expect(db.prepare().run).toHaveBeenCalledWith(proposal_id, student_id, expect.any(String));
   });
   test('applies for a proposal with a wrong format file', async () => {
-    
+
     // Mock data
     const proposal_id = 1;
     const student_id = "1";
@@ -758,7 +758,7 @@ describe('applyForProposal', () => {
 
   });
   test('handle properly file errors', async () => {
-    
+
     // Mock data
     const proposal_id = 1;
     const student_id = "1";
@@ -785,7 +785,7 @@ describe('applyForProposal', () => {
 
   });
   test('handle properly db errors', async () => {
-    
+
     // Mock data
     const proposal_id = 1;
     const student_id = "1";
@@ -941,7 +941,7 @@ describe('getStudentActiveApplication', () => {
     const expectedResult = [ { proposal_id: 1 } ];
 
     // Mock the all function to return a mock result
-    jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce(expectedResult);
+    jest.spyOn(require('../../db').prepare(), 'all').mockReturnValueOnce(expectedResult);
 
     // Act
     const result = await thesis.getStudentActiveApplication(student_id);
@@ -958,7 +958,7 @@ describe('getStudentActiveApplication', () => {
     const student_id = 2;
 
     // Mock the all function to return an empty array
-    jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce([]);
+    jest.spyOn(require('../../db').prepare(), 'all').mockReturnValueOnce([]);
 
     // Act
     const result = await thesis.getStudentActiveApplication(student_id);
@@ -983,7 +983,7 @@ describe('updateApplicationStatus', () => {
         const expectedRowCount = 1;
 
         // Mock the run function to return a mock result
-        jest.spyOn(require('../db').prepare(), 'run').mockReturnValueOnce({ changes: expectedRowCount });
+        jest.spyOn(require('../../db').prepare(), 'run').mockReturnValueOnce({ changes: expectedRowCount });
 
         // Act
         const result = await thesis.updateApplicationStatus(studentId, proposalId, status);
@@ -999,7 +999,7 @@ describe('updateApplicationStatus', () => {
         const expectedRowCount = 0;
 
         // Mock the run function to return a mock result
-        jest.spyOn(require('../db').prepare(), 'run').mockReturnValueOnce({ changes: expectedRowCount });
+        jest.spyOn(require('../../db').prepare(), 'run').mockReturnValueOnce({ changes: expectedRowCount });
 
         // Act
         const result = await thesis.updateApplicationStatus(studentId, proposalId, status);
@@ -1015,7 +1015,7 @@ describe('updateApplicationStatus', () => {
     const status = 'accepted';
 
     // Mock the run function to throw an error
-    jest.spyOn(require('../db').prepare(), 'run').mockImplementationOnce(() => {
+    jest.spyOn(require('../../db').prepare(), 'run').mockImplementationOnce(() => {
       throw new Error('Some error');
     });
 
@@ -1040,7 +1040,7 @@ describe('cancelOtherApplications', () => {
     ];
 
     // Mock the run function to return a mock result
-    jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce([
+    jest.spyOn(require('../../db').prepare(), 'all').mockReturnValueOnce([
         { proposal_id: proposalId, student_id: 's1', status: 'cancelled', id: 1 },
         { proposal_id: proposalId, student_id: 's2', status: 'cancelled', id: 2 },
     ]);
@@ -1058,7 +1058,7 @@ describe('cancelOtherApplications', () => {
     const proposalId = "2";
 
     // Mock the run function to throw an error
-    jest.spyOn(require('../db').prepare(), 'all').mockImplementationOnce(() => {
+    jest.spyOn(require('../../db').prepare(), 'all').mockImplementationOnce(() => {
       throw new Error('Some error');
     });
 
@@ -1078,7 +1078,7 @@ describe('getThesisProposalCds', () => {
       const expectedQuery = `SELECT d.cod_degree, d.title_degree FROM proposalCds p, degree d WHERE proposal_id = ? AND p.cod_degree = d.cod_degree`;
       const expectedResult = [{cds: 'TestCds'}];
 
-      jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce(expectedResult);
+      jest.spyOn(require('../../db').prepare(), 'all').mockReturnValueOnce(expectedResult);
 
       result = await thesis.getThesisProposalCds(proposalId);
 
@@ -1091,7 +1091,7 @@ describe('getThesisProposalCds', () => {
       const proposalId = 2;
 
       // Mock the all function to return an empty array
-      jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce([]);
+      jest.spyOn(require('../../db').prepare(), 'all').mockReturnValueOnce([]);
 
       // Act
       const result = await thesis.getThesisProposalCds(proposalId);
@@ -1142,7 +1142,7 @@ describe('getThesisProposalById', () => {
       "level": "Test Level",
     };
 
-    jest.spyOn(require('../db').prepare(), 'get').mockReturnValue(expectedResult);
+    jest.spyOn(require('../../db').prepare(), 'get').mockReturnValue(expectedResult);
 
     const result = await thesis.getThesisProposalById(proposalId);
     const expectedQuery = `SELECT * FROM thesisProposal P
@@ -1172,7 +1172,7 @@ describe('getThesisProposalTeacher', () => {
       cod_department : "dep1"
     }
 
-    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce(undefined).mockReturnValueOnce(expectedResult);
+    jest.spyOn(require('../../db').prepare(), 'get').mockReturnValueOnce(undefined).mockReturnValueOnce(expectedResult);
 
     const result = await thesis.getThesisProposalTeacher(proposalId, teacherId);
 
@@ -1183,7 +1183,7 @@ describe('getThesisProposalTeacher', () => {
     const proposalId = 2;
     const teacheId = "d2";
 
-    jest.spyOn(require('../db').prepare(), 'get').mockReturnValueOnce({proposalId: 2, teacheId: "d2", status: 'accepted'});
+    jest.spyOn(require('../../db').prepare(), 'get').mockReturnValueOnce({proposalId: 2, teacheId: "d2", status: 'accepted'});
 
     const result = await thesis.getThesisProposalTeacher(proposalId, teacheId);
 
@@ -1212,7 +1212,7 @@ describe('listApplicationsDecisionsFromStudent', () => {
     FROM thesisApplication ta, thesisProposal tp, teacher t
     WHERE ta.proposal_id = tp.proposal_id AND ta.student_id = ? AND t.id = tp.supervisor_id AND ta.creation_date < ?`;
 
-    jest.spyOn(require('../db').prepare(), 'all').mockReturnValueOnce(expectedResult);
+    jest.spyOn(require('../../db').prepare(), 'all').mockReturnValueOnce(expectedResult);
 
     result = await thesis.listApplicationsDecisionsFromStudent(studentId);
 
@@ -1321,10 +1321,10 @@ describe('archiveThesisProposalById', () => {
     db.prepare().run.mockReturnValueOnce({ changes: 1 }); // Successful archiving
 
     const result = await thesis.archiveThesisProposalById(proposalId, supervisorId);
-    
+
     expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
     expect(db.prepare().run).toHaveBeenCalledWith(
-      proposalId, 
+      proposalId,
       supervisorId,
       expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
       expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
@@ -1345,10 +1345,10 @@ describe('archiveThesisProposalById', () => {
   });
 
   test('rejects with the appropriate error for an unsuccessful archiving (inexistent thesis)', async () => {
-   
+
     const proposalId = 1;
     const supervisorId = 'd1';
-    
+
 
     db.prepare().get.mockReturnValueOnce(null);
     db.prepare().run.mockReturnValueOnce({ changes: 0 });
@@ -1367,15 +1367,15 @@ describe('archiveThesisProposalById', () => {
   });
 
   test('rejects with the appropriate error for an unsuccessful archiving (thesis not already created)', async () => {
-   
+
     const proposalId = 1;
     const supervisorId = 'd1';
-    
+
 
     db.prepare().get.mockReturnValueOnce(null);
     db.prepare().run.mockReturnValueOnce({ changes: 0 });
 
-    db.prepare().get.mockReturnValueOnce({ creation_date: '2030-11-10T23:59:59.999Z'}); 
+    db.prepare().get.mockReturnValueOnce({ creation_date: '2030-11-10T23:59:59.999Z'});
 
     await expect(thesis.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(NoThesisProposalError); // No thesis proposal with the given id
     expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
@@ -1389,10 +1389,10 @@ describe('archiveThesisProposalById', () => {
   });
 
   test('rejects with the appropriate error for an unsuccessful archiving (expired thesis)', async () => {
-   
+
     const proposalId = 1;
     const supervisorId = 'd1';
-    
+
 
     db.prepare().get.mockReturnValueOnce(null);
     db.prepare().run.mockReturnValueOnce({ changes: 0 });
@@ -1411,10 +1411,10 @@ describe('archiveThesisProposalById', () => {
   });
 
   test('rejects with the appropriate error for an unsuccessful archiving (supervisor not owner of the proposal)', async () => {
-   
+
     const proposalId = 1;
     const supervisorId = 'd1';
-    
+
 
     db.prepare().get.mockReturnValueOnce(null);
     db.prepare().run.mockReturnValueOnce({ changes: 0 });
@@ -1450,7 +1450,7 @@ describe('getApplicationById', () => {
       "creation_date": "2020-10-21T21:37:01.176Z",
     };
 
-    jest.spyOn(require('../db').prepare(), 'get').mockReturnValue(expectedResult);
+    jest.spyOn(require('../../db').prepare(), 'get').mockReturnValue(expectedResult);
 
     const result = await thesis.getApplicationById(applicationId);
     const expectedQuery = `SELECT * FROM thesisApplication WHERE id = ?`;
