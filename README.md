@@ -50,16 +50,19 @@ This variable must contain the key to decrypt the environment variables stored i
 
 ## React Client Application Routes
 - Route `/`: Displays the home page
-- Route `/proposals`: Displays the proposals for a student
+- Route `/proposals`: Displays the proposals for a student and a teacher
 - Route `/insert-proposal`: Displays the proposal form for the teacher to insert a new thesis proposal.
+- Route `/view-proposal/:id`: Displays the specific proposal to view.
+- Route `/edit-proposal/:id`: Displays the specific proposal to view, allowing the logged-in supervisor teacher to edit it.
+- Route `/applications`: Displays all the applications of students for thesis created by the logged-in teacher.
 
 ## API SERVER
 
 ### LOGIN
-- HTTP Method: `POST` URL `/api/sessions`
-- Description: Validates Login information for the user.
+- HTTP Method: `POST` URL `/sso/callback`
+- Description: Handles the callback from the SAML identity provider after the user is authenticated.
 - Request body:
-```
+```json
         {
           "username": "rossi.marco@email.com",
           "password": "d279620"
@@ -67,7 +70,7 @@ This variable must contain the key to decrypt the environment variables stored i
 ```
 - Response: `201 CREATED` (success)
 - Response body: An object containing information on the user logged in.
-```
+```json
         {
           "id": "d279620",
           "surname": "Rossi",
@@ -80,12 +83,12 @@ This variable must contain the key to decrypt the environment variables stored i
 - Error Response: `401 Unauthorized` ("Incorrect email and/or password")
 
 ### GET CURRENT LOGGED USER
-- HTTP Method: `GET` URL `/api/sessions/current`
+- HTTP Method: `GET` URL `/api/user`
 - Description: Retrieves information for the current user logged.
 - Request body: _None_
 - Response: `200 OK` (success)
 - Response body: An object containing information on the actual logged user.
-```
+```json
         {
           "id": "s294301",
           "surname": "Rossi",
@@ -100,7 +103,7 @@ This variable must contain the key to decrypt the environment variables stored i
 - Error Response: `401 Unauthorized` ("Not authenticated")
 
 ### LOGOUT
-- HTTP Method: `DELETE` URL `/api/sessions/current`
+- HTTP Method: `POST` URL `/logout`
 - Description: Closes current session.
 - Request body: _None_
 - Response: `204 NO CONTENT` (success)
@@ -527,6 +530,11 @@ Error Responses:
     - `500 Internal Server Error` 
 
 ## Database Tables
+- Table `configuration`:
+    | Column            | Type     | Constraints                           |
+    | ----------------- | -------- | ------------------------------------- |
+    | key               | text     | **PK**                                |
+    | value             | text     | **NOT NULL**                          |
 
 - Table `student`:
     | Column            | Type     | Constraints                           |
@@ -581,6 +589,7 @@ Error Responses:
     | expiration         | date     | **NOT NULL**                                          |
     | level              | text     | **NOT NULL**                                          |
     | is_deleted         | integer  | **CHECK (is_deleted == 0 or is_deleted == 1) DEFAULT 0** |
+    | is_archived        | integer  | **CHECK (is_archived == 0 or is_archived == 1) DEFAULT 0** |
 
 
 - Table `proposalKeyword`
@@ -635,16 +644,4 @@ Error Responses:
     | student_id    | text    | **NOT NULL, FK** [student](#student)(id)             |
     | creation_date | date    | **NOT NULL**                                         |
     | status        | text    | **DEFAULT 'waiting for approval'**         |
-
-- Table `student_auth0`:
-    | Column   | Type | Constraints                        |
-    | -------- | ---- | ---------------------------------- |
-    | id       | text | **PK**, **FK** [student](#student)(id) |
-    | id_auth0  | text | **NOT NULL**                       |
-
-- Table `teacher_auth0`:
-    | Column   | Type | Constraints                        |
-    | -------- | ---- | ---------------------------------- |
-    | id       | text | **PK**, **FK** [teacher](#teacher)(id) |
-    | id_auth0  | text | **NOT NULL**                       |
 
