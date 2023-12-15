@@ -1,6 +1,13 @@
 RETROSPECTIVE (Team 09)
 =====================================
 
+### Sections:
+
+- [process measures](#process-measures)
+- [quality measures](#quality-measures)
+- [general assessment](#assessment)
+
+
 ## PROCESS MEASURES 
 
 ### Macro statistics
