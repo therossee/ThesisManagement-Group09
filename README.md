@@ -69,17 +69,7 @@ This variable must contain the key to decrypt the environment variables stored i
         }
 ```
 - Response: `201 CREATED` (success)
-- Response body: An object containing information on the user logged in.
-```json
-        {
-          "id": "d279620",
-          "surname": "Rossi",
-          "name": "Marco",
-          "email": "rossi.marco@email.com",
-          "cod_group": "Group1",
-          "cod_department": "Dep1"
-        }
-```
+- Response body: _None_
 - Error Response: `401 Unauthorized` ("Incorrect email and/or password")
 
 ### GET CURRENT LOGGED USER

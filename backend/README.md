@@ -98,9 +98,9 @@ Several middleware functions are defined to check user authentication and roles.
 ### Applications APIs
 
 - POST `/api/student/applications`
-    - Authenticated by a student, it allows the latter to apply for a proposal
-    - Requires the id of the thesis proposal to apply to in the body
-    - Returns the json with thesis_proposal_id, student_id and the status setted to 'waiting for approval'
+    - Authenticated by a student, it allows the latter to apply for a proposal, allowing to upload a file if necessary.
+    - The user ID (student_id) and thesis proposal ID (thesis_proposal_id) are extracted from the request
+    - Returns the json with application_id, thesis_proposal_id, student_id and the status setted to 'waiting for approval'
     - Error if:
         - The proposal doesn't belong to the student degree
         - The proposal is not active
@@ -132,3 +132,6 @@ Several middleware functions are defined to check user authentication and roles.
     - Authenticated by a teacher, gets the career of the student with the given id
     - Error if a student with the given id doesn't exist
 
+- GET `/api/teacher/uploads/:stud_id/:app_id`
+    - Authenticated by a teacher, gets uploads associated with a specific student's application for a teacher.
+    - Error if a student with the given id or a application with a given id doesn't exist.
