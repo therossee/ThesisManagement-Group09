@@ -14,7 +14,7 @@ sections:
 
 - Number of stories committed vs done: **4/4** 
 - Total points committed vs done: **16/16**
-- Nr of hours planned vs spent (as a team): **113h05m/111h50m**
+- Nr of hours planned vs spent (as a team): **113h 05m/111h 50m**
 
 **Note**: During the sprint, we abandoned 4 tasks as we realized they were related to future stories. These tasks are not considered in the estimated time, as they have been replaced with other tasks related to committed stories.
 
