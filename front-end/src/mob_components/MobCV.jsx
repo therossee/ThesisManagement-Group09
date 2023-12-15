@@ -66,7 +66,7 @@ function MobCV(props) {
                     {examCV.length > 0 ?
                             <Collapse style={{marginTop: "2%"}}>
                             {examCV.map((x) => {
-                                const title = x.code + " - " + x.teaching;
+                                const title = x.code + " - " + x.teaching + " - " + x.cfu + " CFU";
                                 // <Collapse.Panel
                                 return (<Collapse.Panel
                                 key={x.code} title={title}>
