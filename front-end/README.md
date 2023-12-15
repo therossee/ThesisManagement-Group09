@@ -12,8 +12,7 @@ This is the front end of the project. It is a mobile/web interface  developed us
 - Route `/admin/virtual-clock`: reference page to change the virtual clock of the entire system
 - Route `/proposals`: display the active proposals of a teacher
 - Route `/applications`: Displays all the applications of students for thesis created by the logged-in teacher.
-- Route `/insert-proposal/`: Displays the proposal form for the teacher to insert a new thesis proposal.
-- Route `/insert-proposal/:id`: If an ID is present, the form fields for inserting a proposal are populated with the corresponding values. Otherwise, if no ID is provided, the insert proposal form remains blank, similar to the previous state
+- Route `/insert-proposal/:id?`:  Displays the proposal form for the teacher to insert a new thesis proposal. If an ID is present, the form fields for inserting a proposal are populated with the corresponding values. Otherwise, if no ID is provided, the insert proposal form remains blank, similar to the previous state
 - Route `/view-proposal/:id`: Displays the specific proposal to view.
 - Route `/edit-proposal/:id`: Displays the form with the specific proposal to edit.
 - Route`/*`: Error page 
