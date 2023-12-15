@@ -70,7 +70,7 @@ hours spent for:
 - **Unit Testing**
   - Total hours estimated: **6h 30m**
   - Total hours spent: **5h 35m**
-  - Nr of automated unit test cases : **6 suites (88 total tests)**
+  - Nr of automated unit test cases : **5 suites (86 total tests)**
   - Coverage:
   
   <img src="./Retrospective-3-unit.jpg" alt="Unit tests coverage" width="70%" height="70%">
@@ -78,7 +78,7 @@ hours spent for:
 - **Integration Testing**
   - Total hours estimated: **12h**
   - Total hours spent: **9h 50m**
-  - Nr of automated integration test cases : **5 suites (100 total tests)**
+  - Nr of automated integration test cases : **5 suites (103 total tests)**
   - Coverage:
 
     <img src="./Retrospective-3-integration.jpg" alt="Integration tests coverage" width="70%" height="70%">
