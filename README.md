@@ -47,6 +47,15 @@ _The service support the use of dotenv-vault and therefore allow you to set only
 This variable must contain the key to decrypt the environment variables stored in the dotenv-vault file._
 
 ---
+
+## React Client Application Routes
+- Route `/`: Displays the home page
+- Route `/proposals`: Displays the proposals for a student and a teacher
+- Route `/insert-proposal`: Displays the proposal form for the teacher to insert a new thesis proposal.
+- Route `/view-proposal/:id`: Displays the specific proposal to view.
+- Route `/edit-proposal/:id`: Displays the specific proposal to view, allowing the logged-in supervisor teacher to edit it.
+- Route `/applications`: Displays all the applications of students for thesis created by the logged-in teacher.
+
 ## API SERVER
 
 ### LOGIN
@@ -709,6 +718,11 @@ Error Responses:
 
 
 ## Database Tables
+- Table `configuration`:
+    | Column            | Type     | Constraints                           |
+    | ----------------- | -------- | ------------------------------------- |
+    | key               | text     | **PK**                                |
+    | value             | text     | **NOT NULL**                          |
 
 - Table `student`:
     | Column            | Type     | Constraints                           |
@@ -763,6 +777,7 @@ Error Responses:
     | expiration         | date     | **NOT NULL**                                          |
     | level              | text     | **NOT NULL**                                          |
     | is_deleted         | integer  | **CHECK (is_deleted == 0 or is_deleted == 1) DEFAULT 0** |
+    | is_archived        | integer  | **CHECK (is_archived == 0 or is_archived == 1) DEFAULT 0** |
 
 
 - Table `proposalKeyword`
@@ -817,16 +832,4 @@ Error Responses:
     | student_id    | text    | **NOT NULL, FK** [student](#student)(id)             |
     | creation_date | date    | **NOT NULL**                                         |
     | status        | text    | **DEFAULT 'waiting for approval'**         |
-
-- Table `student_auth0`:
-    | Column   | Type | Constraints                        |
-    | -------- | ---- | ---------------------------------- |
-    | id       | text | **PK**, **FK** [student](#student)(id) |
-    | id_auth0  | text | **NOT NULL**                       |
-
-- Table `teacher_auth0`:
-    | Column   | Type | Constraints                        |
-    | -------- | ---- | ---------------------------------- |
-    | id       | text | **PK**, **FK** [teacher](#teacher)(id) |
-    | id_auth0  | text | **NOT NULL**                       |
 
