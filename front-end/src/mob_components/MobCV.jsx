@@ -70,14 +70,13 @@ function MobCV(props) {
                                 // <Collapse.Panel
                                 return (<Collapse.Panel
                                 key={x.code} title={title}>
-                                    <h4>Taken in</h4><p>{x.date}</p>
-                                    <h4>Mark</h4>
+                                    <h4>Taken in: </h4><p>{x.date}</p>
+                                    <h4>Mark: </h4>
                                     <Tag color={setColor(x.mark)} style={{ borderRadius: "20px" }}>
                                         <Text style={{ color: "white", size: "16px" }}>
                                             {x.mark}
                                         </Text>
                                     </Tag>
-
                                 </Collapse.Panel>);
                                 })}
                         </Collapse>
