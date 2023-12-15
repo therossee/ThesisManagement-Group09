@@ -16,13 +16,24 @@ The validators are the JSON schemas that are used to validate the requests using
 There are the Data Access Object modules for accessing thesis/users/degree data.
 The controllers are responsible for handling the requests and responses. They are located in the `controllers` directory.
 In this directory, each controller has its own file with all the methods that handle the requests for that controller.
-### Index
+### App.js
 Contains the API for the working project.
 
-### Authentication APIs
+### Authentication Middleware
+Several middleware functions are defined to check user authentication and roles. These include:
 
-- POST `/api/user`
-    - Get the current logged-in user
+- `isLoggedIn`: Checks if the user is authenticated.
+- `isStudent`, `isTeacher`, `isTester`: Checks if the authenticated user has the specified role.
+
+### Authentication APIs
+- GET `/login`
+    - Endpoint for initiating SAML authentication
+- POST `/sso/callback`
+    - Endpoint for receiving SAML responses 
+- POST `/logout`
+    - Endpoint for logging out
+- GET `/api/user`
+    - Returns information about the authenticated user.
 
 ### Virtual Clock APIs
 
@@ -36,7 +47,7 @@ Contains the API for the working project.
 
 - POST `/api/teacher/thesis_proposals`
     - Inserts a new thesis proposal in the database
-    - The body requires title, internal supervisors, external supervisors, type, description, required knowledge, note, level, cds and keywords
+    - The body requires title, internal supervisors, external supervisors, type, description, required knowledge, notes, level, cds and keywords
     - Authenticated by the teacher, responds with the thesis proposal in json format
 
 - GET `/api/teachers`
@@ -69,6 +80,14 @@ Contains the API for the working project.
 
 - DELETE `/api/thesis-proposals/:id`
     - Authenticated by a teacher, delete the proposal with the given id, of which the teacher is the supervisor
+    - Requires the id of the thesis proposal to delete
+    - Error if:
+        - Some applications of the given thesis proposals has been accepted
+        - There are no thesis proposal with the given id
+        - The thesis is already expired
+        - The supervisor is not the owner of the thesis proposal
+- PATCH `/api/thesis-proposals/archive/:id`
+    - Authenticated by a teacher, archive the proposal with the given id, of which the teacher is the superviso
     - Requires the id of the thesis proposal to delete
     - Error if:
         - Some applications of the given thesis proposals has been accepted
@@ -108,4 +127,8 @@ Contains the API for the working project.
 
 - GET `/api/student/applications-decision`
     - Authenticated by a student, gets all the applications with thesis infos done by the logged-in student
+
+- GET `/api/student/:id/career`
+    - Authenticated by a teacher, gets the career of the student with the given id
+    - Error if a student with the given id doesn't exist
 

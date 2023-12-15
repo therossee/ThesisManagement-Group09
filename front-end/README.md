@@ -13,7 +13,9 @@ This is the front end of the project. It is a mobile/web interface  developed us
 - Route `/proposals`: display the active proposals of a teacher
 - Route `/applications`: Displays all the applications of students for thesis created by the logged-in teacher.
 - Route `/insert-proposal/`: Displays the proposal form for the teacher to insert a new thesis proposal.
+- Route `/insert-proposal/:id`: If an ID is present, the form fields for inserting a proposal are populated with the corresponding values. Otherwise, if no ID is provided, the insert proposal form remains blank, similar to the previous state
 - Route `/view-proposal/:id`: Displays the specific proposal to view.
+- Route `/edit-proposal/:id`: Displays the form with the specific proposal to edit.
 - Route`/*`: Error page 
 
 
@@ -25,13 +27,15 @@ This is the front end of the project. It is a mobile/web interface  developed us
 - `Home.jsx` : React component for the home page.
 - `InsertProposal.jsx` : React conditional component to filter if a teacher enters InsertThesisProposal, otherwise error.
 - `Proposals.jsx` : React conditional component to filter if a logged-in user is a student. In this case enters ThesisProposals, otherwise error.
-- `ViewProposal.jsx` : React component for viewThesisProposal.
+- `ViewProposal.jsx` : React component for view a ThesisProposal.
+- `EditProposal.jsx` : React component for edit a ThesisProposal.
 - `Applications.jsx` : React conditional component to filter if a logged-in user is a teacher. In this case enters ApplicationsProposals, otherwise error.
 - `VirtualClock.jsx` :  React component for virtual clock management
   
 ## components
 - `Authentication` : Folder with three components: login button, logout button and usaAuth for the authentication provider
-- `InsertThesisProposal`: Form to insert new thesis proposal by a teacher divided in a 3 step form:
+- `InsertThesisProposal`: Form to insert new thesis proposal by a teacher or copy a proposal with a given id.
+It is divided in a 3 step form:
    - `InsertBody.jsx` : Designed to handle the creation of data related to thesis proposals.
    - `ReviewProposals.jsx` : Designed to view and review the data of a thesis proposal. Uses a table to show proposal details, including title, internal/external supervisors, keywords, type, description, and other associated fields.
    - `UploadResult.jsx`: Designed to display a result message after attempting to upload a thesis proposal. Depending on the result (success or error), it shows an appropriate message along with a button to return to the main page.
@@ -47,22 +51,28 @@ Main functions:
   - `LoginForm` : Form for the login inserted in the topbar.
   - `IsLoggedInForm` : Form when the user has alredy logged in.
 - `ViewThesisProposal` : Allows users to view specific details of a thesis proposal. Provides a detailed view of the proposal, including title, level, type, expiration date, description, required knowledge, supervisor, co-supervisors, groups, notes, keywords and, if the user is a lecturer, also the course of study (CdS). Students have the opportunity to apply for the proposal..
-
+- `EditThesisProposal` : Allows the logged-in teacher to view the form to edit a specific thesis Proposal.
+- `StudentCV` : Designed to display the curriculum vitae (CV) of a student. It provides an interface to view information about the student's exams, including the date, course code, teaching, mark, and credit units (CFU). The component also offers the ability to view an attached PDF document.
 
 ## Main React Components
 - `API.jsx` : Main API functions as:
   - APIs for auth:
-     - `getUserInfo`: retrieves user information.
+     - `getUser`: Fetches user information from the server.
+     - `logOut`: Initiates the logout process by sending a POST request to the appropriate endpoint
+     - `redirectToLogin`: Redirects the user to the login page
   - Virtual Clock APIs :
       - `getClock`: function to obtain the setted data and offset 
       - `updateClock`: function to update the system virtual clock
   - Thesis Proposals APIs
       - `getThesisProposals`: Gets the thesis proposals for a user.
       - `getThesisProposalById`: Gets a specific thesis proposal with a given Id
-      - `applyForProposal`: Function to apply to a proposal with a given Id
+      - `applyForProposal`: Function to apply to a proposal with a given Id and possibly upload a file.
+      - `archiveProposalById`: Function to archive a proposal with the given id
+      - `deleteProposalById`: Funcion to delete a proposal with a given id
+      - `updateProposal`: Function to update an edited proposal with a given id
   - Applications APIs
       - `getStudentActiveApplication`: Gets all the active application for a student
-      - `getTeacherThesisApplications` : Gets all the application for a  proposal with a given Id
+      - `getTeacherThesisApplications` : Gets all the application for a proposal with a given Id
       - `insertProposal`: function to insert a proposal in the database
       - `acceptThesisApplications` : function to accept Student Applications on a Thesis Proposal and automatically reject all the other student applied.
       - `rejectThesisApplications` : function to reject Student Applications on a Thesis Proposal
@@ -72,6 +82,8 @@ Main functions:
       - `getTeachers` : Gets all the teachers 
       - `getAllKeywords` : Gets all the keywords
       - `getAllDegrees` : Gets all the degrees
+      - `getStudentCVById`: Get student career with a given id
+      - `getPDF`: Get all the document in pdf format uploaded by the student with a given student_id for a specific application (application_id)
      
 - `App.jsx` : Main component of the application. It manages user authentication, sets notifications for API errors during login, and defines the basic structure of the application.
 - `main.jsx` : root render for the App

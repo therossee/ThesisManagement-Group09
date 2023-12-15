@@ -173,7 +173,7 @@ app.get('/api/user',
 });
 
 /*** APIs ***/
-
+//GET Virutal Clock
 app.get('/api/system/virtual-clock', (req, res) => {
   const json = {
     date: AdvancedDate.virtual.getVirtualDate().toISOString(),
@@ -183,6 +183,7 @@ app.get('/api/system/virtual-clock', (req, res) => {
   res.status(200).json(json);
 });
 
+//Edit Virtual Clock
 app.post('/api/system/virtual-clock', isTester, (req, res, next) => {
   try {
     const { newDate } = schemas.APIVirtualClockUpdateSchema.parse(req.body);
@@ -205,6 +206,7 @@ app.post('/api/system/virtual-clock', isTester, (req, res, next) => {
   }
 });
 
+//Insert a new thesis proposal
 app.post('/api/teacher/thesis_proposals',
   isLoggedIn,
   isTeacher,
@@ -268,6 +270,7 @@ app.post('/api/teacher/thesis_proposals',
     } 
   });
 
+//GET list of teachers not logged
 app.get('/api/teachers',
   isLoggedIn,
   isTeacher,
@@ -283,6 +286,7 @@ app.get('/api/teachers',
     }
   });
 
+//Get list of external co-supervisors
 app.get('/api/externalCoSupervisors',
   isLoggedIn,
   isTeacher,
@@ -297,6 +301,7 @@ app.get('/api/externalCoSupervisors',
     }
   });
 
+//Get all keywords
 app.get('/api/keywords',
   isLoggedIn,
   isTeacher,
@@ -310,6 +315,7 @@ app.get('/api/keywords',
     }
   });
 
+ //Get all degrees 
 app.get('/api/degrees',
   isLoggedIn,
   isTeacher,
@@ -323,6 +329,7 @@ app.get('/api/degrees',
     }
   });
 
+//Search for thesis proposals
 app.get('/api/thesis-proposals',
   isLoggedIn,
   async (req, res) => {
@@ -373,6 +380,7 @@ app.get('/api/thesis-proposals',
     }
   });
 
+//Get thesis proposal by id
 app.get('/api/thesis-proposals/:id',
   isLoggedIn,
   async (req, res) => {
@@ -411,6 +419,7 @@ app.get('/api/thesis-proposals/:id',
     }
   });
 
+//Edit a thesis proposal with a given id
 app.put('/api/thesis-proposals/:id',
   isLoggedIn,
   isTeacher,
@@ -458,6 +467,7 @@ app.put('/api/thesis-proposals/:id',
     }
   });
 
+//Delete a thesis proposal with a given id
 app.delete('/api/thesis-proposals/:id',
   isLoggedIn,
   isTeacher,
@@ -490,6 +500,7 @@ app.delete('/api/thesis-proposals/:id',
     }
   });
 
+//Patch for archive a proposal with a given id
 app.patch('/api/thesis-proposals/archive/:id',
   isLoggedIn,
   isTeacher,
@@ -522,6 +533,7 @@ app.patch('/api/thesis-proposals/archive/:id',
     }
   });
 
+//Apply for a thesis proposal
 app.post('/api/student/applications',
   isLoggedIn,
   isStudent,
@@ -553,6 +565,7 @@ app.post('/api/student/applications',
     });
   });
 
+//Get all applications for a thesis proposal
 app.get('/api/teacher/applications/:proposal_id',
   isLoggedIn,
   isTeacher,
@@ -568,6 +581,7 @@ app.get('/api/teacher/applications/:proposal_id',
     }
   });
 
+//Get all applications for a student
 app.get('/api/student/active-application',
   isLoggedIn,
   isStudent,
@@ -582,6 +596,7 @@ app.get('/api/student/active-application',
     }
   });
 
+//Accept a student application with a given id of a thesis proposal
 app.patch('/api/teacher/applications/accept/:proposal_id',
   isLoggedIn,
   isTeacher,
@@ -622,7 +637,7 @@ app.patch('/api/teacher/applications/accept/:proposal_id',
       res.status(500).json(`Internal Server Error`);
     }
   })
-
+//Reject a student application with a given id of a thesis proposal
 app.patch('/api/teacher/applications/reject/:proposal_id',
   isLoggedIn,
   isTeacher,
@@ -655,6 +670,7 @@ app.patch('/api/teacher/applications/reject/:proposal_id',
 
   })
 
+//Get decisions on thesis proposals applications for a student
 app.get('/api/student/applications-decision',
   isLoggedIn,
   isStudent,
@@ -668,6 +684,7 @@ app.get('/api/student/applications-decision',
       res.status(500).json('Internal Server Error');
     }
   });
+
 
 app.get('/api/student/:id/career',
   isLoggedIn,
@@ -687,6 +704,7 @@ app.get('/api/student/:id/career',
     }
   });
 
+//
 app.get('/api/teacher/uploads/:stud_id/:app_id',
   isLoggedIn,
   isTeacher,
