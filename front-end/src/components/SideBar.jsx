@@ -27,8 +27,13 @@ function SideBar() {
 
   return (
     <Sider breakpoint="lg" collapsedWidth="0" style={{ position: "sticky", left: "0", top: "0", height: "100vh", zIndex: "5" }}>
-      <div className="logo-style">
-        <FileTextOutlined style={{ fontSize: '32px', color: '#1677ff' }} onClick={() => { navigate('/') }} />
+      <div className='logo-style'>
+        <img
+          src="https://imgur.com/wYw8LZz.jpg"  
+          alt="Polito Logo"
+          style={{ width: '90%', cursor: 'pointer', marginTop: '10px', marginBottom: '55px'}}
+          onClick={() => navigate('/')}
+        />  
       </div>
       <Menu className="menu-style" mode="inline" items={navigation} selectedKeys={[window.location.pathname]} onClick={handleMenuClick} />
     </Sider>
