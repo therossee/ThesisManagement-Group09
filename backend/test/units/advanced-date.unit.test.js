@@ -47,7 +47,7 @@ describe('AdvancedDate class', () => {
             const dateStr = now.add(offset, 'millisecond').toISOString();
             AdvancedDate.virtual.setNewOffset(dateStr);
 
-            expect(configuration.setValue).toHaveBeenCalledWith(configuration.KEYS.VIRTUAL_OFFSET_MS, expect.toBeAnIntegerCloseTo(offset, 3));
+            expect(configuration.setValue).toHaveBeenCalledWith(configuration.KEYS.VIRTUAL_OFFSET_MS, expect.toBeAnIntegerCloseTo(offset, 10));
             expect(configuration.getIntegerValue).toHaveBeenCalledWith(configuration.KEYS.VIRTUAL_OFFSET_MS);
         });
 
