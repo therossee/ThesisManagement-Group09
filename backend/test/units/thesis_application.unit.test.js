@@ -276,18 +276,16 @@ describe('listApplicationsForTeacherThesisProposal', () => {
         // Call the function
         const result = await thesis.listApplicationsForTeacherThesisProposal(1, 'd1');
         const expectedQuery = `SELECT s.name, s.surname, ta.status, s.id, ta.id AS application_id
-                               FROM thesisApplication ta,
-                                    thesisProposal tp,
-                                    student s
-                               WHERE ta.proposal_id = tp.proposal_id
-                                 AND s.id = ta.student_id
-                                 AND ta.proposal_id = ?
-                                 AND tp.supervisor_id = ?
-                                 AND ta.creation_date < ?
-                                 AND tp.expiration > ?
-                                 AND tp.creation_date < ?
-                                 AND tp.is_archived = 0
-                                 AND tp.is_deleted = 0;`;
+    FROM thesisApplication ta, thesisProposal tp, student s
+    WHERE ta.proposal_id = tp.proposal_id 
+      AND s.id = ta.student_id
+      AND ta.proposal_id=?
+      AND tp.supervisor_id= ? 
+      AND ta.creation_date < ?
+      AND tp.expiration > ?
+      AND tp.creation_date < ?
+      AND tp.is_archived = 0
+      AND tp.is_deleted = 0;`;
         // Assertions
         expect(result).toEqual(mockApplications);
         expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
@@ -306,12 +304,7 @@ describe('getStudentActiveApplication', () => {
 
         // Act
         const result = await thesis.getStudentActiveApplication(student_id);
-        const expectedQuery = `SELECT proposal_id
-                               FROM thesisApplication
-                               WHERE student_id = ?
-                                 AND creation_date < ?
-                                 AND (status = 'waiting for approval' OR status = 'accepted')`;
-
+        const expectedQuery = `SELECT proposal_id FROM thesisApplication WHERE student_id=? AND creation_date < ? AND ( status='waiting for approval' OR status='accepted')`;
 
         // Assert
         expect(result).toEqual(expectedResult);
@@ -438,25 +431,13 @@ describe('listApplicationsDecisionsFromStudent', () => {
             status: "Test status",
             expiration: "2023-11-29"
         }];
-        const expectedQuery = `SELECT ta.id     AS "application_id",
-                                      ta.proposal_id,
-                                      tp.title,
-                                      tp.level,
-                                      t.name    AS "teacher_name",
-                                      t.surname AS "teacher_surname",
-                                      ta.status,
-                                      tp.expiration
-                               FROM thesisApplication ta,
-                                    thesisProposal tp,
-                                    teacher t
-                               WHERE ta.proposal_id = tp.proposal_id
-                                 AND ta.student_id = ?
-                                 AND t.id = tp.supervisor_id
-                                 AND ta.creation_date < ?`;
+        const expectedQuery = `SELECT ta.id AS "application_id", ta.proposal_id, tp.title,  tp.level, t.name AS "teacher_name" , t.surname AS "teacher_surname" ,ta.status, tp.expiration
+    FROM thesisApplication ta, thesisProposal tp, teacher t
+    WHERE ta.proposal_id = tp.proposal_id AND ta.student_id = ? AND t.id = tp.supervisor_id AND ta.creation_date < ?`;
 
         db.prepare().all.mockReturnValueOnce(expectedResult);
 
-        result = await thesis.listApplicationsDecisionsFromStudent(studentId);
+        const result = await thesis.listApplicationsDecisionsFromStudent(studentId);
 
         expect(result).toEqual(expectedResult);
         expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
@@ -480,9 +461,7 @@ describe('getApplicationById', () => {
         db.prepare().get.mockReturnValue(expectedResult);
 
         const result = await thesis.getApplicationById(applicationId);
-        const expectedQuery = `SELECT *
-                               FROM thesisApplication
-                               WHERE id = ?`;
+        const expectedQuery = `SELECT * FROM thesisApplication WHERE id = ?`;
 
         expect(result).toEqual(expectedResult);
         expect(db.prepare).toHaveBeenCalledWith(expectedQuery);

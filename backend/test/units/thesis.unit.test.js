@@ -709,17 +709,19 @@ describe('listThesisProposalsTeacher', () => {
             {proposal_id: 2, title: 'Proposal2'},
         ];
         const currentDate = new AdvancedDate().toISOString();
-        const expectedQuery = `SELECT *
-                               FROM thesisProposal P
-                               WHERE P.supervisor_id = ?
-                                 AND NOT EXISTS (SELECT 1
-                                                 FROM thesisApplication A
-                                                 WHERE A.proposal_id = P.proposal_id
-                                                   AND A.status = 'accepted')
-                                 AND P.expiration > ?
-                                 AND creation_date < ?
-                                 AND is_archived = 0
-                                 AND is_deleted = 0;`;
+        const expectedQuery = `SELECT * 
+      FROM thesisProposal P
+      WHERE P.supervisor_id=?
+        AND NOT EXISTS (
+          SELECT 1
+          FROM thesisApplication A
+          WHERE A.proposal_id = P.proposal_id
+            AND A.status = 'accepted'
+        )
+        AND P.expiration > ?
+        AND creation_date < ?
+        AND is_archived = 0
+        AND is_deleted = 0;`;
         // Mock the SQLite database query
         db.prepare.mockClear().mockReturnValueOnce({all: jest.fn(() => mockProposals)});
 
@@ -752,16 +754,12 @@ describe('getThesisProposalCds', () => {
 
     test('should return thesis proposal cds', async () => {
         const proposalId = 1;
-        const expectedQuery = `SELECT d.cod_degree, d.title_degree
-                               FROM proposalCds p,
-                                    degree d
-                               WHERE proposal_id = ?
-                                 AND p.cod_degree = d.cod_degree`;
+        const expectedQuery = `SELECT d.cod_degree, d.title_degree FROM proposalCds p, degree d WHERE proposal_id = ? AND p.cod_degree = d.cod_degree`;
         const expectedResult = [{cds: 'TestCds'}];
 
         jest.spyOn(require('../../db').prepare(), 'all').mockReturnValueOnce(expectedResult);
 
-        result = await thesis.getThesisProposalCds(proposalId);
+        const result = await thesis.getThesisProposalCds(proposalId);
 
         expect(result).toEqual(expectedResult);
         expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
@@ -826,12 +824,10 @@ describe('getThesisProposalById', () => {
         jest.spyOn(require('../../db').prepare(), 'get').mockReturnValue(expectedResult);
 
         const result = await thesis.getThesisProposalById(proposalId);
-        const expectedQuery = `SELECT *
-                               FROM thesisProposal P
-                                        JOIN proposalCds PC ON P.proposal_id = PC.proposal_id
-                                        JOIN degree D ON PC.cod_degree = D.cod_degree
-                               WHERE P.proposal_id = ?
-                                 AND is_deleted = 0;`;
+        const expectedQuery = `SELECT * FROM thesisProposal P
+        JOIN proposalCds PC ON P.proposal_id = PC.proposal_id
+        JOIN degree D ON PC.cod_degree = D.cod_degree
+        WHERE P.proposal_id = ? AND is_deleted = 0;`;
 
         expect(result).toEqual(expectedResult);
         expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
