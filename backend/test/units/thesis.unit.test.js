@@ -448,7 +448,7 @@ describe('getThesisProposal', () => {
             };
 
         // Mock the get function to return a mock result
-        jest.spyOn(require('../../db').prepare(), 'get').mockReturnValueOnce(undefined).mockReturnValueOnce(expectedResult);
+        db.prepare().get.mockReturnValueOnce(undefined).mockReturnValueOnce(expectedResult);
 
         // Act
         const result = await thesis.getThesisProposal(proposalId, studentId);
@@ -463,7 +463,7 @@ describe('getThesisProposal', () => {
         const studentId = "2";
 
         // Mock the get function to return undefined (indicating no thesis proposal)
-        jest.spyOn(require('../../db').prepare(), 'get').mockReturnValueOnce(undefined).mockReturnValueOnce(undefined);
+        db.prepare().get.mockReturnValueOnce(undefined).mockReturnValueOnce(undefined);
 
         // Act
         const result = await thesis.getThesisProposal(proposalId, studentId);
@@ -478,7 +478,7 @@ describe('getThesisProposal', () => {
         const studentId = "1";
 
         // Mock the get function to return a mock result
-        jest.spyOn(require('../../db').prepare(), 'get').mockReturnValueOnce({
+        db.prepare().get.mockReturnValueOnce({
             proposalId: 1,
             student_id: "1",
             status: 'accepted'
@@ -757,7 +757,7 @@ describe('getThesisProposalCds', () => {
         const expectedQuery = `SELECT d.cod_degree, d.title_degree FROM proposalCds p, degree d WHERE proposal_id = ? AND p.cod_degree = d.cod_degree`;
         const expectedResult = [{cds: 'TestCds'}];
 
-        jest.spyOn(require('../../db').prepare(), 'all').mockReturnValueOnce(expectedResult);
+        db.prepare().all.mockReturnValueOnce(expectedResult);
 
         const result = await thesis.getThesisProposalCds(proposalId);
 
@@ -770,7 +770,7 @@ describe('getThesisProposalCds', () => {
         const proposalId = 2;
 
         // Mock the all function to return an empty array
-        jest.spyOn(require('../../db').prepare(), 'all').mockReturnValueOnce([]);
+        db.prepare().all.mockReturnValueOnce([]);
 
         // Act
         const result = await thesis.getThesisProposalCds(proposalId);
@@ -821,7 +821,7 @@ describe('getThesisProposalById', () => {
                 "level": "Test Level",
             };
 
-        jest.spyOn(require('../../db').prepare(), 'get').mockReturnValue(expectedResult);
+        db.prepare().get.mockReturnValue(expectedResult);
 
         const result = await thesis.getThesisProposalById(proposalId);
         const expectedQuery = `SELECT * FROM thesisProposal P
@@ -851,7 +851,7 @@ describe('getThesisProposalTeacher', () => {
             cod_department: "dep1"
         };
 
-        jest.spyOn(require('../../db').prepare(), 'get').mockReturnValueOnce(undefined).mockReturnValueOnce(expectedResult);
+        db.prepare().get.mockReturnValueOnce(undefined).mockReturnValueOnce(expectedResult);
 
         const result = await thesis.getThesisProposalTeacher(proposalId, teacherId);
 
@@ -862,7 +862,7 @@ describe('getThesisProposalTeacher', () => {
         const proposalId = 2;
         const teacheId = "d2";
 
-        jest.spyOn(require('../../db').prepare(), 'get').mockReturnValueOnce({
+        db.prepare().get.mockReturnValueOnce({
             proposalId: 2,
             teacheId: "d2",
             status: 'accepted'
