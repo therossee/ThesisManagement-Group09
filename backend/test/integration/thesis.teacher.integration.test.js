@@ -1,6 +1,6 @@
 require('jest');
 // [i] This line setup the test database + load the environment variables. DON'T (RE)MOVE IT
-const {resetTestDatabase} = require('../integration_config');
+const { resetTestDatabase, initImapClient, closeImapClient, searchEmails} = require('../integration_config');
 
 const request = require("supertest");
 const {app} = require("../../app");
@@ -11,16 +11,20 @@ const db = require('../../db');
 const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
-const imap = require("imap");
 
+let agent;
+beforeAll(async () => {
+    await initImapClient();
+    agent = await utils.getMarcoRossiAgent(app);
+});
 beforeEach(() => {
     // Be sure that we are using a full clean database before each test
     resetTestDatabase();
     jest.restoreAllMocks();
 });
-let agent;
-beforeAll(async () => {
-    agent = await utils.getMarcoRossiAgent(app);
+
+afterAll(async () => {
+    await closeImapClient();
 });
 
 describe('GET /api/teachers', () => {
@@ -743,46 +747,13 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
         // Wait for a moment to allow the email to be processed (adjust the timing as needed)
         await new Promise((resolve) => setTimeout(resolve, 5000));
 
-        // Set up IMAP client
-        const imapClient = new imap({
-            user: process.env.TM_SMTP_USERNAME,
-            password: process.env.TM_SMTP_PASSWORD,
-            host: "imap.ethereal.email", // IMAP server host
-            port: 993, // IMAP server port
-            tls: true,
-            tlsOptions: {rejectUnauthorized: false},
-        });
-
-        // Connect to the IMAP server
-        await new Promise((resolve, reject) => {
-            imapClient.once("ready", resolve);
-            imapClient.once("error", reject);
-            imapClient.connect();
-        });
-
-        // Open the Inbox
-        const openInbox = await new Promise((resolve, reject) => {
-            imapClient.openBox("INBOX", true, (err, box) => {
-                if (err) reject(err);
-                resolve(box);
-            });
-        });
-
         const subject = 'Application status changed - PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API';
+        const to = 's318952@studenti.polito.it';
         // Search for the email (adjust criteria as needed)
-        const searchResults = await new Promise((resolve, reject) => {
-            imapClient.search(['UNSEEN', ['TO', 's318952@studenti.polito.it'], ['SUBJECT', subject]], (err, results) => {
-                if (err) reject(err);
-                resolve(results);
-            });
-        });
+        const searchResults = await searchEmails(to, subject);
 
         // Assert that the email has been received
         expect(searchResults.length).toBeGreaterThan(0);
-
-        // Close the IMAP connection
-        imapClient.end();
-
     }, 10000);
     test('should return 400 error if is missing student_id', async () => {
         // Act
@@ -855,45 +826,13 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
         // Wait for a moment to allow the email to be processed (adjust the timing as needed)
         await new Promise((resolve) => setTimeout(resolve, 5000));
 
-        // Set up IMAP client
-        const imapClient = new imap({
-            user: process.env.TM_SMTP_USERNAME,
-            password: process.env.TM_SMTP_PASSWORD,
-            host: "imap.ethereal.email", // IMAP server host
-            port: 993, // IMAP server port
-            tls: true,
-            tlsOptions: {rejectUnauthorized: false},
-        });
-
-        // Connect to the IMAP server
-        await new Promise((resolve, reject) => {
-            imapClient.once("ready", resolve);
-            imapClient.once("error", reject);
-            imapClient.connect();
-        });
-
-        // Open the Inbox
-        const openInbox = await new Promise((resolve, reject) => {
-            imapClient.openBox("INBOX", true, (err, box) => {
-                if (err) reject(err);
-                resolve(box);
-            });
-        });
-
         const subject = 'Application status changed - PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API';
+        const to = '321529@studenti.polito.it';
         // Search for the email (adjust criteria as needed)
-        const searchResults = await new Promise((resolve, reject) => {
-            imapClient.search(['UNSEEN', ['TO', '321529@studenti.polito.it'], ['SUBJECT', subject]], (err, results) => {
-                if (err) reject(err);
-                resolve(results);
-            });
-        });
+        const searchResults = await searchEmails(to, subject);
 
         // Assert that the email has been received
         expect(searchResults.length).toBeGreaterThan(0);
-
-        // Close the IMAP connection
-        imapClient.end()
     }, 10000);
     test('should return 400 error if is missing student_id', async () => {
         // Act
@@ -1040,46 +979,13 @@ describe('DELETE /api/thesis-proposals/:id', () => {
         // Wait for a moment to allow the email to be processed (adjust the timing as needed)
         await new Promise((resolve) => setTimeout(resolve, 5000));
 
-        // Set up IMAP client
-        const imapClient = new imap({
-            user: process.env.TM_SMTP_USERNAME,
-            password: process.env.TM_SMTP_PASSWORD,
-            host: "imap.ethereal.email", // IMAP server host
-            port: 993, // IMAP server port
-            tls: true,
-            tlsOptions: {rejectUnauthorized: false},
-        });
-
-        // Connect to the IMAP server
-        await new Promise((resolve, reject) => {
-            imapClient.once("ready", resolve);
-            imapClient.once("error", reject);
-            imapClient.connect();
-        });
-
-        // Open the Inbox
-        const openInbox = await new Promise((resolve, reject) => {
-            imapClient.openBox("INBOX", true, (err, box) => {
-                if (err) reject(err);
-                resolve(box);
-            });
-        });
-
         const subject = 'Application status changed - PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API';
+        const to = 's318952@studenti.polito.it';
         // Search for the email (adjust criteria as needed)
-        const searchResults = await new Promise((resolve, reject) => {
-            imapClient.search(['UNSEEN', ['TO', 's318952@studenti.polito.it'], ['SUBJECT', subject]], (err, results) => {
-                if (err) reject(err);
-                resolve(results);
-            });
-        });
+        const searchResults = await searchEmails(to, subject);
 
         // Assert that the email has been received
         expect(searchResults.length).toBeGreaterThan(0);
-
-        // Close the IMAP connection
-        imapClient.end();
-
     }, 10000);
     test('should refuse to delete a thesis proposal with accepted application', async () => {
         const id = 3;

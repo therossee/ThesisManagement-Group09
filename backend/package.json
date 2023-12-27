@@ -29,26 +29,30 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/imap": "^0.8.40",
     "@types/jest": "^29.5.6",
     "@types/supertest": "^2.0.16",
-    "supertest": "^6.3.3",
     "fs-extra": "^11.2.0",
     "imap": "^0.8.19",
     "jest": "^29.7.0",
     "jest-html-reporters": "^3.1.5",
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "supertest": "^6.3.3"
   },
   "jest": {
     "collectCoverage": true,
     "reporters": [
       "default",
-      ["jest-html-reporters", {
-        "enableMergeData": true,
-        "dataMergeLevel": 1,
-        "openReport": true,
-        "publicPath": "./reports",
-        "filename": "index.html"
-      }]
+      [
+        "jest-html-reporters",
+        {
+          "enableMergeData": true,
+          "dataMergeLevel": 1,
+          "openReport": true,
+          "publicPath": "./reports",
+          "filename": "index.html"
+        }
+      ]
     ]
   }
 }

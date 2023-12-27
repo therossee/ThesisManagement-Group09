@@ -9,6 +9,7 @@ dotenv.config({DOTENV_KEY: process.env.TM_DOTENV_KEY});
 const fs = require('fs');
 const db = require('../db');
 const path = require("path");
+const imap = require("imap");
 
 /** Reset test database */
 function resetTestDatabase() {
@@ -16,8 +17,85 @@ function resetTestDatabase() {
     const initTestDBSql = fs.readFileSync(sqlFilePath).toString();
     db.exec(initTestDBSql);
 }
-
 resetTestDatabase();
+
+
+/** IMAP client */
+const imapClient = new imap({
+    user: process.env.TM_SMTP_USERNAME,
+    password: process.env.TM_SMTP_PASSWORD,
+    host: "imap.ethereal.email", // IMAP server host
+    port: 993, // IMAP server port
+    tls: true,
+    tlsOptions: { rejectUnauthorized: false }
+});
+let imapClientIsReady = false;
+
+async function initImapClient() {
+    return new Promise((resolve, reject) => {
+        imapClient.once("ready", resolve);
+        imapClient.once("error", reject);
+
+        imapClient.connect();
+    }).then( r => {
+        imapClientIsReady = true;
+        return r;
+    });
+}
+async function closeImapClient() {
+    return new Promise((resolve, reject) => {
+        imapClient.once("close", resolve);
+        imapClient.once("error", reject);
+
+        imapClient.end();
+    }).then( r => {
+        imapClientIsReady = false;
+        return r;
+    });
+}
+
+/**
+ * Open INBOX mailbox
+ *
+ * @return {Promise<import("imap").Box>}
+ */
+async function openInbox() {
+    if (!imapClientIsReady) {
+        throw new Error('IMAP client is not ready, please call initImapClient() first');
+    }
+
+    return new Promise((resolve, reject) => {
+        imapClient.openBox("INBOX", true, (err, box) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(box);
+            }
+        });
+    });
+}
+
+/**
+ * Search emails inside the INBOX mailbox
+ *
+ * @param {string} dest - Destination email address (TO) of the emails to search
+ * @param {string} subject - Email subject (SUBJECT) of the emails to search
+ *
+ * @return {Promise<unknown>}
+ */
+async function searchEmails(dest, subject) {
+    await openInbox();
+
+    return new Promise((resolve, reject) => {
+        imapClient.search(['UNSEEN', ['TO', dest], ['SUBJECT', subject]], (err, uids) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(uids);
+            }
+        });
+    });
+}
 
 
 /** SAML Passport mock */
@@ -75,5 +153,8 @@ function toBeAnIntegerCloseTo(received, expected, delta) {
 expect.extend({toBeAnIntegerCloseTo});
 
 module.exports = {
-    resetTestDatabase
+    resetTestDatabase,
+    searchEmails,
+    initImapClient,
+    closeImapClient
 };
