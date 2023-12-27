@@ -3,7 +3,7 @@ if (!process.env.TM_DOTENV_KEY?.endsWith('ci')) {
     process.env.TM_DOTENV_KEY = process.env.TM_DOTENV_KEY_CI;
 }
 const dotenv = require("dotenv");
-dotenv.config({ DOTENV_KEY: process.env.TM_DOTENV_KEY });
+dotenv.config({DOTENV_KEY: process.env.TM_DOTENV_KEY});
 
 /** Import modules */
 const fs = require('fs');
@@ -16,6 +16,7 @@ function resetTestDatabase() {
     const initTestDBSql = fs.readFileSync(sqlFilePath).toString();
     db.exec(initTestDBSql);
 }
+
 resetTestDatabase();
 
 
@@ -70,7 +71,8 @@ function toBeAnIntegerCloseTo(received, expected, delta) {
         };
     }
 }
-expect.extend({ toBeAnIntegerCloseTo });
+
+expect.extend({toBeAnIntegerCloseTo});
 
 module.exports = {
     resetTestDatabase

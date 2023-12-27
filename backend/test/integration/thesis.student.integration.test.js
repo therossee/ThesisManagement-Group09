@@ -1,9 +1,9 @@
 require('jest');
 // [i] This line setup the test database + load the environment variables. DON'T (RE)MOVE IT
-const { resetTestDatabase } = require('../integration_config');
+const {resetTestDatabase} = require('../integration_config');
 
 const request = require("supertest");
-const { app } = require("../../app");
+const {app} = require("../../app");
 const utils = require("../utils");
 const thesisDao = require('../../thesis_dao');
 const db = require('../../db');
@@ -175,7 +175,7 @@ describe('GET /api/thesis-proposals/:id (student)', () => {
             creation_date: '2023-10-10T10:45:50.121Z',
             expiration: '2024-11-10T23:59:59.999Z',
             level: 'LM',
-            cds: { cod_degree: 'L-08', title_degree: 'Ingegneria Elettronica'},
+            cds: {cod_degree: 'L-08', title_degree: 'Ingegneria Elettronica'},
             keywords: ['AI', 'research', 'web development'],
             groups: ['Group1']
         });
@@ -219,12 +219,12 @@ describe('POST /api/student/applications', () => {
     const uploadDir = path.join(__dirname, 'temp-uploads');
 
     beforeAll(() => {
-      fse.ensureDirSync(uploadDir);
+        fse.ensureDirSync(uploadDir);
     });
 
-    afterAll(async() => {
-      fse.removeSync(uploadDir);
-      await fse.remove('uploads');
+    afterAll(async () => {
+        fse.removeSync(uploadDir);
+        await fse.remove('uploads');
     });
 
     test('should create a new application for a valid request', async () => {
@@ -265,7 +265,7 @@ describe('POST /api/student/applications', () => {
     test('should return 401 status error for if a not logged user try to apply to a thesis proposal', async () => {
         const response = await request(app)
             .post('/api/student/applications')
-            .send({ thesis_proposal_id: 2 });
+            .send({thesis_proposal_id: 2});
 
         expect(response.status).toBe(401);
     });
@@ -294,10 +294,10 @@ describe('POST /api/student/applications', () => {
     test('should reject if the student apply for an archived proposal', async () => {
 
         db.prepare('INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-        .run(4, 'Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2020-10-10T10:45:50.121Z', '2022-11-10T23:59:59.999Z', 'LM');
+            .run(4, 'Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2020-10-10T10:45:50.121Z', '2022-11-10T23:59:59.999Z', 'LM');
 
         db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
-        .run(4, 'L-08');
+            .run(4, 'L-08');
 
         const thesis_proposal_id = '4';
 
@@ -311,7 +311,7 @@ describe('POST /api/student/applications', () => {
         const response = await agent
             .post('/api/student/applications')
             .set('credentials', 'include')
-            .field('thesis_proposal_id', thesis_proposal_id)
+            .field('thesis_proposal_id', thesis_proposal_id);
 
         expect(response.status).toBe(500);
         expect(response.body).toEqual('Failed to apply for proposal. The proposal is not active');
@@ -321,7 +321,7 @@ describe('POST /api/student/applications', () => {
     test('should reject if the student has already applied for another proposal', async () => {
 
         db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
-        .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
+            .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
 
 
         const thesis_proposal_id = '2';
@@ -336,7 +336,7 @@ describe('POST /api/student/applications', () => {
         const response = await agent
             .post('/api/student/applications')
             .set('credentials', 'include')
-            .field('thesis_proposal_id', thesis_proposal_id)
+            .field('thesis_proposal_id', thesis_proposal_id);
 
         expect(response.status).toBe(500);
         expect(response.body).toEqual('Failed to apply for proposal. The user has already applied for other proposals');
@@ -424,18 +424,18 @@ describe('POST /api/student/applications', () => {
 
         // Simulate an error during form parsing
         formParseSpy.mockImplementation((req, callback) => {
-        // Call the callback with an error
-        callback(new Error('Simulated form parsing error'), {}, {});
+            // Call the callback with an error
+            callback(new Error('Simulated form parsing error'), {}, {});
         });
 
         const response = await agent
-          .post('/api/student/applications')
-          .set('credentials', 'include')
-          .field('thesis_proposal_id', thesis_proposal_id)
-          .attach('file', filePath)
-          .expect(500);
+            .post('/api/student/applications')
+            .set('credentials', 'include')
+            .field('thesis_proposal_id', thesis_proposal_id)
+            .attach('file', filePath)
+            .expect(500);
 
-        expect(response.body).toEqual({ message: 'Internal Server Error' });
+        expect(response.body).toEqual({message: 'Internal Server Error'});
     });
 
     test('should handle generic errors gracefully', async () => {
@@ -509,7 +509,7 @@ describe('GET /api/student/active-application', () => {
 
         // Assertions
         expect(response.status).toBe(200);
-        expect(response.body).toEqual([{ proposal_id: 2 }]);
+        expect(response.body).toEqual([{proposal_id: 2}]);
     });
 
     test('should return 500 if an error occurs', async () => {
@@ -517,8 +517,8 @@ describe('GET /api/student/active-application', () => {
 
         // Perform the request
         const response = await agent
-                               .get('/api/student/active-application')
-                               .set('credentials', 'include');
+            .get('/api/student/active-application')
+            .set('credentials', 'include');
 
         // Assertions
         expect(response.status).toBe(500);

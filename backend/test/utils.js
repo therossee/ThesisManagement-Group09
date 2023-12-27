@@ -1,7 +1,7 @@
 const request = require('supertest');
-const { app } = require('../app');
+const {app} = require('../app');
 
-const agents = { };
+const agents = {};
 
 /**
  * Return a supertest agent logged as Marco Rossi (teacher + tester).

@@ -1,10 +1,10 @@
 require('jest');
 // [i] This line setup the test database + load the environment variables. DON'T (RE)MOVE IT
-const { resetTestDatabase } = require('../integration_config');
+const {resetTestDatabase} = require('../integration_config');
 
 const dayjs = require('dayjs');
 const request = require("supertest");
-const { app } = require("../../app");
+const {app} = require("../../app");
 const utils = require("../utils");
 const AdvancedDate = require("../../AdvancedDate");
 
@@ -58,7 +58,7 @@ describe('[INTEGRATION] Virtual Clock APIs', () => {
             const res = await testerAgent.post('/api/system/virtual-clock')
                 .set('Content-Type', 'application/json')
                 .set('credentials', 'include')
-                .send({ newDate: date });
+                .send({newDate: date});
 
             expect(res.status).toBe(200);
             expect(res.body).toHaveProperty('date');
@@ -77,7 +77,7 @@ describe('[INTEGRATION] Virtual Clock APIs', () => {
             const res = await testerAgent.post('/api/system/virtual-clock')
                 .set('Content-Type', 'application/json')
                 .set('credentials', 'include')
-                .send({ newDate: date });
+                .send({newDate: date});
 
             expect(res.status).toBe(400);
             expect(res.body).toHaveProperty('message');
@@ -85,9 +85,9 @@ describe('[INTEGRATION] Virtual Clock APIs', () => {
 
         test('should return 400 if the newDate property isn\'t a string', async () => {
             const res = await testerAgent.post('/api/system/virtual-clock')
-                        .set('Content-Type', 'application/json')
-                        .set('credentials', 'include')
-                        .send({ newDate: 1000 });
+                .set('Content-Type', 'application/json')
+                .set('credentials', 'include')
+                .send({newDate: 1000});
 
             expect(res.status).toBe(400);
             expect(res.body).toHaveProperty('message');
@@ -96,9 +96,9 @@ describe('[INTEGRATION] Virtual Clock APIs', () => {
 
         test('should return 400 if the newDate property isn\'t a valid date', async () => {
             const res = await testerAgent.post('/api/system/virtual-clock')
-                        .set('Content-Type', 'application/json')
-                        .set('credentials', 'include')
-                        .send({ newDate: 'invalid date' });
+                .set('Content-Type', 'application/json')
+                .set('credentials', 'include')
+                .send({newDate: 'invalid date'});
 
             expect(res.status).toBe(400);
             expect(res.body).toHaveProperty('message');
@@ -107,9 +107,9 @@ describe('[INTEGRATION] Virtual Clock APIs', () => {
 
         test('should return 403 if the user is not a tester', async () => {
             const res = await nonTesterAgent.post('/api/system/virtual-clock')
-                        .set('Content-Type', 'application/json')
-                        .set('credentials', 'include')
-                        .send({ newDate: 'invalid date' });
+                .set('Content-Type', 'application/json')
+                .set('credentials', 'include')
+                .send({newDate: 'invalid date'});
 
             expect(res.status).toBe(403);
             expect(res.body).toEqual('Unauthorized');
