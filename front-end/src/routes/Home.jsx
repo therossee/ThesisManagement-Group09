@@ -18,6 +18,7 @@ function Home() {
         { id: 1, url: "https://imgur.com/hx0bwSH.jpg" },       
         { id: 2, url: "https://imgur.com/f2DDJGc.jpg" },
         { id: 3, url: "https://imgur.com/34iBlOD.jpg" },
+        { id: 4, url: "https://imgur.com/Rac3Rjp.jpg" },
     ]);
 
     return (
