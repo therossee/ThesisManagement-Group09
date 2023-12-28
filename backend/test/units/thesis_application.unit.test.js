@@ -1,5 +1,9 @@
 require('jest');
 
+/**
+ * Tests on the whole thesis application management
+ */
+
 const db = require('../../db');
 const thesis = require('../../thesis_dao');
 const fs = require('fs');
