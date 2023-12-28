@@ -27,19 +27,13 @@ jest.mock('../../configuration_dao', () => ({
 jest.mock('fs');
 jest.mock('path');
 
-afterAll(() => {
+afterEach(() => {
     jest.restoreAllMocks(); // Restore original functionality after all tests
     jest.clearAllMocks();
 });
 
 describe('createThesisProposal', () => {
-    beforeEach(() => {
-        // Reset the mock before each test
-        db.prepare.mockClear();
-    });
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
+
     test('create a thesis proposal with cosupervisors', async () => {
         const proposalData = {
             title: 'Test Proposal',
@@ -167,36 +161,6 @@ describe('createThesisProposal', () => {
 
 describe('updateThesisProposal', () => {
 
-    let proposal_id;
-    beforeEach(async () => {
-        const sql_teacher = `INSERT INTO teacher (id, name, surname, email, cod_group, cod_department)
-                             VALUES (?, ?, ?, ?, ?, ?)`;
-        const sql_proposal = `INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge,
-                                                          notes, expiration, level, creation_date)
-                              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-        const sql_keyword = `INSERT INTO proposalKeyword (proposal_id, keyword)
-                             VALUES (?, ?)`;
-        db.prepare(sql_teacher).run('d1', 'supervisorName', 'supervisorSurname', 'supervisorEmail', 'Group1', 'Dep1');
-        proposal_id = db.prepare(sql_proposal).run('Test Proposal', 'd1', 'Test Type', 'Test Description', 'Test Knowledge', 'Test Notes', '2025-12-31T23:59:59.999Z', 'Test Level', '2020-10-21T10:10:10.001Z');
-        db.prepare(sql_keyword).run(proposal_id, 'Keyword');
-    });
-    afterEach(async () => {
-        const sql_proposal = `DELETE
-                              FROM thesisProposal
-                              WHERE proposal_id = ?`;
-        const sql_teacher = `DELETE
-                             FROM teacher
-                             WHERE id = ?`;
-        const sql_keyword = `DELETE
-                             FROM proposalKeyword
-                             WHERE proposal_id = ?
-                               AND keyword = ?`;
-        db.prepare(sql_proposal).run(proposal_id);
-        db.prepare(sql_teacher).run('d1');
-        db.prepare(sql_keyword).run(proposal_id, 'Keyword');
-        jest.restoreAllMocks()
-    });
-
     test('updates the thesis proposal with valid data', async () => {
         const proposalId = 1;
         const supervisorId = 'd1';
@@ -218,7 +182,7 @@ describe('updateThesisProposal', () => {
         // Call the function and assert the result
         const result = await thesis.updateThesisProposal(proposalId, supervisorId, thesisData);
         expect(result).toEqual(proposalId); // Assuming that the function resolves with the proposal_id on success
-        expect(db.prepare).toHaveBeenCalledTimes(19); // 19 queries
+        expect(db.prepare).toHaveBeenCalledTimes(16); // 16 queries
     });
 
     test('updates the thesis proposal without changing anything', async () => {
@@ -242,18 +206,6 @@ describe('updateThesisProposal', () => {
 });
 
 describe('getTeacherListExcept', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
-    let mockDb;
-
-    beforeAll(() => {
-        mockDb = require('../../db');
-    });
-
-    afterAll(() => {
-        jest.restoreAllMocks(); // Restore original functionality after all tests
-    });
     test('returns a list of teachers excluding the specified ID', async () => {
         const excludedTeacherId = 'd3';
         const mockTeacherData = [
@@ -262,39 +214,28 @@ describe('getTeacherListExcept', () => {
         ];
 
         // Mock the database query result
-        mockDb.prepare().all.mockReturnValue(mockTeacherData);
+        db.prepare().all.mockReturnValue(mockTeacherData);
 
         const result = await thesis.getTeacherListExcept(excludedTeacherId);
 
         expect(result).toEqual(mockTeacherData.filter(teacher => teacher.id !== excludedTeacherId));
-        expect(mockDb.prepare().all).toHaveBeenCalledWith(excludedTeacherId);
+        expect(db.prepare().all).toHaveBeenCalledWith(excludedTeacherId);
     });
     test('handles errors and rejects the promise if the database query fails', async () => {
         const excludedTeacherId = 2;
 
         // Mock the database query to throw an error
-        mockDb.prepare().all.mockImplementation(() => {
+        db.prepare().all.mockImplementation(() => {
             throw new Error('Database query failed');
         });
 
         await expect(thesis.getTeacherListExcept(excludedTeacherId)).rejects.toThrow('Database query failed');
-        expect(mockDb.prepare().all).toHaveBeenCalledWith(excludedTeacherId);
+        expect(db.prepare().all).toHaveBeenCalledWith(excludedTeacherId);
     });
 });
 
 describe('getExternalCoSupervisors', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
-    let mockDb;
 
-    beforeAll(() => {
-        mockDb = require('../../db');
-    });
-
-    afterAll(() => {
-        jest.restoreAllMocks(); // Restore original functionality after all tests
-    });
     test('returns the list of external co-supervisors', async () => {
 
         const mockExternalCoSupervisorData = [
@@ -303,7 +244,7 @@ describe('getExternalCoSupervisors', () => {
         ];
 
         // Mock the database query result
-        mockDb.prepare().all.mockReturnValue(mockExternalCoSupervisorData);
+        db.prepare().all.mockReturnValue(mockExternalCoSupervisorData);
 
         const result = await thesis.getExternalCoSupervisorList();
 
@@ -312,7 +253,7 @@ describe('getExternalCoSupervisors', () => {
     test('handles errors and rejects the promise if the database query fails', async () => {
 
         // Mock the database query to throw an error
-        mockDb.prepare().all.mockImplementation(() => {
+        db.prepare().all.mockImplementation(() => {
             throw new Error('Database query failed');
         });
 
@@ -321,48 +262,34 @@ describe('getExternalCoSupervisors', () => {
 });
 
 describe('getGroup', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
-    let mockDb;
-
-    beforeAll(() => {
-        mockDb = require('../../db');
-    });
-
-    afterAll(() => {
-        jest.restoreAllMocks(); // Restore original functionality after all tests
-    });
 
     test('returns the cod_group for a given teacher ID', async () => {
         const teacherId = 1;
         const expectedCodGroup = 'Group1';
 
         // Mock the database query result
-        mockDb.prepare().get.mockReturnValue({cod_group: expectedCodGroup});
+        db.prepare().get.mockReturnValue({cod_group: expectedCodGroup});
 
         const result = await thesis.getGroup(teacherId);
 
         expect(result).toBe(expectedCodGroup);
-        expect(mockDb.prepare().get).toHaveBeenCalledWith(teacherId);
+        expect(db.prepare().get).toHaveBeenCalledWith(teacherId);
     });
     test('handles errors and rejects the promise if the database query fails', async () => {
         const teacherId = 1;
 
         // Mock the database query to throw an error
-        mockDb.prepare().get.mockImplementation(() => {
+        db.prepare().get.mockImplementation(() => {
             throw new Error('Database query failed');
         });
 
         await expect(thesis.getGroup(teacherId)).rejects.toThrow('Database query failed');
-        expect(mockDb.prepare().get).toHaveBeenCalledWith(teacherId);
+        expect(db.prepare().get).toHaveBeenCalledWith(teacherId);
     });
 });
 
 describe('getAllKeywords', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
+
     test('should return an array of keywords', async () => {
         // Mock the response from the database
         const mockKeywords = [
@@ -383,9 +310,7 @@ describe('getAllKeywords', () => {
 });
 
 describe('getDegrees', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
+
     test('should return an array of keywords', async () => {
         // Mock the response from the database
         const mockKeywords = [
@@ -406,10 +331,6 @@ describe('getDegrees', () => {
 });
 
 describe('getThesisProposal', () => {
-    // Restore mocks after each test
-    afterEach(() => {
-        jest.restoreAllMocks();
-    });
 
     test('should return a thesis proposal when it exists for the given proposalId and studentId', async () => {
         // Arrange
@@ -494,13 +415,6 @@ describe('getThesisProposal', () => {
 });
 
 describe('listThesisProposalsFromStudent', () => {
-    beforeEach(() => {
-        // Reset the mock before each test
-        db.prepare.mockClear();
-    });
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
 
     test('should return the result of the db query', async () => {
         const studentId = "1";
@@ -547,9 +461,6 @@ describe('listThesisProposalsFromStudent', () => {
 });
 
 describe('getKeywordsOfProposal', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
 
     test('should return the result of the db query', async () => {
         const proposalId = "1";
@@ -588,9 +499,6 @@ describe('getKeywordsOfProposal', () => {
 });
 
 describe('getInternalCoSupervisorsOfProposal', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
 
     test('should return the result of the db query', async () => {
         const proposalId = "1";
@@ -615,9 +523,6 @@ describe('getInternalCoSupervisorsOfProposal', () => {
 });
 
 describe('getExternalCoSupervisorsOfProposal', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
 
     test('should return the result of the db query', async () => {
         const proposalId = "1";
@@ -640,9 +545,6 @@ describe('getExternalCoSupervisorsOfProposal', () => {
 });
 
 describe('getSupervisorOfProposal', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
 
     test('should return the result of the db query', async () => {
         const proposalId = "1";
@@ -665,9 +567,6 @@ describe('getSupervisorOfProposal', () => {
 });
 
 describe('getProposalGroups', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
 
     test('should return the result of the db query', async () => {
         const proposalId = "1";
@@ -693,13 +592,6 @@ describe('getProposalGroups', () => {
 });
 
 describe('listThesisProposalsTeacher', () => {
-    beforeEach(() => {
-        // Reset the mock before each test
-        db.prepare.mockClear();
-    });
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
 
     test('should return an array of thesis proposals for a teacher', async () => {
         const teacherId = "1";
@@ -747,10 +639,6 @@ describe('listThesisProposalsTeacher', () => {
 });
 
 describe('getThesisProposalCds', () => {
-    // Restore mocks after each test
-    afterEach(() => {
-        jest.restoreAllMocks();
-    });
 
     test('should return thesis proposal cds', async () => {
         const proposalId = 1;
@@ -782,10 +670,6 @@ describe('getThesisProposalCds', () => {
 });
 
 describe('getThesisProposalById', () => {
-
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
 
     test('should return the thesis proposal given the id', async () => {
         const proposalId = 1;
@@ -835,9 +719,6 @@ describe('getThesisProposalById', () => {
 });
 
 describe('getThesisProposalTeacher', () => {
-    afterEach(() => {
-        jest.restoreAllMocks()
-    });
 
     test('should return teacher given thesisProposalId and teacherId', async () => {
         const proposalId = 1;
@@ -875,10 +756,6 @@ describe('getThesisProposalTeacher', () => {
 });
 
 describe('deleteThesisProposalById', () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-        jest.restoreAllMocks();
-    });
 
     test('should reject the deletion if database indicate that an application has been accepted', async () => {
         const proposalId = 1;
