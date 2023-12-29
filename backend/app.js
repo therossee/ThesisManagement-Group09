@@ -15,7 +15,6 @@ const formidable = require('formidable');
 
 const thesisDao = require('./thesis_dao.js');
 const usersDao = require('./users_dao.js');
-const degreeDao = require('./degree_dao.js');
 const AdvancedDate = require("./AdvancedDate");
 const schemas = require('./schemas.js');
 const { sendEmailApplicationStatusChange } = require("./email");
@@ -267,7 +266,7 @@ app.post('/api/teacher/thesis_proposals',
     }catch(e){
       console.error(e);
       res.status(500).json('Internal Server Error');
-    } 
+    }
   });
 
 //GET list of teachers not logged
@@ -722,7 +721,7 @@ app.get('/api/teacher/uploads/:stud_id/:app_id',
       if(!application || application.student_id !== student_id){
         return res.status(404).json({ message: `Application with id ${application_id} not found.` });
       }
-      
+
       const dir = path.join(__dirname, 'uploads', student_id, application_id);
 
       if (fs.existsSync(dir)) {

@@ -1,9 +1,9 @@
 require('jest');
 
-const db = require('../db');
-const configuration = require('../configuration_dao');
+const db = require('../../db');
+const configuration = require('../../configuration_dao');
 
-jest.mock('../db', () => ({
+jest.mock('../../db', () => ({
     prepare: jest.fn(),
     get: jest.fn(),
     run: jest.fn()
@@ -29,7 +29,7 @@ describe('Configuration DAO', () => {
             const key = 'key';
             const value = '123';
             const expected = 123;
-            db.prepare().get.mockReturnValueOnce({ value });
+            db.prepare().get.mockReturnValueOnce({value});
 
             const result = configuration.getIntegerValue(key);
 

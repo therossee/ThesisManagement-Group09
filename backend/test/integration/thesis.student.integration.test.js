@@ -1,32 +1,16 @@
 require('jest');
 // [i] This line setup the test database + load the environment variables. DON'T (RE)MOVE IT
-const { resetTestDatabase } = require('./integration_config');
+const {resetTestDatabase} = require('../integration_config');
 
 const request = require("supertest");
-const { app } = require("../app");
-const thesisDao = require('../thesis_dao');
-const db = require('../db');
+const {app} = require("../../app");
+const utils = require("../utils");
+const thesisDao = require('../../thesis_dao');
+const db = require('../../db');
 const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
 const formidable = require('formidable');
-
-// Mock Passport-SAML authenticate method
-jest.mock('passport-saml', () => {
-    const Strategy = jest.requireActual('passport-saml').Strategy;
-    return {
-      Strategy: class MockStrategy extends Strategy {
-        authenticate(req, options) {
-          const user = {
-            id: 's318952',
-            name: 'Sylvie Molinatto',
-            roles: ['student'], 
-          };
-          this.success(user);
-        }
-      },
-    };
-});
 
 beforeEach(() => {
     // Be sure that we are using a full clean database before each test
@@ -34,9 +18,9 @@ beforeEach(() => {
     jest.restoreAllMocks();
 });
 
+let agent;
 beforeAll(async () => {
-    agent = request.agent(app);
-    await agent.get('/login');
+    agent = await utils.getMolinattoSylvieAgent(app);
 });
 
 describe('GET /api/thesis-proposals (student)', () => {
@@ -72,10 +56,10 @@ describe('GET /api/thesis-proposals (student)', () => {
                     coSupervisors: {
                         internal: [],
                         external: [
-                            { 
+                            {
                                 id: 1,
-                                name: 'Alice', 
-                                surname: 'Amato', 
+                                name: 'Alice',
+                                surname: 'Amato',
                                 email: 'alice.amato@email.com',
                                 co_supervisor_id: "1",
                                 proposal_id: 1
@@ -113,10 +97,10 @@ describe('GET /api/thesis-proposals (student)', () => {
                         external: [
                             {
                                 id: 2,
-                                name: 'Benjamin', 
-                                surname: 'Bianchi', 
+                                name: 'Benjamin',
+                                surname: 'Bianchi',
                                 email: 'benjamin.bianchi@email.com',
-                                co_supervisor_id: "2", 
+                                co_supervisor_id: "2",
                                 proposal_id: 2,
                             }
                         ]
@@ -174,10 +158,10 @@ describe('GET /api/thesis-proposals/:id (student)', () => {
             coSupervisors: {
                 internal: [],
                 external: [
-                    { 
+                    {
                         id: 1,
-                        name: 'Alice', 
-                        surname: 'Amato', 
+                        name: 'Alice',
+                        surname: 'Amato',
                         email: 'alice.amato@email.com',
                         co_supervisor_id: "1",
                         proposal_id: 1
@@ -191,7 +175,7 @@ describe('GET /api/thesis-proposals/:id (student)', () => {
             creation_date: '2023-10-10T10:45:50.121Z',
             expiration: '2024-11-10T23:59:59.999Z',
             level: 'LM',
-            cds: { cod_degree: 'L-08', title_degree: 'Ingegneria Elettronica'},
+            cds: {cod_degree: 'L-08', title_degree: 'Ingegneria Elettronica'},
             keywords: ['AI', 'research', 'web development'],
             groups: ['Group1']
         });
@@ -231,65 +215,65 @@ describe('GET /api/thesis-proposals/:id (student)', () => {
 });
 
 describe('POST /api/student/applications', () => {
-  
+
     const uploadDir = path.join(__dirname, 'temp-uploads');
-  
+
     beforeAll(() => {
-      fse.ensureDirSync(uploadDir);
+        fse.ensureDirSync(uploadDir);
     });
-  
-    afterAll(async() => {
-      fse.removeSync(uploadDir);
-      await fse.remove('uploads');
+
+    afterAll(async () => {
+        fse.removeSync(uploadDir);
+        await fse.remove('uploads');
     });
 
     test('should create a new application for a valid request', async () => {
         // Create a sample file to be uploaded
         const filePath = path.join(uploadDir, 'sample.pdf');
         fs.writeFileSync(filePath, 'This is a sample file.');
-    
+
         const thesis_proposal_id = '2';
-    
+
         const form = new formidable.IncomingForm();
 
         // Simulate file upload by adding a 'file' field to the form
         form.on('file', (field, file) => {
             form.files[field] = file;
         });
-    
+
         // Simulate the fields in the form
         form.fields = {
             thesis_proposal_id: '2',
         };
-    
+
         const response = await agent
             .post('/api/student/applications')
             .set('credentials', 'include')
             .field('thesis_proposal_id', thesis_proposal_id)
             .attach('file', filePath)
             .expect(201);
-    
+
         expect(response.body).toEqual({
             application_id: 2,
             thesis_proposal_id: '2',
             student_id: 's318952',
             status: 'waiting for approval',
         });
-  
+
     });
 
     test('should return 401 status error for if a not logged user try to apply to a thesis proposal', async () => {
         const response = await request(app)
             .post('/api/student/applications')
-            .send({ thesis_proposal_id: 2 });
+            .send({thesis_proposal_id: 2});
 
         expect(response.status).toBe(401);
     });
 
     test('should reject if the student apply for a proposal of another course of study', async () => {
-    
+
         const thesis_proposal_id = '3';
-    
+
         const form = new formidable.IncomingForm();
 
         // Simulate the fields in the form
@@ -308,15 +292,15 @@ describe('POST /api/student/applications', () => {
     });
 
     test('should reject if the student apply for an archived proposal', async () => {
-    
+
         db.prepare('INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-        .run(4, 'Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2020-10-10T10:45:50.121Z', '2022-11-10T23:59:59.999Z', 'LM');
+            .run(4, 'Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2020-10-10T10:45:50.121Z', '2022-11-10T23:59:59.999Z', 'LM');
 
         db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
-        .run(4, 'L-08');
+            .run(4, 'L-08');
 
         const thesis_proposal_id = '4';
-    
+
         const form = new formidable.IncomingForm();
 
         // Simulate the fields in the form
@@ -327,21 +311,21 @@ describe('POST /api/student/applications', () => {
         const response = await agent
             .post('/api/student/applications')
             .set('credentials', 'include')
-            .field('thesis_proposal_id', thesis_proposal_id)
-            
+            .field('thesis_proposal_id', thesis_proposal_id);
+
         expect(response.status).toBe(500);
         expect(response.body).toEqual('Failed to apply for proposal. The proposal is not active');
 
     });
 
     test('should reject if the student has already applied for another proposal', async () => {
-    
+
         db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
-        .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
-       
+            .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
+
 
         const thesis_proposal_id = '2';
-    
+
         const form = new formidable.IncomingForm();
 
         // Simulate the fields in the form
@@ -352,8 +336,8 @@ describe('POST /api/student/applications', () => {
         const response = await agent
             .post('/api/student/applications')
             .set('credentials', 'include')
-            .field('thesis_proposal_id', thesis_proposal_id)
-            
+            .field('thesis_proposal_id', thesis_proposal_id);
+
         expect(response.status).toBe(500);
         expect(response.body).toEqual('Failed to apply for proposal. The user has already applied for other proposals');
 
@@ -363,16 +347,16 @@ describe('POST /api/student/applications', () => {
         // Create a sample file to be uploaded
         const filePath = path.join(uploadDir, 'sample.pdf');
         fs.writeFileSync(filePath, 'This is a sample file.');
-    
+
         const thesis_proposal_id = '2';
-    
+
         const form = new formidable.IncomingForm();
 
         // Simulate file upload by adding a 'file' field to the form
         form.on('file', (field, file) => {
             form.files[field] = file;
         });
-    
+
         // Simulate the fields in the form
         form.fields = {
             thesis_proposal_id: '2',
@@ -382,7 +366,7 @@ describe('POST /api/student/applications', () => {
         jest.spyOn(fs, 'mkdirSync').mockImplementation(() => {
             throw new Error('Simulated mkdirSync error');
         });
-    
+
         const response = await agent
             .post('/api/student/applications')
             .set('credentials', 'include')
@@ -397,16 +381,16 @@ describe('POST /api/student/applications', () => {
         // Create a sample file to be uploaded
         const filePath = path.join(uploadDir, 'sample.pdf');
         fs.writeFileSync(filePath, 'This is a sample file.');
-    
+
         const thesis_proposal_id = '2';
-    
+
         const form = new formidable.IncomingForm();
 
         // Simulate file upload by adding a 'file' field to the form
         form.on('file', (field, file) => {
             form.files[field] = file;
         });
-    
+
         // Simulate the fields in the form
         form.fields = {
             thesis_proposal_id: '2',
@@ -423,16 +407,16 @@ describe('POST /api/student/applications', () => {
             .field('thesis_proposal_id', thesis_proposal_id)
             .attach('file', filePath)
             .expect(500);
-        
+
         expect(response.body).toEqual('Failed to apply for proposal. Simulated database insertion error');
-  
+
     });
-  
+
     test('should handle internal server error during form parsing', async () => {
         // Create a sample file to be uploaded
         const filePath = path.join(uploadDir, 'sample.pdf');
         fs.writeFileSync(filePath, 'This is a sample file.');
-    
+
         const thesis_proposal_id = '2';
 
         // Spy on the form.parse method to mock its behavior
@@ -440,18 +424,18 @@ describe('POST /api/student/applications', () => {
 
         // Simulate an error during form parsing
         formParseSpy.mockImplementation((req, callback) => {
-        // Call the callback with an error
-        callback(new Error('Simulated form parsing error'), {}, {});
+            // Call the callback with an error
+            callback(new Error('Simulated form parsing error'), {}, {});
         });
-    
+
         const response = await agent
-          .post('/api/student/applications')
-          .set('credentials', 'include')
-          .field('thesis_proposal_id', thesis_proposal_id)
-          .attach('file', filePath)
-          .expect(500);
-    
-        expect(response.body).toEqual({ message: 'Internal Server Error' });
+            .post('/api/student/applications')
+            .set('credentials', 'include')
+            .field('thesis_proposal_id', thesis_proposal_id)
+            .attach('file', filePath)
+            .expect(500);
+
+        expect(response.body).toEqual({message: 'Internal Server Error'});
     });
 
     test('should handle generic errors gracefully', async () => {
@@ -459,36 +443,36 @@ describe('POST /api/student/applications', () => {
         jest.spyOn(thesisDao, 'applyForProposal').mockImplementation(() => {
             throw new Error('Simulated error');
         });
-    
+
         const response = await agent
             .post('/api/student/applications')
             .set('credentials', 'include')
             .field('thesis_proposal_id', '2')
             .expect(500);
-    
+
         expect(response.body).toEqual('Failed to apply for proposal. Simulated error');
-    
+
     });
 
     test.skip('should reject a non-PDF file', async () => {
         // Create a sample file to be uploaded
         const filePath = path.join(uploadDir, 'sample.txt');
         fs.writeFileSync(filePath, 'This is a sample file.');
-    
+
         const thesis_proposal_id = '2';
-    
+
         const form = new formidable.IncomingForm();
 
         // Simulate file upload by adding a 'file' field to the form
         form.on('file', (field, file) => {
             form.files[field] = file;
         });
-    
+
         // Simulate the fields in the form
         form.fields = {
             thesis_proposal_id: '2',
         };
-    
+
         const response = await agent
             .post('/api/student/applications')
             .set('credentials', 'include')
@@ -525,7 +509,7 @@ describe('GET /api/student/active-application', () => {
 
         // Assertions
         expect(response.status).toBe(200);
-        expect(response.body).toEqual([{ proposal_id: 2 }]);
+        expect(response.body).toEqual([{proposal_id: 2}]);
     });
 
     test('should return 500 if an error occurs', async () => {
@@ -533,8 +517,8 @@ describe('GET /api/student/active-application', () => {
 
         // Perform the request
         const response = await agent
-                               .get('/api/student/active-application')
-                               .set('credentials', 'include');
+            .get('/api/student/active-application')
+            .set('credentials', 'include');
 
         // Assertions
         expect(response.status).toBe(500);

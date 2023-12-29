@@ -1,35 +1,19 @@
 require('jest');
 // [i] This line setup the test database + load the environment variables. DON'T (RE)MOVE IT
-const { resetTestDatabase } = require('./integration_config');
+const {resetTestDatabase} = require('../integration_config');
 
 const request = require("supertest");
-const { app } = require("../app");
-
-// Mock Passport-SAML authenticate method
-jest.mock('passport-saml', () => {
-    const Strategy = jest.requireActual('passport-saml').Strategy;
-    return {
-      Strategy: class MockStrategy extends Strategy {
-        authenticate(req, options) {
-          const user = {
-            id: 's318952',
-            name: 'Sylvie Molinatto',
-            roles: ['student'], 
-          };
-          this.success(user);
-        }
-      },
-    };
-});
+const {app} = require("../../app");
+const utils = require("../utils");
 
 beforeEach(() => {
     // Be sure that we are using a full clean database before each test
     resetTestDatabase();
 });
 
+let agent;
 beforeAll(async () => {
-    agent = request.agent(app);
-    await agent.get('/login');
+    agent = await utils.getMolinattoSylvieAgent(app);
 });
 
 describe('GET /users', () => {

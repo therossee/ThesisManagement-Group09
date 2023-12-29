@@ -1,8 +1,8 @@
 require('jest');
 // [i] This line setup the test database + load the environment variables. DON'T (RE)MOVE IT
-const { resetTestDatabase } = require('./integration_config');
+const {resetTestDatabase} = require('../integration_config');
 
-const db = require('../db');
+const db = require('../../db');
 
 describe('[DATABASE] Check database access using SQLite3', () => {
     beforeEach(() => {
@@ -12,7 +12,7 @@ describe('[DATABASE] Check database access using SQLite3', () => {
 
     test('should open the database without errors', () => {
         expect(db).toBeDefined();
-      });
+    });
     test('should return the list of students', async () => {
         const rows = await db.prepare('SELECT * FROM student').all();
 
