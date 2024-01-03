@@ -9,6 +9,8 @@ PRAGMA foreign_keys = ON;
 -- ------------------------------------------
 
 -- Drop the existing tables if they exist
+DROP TABLE IF EXISTS thesisStartCosupervisor;
+DROP TABLE IF EXISTS thesisStartRequest;
 DROP TABLE IF EXISTS thesisApplication;
 DROP TABLE IF EXISTS proposalGroup;
 DROP TABLE IF EXISTS proposalKeyword;
@@ -147,6 +149,30 @@ CREATE TABLE thesisApplication (
     FOREIGN KEY(student_id) REFERENCES student(id)
 );
 
+CREATE TABLE thesisStartRequest (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id TEXT NOT NULL,
+    application_id INTEGER,
+    proposal_id INTEGER,
+    title TEXT,
+    description TEXT,
+    supervisor_id TEXT NOT NULL,
+    creation_date DATE NOT NULL,
+    approval_date DATE,
+    status TEXT DEFAULT 'waiting for approval',
+    FOREIGN KEY(student_id) REFERENCES student(id),
+    FOREIGN KEY(application_id) REFERENCES thesisApplication(id),
+    FOREIGN KEY(proposal_id) REFERENCES thesisProposal(proposal_id),
+    FOREIGN KEY(supervisor_id) REFERENCES teacher(id)
+);
+
+CREATE TABLE thesisStartCosupervisor (
+    start_request_id INTEGER NOT NULL,
+    cosupervisor_id TEXT NOT NULL,
+    PRIMARY KEY (start_request_id, cosupervisor_id),
+    FOREIGN KEY(start_request_id) REFERENCES thesisStartRequest(id),
+    FOREIGN KEY(cosupervisor_id) REFERENCES teacher(id)
+);
 
 -- Insert Data
 
@@ -240,6 +266,10 @@ VALUES
 INSERT INTO thesisApplication (proposal_id, student_id, creation_date, status)
 VALUES
     (3, 's320213', '2021-03-17T21:37:01.176Z', 'accepted');
+
+INSERT INTO thesisStartRequest(student_id, application_id, proposal_id, title, description, supervisor_id, creation_date)
+VALUES
+    ('s320213', 1, 1, 'start request for ai-guided web crawler thesis', 'will to start the thesis in january for which application is accepted', 'd279620', '2023-12-12T23:59:59.999Z');
 
 -- Create a trigger that check that the proposal_id of the thesisApplication table is present in the thesisProposal table
 -- and that the proposal is not deleted or archived for the insertion and the update
