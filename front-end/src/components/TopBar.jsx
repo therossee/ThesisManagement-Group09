@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Badge, Layout } from "antd";
-import { BellOutlined, FileAddOutlined } from '@ant-design/icons';
+import { BellOutlined, FileAddOutlined, InboxOutlined } from '@ant-design/icons';
 import { useAuth } from '../components/authentication/useAuth';
 import LoginButton from './authentication/LoginButton';
 import LogoutButton from './authentication/LogoutButton';
@@ -35,7 +35,10 @@ function IsLoggedInForm() {
     <div>
       {
         isTeacher &&
+        <>
         <FileAddOutlined style={{ fontSize: '22px', verticalAlign: 'middle', marginRight: "20px" }} onClick={() => navigate("/insert-proposal")} />
+        <InboxOutlined style={{ fontSize: '22px', verticalAlign: 'middle', marginRight: "20px" }} onClick={() => navigate("/archive")}/>
+        </>
       }
       <Badge count={1} style={{ marginRight: '22px' }}>
         <BellOutlined style={{ fontSize: '22px', marginRight: '22px', verticalAlign: 'middle' }} />

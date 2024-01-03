@@ -9,6 +9,7 @@ import Proposals from './routes/Proposals';
 import ViewProposal from './routes/ViewProposal';
 import SideBar from './components/SideBar';
 import TopBar from './components/TopBar';
+import Archive from './routes/Archive.jsx';
 import './css/style.css';
 import Applications from './routes/Applications';
 
@@ -27,6 +28,7 @@ function MainLayout() {
                             <Route path="/" element={<Home />} />
                             <Route path="/admin/virtual-clock" element={<VirtualClock />} />
                             <Route path="/proposals" element={<Proposals />} />
+                            <Route path="/archive" element={<Archive />} />
                             <Route path="/applications" element={<Applications />} />
                             <Route path="/insert-proposal/:id?" element={<InsertProposal />} />
                             <Route path="/view-proposal/:id" element={<ViewProposal />} />
