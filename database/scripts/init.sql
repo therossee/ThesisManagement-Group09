@@ -151,6 +151,7 @@ CREATE TABLE thesisApplication (
 
 CREATE TABLE thesisStartRequest (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id TEXT NOT NULL,
     application_id INTEGER,
     proposal_id INTEGER,
     title TEXT,
@@ -159,6 +160,7 @@ CREATE TABLE thesisStartRequest (
     creation_date DATE NOT NULL,
     approval_date DATE,
     status TEXT DEFAULT 'waiting for approval',
+    FOREIGN KEY(student_id) REFERENCES student(id),
     FOREIGN KEY(application_id) REFERENCES thesisApplication(id),
     FOREIGN KEY(proposal_id) REFERENCES thesisProposal(proposal_id),
     FOREIGN KEY(supervisor_id) REFERENCES teacher(id)
@@ -576,10 +578,10 @@ VALUES
     (17, 'LM-35'),
     (18, 'LM-35');
 
-INSERT INTO thesisStartRequest(application_id, proposal_id, title, description, supervisor_id, creation_date)
+INSERT INTO thesisStartRequest(student_id, application_id, proposal_id, title, description, supervisor_id, creation_date)
 VALUES
-    (1, 1, 'start request for ai-guided web crawler thesis', 'will to start the thesis in january for which application is accepted', 'd279620', '2023-12-12T23:59:59.999Z'),
-    (2, 6, 'start request for optimization of check-in process in amazon thesis', 'will to start the thesis as soon as possible', 'd292715', '2023-11-30T23:59:59.999Z');
+    ('s320213', 1, 1, 'start request for ai-guided web crawler thesis', 'will to start the thesis in january for which application is accepted', 'd279620', '2023-12-12T23:59:59.999Z'),
+    ('s321607', 2, 6, 'start request for optimization of check-in process in amazon thesis', 'will to start the thesis as soon as possible', 'd292715', '2023-11-30T23:59:59.999Z');
 
 INSERT INTO thesisStartCosupervisor(start_request_id, cosupervisor_id)
 VALUES
