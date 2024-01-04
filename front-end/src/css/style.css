@@ -103,8 +103,15 @@
 }
 
 .image {
-  width: 500px;
-  height: 350px;
+  width: 600px;
+  height: auto;
+  margin: 5px;
+  border-radius: 8px;
+}
+
+.image-mobile{
+  width: 400px;
+  height: auto;
   margin: 5px;
   border-radius: 8px;
 }
