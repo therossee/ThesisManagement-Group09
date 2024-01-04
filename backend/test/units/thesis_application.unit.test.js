@@ -4,12 +4,13 @@ require('jest');
  * Tests on the whole thesis application management
  */
 
-const db = require('../../db');
-const thesis = require('../../thesis_dao');
+const db = require('../../src/services/db');
+const thesis = require('../../src/dao/thesis_dao');
 const fs = require('fs');
+const {APPLICATION_STATUS} = require("../../src/enums/application");
 
 // Mocking the database
-jest.mock('../../db', () => ({
+jest.mock('../../src/services/db', () => ({
     prepare: jest.fn().mockReturnThis(),
     run: jest.fn(),
     all: jest.fn(),
@@ -17,7 +18,7 @@ jest.mock('../../db', () => ({
     transaction: jest.fn().mockImplementation(callback => callback),
 }));
 
-jest.mock('../../configuration_dao', () => ({
+jest.mock('../../src/dao/configuration_dao', () => ({
     getIntegerValue: jest.fn().mockReturnValue(0),
     setValue: jest.fn(),
     KEYS: {
@@ -102,8 +103,8 @@ describe('applyForProposal', () => {
         // Verify that the correct database methods were called with the expected arguments
         expect(db.prepare().get).toHaveBeenCalledTimes(3);
         expect(db.prepare().get).toHaveBeenCalledWith(proposal_id, student_id);
-        expect(db.prepare().get).toHaveBeenCalledWith(proposal_id, expect.any(String), expect.any(String));
-        expect(db.prepare().get).toHaveBeenCalledWith(student_id);
+        expect(db.prepare().get).toHaveBeenCalledWith(proposal_id, expect.any(String), expect.any(String), APPLICATION_STATUS.ACCEPTED);
+        expect(db.prepare().get).toHaveBeenCalledWith(student_id, APPLICATION_STATUS.WAITING_FOR_APPROVAL, APPLICATION_STATUS.ACCEPTED);
         expect(db.prepare().run).toHaveBeenCalledWith(proposal_id, student_id, expect.any(String));
     });
     test('applies for a proposal with a wrong format file', async () => {
@@ -308,7 +309,7 @@ describe('getStudentActiveApplication', () => {
 
         // Act
         const result = await thesis.getStudentActiveApplication(student_id);
-        const expectedQuery = `SELECT proposal_id FROM thesisApplication WHERE student_id=? AND creation_date < ? AND ( status='waiting for approval' OR status='accepted')`;
+        const expectedQuery = `SELECT proposal_id FROM thesisApplication WHERE student_id=? AND creation_date < ? AND ( status=? OR status=?)`;
 
         // Assert
         expect(result).toEqual(expectedResult);

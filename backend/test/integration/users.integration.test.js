@@ -3,7 +3,7 @@ require('jest');
 const {resetTestDatabase} = require('../integration_config');
 
 const request = require("supertest");
-const {app} = require("../../app");
+const {app} = require("../../src/app");
 const utils = require("../utils");
 
 beforeEach(() => {

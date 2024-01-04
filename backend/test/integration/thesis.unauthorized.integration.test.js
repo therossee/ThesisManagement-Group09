@@ -2,7 +2,7 @@ require('jest');
 // [i] This line setup the test database + load the environment variables. DON'T (RE)MOVE IT
 const {resetTestDatabase} = require('../integration_config');
 
-const {app} = require("../../app");
+const {app} = require("../../src/app");
 const utils = require("../utils");
 
 beforeEach(() => {
