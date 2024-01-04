@@ -7,3 +7,5 @@
 .DS_Store
 
 backend/reports
+
+front-end/.vite
