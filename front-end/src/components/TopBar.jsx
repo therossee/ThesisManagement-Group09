@@ -37,7 +37,7 @@ function IsLoggedInForm() {
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <div>
         <Avatar size="medium" icon={<UserOutlined />} style={{ marginRight: '20px' }} />
-        <span>Hi {userData.name}!</span>
+        <span> {userData.name} </span>
       </div>
       <div>
         {isTeacher && (
