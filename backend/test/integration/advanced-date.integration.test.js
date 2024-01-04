@@ -4,9 +4,9 @@ const {resetTestDatabase} = require('../integration_config');
 
 const dayjs = require('dayjs');
 const request = require("supertest");
-const {app} = require("../../app");
+const {app} = require("../../src/app");
 const utils = require("../utils");
-const AdvancedDate = require("../../AdvancedDate");
+const AdvancedDate = require("../../src/models/AdvancedDate");
 
 let testerAgent, nonTesterAgent;
 beforeAll(async () => {

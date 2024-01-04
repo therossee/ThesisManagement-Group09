@@ -1,11 +1,7 @@
 'use strict';
 
 const z = require('zod');
-const AdvancedDate = require("./AdvancedDate");
-
-const APIVirtualClockUpdateSchema = z.object({
-    newDate: z.string().datetime().optional()
-});
+const AdvancedDate = require("../models/AdvancedDate");
 
 const APIThesisProposalSchema = z.object({
     title: z.string().min(1).max(1000),
@@ -26,7 +22,7 @@ const APIThesisProposalSchema = z.object({
         }
 
         const currentDate = new AdvancedDate();
-        if(exp.isBefore(currentDate)){
+        if (exp.isBefore(currentDate)) {
             ctx.addIssue({ code: z.ZodIssueCode.invalid_date, message: 'Expiration date must be in the future' });
             return z.NEVER;
         }
@@ -36,6 +32,5 @@ const APIThesisProposalSchema = z.object({
 });
 
 module.exports = {
-    APIVirtualClockUpdateSchema,
     APIThesisProposalSchema
 };

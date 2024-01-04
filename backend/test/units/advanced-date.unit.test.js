@@ -3,12 +3,12 @@ require('jest');
 require('../integration_config');
 
 const dayjs = require('dayjs');
-const configuration = require('../../configuration_dao');
-const AdvancedDate = require("../../AdvancedDate");
-const InvalidNewVirtualOffsetError = require("../../errors/InvalidNewVirtualOffsetError");
+const configuration = require('../../src/dao/configuration_dao');
+const AdvancedDate = require("../../src/models/AdvancedDate");
+const InvalidNewVirtualOffsetError = require("../../src/errors/InvalidNewVirtualOffsetError");
 
 
-jest.mock('../../configuration_dao', () => ({
+jest.mock('../../src/dao/configuration_dao', () => ({
     getIntegerValue: jest.fn(),
     setValue: jest.fn(),
     KEYS: {

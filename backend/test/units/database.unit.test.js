@@ -2,7 +2,7 @@ require('jest');
 // [i] This line setup the test database + load the environment variables. DON'T (RE)MOVE IT
 const {resetTestDatabase} = require('../integration_config');
 
-const db = require('../../db');
+const db = require('../../src/services/db');
 
 describe('[DATABASE] Check database access using SQLite3', () => {
     beforeEach(() => {
