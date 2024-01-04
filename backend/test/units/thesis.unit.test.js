@@ -5,14 +5,15 @@ require('jest');
  * operations on the thesis_proposal table (create, update, get, ...).
  */
 
-const AdvancedDate = require('../../AdvancedDate');
-const db = require('../../db');
-const thesis = require('../../thesis_dao');
-const UnauthorizedActionError = require("../../errors/UnauthorizedActionError");
-const NoThesisProposalError = require("../../errors/NoThesisProposalError");
+const AdvancedDate = require('../../src/models/AdvancedDate');
+const db = require('../../src/services/db');
+const thesis = require('../../src/dao/thesis_dao');
+const UnauthorizedActionError = require("../../src/errors/UnauthorizedActionError");
+const NoThesisProposalError = require("../../src/errors/NoThesisProposalError");
+const {APPLICATION_STATUS} = require("../../src/enums/application");
 
 // Mocking the database
-jest.mock('../../db', () => ({
+jest.mock('../../src/services/db', () => ({
     prepare: jest.fn().mockReturnThis(),
     run: jest.fn().mockReturnValue({lastInsertRowid: 1}),
     all: jest.fn(),
@@ -20,7 +21,7 @@ jest.mock('../../db', () => ({
     transaction: jest.fn().mockImplementation(callback => callback),
 }));
 
-jest.mock('../../configuration_dao', () => ({
+jest.mock('../../src/dao/configuration_dao', () => ({
     getIntegerValue: jest.fn().mockReturnValue(0),
     setValue: jest.fn(),
     KEYS: {
@@ -316,6 +317,7 @@ describe('listThesisProposalsFromStudent', () => {
         expect(result).toEqual(mockedData);
         expect(db.prepare().all).toHaveBeenCalledWith(
             studentId,
+            APPLICATION_STATUS.ACCEPTED,
             expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
             expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/));
     });
@@ -353,7 +355,7 @@ describe('listThesisProposalsTeacher', () => {
           SELECT 1
           FROM thesisApplication A
           WHERE A.proposal_id = P.proposal_id
-            AND A.status = 'accepted'
+            AND A.status = ?
         )
         AND P.expiration > ?
         AND creation_date < ?
@@ -577,7 +579,7 @@ describe('archiveThesisProposalById', () => {
 
         const result = await thesis.archiveThesisProposalById(proposalId, supervisorId);
 
-        expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+        expect(db.prepare().get).toHaveBeenCalledWith(proposalId, APPLICATION_STATUS.ACCEPTED);
         expect(db.prepare().run).toHaveBeenCalledWith(
             proposalId,
             supervisorId,
@@ -596,7 +598,7 @@ describe('archiveThesisProposalById', () => {
 
         await expect(thesis.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(UnauthorizedActionError);
 
-        expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+        expect(db.prepare().get).toHaveBeenCalledWith(proposalId, APPLICATION_STATUS.ACCEPTED);
     });
 
     test('rejects with the appropriate error for an unsuccessful archiving (inexistent thesis)', async () => {

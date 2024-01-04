@@ -3,10 +3,10 @@ require('jest');
 const {resetTestDatabase} = require('../integration_config');
 
 const request = require("supertest");
-const {app} = require("../../app");
+const {app} = require("../../src/app");
 const utils = require("../utils");
-const thesisDao = require('../../thesis_dao');
-const db = require('../../db');
+const thesisDao = require('../../src/dao/thesis_dao');
+const db = require('../../src/services/db');
 const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
@@ -284,11 +284,10 @@ describe('POST /api/student/applications', () => {
         const response = await agent
             .post('/api/student/applications')
             .set('credentials', 'include')
-            .field('thesis_proposal_id', thesis_proposal_id)
-            .expect(500);
+            .field('thesis_proposal_id', thesis_proposal_id);
 
-        expect(response.status).toBe(500);
-        expect(response.body).toEqual('Failed to apply for proposal. The proposal doesn\'t belong to the student degree');
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ message: "The proposal doesn't belong to the student degree" });
     });
 
     test('should reject if the student apply for an archived proposal', async () => {
@@ -313,8 +312,8 @@ describe('POST /api/student/applications', () => {
             .set('credentials', 'include')
             .field('thesis_proposal_id', thesis_proposal_id);
 
-        expect(response.status).toBe(500);
-        expect(response.body).toEqual('Failed to apply for proposal. The proposal is not active');
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ message: "The proposal is not active" });
 
     });
 
@@ -338,8 +337,8 @@ describe('POST /api/student/applications', () => {
             .set('credentials', 'include')
             .field('thesis_proposal_id', thesis_proposal_id);
 
-        expect(response.status).toBe(500);
-        expect(response.body).toEqual('Failed to apply for proposal. The user has already applied for other proposals');
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ message: "The user has already applied for other proposals" });
 
     });
 
@@ -374,7 +373,7 @@ describe('POST /api/student/applications', () => {
             .attach('file', filePath);
 
         expect(response.status).toBe(500);
-        expect(response.body).toEqual('Failed to apply for proposal. Error: Simulated mkdirSync error');
+        expect(response.body).toEqual("Internal Server Error");
     });
 
     test('should handle error while inserting application', async () => {
@@ -405,10 +404,10 @@ describe('POST /api/student/applications', () => {
             .post('/api/student/applications')
             .set('credentials', 'include')
             .field('thesis_proposal_id', thesis_proposal_id)
-            .attach('file', filePath)
-            .expect(500);
+            .attach('file', filePath);
 
-        expect(response.body).toEqual('Failed to apply for proposal. Simulated database insertion error');
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual("Internal Server Error");
 
     });
 
@@ -432,10 +431,10 @@ describe('POST /api/student/applications', () => {
             .post('/api/student/applications')
             .set('credentials', 'include')
             .field('thesis_proposal_id', thesis_proposal_id)
-            .attach('file', filePath)
-            .expect(500);
+            .attach('file', filePath);
 
-        expect(response.body).toEqual({message: 'Internal Server Error'});
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Internal Server Error');
     });
 
     test('should handle generic errors gracefully', async () => {
@@ -447,10 +446,10 @@ describe('POST /api/student/applications', () => {
         const response = await agent
             .post('/api/student/applications')
             .set('credentials', 'include')
-            .field('thesis_proposal_id', '2')
-            .expect(500);
+            .field('thesis_proposal_id', '2');
 
-        expect(response.body).toEqual('Failed to apply for proposal. Simulated error');
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Internal Server Error');
 
     });
 

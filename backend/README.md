@@ -8,23 +8,54 @@ This is the back end of the project. It is a REST API that provides the data for
 3. Run `npm install` in the back-end directory
 4. Run `npm start` to start the server (the server will be running on port 3000 by default)
 
+---
+
+## Project Structure
+The backend project is divided into 3 parts :
+- `src` => source code of the API
+- `test` => all unit/integration tests of the project
+- `.` => all the configuration (.pem key, environment, ...)
+
 ### Test (directory)
-The test directory contains integration and unit testing of the backend.
-### Validators
-The validators are the JSON schemas that are used to validate the requests using the [ajv](https://ajv.js.org/) library.
-### DAO'S
-There are the Data Access Object modules for accessing thesis/users/degree data.
-The controllers are responsible for handling the requests and responses. They are located in the `controllers` directory.
-In this directory, each controller has its own file with all the methods that handle the requests for that controller.
-### App.js
-Contains the API for the working project.
+The test directory contains integration and unit testing of the backend. To simplify readability tests are divided 
+into 2 folders:
+- unit
+- integration
+The root of the directory contains some utils methods/variables for the execution of tests
 
-### Authentication Middleware
+### Source code (directory)
+The source has been divided into different folder to simplify the readability of the code:
+- `errors` => each file is equal to a class representing an error that can be formatted to be sent through an express response (see `src/middlewares/errors.js`)
+- `middlewares` => each file contains one or more function used as middleware for express application/router
+- `models` => each file contains a class representing a model of an entity
+- `enums` => each file contains one or more enum object AND the file `index.js` exports all enums from the directory
+  - Don't forget to update the `index.js` file when you add a new enum
+- `schemas` => each file contains one or more "zod" schemas object used to validate user input AND the file `index.js` exports all schemas from the directory
+  - Don't forget to update the `index.js` file when you add a new schema
+- `services` => each file contains one or more service class/function used to interact logically. Some of the domain logic is implemented here
+- `dao` => each file contains one or more dao function used to interact with the database. All the database logic is implemented here
+- `routers` => each file contains one router exported as default. The router contains all API endpoint related to his domain.
+  - They are used in the `app.js` file to register the router to the express application
+- `controllers` => each file contains one or more functions used in routers ONLY to handle the request and response.
+
+The `index.js` file is the entry point where the HTTP server is created/set up. While the `app.js` file is used to set
+up the express application and is used in test directory to create a fake server for integration testing.
+
+## Middlewares
+### Authentication
+The authentication middleware is defined in `src/middlewares/authentication.js`.
+It uses the `passport-saml` library to authenticate users using SAML.
+### Authorization
 Several middleware functions are defined to check user authentication and roles. These include:
-
 - `isLoggedIn`: Checks if the user is authenticated.
 - `isStudent`, `isTeacher`, `isTester`: Checks if the authenticated user has the specified role.
+### Error Handling
+The error handling middleware is defined in `src/middlewares/errors.js` and expose all middlewares needed
+to handle errors and send a response to the client.
 
+---
+
+## APIs
 ### Authentication APIs
 - GET `/login`
     - Endpoint for initiating SAML authentication
@@ -134,4 +165,4 @@ Several middleware functions are defined to check user authentication and roles.
 
 - GET `/api/teacher/uploads/:stud_id/:app_id`
     - Authenticated by a teacher, gets uploads associated with a specific student's application for a teacher.
-    - Error if a student with the given id or a application with a given id doesn't exist.
+    - Error if a student with the given id or an application with a given id doesn't exist.

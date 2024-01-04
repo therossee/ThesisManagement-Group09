@@ -7,11 +7,11 @@ require('jest');
  * For e.g., we are testing methods to get groups, keywords, etc.
  */
 
-const db = require('../../db');
-const thesis = require('../../thesis_dao');
+const db = require('../../src/services/db');
+const thesis = require('../../src/dao/thesis_dao');
 
 // Mocking the database
-jest.mock('../../db', () => ({
+jest.mock('../../src/services/db', () => ({
     prepare: jest.fn().mockReturnThis(),
     run: jest.fn().mockReturnValue({lastInsertRowid: 1}),
     all: jest.fn(),
@@ -19,7 +19,7 @@ jest.mock('../../db', () => ({
     transaction: jest.fn().mockImplementation(callback => callback),
 }));
 
-jest.mock('../../configuration_dao', () => ({
+jest.mock('../../src/dao/configuration_dao', () => ({
     getIntegerValue: jest.fn().mockReturnValue(0),
     setValue: jest.fn(),
     KEYS: {

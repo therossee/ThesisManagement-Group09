@@ -7,7 +7,7 @@ dotenv.config({DOTENV_KEY: process.env.TM_DOTENV_KEY});
 
 /** Import modules */
 const fs = require('fs');
-const db = require('../db');
+const db = require('../src/services/db');
 const path = require("path");
 const imap = require("imap");
 
