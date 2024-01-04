@@ -381,6 +381,44 @@ exports.archiveThesisProposalById = (proposalId, supervisorId) => {
     })();
   })
 };
+
+/**
+ * Set the property is_archived of a thesis proposal to 0 
+ *
+ * @param {string} proposalId
+ * @param {string} supervisorId
+ * @return {Promise<ThesisApplicationRow[]>}
+ */
+exports.publishThesisProposalById = (proposalId, supervisorId) => {
+  return new Promise( (resolve, reject) => {
+    db.transaction(async () => {
+      const now = new AdvancedDate().toISOString();
+      const archiveThesisProposalQuery = `
+        UPDATE thesisProposal
+        SET is_archived = 0
+        WHERE proposal_id = ? AND supervisor_id = ? AND expiration > ? AND creation_date < ?;
+      `;
+      const res = db.prepare(archiveThesisProposalQuery).run(proposalId, supervisorId, now, now);
+      if (res.changes === 0) {
+        // We try to understand the reason of the failure
+        const thesis = await this.getThesisProposalById(proposalId);
+        if (thesis == null || thesis.creation_date > now) {
+          // No thesis proposal with the given id
+          reject( new NoThesisProposalError(proposalId) );
+        } else if (thesis.expiration <= now) {
+          // Thesis proposal expired
+          reject( new UnauthorizedActionError('You can\'t publish a thesis already expired') );
+        } else {
+          // The supervisor is not the owner of the thesis proposal
+          reject( new UnauthorizedActionError('You are not the supervisor of this thesis') );
+        }
+
+        return;
+      }
+      resolve(res);
+    })();
+  })
+};
 /**
  * Return the list of thesis proposals related to a student degree
  *
@@ -623,6 +661,28 @@ exports.listThesisProposalsTeacher = (teacherId) => {
   })
 };
 
+exports.listArchivedThesisProposalsTeacher = (teacherId) => {
+  return new Promise((resolve) => {
+    const currentDate = new AdvancedDate().toISOString();
+    const getProposals = `SELECT * 
+      FROM thesisProposal P
+      WHERE P.supervisor_id=?
+        AND NOT EXISTS (
+          SELECT 1
+          FROM thesisApplication A
+          WHERE A.proposal_id = P.proposal_id
+            AND A.status = ?
+        )
+        AND P.expiration > ?
+        AND creation_date < ?
+        AND is_archived = 1
+        AND is_deleted = 0;`;
+    const proposals = db.prepare(getProposals).all(teacherId, APPLICATION_STATUS.ACCEPTED, currentDate, currentDate);
+    resolve(proposals)
+
+  })
+};
+
 exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
   return new Promise((resolve) => {
     const currentDate = new AdvancedDate().toISOString();
@@ -642,24 +702,6 @@ exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
     resolve(applications)
 
   })
-};
-
-/**
- * Return the application with the given id
- *
- * @param {number} applicationId
- * @return {Promise<ThesisApplicationRow | null>}
- */
-exports.getThesisApplicationById = (applicationId) => {
-    return new Promise((resolve) => {
-        const query = `SELECT * FROM thesisApplication WHERE id = ?`;
-        const res = db.prepare(query).get(applicationId);
-        if (!res) {
-            resolve(null);
-        }
-
-        resolve(res);
-    })
 };
 
 exports.getStudentActiveApplication = (student_id) => {

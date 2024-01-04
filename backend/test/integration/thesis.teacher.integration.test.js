@@ -542,6 +542,8 @@ describe('PUT /api/thesis-proposals/:id', () => {
             .set('credentials', 'include')
             .send(body);
 
+        console.log(response.body);
+
         // Assert the response
         expect(response.status).toBe(404);
         expect(response.body).toEqual({message: `Thesis proposal with id 32 not found.`});

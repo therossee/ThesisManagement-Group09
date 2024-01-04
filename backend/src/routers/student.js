@@ -4,7 +4,7 @@ const controller = require('../controllers/student');
 
 const router = express.Router({ mergeParams: true });
 
-router.post('/applications', authorization.isLoggedIn, authorization.isStudent, controller.applyForProposal);
+router.post('/applications', authorization.isLoggedIn, authorization.isStudent, controller.getStudentApplications);
 
 router.get('/active-application', authorization.isLoggedIn, authorization.isStudent, controller.getStudentActiveApplication);
 

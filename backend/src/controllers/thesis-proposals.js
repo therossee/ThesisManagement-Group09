@@ -246,6 +246,39 @@ async function deleteThesisProposalById(req, res, next) {
  * @param {import('express').Response} res
  * @param {import('express').NextFunction} next
  */
+async function listArchivedThesisProposals(req, res, next) {
+    try {
+        if (req.user.roles.includes(USER_ROLES.TEACHER)) {
+            const thesisProposals = await thesisDao.listArchivedThesisProposalsTeacher(req.user.id);
+            const proposalsPopulated = await Promise.all(
+                thesisProposals.map(async proposal => {
+                    const cds = await thesisDao.getThesisProposalCds(proposal.proposal_id);
+                    return await _populateProposal(proposal, cds);
+                })
+            );
+
+            // Not used right now, but it's here for potential future use
+            const metadata = {
+                index: 0,
+                count: thesisProposals.length,
+                total: thesisProposals.length,
+                currentPage: 1
+            };
+            res.json({ $metadata: metadata, items: proposalsPopulated });
+        } else {
+            // Handle unauthorized case if neither student nor teacher
+            res.status(403).json('Unauthorized');
+        }
+    } catch (e) {
+        next(e);
+    }
+}
+
+/**
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 async function archiveThesisProposalById(req, res, next) {
     try {
         const teacherId = req.user.id;
@@ -274,13 +307,43 @@ async function archiveThesisProposalById(req, res, next) {
     }
 }
 
+/**
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+async function publishThesisProposalById(req, res, next) {
+    try {
+        const teacherId = req.user.id;
+        const proposalId = req.params.id;
+
+        await thesisDao.publishThesisProposalById(proposalId, teacherId)
+            .then(() => {
+               
+
+                return res.status(204).send();
+            })
+            .catch(error => {
+                if (error instanceof AppError) {
+                    return error.sendHttpResponse(res);
+                } else {
+                    throw error;
+                }
+            });
+    } catch (e) {
+        next(e);
+    }
+}
+
 module.exports = {
     listThesisProposals,
     createThesisProposal,
     getThesisProposalById,
     updateThesisProposalById,
     deleteThesisProposalById,
-    archiveThesisProposalById
+    archiveThesisProposalById,
+    listArchivedThesisProposals,
+    publishThesisProposalById
 };
 
 
