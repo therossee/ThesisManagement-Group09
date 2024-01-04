@@ -45,28 +45,34 @@ Instructions on how to set up and use the database. (how to install sqlite3 and 
 ## Database Structure
 In our database there are the following tables:
 
-- configuration(**key**, value)
+- configuration (**key**, value)
+  
   → This table is necessary for the virtual clock management. The default value for the 'value' attribute is 0 (note that it's stringified value). This means that the virtual clock is disabled. When we change the date it will assume another value.
-- student(**id**, surname, name, gender, nationality, email, cod_degree, enrollment_year)  
-- teacher(**id**, surname, name, email, cod_group, cod_department)
-- degree(**cod_degree**, title_degree)
-- career(**id**, **cod_course**, title_course, cfu, grade, date)
+- student (**id**, surname, name, gender, nationality, email, cod_degree, enrollment_year)  
+- teacher (**id**, surname, name, email, cod_group, cod_department)
+- degree (**cod_degree**, title_degree)
+- career (**id**, **cod_course**, title_course, cfu, grade, date)
+  
   → the career table contains all the courses taken by the students. The field 'id' is the student id, so it is possible to know all the courses a specific student attended filtering by the id.
-- thesisProposal(**proposal_id**, title, supervisor_id, type, description, required_knowledge, creation_date, expiration, level, is_deleted, is_archived)
+- thesisProposal (**proposal_id**, title, supervisor_id, type, description, required_knowledge, creation_date, expiration, level, is_deleted, is_archived)
+  
   → this table contains all the relevant information for a thesis proposal. We can also be aware if a particular thesis is deleted or archived by the attributes 'is_deleted' and 'is_archived' (0 → non deleted/archived, 1 otherwise)
-- proposalKeyword(**proposal_id**, **keyword**)
-  - proposalKeyword(**proposal_id**, **keyword**)
-    → This table stores the keywords for each proposal, allowing multiple keywords for the same proposal. Similar tables exist for groups, degree programs, internal co-supervisors and external co-supervisors, enabling multiple entries for each category.
-- proposalGroup(**proposal_id**, **cod_group**)
-- proposalCds(**proposal_id**, **cod_degree**)
-- thesisInternalCoSupervisor(**proposal_id**, **co_supervisor_id**)
-- externalCoSupervisor(**id**, surname, name, email)
-- thesisExternalCoSupervisor(**proposal_id**, **co_supervisor_id**)
-- thesisApplication(**id**, proposal_id, student_id, creation_date, status)
+- proposalKeyword (**proposal_id**, **keyword**)
+   
+  → This table stores the keywords for each proposal, allowing multiple keywords for the same proposal. Similar tables exist for groups, degree programs, internal co-supervisors and external co-supervisors, enabling multiple entries for each category.
+- proposalGroup (**proposal_id**, **cod_group**)
+- proposalCds (**proposal_id**, **cod_degree**)
+- thesisInternalCoSupervisor (**proposal_id**, **co_supervisor_id**)
+- externalCoSupervisor (**id**, surname, name, email)
+- thesisExternalCoSupervisor (**proposal_id**, **co_supervisor_id**)
+- thesisApplication (**id**, proposal_id, student_id, creation_date, status)
+    
   → this table stores the applications for the thesis proposals (related to a specific thesis proposal -> proposal_id and made by a specific student -> student_id). The status attribute is by defeault 'waiting for approval', but it can be set to 'approved' or 'rejected'.
-- thesiStartRequest(**id**, student_id, application_id, proposal_id, title, description, supervisor_id, creation_date, approval_date, status)
+- thesiStartRequest (**id**, student_id, application_id, proposal_id, title, description, supervisor_id, creation_date, approval_date, status)
+    
   → this table captures comprehensive details to characterize a thesis start request. The student_id, supervisor_id, and creation_date attributes are non-nullable because initiating a request necessitates essential information such as the student making the request, the professor to whom it is addressed, and the date indicating when the request was made. On the other hand, all the other attributes can be null because we want to allow the possibility to make a start request and then complete all the information after discussing it (as requested by the specifications).
-- thesisStartCosupervisor(**start_request_id**, **cosupervisor_id**)
+- thesisStartCosupervisor (**start_request_id**, **cosupervisor_id**)
+   
   → this table allows to have multiple co-supervisors for the same thesis start request.
 
 
