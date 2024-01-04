@@ -54,6 +54,23 @@ exports.getStudentCareer = (id) => {
     });
 };
 
+/**
+ * Return the full teacher date associated to the given id
+ *
+ * @param {string} id
+ * @return {Promise<TeacherRow | null>}
+ */
+exports.getTeacherById = (id) => {
+    return new Promise( resolve => {
+        const sql = 'SELECT * FROM teacher WHERE id = ?';
+        const row = db.prepare(sql).get(id);
+        if (!row) {
+            resolve(null);
+        }
+        resolve(row);
+    })
+};
+
 
 /**
  * @typedef {Object} DegreePartialRow
