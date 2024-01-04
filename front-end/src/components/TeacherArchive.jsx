@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { message, Space, Table, Tag, Tooltip } from 'antd';
 import { EditOutlined, EyeOutlined, DeleteOutlined, SelectOutlined } from '@ant-design/icons';
 import API from '../API';
-import { useAuth } from './authentication/useAuth';
+
 
 function TeacherArchive() {
 
@@ -14,8 +14,6 @@ function TeacherArchive() {
     const [isLoadingTable, setIsLoadingTable] = useState(true);
 
     const navigate = useNavigate();
-
-    const { accessToken } = useAuth();
 
     const [dirty, setDirty] = useState(true);
 
@@ -109,9 +107,9 @@ function TeacherArchive() {
     };
 
     useEffect(() => {
-        if (accessToken && dirty) {
+        if (dirty) {
             setIsLoadingTable(true);
-            API.getArchievedThesisProposals(accessToken)
+            API.getArchivedThesisProposals()
                 .then((x) => {
                     setData(handleReceivedData(x));
                     setIsLoadingTable(false);
@@ -123,7 +121,7 @@ function TeacherArchive() {
                     setDirty(false);
                 });
         }
-    }, [accessToken, dirty]);
+    }, [dirty]);
 
     function handleReceivedData(data) {
 
@@ -139,8 +137,8 @@ function TeacherArchive() {
 
     async function deleteProposalById(id) {
         try {
-            await API.deleteProposalById(id, accessToken);
-            message.success("Deleted proposal " + id);
+            await API.deleteProposalById(id);
+            message.success("Thesis proposal deleted successfully");
             setDirty(true);
         } catch (err) {
             message.error(err.message ? err.message : err);
@@ -150,7 +148,8 @@ function TeacherArchive() {
 
     async function publishProposalById(id) {
         try {
-            await API.publishProposalById(id, accessToken);
+            await API.publishProposalById(id);
+            message.success("Proposal published successfully");
             setDirty(true);
         } catch (err) {
             setIsLoadingTable(false);

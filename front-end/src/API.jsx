@@ -100,6 +100,38 @@ async function getThesisProposals() {
     }
 }
 
+// GET Archived Thesis Proposals
+async function getArchivedThesisProposals() {
+    const response = await fetch(URL + '/archived-thesis-proposals/', {
+        method: 'GET',
+        credentials: 'include',
+    });
+    const proposals = await response.json();
+    if (response.ok) {
+        return proposals.items.map((x) => ({
+            id: x.id,
+            key: x.id,
+            title: x.title,
+            supervisor: x.supervisor,
+            internalCoSupervisors: x.coSupervisors.internal ?? [],
+            externalCoSupervisors: x.coSupervisors.external ?? [],
+            type: x.type,
+            description: x.description,
+            requiredKnowledge: x.requiredKnowledge ?? "",
+            notes: x.notes ?? "",
+            expiration: x.expiration.substring(0, 10),
+            level: x.level,
+            groups: x.groups,
+            keywords: x.keywords,
+            cds: x.cds
+        }))
+    } else {
+        throw proposals;
+    }
+}
+
+
+
 // GET Thesis Proposals by given id
 async function getThesisProposalbyId(id) {
     const response = await fetch(URL + `/thesis-proposals/${id}`, {
@@ -328,6 +360,18 @@ async function archiveProposalById(id) {
     }
 }
 
+async function publishProposalById(id) {
+    const response = await fetch(URL + `/thesis-proposals/publish/${id} `, {
+        method: 'PATCH',
+        credentials: 'include'
+    });
+    if (response.ok) {
+        return response;
+    } else {
+        throw response;
+    }
+}
+
 async function deleteProposalById(id) {
     const response = await fetch(URL + `/thesis-proposals/${id} `, {
         method: 'DELETE',
@@ -399,6 +443,6 @@ const API = {
     getUser,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById, getPDF
+    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById, getPDF, getArchivedThesisProposals, publishProposalById
 };
 export default API;
