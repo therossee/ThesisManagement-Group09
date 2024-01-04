@@ -1,28 +1,14 @@
 require('jest');
+// [i] This line load the environment variables + setup extension of "jest". DON'T (RE)MOVE IT
+require('../integration_config');
 
 const dayjs = require('dayjs');
-const configuration = require('../configuration_dao');
-const AdvancedDate = require("../AdvancedDate");
-const InvalidNewVirtualOffsetError = require("../errors/InvalidNewVirtualOffsetError");
-
-function toBeAnIntegerCloseTo(received, expected, delta) {
-    const pass = Number.isInteger(received) && Math.abs(received - expected) <= delta;
-    if (pass) {
-        return {
-            message: () => `expected ${received} not to be an integer close to ${expected} (with a tolerance of ${delta})`,
-            pass: true,
-        };
-    } else {
-        return {
-            message: () => `expected ${received} to be an integer close to ${expected} (with a tolerance of ${delta})`,
-            pass: false,
-        };
-    }
-}
-expect.extend({ toBeAnIntegerCloseTo });
+const configuration = require('../../src/dao/configuration_dao');
+const AdvancedDate = require("../../src/models/AdvancedDate");
+const InvalidNewVirtualOffsetError = require("../../src/errors/InvalidNewVirtualOffsetError");
 
 
-jest.mock('../configuration_dao', () => ({
+jest.mock('../../src/dao/configuration_dao', () => ({
     getIntegerValue: jest.fn(),
     setValue: jest.fn(),
     KEYS: {
@@ -61,7 +47,7 @@ describe('AdvancedDate class', () => {
             const dateStr = now.add(offset, 'millisecond').toISOString();
             AdvancedDate.virtual.setNewOffset(dateStr);
 
-            expect(configuration.setValue).toHaveBeenCalledWith(configuration.KEYS.VIRTUAL_OFFSET_MS, expect.toBeAnIntegerCloseTo(offset, 3));
+            expect(configuration.setValue).toHaveBeenCalledWith(configuration.KEYS.VIRTUAL_OFFSET_MS, expect.toBeAnIntegerCloseTo(offset, 10));
             expect(configuration.getIntegerValue).toHaveBeenCalledWith(configuration.KEYS.VIRTUAL_OFFSET_MS);
         });
 

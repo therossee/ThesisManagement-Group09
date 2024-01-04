@@ -1,7 +1,7 @@
 const dayjs = require('dayjs');
 dayjs.extend(require('dayjs/plugin/utc'));
-const InvalidNewVirtualOffsetError = require("./errors/InvalidNewVirtualOffsetError");
-const configuration = require('./configuration_dao');
+const InvalidNewVirtualOffsetError = require("../errors/InvalidNewVirtualOffsetError");
+const configuration = require('../dao/configuration_dao');
 
 class VirtualClock {
     static get offsetMs() {

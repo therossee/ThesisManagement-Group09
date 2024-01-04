@@ -1,5 +1,5 @@
 'use strict';
-const db = require('./db');
+const db = require('../services/db');
 
 /* Data Access Object (DAO) module for accessing configuration data */
 
