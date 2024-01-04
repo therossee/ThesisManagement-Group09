@@ -12,7 +12,6 @@ async function getStudentCareer(req, res, next) {
     try {
         const studentId = req.params.id;
         const student = await usersDao.getStudentById(studentId);
-        console.log('student', student);
         if (!student) {
             return res.status(404).json({ message: `Student with id ${studentId} not found.` });
         }
