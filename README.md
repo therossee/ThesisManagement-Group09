@@ -23,7 +23,7 @@ docker build -t apokalypt/09_thesis_management .
 _N.B. A working image is available on Docker Hub at [this link](https://hub.docker.com/r/apokalypt/09_thesis_management)._
 ### Run container
 ```
-docker run -p 5173:5173 -p 3000:3000 --name thesis_management apokalypt/09_thesis_management -e <...>
+docker run -p 5173:5173 -p 3000:3000 --name thesis_management -e <...> apokalypt/09_thesis_management
 ```
 _For the environment variables, see the [Environment variables](#environment-variables) section._
 ### External documentation
