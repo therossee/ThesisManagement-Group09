@@ -1,6 +1,6 @@
 require('jest');
 // [i] This line setup the test database + load the environment variables. DON'T (RE)MOVE IT
-const {resetTestDatabase} = require('../integration_config');
+const { resetTestDatabase, initImapClient, closeImapClient, searchEmails} = require('../integration_config');
 
 const request = require("supertest");
 const {app} = require("../../src/app");
@@ -20,7 +20,12 @@ beforeEach(() => {
 
 let agent;
 beforeAll(async () => {
+    await initImapClient();
     agent = await utils.getMolinattoSylvieAgent(app);
+});
+
+afterAll(async () => {
+    await closeImapClient();
 });
 
 describe('GET /api/thesis-proposals (student)', () => {
@@ -227,7 +232,7 @@ describe('POST /api/student/applications', () => {
         await fse.remove('uploads');
     });
 
-    test('should create a new application for a valid request', async () => {
+    test('should create a new application for a valid request and notify teacher', async () => {
         // Create a sample file to be uploaded
         const filePath = path.join(uploadDir, 'sample.pdf');
         fs.writeFileSync(filePath, 'This is a sample file.');
@@ -260,7 +265,18 @@ describe('POST /api/student/applications', () => {
             status: 'waiting for approval',
         });
 
-    });
+        // Wait for a moment to allow the email to be processed (adjust the timing as needed)
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        const subject = 'New Application - PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API';
+        const to = 'd279620@polito.it';
+        // Search for the email (adjust criteria as needed)
+        const searchResults = await searchEmails(to, subject);
+
+        // Assert that the email has been received
+        expect(searchResults.length).toBeGreaterThan(0);
+
+    },10000);
 
     test('should return 401 status error for if a not logged user try to apply to a thesis proposal', async () => {
         const response = await request(app)
