@@ -1,6 +1,7 @@
 const formidable = require("formidable");
 const thesisDao = require("../dao/thesis_dao");
 const usersDao = require("../dao/users_dao");
+const NotificationService = require("../services/NotificationService");
 
 /**
  * @param {PopulatedRequest} req
@@ -11,7 +12,6 @@ async function getStudentCareer(req, res, next) {
     try {
         const studentId = req.params.id;
         const student = await usersDao.getStudentById(studentId);
-        console.log('student', student);
         if (!student) {
             return res.status(404).json({ message: `Student with id ${studentId} not found.` });
         }
@@ -42,7 +42,7 @@ async function getStudentActiveApplication(req, res, next) {
  * @param {import('express').Response} res
  * @param {import('express').NextFunction} next
  */
-async function getStudentApplications(req, res, next) {
+async function applyForProposal(req, res, next) {
     const form = new formidable.IncomingForm();
     form.parse(req, async (err, fields, files) => {
         if (err) {
@@ -56,6 +56,9 @@ async function getStudentApplications(req, res, next) {
 
         try {
             const applicationId = await thesisDao.applyForProposal(thesis_proposal_id, student_id, upload);
+
+            await NotificationService.emitNewApplicationCreated(applicationId, student_id, thesis_proposal_id);
+
             res.status(201).json({
                 application_id: applicationId,
                 thesis_proposal_id: thesis_proposal_id,
@@ -86,6 +89,6 @@ async function getStudentApplicationDecision(req, res, next) {
 module.exports = {
     getStudentCareer,
     getStudentActiveApplication,
-    getStudentApplications,
+    applyForProposal,
     getStudentApplicationDecision,
 };

@@ -644,6 +644,24 @@ exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
   })
 };
 
+/**
+ * Return the application with the given id
+ *
+ * @param {number} applicationId
+ * @return {Promise<ThesisApplicationRow | null>}
+ */
+exports.getThesisApplicationById = (applicationId) => {
+    return new Promise((resolve) => {
+        const query = `SELECT * FROM thesisApplication WHERE id = ?`;
+        const res = db.prepare(query).get(applicationId);
+        if (!res) {
+            resolve(null);
+        }
+
+        resolve(res);
+    })
+};
+
 exports.getStudentActiveApplication = (student_id) => {
   return new Promise((resolve) => {
     const currentDate = new AdvancedDate().toISOString();
