@@ -22,11 +22,17 @@ The project includes a file named 'database.sqlite' located in the 'database' fo
 
 ## Features
 
-Highlight key features and capabilities of the database (database type, technology, ...).
+The database is a **relational database**, which means that it stores data in tables with defined relationships between them. This structure makes it easy to query and manage data, and it is also well-suited for storing complex relationships between entities like students, thesis proposals, supervisors, and co-supervisors.
+The database is **implemented using SQLite**, which is a lightweight, embedded SQL database engine that is often used for personal applications or for storing data within applications. It is a good choice for this project because it is easy to use and deploy, and it is also relatively efficient for the size of data that will be stored.
+Key Features:
+- _Data integrity_: Foreign key constraints are used to ensure referential integrity between tables, maintaining consistency and preventing orphaned records. This means that for example when a student is deleted, their thesis proposals are also deleted, and when a thesis proposal is deleted, the associated applications and start requests are also deleted. This helps to maintain data consistency.
+- _Normalization_: The database is normalized to the third normal form, which means that it is well-organized and less likely to contain data anomalies. Redundancy and dependency issues in the data are minimized.
+- _Auto-incrementing IDs_: Certain tables use auto-incrementing primary key IDs, ensuring the automatic generation of unique identifiers for each record.
+- _Default values_: Default values are defined for certain columns, providing a fallback option if a value is not explicitly provided during record creation.
 
 ## Getting Started
 
-Instructions on how to set up and use the database. (how to install sqlite3 and see the content)
+In this section you will fine instructions on how to set up, use and consult the database.
 
 ### Prerequisites
 
@@ -70,7 +76,7 @@ In our database there are the following tables:
   → this table stores the applications for the thesis proposals (related to a specific thesis proposal -> proposal_id and made by a specific student -> student_id). The status attribute is by defeault 'waiting for approval', but it can be set to 'approved' or 'rejected'.
 - thesiStartRequest (**id**, student_id, application_id, proposal_id, title, description, supervisor_id, creation_date, approval_date, status)
     
-  → this table captures comprehensive details to characterize a thesis start request. The student_id, supervisor_id, and creation_date attributes are non-nullable because initiating a request necessitates essential information such as the student making the request, the professor to whom it is addressed, and the date indicating when the request was made. On the other hand, all the other attributes can be null because we want to allow the possibility to make a start request and then complete all the information after discussing it (as requested by the specifications).
+  → this table captures comprehensive details to characterize a thesis start request. The student_id, supervisor_id, title, description and creation_date attributes are non-nullable because initiating a request necessitates essential information such as the student making the request, the professor to whom it is addressed, the title of the start request, a description of it and the date indicating when the request was made. On the other hand, all the other attributes can be null because we want to allow the possibility to make a start request and then complete all the information after discussing it (as requested by the specifications).
 - thesisStartCosupervisor (**start_request_id**, **cosupervisor_id**)
    
   → this table allows to have multiple co-supervisors for the same thesis start request.
@@ -242,8 +248,8 @@ Here, a more detailed visualisation of the tables:
 | student_id        | text   | **NOT NULL, FK** [student](#student)(**id**)            |
 | application_id    | INTEGER|                                                         |
 | proposal_id       | integer| **FK** [thesisProposal](#thesisProposal)(**proposal_id**) |
-| title             | text   |                                                         |
-| description       | text   |                                                         |
+| title             | text   |             **NOT NULL**                                            |
+| description       | text   |     **NOT NULL**                                                    |
 | supervisor_id     | text   | **NOT NULL, FK** [teacher](#teacher)(**id**)            |
 | creation_date     | date   | **NOT NULL**                                            |
 | approval_date     | date   |                                                         |
@@ -261,7 +267,36 @@ Here, a more detailed visualisation of the tables:
 
 
 ### Relationships
-Explain the relationships between different tables.
+
+#### Degree and Student:
+- **Relationship:** The `student` table has a foreign key `cod_degree` that references the `degree` table's primary key `cod_degree`.
+- **Explanation:** This relationship indicates the academic degree program to which a student is enrolled.
+---
+#### Teacher and ThesisProposal:
+- **Relationship:** The `thesisProposal` table has a foreign key `supervisor_id` that references the `teacher` table's primary key `id`.
+- **Explanation:** This relationship establishes the connection between a thesis proposal and the teacher who serves as its supervisor (essentially the one who created the thesis proposal).
+---
+#### ThesisProposal and ThesisInternalCoSupervisor, ThesisExternalCoSupervisor, ProposalKeyword, ProposalGroup, ProposalCds:
+- **Relationship:** These tables all have a foreign key `proposal_id` that references the `thesisProposal` table's primary key `proposal_id`.
+- **Explanation:** This relationships connect internal/external co-supervisors, keywords, groups and cds-es to specific thesis proposals to allow a 1-n relationship with the same proposal.
+---
+#### Teacher and ThesisInternalCoSupervisor, thesisStartCosupervisor:
+- **Relationship:** Both of these tables have a filed `cosupervisor_id` that references teacher `id` primary key.
+- **Explanation:** This relationship establishes a connection between internal co-supervisors and existing teachers.
+---
+#### ThesisApplication and Student:
+- **Relationship:** The `thesisApplication` table has a foreign key `student_id` that references the `student` table's primary key `id`.
+- **Explanation:** This relationship links thesis applications to the specific students that made the application for a thesis.
+---
+#### ThesisApplication and ThesisProposal:
+- **Relationship:** The `thesisApplication` table has a foreign key `proposal_id` that references the `thesisProposal` table's primary key `proposal_id`.
+- **Explanation:** This relationship associates thesis applications with specific thesis proposals.
+---
+#### ThesisStartRequest and Teacher:
+- **Relationship:** The `thesisStartRequest` table has a foreign key `supervisor_id` that references the `teacher` table's primary key `id`.
+- **Explanation:** This relationship connects thesis start requests with the teacher who will be the supervisor.
+---
+
 
 ## Sample Queries
 Include sample SQL queries to demonstrate basic operations and common use cases.
