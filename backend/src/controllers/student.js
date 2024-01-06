@@ -179,11 +179,26 @@ async function newThesisStartRequest(req, res, next) {
     }
 }
 
+/**
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+async function getStudentActiveThesisStartRequests(req, res, next) {  
+    try {
+        const studentId = req.user.id;
+        const studentThesisStartRequests = await thesisDao.getStudentActiveThesisStartRequests(studentId);
+        res.json(studentThesisStartRequests);
+    } catch (e) {
+        next(e);
+    }
+}
 
 module.exports = {
     getStudentCareer,
     getStudentActiveApplication,
     applyForProposal,
     getStudentApplicationDecision,
-    newThesisStartRequest
+    newThesisStartRequest,
+    getStudentActiveThesisStartRequests
 };
