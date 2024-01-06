@@ -2,11 +2,10 @@
 
 ## Database File
 
-The project includes a file named 'database.sqlite' located in the 'database' folder. This file contains the actual database used by the project. You can explore the tables and fields described in this documentation section by opening the 'database.sqlite' file.
+The project includes a file named 'database.sqlite' located in the 'database' folder. This file contains the actual database used by the project.
 
 ## Table of Contents
 
-- [Introduction](#introduction)
 - [Features](#features)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
@@ -16,14 +15,12 @@ The project includes a file named 'database.sqlite' located in the 'database' fo
   - [Relationships](#relationships)
 - [Sample Queries](#sample-queries)
 
-## Introduction
-
-
-
 ## Features
 
 The database is a **relational database**, which means that it stores data in tables with defined relationships between them. This structure makes it easy to query and manage data, and it is also well-suited for storing complex relationships between entities like students, thesis proposals, supervisors, and co-supervisors.
-The database is **implemented using SQLite**, which is a lightweight, embedded SQL database engine that is often used for personal applications or for storing data within applications. It is a good choice for this project because it is easy to use and deploy, and it is also relatively efficient for the size of data that will be stored.
+  
+The database is **implemented using SQLite**, which is a lightweight, embedded SQL database engine that is often used for personal applications or for storing data within applications. It is a good choice for this project because it is easy to use and deploy, and it is also relatively efficient for the size of the stored data.
+  
 Key Features:
 - _Data integrity_: Foreign key constraints are used to ensure referential integrity between tables, maintaining consistency and preventing orphaned records. This means that for example when a student is deleted, their thesis proposals are also deleted, and when a thesis proposal is deleted, the associated applications and start requests are also deleted. This helps to maintain data consistency.
 - _Normalization_: The database is normalized to the third normal form, which means that it is well-organized and less likely to contain data anomalies. Redundancy and dependency issues in the data are minimized.
@@ -32,7 +29,7 @@ Key Features:
 
 ## Getting Started
 
-In this section you will fine instructions on how to set up, use and consult the database.
+In this section you will find instructions on how to set up, use and consult the database.
 
 ### Prerequisites
 
@@ -281,7 +278,7 @@ Here, a more detailed visualisation of the tables:
 - **Explanation:** This relationships connect internal/external co-supervisors, keywords, groups and cds-es to specific thesis proposals to allow a 1-n relationship with the same proposal.
 ---
 #### Teacher and ThesisInternalCoSupervisor, thesisStartCosupervisor:
-- **Relationship:** Both of these tables have a filed `cosupervisor_id` that references teacher `id` primary key.
+- **Relationship:** Both of these tables have a field `cosupervisor_id` that references teacher `id` primary key.
 - **Explanation:** This relationship establishes a connection between internal co-supervisors and existing teachers.
 ---
 #### ThesisApplication and Student:
