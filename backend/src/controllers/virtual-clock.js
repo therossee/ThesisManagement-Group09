@@ -1,5 +1,6 @@
 const AdvancedDate = require("../models/AdvancedDate");
 const schemas = require("../schemas");
+const CronTaskService = require("../services/CronTasksService");
 
 /**
  * @param {PopulatedRequest} req
@@ -25,6 +26,8 @@ function updateVirtualClockState(req, res, next) {
         const { newDate } = schemas.APIVirtualClockUpdateSchema.parse(req.body);
 
         AdvancedDate.virtual.setNewOffset(newDate || 0);
+
+        CronTaskService.fireJob(CronTaskService.JOB_NAMES.THESIS_EXPIRED);
 
         const json = {
             date: AdvancedDate.virtual.getVirtualDate().toISOString(),
