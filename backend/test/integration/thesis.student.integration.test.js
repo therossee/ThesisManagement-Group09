@@ -1,12 +1,12 @@
 require('jest');
 // [i] This line setup the test database + load the environment variables. DON'T (RE)MOVE IT
-const {resetTestDatabase} = require('../integration_config');
+const { resetTestDatabase, initImapClient, closeImapClient, searchEmails} = require('../integration_config');
 
 const request = require("supertest");
-const {app} = require("../../app");
+const {app} = require("../../src/app");
 const utils = require("../utils");
-const thesisDao = require('../../thesis_dao');
-const db = require('../../db');
+const thesisDao = require('../../src/dao/thesis_dao');
+const db = require('../../src/services/db');
 const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
@@ -20,7 +20,12 @@ beforeEach(() => {
 
 let agent;
 beforeAll(async () => {
+    await initImapClient();
     agent = await utils.getMolinattoSylvieAgent(app);
+});
+
+afterAll(async () => {
+    await closeImapClient();
 });
 
 describe('GET /api/thesis-proposals (student)', () => {
@@ -227,7 +232,7 @@ describe('POST /api/student/applications', () => {
         await fse.remove('uploads');
     });
 
-    test('should create a new application for a valid request', async () => {
+    test('should create a new application for a valid request and notify teacher', async () => {
         // Create a sample file to be uploaded
         const filePath = path.join(uploadDir, 'sample.pdf');
         fs.writeFileSync(filePath, 'This is a sample file.');
@@ -260,7 +265,18 @@ describe('POST /api/student/applications', () => {
             status: 'waiting for approval',
         });
 
-    });
+        // Wait for a moment to allow the email to be processed (adjust the timing as needed)
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        const subject = 'New Application - PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API';
+        const to = 'd279620@polito.it';
+        // Search for the email (adjust criteria as needed)
+        const searchResults = await searchEmails(to, subject);
+
+        // Assert that the email has been received
+        expect(searchResults.length).toBeGreaterThan(0);
+
+    },10000);
 
     test('should return 401 status error for if a not logged user try to apply to a thesis proposal', async () => {
         const response = await request(app)
@@ -284,11 +300,10 @@ describe('POST /api/student/applications', () => {
         const response = await agent
             .post('/api/student/applications')
             .set('credentials', 'include')
-            .field('thesis_proposal_id', thesis_proposal_id)
-            .expect(500);
+            .field('thesis_proposal_id', thesis_proposal_id);
 
-        expect(response.status).toBe(500);
-        expect(response.body).toEqual('Failed to apply for proposal. The proposal doesn\'t belong to the student degree');
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ message: "The proposal doesn't belong to the student degree" });
     });
 
     test('should reject if the student apply for an archived proposal', async () => {
@@ -313,8 +328,8 @@ describe('POST /api/student/applications', () => {
             .set('credentials', 'include')
             .field('thesis_proposal_id', thesis_proposal_id);
 
-        expect(response.status).toBe(500);
-        expect(response.body).toEqual('Failed to apply for proposal. The proposal is not active');
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ message: "The proposal is not active" });
 
     });
 
@@ -338,8 +353,8 @@ describe('POST /api/student/applications', () => {
             .set('credentials', 'include')
             .field('thesis_proposal_id', thesis_proposal_id);
 
-        expect(response.status).toBe(500);
-        expect(response.body).toEqual('Failed to apply for proposal. The user has already applied for other proposals');
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ message: "The user has already applied for other proposals" });
 
     });
 
@@ -374,7 +389,7 @@ describe('POST /api/student/applications', () => {
             .attach('file', filePath);
 
         expect(response.status).toBe(500);
-        expect(response.body).toEqual('Failed to apply for proposal. Error: Simulated mkdirSync error');
+        expect(response.body).toEqual("Internal Server Error");
     });
 
     test('should handle error while inserting application', async () => {
@@ -405,10 +420,10 @@ describe('POST /api/student/applications', () => {
             .post('/api/student/applications')
             .set('credentials', 'include')
             .field('thesis_proposal_id', thesis_proposal_id)
-            .attach('file', filePath)
-            .expect(500);
+            .attach('file', filePath);
 
-        expect(response.body).toEqual('Failed to apply for proposal. Simulated database insertion error');
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual("Internal Server Error");
 
     });
 
@@ -432,10 +447,10 @@ describe('POST /api/student/applications', () => {
             .post('/api/student/applications')
             .set('credentials', 'include')
             .field('thesis_proposal_id', thesis_proposal_id)
-            .attach('file', filePath)
-            .expect(500);
+            .attach('file', filePath);
 
-        expect(response.body).toEqual({message: 'Internal Server Error'});
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Internal Server Error');
     });
 
     test('should handle generic errors gracefully', async () => {
@@ -447,10 +462,10 @@ describe('POST /api/student/applications', () => {
         const response = await agent
             .post('/api/student/applications')
             .set('credentials', 'include')
-            .field('thesis_proposal_id', '2')
-            .expect(500);
+            .field('thesis_proposal_id', '2');
 
-        expect(response.body).toEqual('Failed to apply for proposal. Simulated error');
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Internal Server Error');
 
     });
 

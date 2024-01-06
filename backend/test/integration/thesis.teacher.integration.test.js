@@ -3,20 +3,20 @@ require('jest');
 const { resetTestDatabase, initImapClient, closeImapClient, searchEmails} = require('../integration_config');
 
 const request = require("supertest");
-const {app} = require("../../app");
+const {app} = require("../../src/app");
 const utils = require("../utils");
-const thesisDao = require('../../thesis_dao');
-const usersDao = require('../../users_dao');
-const db = require('../../db');
+const thesisDao = require('../../src/dao/thesis_dao');
+const usersDao = require('../../src/dao/users_dao');
+const db = require('../../src/services/db');
 const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
 
-let agent;
+let marcoRossiAgent;
 beforeAll(async () => {
     await initImapClient();
-    agent = await utils.getMarcoRossiAgent(app);
-});
+    marcoRossiAgent = await utils.getMarcoRossiAgent(app);
+}, 2_000);
 beforeEach(() => {
     // Be sure that we are using a full clean database before each test
     resetTestDatabase();
@@ -30,7 +30,7 @@ afterAll(async () => {
 describe('GET /api/teachers', () => {
     test('returns a list of teachers excluding the logged-in teacher', async () => {
         // Make the authenticated request
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/teachers')
             .set('Accept', 'application/json')
             .set('credentials', 'include');
@@ -50,7 +50,7 @@ describe('GET /api/teachers', () => {
     test('handles internal server error gracefully', async () => {
         jest.spyOn(thesisDao, 'getTeacherListExcept').mockRejectedValueOnce(new Error());
 
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/teachers')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
@@ -63,7 +63,7 @@ describe('GET /api/teachers', () => {
 
 describe('GET /api/externalCoSupervisors', () => {
     test('returns the list of external co-supervisors', async () => {
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/externalCoSupervisors')
             .set('Accept', 'application/json')
             .set('credentials', 'include');
@@ -81,7 +81,7 @@ describe('GET /api/externalCoSupervisors', () => {
     test('handles internal server error gracefully', async () => {
         jest.spyOn(thesisDao, 'getExternalCoSupervisorList').mockRejectedValueOnce(new Error());
 
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/externalCoSupervisors')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
@@ -108,7 +108,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
             keywords: ['test', 'keywords'],
         };
 
-        const response = await agent
+        const response = await marcoRossiAgent
             .post('/api/teacher/thesis_proposals')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
@@ -148,7 +148,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
             keywords: ['test', 'keywords'],
         };
 
-        const response = await agent
+        const response = await marcoRossiAgent
             .post('/api/teacher/thesis_proposals')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
@@ -187,7 +187,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
             keywords: ['test', 'keywords'],
         };
 
-        const response = await agent
+        const response = await marcoRossiAgent
             .post('/api/teacher/thesis_proposals')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
@@ -237,7 +237,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
             keywords: ['test', 'keywords'],
         };
 
-        const response = await agent
+        const response = await marcoRossiAgent
             .post('/api/teacher/thesis_proposals')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
@@ -266,7 +266,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
             keywords: ['test', 'keywords'],
         };
 
-        const response = await agent
+        const response = await marcoRossiAgent
             .post('/api/teacher/thesis_proposals')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
@@ -282,7 +282,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
 describe('GET /api/keywords', () => {
     test('should return an array of keywords', async () => {
         // Send a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/keywords')
             .set('credentials', 'include');
 
@@ -297,7 +297,7 @@ describe('GET /api/keywords', () => {
         jest.spyOn(thesisDao, 'getAllKeywords').mockRejectedValueOnce(new Error());
 
         // Send a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/keywords')
             .set('credentials', 'include');
 
@@ -310,7 +310,7 @@ describe('GET /api/keywords', () => {
 describe('GET /api/degrees', () => {
     test('should return an array of degrees', async () => {
         // Send a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/degrees')
             .set('credentials', 'include');
 
@@ -326,7 +326,7 @@ describe('GET /api/degrees', () => {
         jest.spyOn(thesisDao, 'getDegrees').mockRejectedValueOnce(new Error());
 
         // Send a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/degrees')
             .set('credentials', 'include');
 
@@ -341,7 +341,7 @@ describe('GET /api/thesis-proposals (teacher)', () => {
         // Signed in as Marco Rossi
 
         // Send a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/thesis-proposals')
             .set('credentials', 'include')
             .send();
@@ -364,7 +364,7 @@ describe('GET /api/thesis-proposals (teacher)', () => {
         jest.spyOn(thesisDao, 'listThesisProposalsTeacher').mockRejectedValueOnce(new Error());
 
         // Send a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/thesis-proposals')
             .set('credentials', 'include');
 
@@ -376,7 +376,7 @@ describe('GET /api/thesis-proposals (teacher)', () => {
 
 describe('GET /api/thesis-proposals/:id (teacher)', () => {
     test('should return the thesis proposal', async () => {
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/thesis-proposals/1')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
@@ -421,7 +421,7 @@ describe('GET /api/thesis-proposals/:id (teacher)', () => {
         });
     });
     test('should return error 404 if no thesis match the ID', async () => {
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/thesis-proposals/123')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
@@ -440,7 +440,7 @@ describe('GET /api/thesis-proposals/:id (teacher)', () => {
     test('should return error 500 if dao throws an error', async () => {
         jest.spyOn(thesisDao, 'getThesisProposalTeacher').mockRejectedValueOnce(new Error());
 
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/thesis-proposals/1')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
@@ -453,7 +453,7 @@ describe('GET /api/thesis-proposals/:id (teacher)', () => {
 
 describe('PUT /api/thesis-proposals/:id', () => {
     test('should update a thesis proposal successfully', async () => {
-        const responseGet = await agent
+        const responseGet = await marcoRossiAgent
             .get('/api/thesis-proposals/1')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
@@ -474,7 +474,7 @@ describe('PUT /api/thesis-proposals/:id', () => {
             internal_co_supervisors_id: [],
             external_co_supervisors_id: []
         };
-        const response = await agent
+        const response = await marcoRossiAgent
             .put(`/api/thesis-proposals/1`)
             .set('credentials', 'include')
             .send(updatedBody);
@@ -511,7 +511,7 @@ describe('PUT /api/thesis-proposals/:id', () => {
 
     test('should return 403 error if the proposal has accepted applications', async () => {
         // Make the request to your API
-        const response = await agent
+        const response = await marcoRossiAgent
             .put(`/api/thesis-proposals/3`)
             .set('credentials', 'include')
             .send({});
@@ -530,14 +530,14 @@ describe('PUT /api/thesis-proposals/:id', () => {
             description: 'Test description',
             required_knowledge: 'Test knowledge',
             notes: 'Test notes',
-            expiration: '2023-12-31',
+            expiration: '2032-12-31',
             level: 'Bachelor',
             cds: ['L-08'],
             keywords: ['test', 'keywords'],
         };
 
         // Make the request to your API
-        const response = await agent
+        const response = await marcoRossiAgent
             .put(`/api/thesis-proposals/32`)
             .set('credentials', 'include')
             .send(body);
@@ -563,7 +563,7 @@ describe('PUT /api/thesis-proposals/:id', () => {
         };
 
         // Make the request to your API
-        const response = await agent
+        const response = await marcoRossiAgent
             .put(`/api/thesis-proposals/1`)
             .set('credentials', 'include')
             .send(mockBody);
@@ -587,7 +587,7 @@ describe('PUT /api/thesis-proposals/:id', () => {
         );
     });
     test('should return 400 if expiration date is invalid', async () => {
-        const responseGet = await agent
+        const responseGet = await marcoRossiAgent
             .get('/api/thesis-proposals/1')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
@@ -608,7 +608,7 @@ describe('PUT /api/thesis-proposals/:id', () => {
             internal_co_supervisors_id: [],
             external_co_supervisors_id: []
         };
-        const response = await agent
+        const response = await marcoRossiAgent
             .put(`/api/thesis-proposals/1`)
             .set('credentials', 'include')
             .send(updatedBody);
@@ -621,7 +621,7 @@ describe('PUT /api/thesis-proposals/:id', () => {
     });
 
     test('should return 400 if expiration date is in the past', async () => {
-        const responseGet = await agent
+        const responseGet = await marcoRossiAgent
             .get('/api/thesis-proposals/1')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
@@ -642,7 +642,7 @@ describe('PUT /api/thesis-proposals/:id', () => {
             internal_co_supervisors_id: [],
             external_co_supervisors_id: []
         };
-        const response = await agent
+        const response = await marcoRossiAgent
             .put(`/api/thesis-proposals/1`)
             .set('credentials', 'include')
             .send(updatedBody);
@@ -672,7 +672,7 @@ describe('PUT /api/thesis-proposals/:id', () => {
         };
 
         // Make the request to your API
-        const response = await agent
+        const response = await marcoRossiAgent
             .put(`/api/thesis-proposals/1`)
             .set('credentials', 'include')
             .send(body);
@@ -686,7 +686,7 @@ describe('PUT /api/thesis-proposals/:id', () => {
 describe('GET /api/teacher/applications/:proposal_id', () => {
     test('should return an empty array of applications for a teacher and proposal', async () => {
         // Send a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/teacher/applications/1')
             .set('credentials', 'include');
 
@@ -700,7 +700,7 @@ describe('GET /api/teacher/applications/:proposal_id', () => {
             .run('s321529', 2, new Date().toISOString(), 'waiting for approval');
 
         // Send a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/teacher/applications/2')
             .set('credentials', 'include');
 
@@ -717,7 +717,7 @@ describe('GET /api/teacher/applications/:proposal_id', () => {
 
         jest.spyOn(thesisDao, 'listApplicationsForTeacherThesisProposal').mockRejectedValueOnce(new Error());
         // Send a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/teacher/applications/2')
             .set('credentials', 'include');
 
@@ -735,7 +735,7 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
             .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
 
         // Act
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch("/api/teacher/applications/accept/2")
             .send({student_id: 's318952'})
             .set('credentials', 'include')
@@ -757,7 +757,7 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
     }, 10000);
     test('should return 400 error if is missing student_id', async () => {
         // Act
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch("/api/teacher/applications/accept/2")
             .set('credentials', 'include');
 
@@ -767,7 +767,7 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
     });
     test('should refuse if the thesis doesn\'t exist', async () => {
         // Act
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch("/api/teacher/applications/accept/5")
             .send({student_id: 's318952'})
             .set('credentials', 'include');
@@ -778,7 +778,7 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
     });
     test('should return 404 error if no application has been found', async () => {
         // Act
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch("/api/teacher/applications/accept/2")
             .set('credentials', 'include')
             .send({student_id: 's4'});
@@ -795,7 +795,7 @@ describe('PATCH /api/teacher/applications/accept/:proposal_id', () => {
         const studentId = 's293605';
 
         // Act
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch(`/api/teacher/applications/accept/${proposalId}`)
             .set('credentials', 'include')
             .send({student_id: studentId});
@@ -814,7 +814,7 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
             .run('s318952', 2, new Date().toISOString(), 'waiting for approval');
 
         // Act
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch("/api/teacher/applications/reject/2")
             .send({student_id: 's321529'})
             .set('credentials', 'include')
@@ -836,7 +836,7 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
     }, 10000);
     test('should return 400 error if is missing student_id', async () => {
         // Act
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch("/api/teacher/applications/reject/2")
             .set('credentials', 'include');
 
@@ -846,7 +846,7 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
     });
     test('should refuse if the thesis doesn\'t exist', async () => {
         // Act
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch("/api/teacher/applications/reject/5")
             .send({student_id: 's318952'})
             .set('credentials', 'include');
@@ -857,7 +857,7 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
     });
     test('should return 404 error if no application has been found', async () => {
         // Act
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch("/api/teacher/applications/reject/2")
             .set('credentials', 'include')
             .send({student_id: 's4'});
@@ -874,7 +874,7 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
         const studentId = 's293605';
 
         // Act
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch(`/api/teacher/applications/reject/${proposalId}`)
             .set('credentials', 'include')
             .send({student_id: studentId});
@@ -888,7 +888,7 @@ describe('PATCH /api/teacher/applications/reject/:proposal_id', () => {
 describe('GET /api/student/:id/career', () => {
     test('should return the student\'s career', async () => {
         // Act
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/student/s318952/career')
             .set('credentials', 'include');
 
@@ -920,7 +920,7 @@ describe('GET /api/student/:id/career', () => {
     });
     test('should return ampty array if the student don\'t have exams', async () => {
         // Act
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/student/s320213/career')
             .set('credentials', 'include');
 
@@ -930,7 +930,7 @@ describe('GET /api/student/:id/career', () => {
     });
     test('should return 404 if the student don\'t exist', async () => {
         // Act
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/student/s12345/career')
             .set('credentials', 'include');
 
@@ -940,7 +940,7 @@ describe('GET /api/student/:id/career', () => {
     test('should return 500 if internal server error happens', async () => {
 
         jest.spyOn(usersDao, 'getStudentById').mockRejectedValueOnce(new Error());
-        const response = await agent
+        const response = await marcoRossiAgent
             .get('/api/student/s318952/career')
             .set('credentials', 'include');
 
@@ -955,7 +955,7 @@ describe('DELETE /api/thesis-proposals/:id', () => {
         const id = 1;
 
         // Make a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .delete(`/api/thesis-proposals/${id}`)
             .set('credentials', 'include');
 
@@ -969,7 +969,7 @@ describe('DELETE /api/thesis-proposals/:id', () => {
         const id = 1;
 
         // Make a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .delete(`/api/thesis-proposals/${id}`)
             .set('credentials', 'include');
 
@@ -991,7 +991,7 @@ describe('DELETE /api/thesis-proposals/:id', () => {
         const id = 3;
 
         // Make a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .delete(`/api/thesis-proposals/${id}`)
             .set('credentials', 'include');
 
@@ -1003,7 +1003,7 @@ describe('DELETE /api/thesis-proposals/:id', () => {
         const id = 4;
 
         // Make a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .delete(`/api/thesis-proposals/${id}`)
             .set('credentials', 'include');
 
@@ -1018,7 +1018,7 @@ describe('DELETE /api/thesis-proposals/:id', () => {
             .run(4, 'L-08');
 
         // Make a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .delete(`/api/thesis-proposals/4`)
             .set('credentials', 'include');
 
@@ -1032,7 +1032,7 @@ describe('DELETE /api/thesis-proposals/:id', () => {
         db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
             .run(4, 'L-08');
         // Make a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .delete(`/api/thesis-proposals/4`)
             .set('credentials', 'include');
 
@@ -1046,7 +1046,7 @@ describe('DELETE /api/thesis-proposals/:id', () => {
         db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
             .run(4, 'L-08');
         // Make a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .delete(`/api/thesis-proposals/4`)
             .set('credentials', 'include');
 
@@ -1058,7 +1058,7 @@ describe('DELETE /api/thesis-proposals/:id', () => {
         const id = 'nonExistingProposalId';
 
         // Make a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .delete(`/api/thesis-proposals/${id}`)
             .set('credentials', 'include');
 
@@ -1070,13 +1070,13 @@ describe('DELETE /api/thesis-proposals/:id', () => {
         jest.spyOn(thesisDao, 'deleteThesisProposalById').mockRejectedValueOnce(new Error());
 
         // Make a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .delete('/api/thesis-proposals/unexpectedErrorId')
             .set('credentials', 'include');
 
         // Assertions
         expect(response.status).toBe(500);
-        expect(response.body).toEqual({message: 'Internal Server Error'});
+        expect(response.body).toEqual('Internal Server Error');
     });
 });
 
@@ -1085,7 +1085,7 @@ describe('PATCH /api/thesis-proposals/archive/:id', () => {
         const id = 1;
 
         // Make a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch(`/api/thesis-proposals/archive/${id}`)
             .set('credentials', 'include');
 
@@ -1098,7 +1098,7 @@ describe('PATCH /api/thesis-proposals/archive/:id', () => {
         const id = 1;
 
         // Make a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch(`/api/thesis-proposals/archive/${id}`)
             .set('credentials', 'include');
 
@@ -1109,7 +1109,7 @@ describe('PATCH /api/thesis-proposals/archive/:id', () => {
         const id = 3;
 
         // Make a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch(`/api/thesis-proposals/archive/${id}`)
             .set('credentials', 'include');
 
@@ -1121,7 +1121,7 @@ describe('PATCH /api/thesis-proposals/archive/:id', () => {
         const id = 4;
 
         // Make a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch(`/api/thesis-proposals/archive/${id}`)
             .set('credentials', 'include');
 
@@ -1139,7 +1139,7 @@ describe('PATCH /api/thesis-proposals/archive/:id', () => {
         const id = 4;
 
         // Make a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch(`/api/thesis-proposals/archive/${id}`)
             .set('credentials', 'include');
 
@@ -1157,7 +1157,7 @@ describe('PATCH /api/thesis-proposals/archive/:id', () => {
         const id = 4;
 
         // Make a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch(`/api/thesis-proposals/archive/${id}`)
             .set('credentials', 'include');
 
@@ -1175,7 +1175,7 @@ describe('PATCH /api/thesis-proposals/archive/:id', () => {
         const id = 4;
 
         // Make a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch(`/api/thesis-proposals/archive/${id}`)
             .set('credentials', 'include');
 
@@ -1187,7 +1187,7 @@ describe('PATCH /api/thesis-proposals/archive/:id', () => {
         const id = 'nonExistingProposalId';
 
         // Make a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch(`/api/thesis-proposals/archive/${id}`)
             .set('credentials', 'include');
 
@@ -1199,13 +1199,13 @@ describe('PATCH /api/thesis-proposals/archive/:id', () => {
         jest.spyOn(thesisDao, 'archiveThesisProposalById').mockRejectedValueOnce(new Error());
 
         // Make a request to the endpoint
-        const response = await agent
+        const response = await marcoRossiAgent
             .patch('/api/thesis-proposals/archive/unexpectedErrorId')
             .set('credentials', 'include');
 
         // Assertions
         expect(response.status).toBe(500);
-        expect(response.body).toEqual({message: 'Internal Server Error'});
+        expect(response.body).toEqual('Internal Server Error');
     });
 });
 
@@ -1220,7 +1220,7 @@ describe('GET /api/teacher/uploads/:stud_id/:app_id', () => {
         const nonExistingApplicationId = 10000;
 
         // Make the request
-        const response = await agent
+        const response = await marcoRossiAgent
             .get(`/api/teacher/uploads/${nonExistingStudentId}/${nonExistingApplicationId}`)
             .set('credentials', 'include')
             .expect(404);
@@ -1234,7 +1234,7 @@ describe('GET /api/teacher/uploads/:stud_id/:app_id', () => {
         const nonExistingApplicationId = 10000;
 
         // Make the request
-        const response = await agent
+        const response = await marcoRossiAgent
             .get(`/api/teacher/uploads/${nonExistingStudentId}/${nonExistingApplicationId}`)
             .set('credentials', 'include')
             .expect(404);
@@ -1252,7 +1252,7 @@ describe('GET /api/teacher/uploads/:stud_id/:app_id', () => {
 
         jest.spyOn(usersDao, 'getStudentById').mockRejectedValueOnce(new Error());
         // Make the request
-        const response = await agent
+        const response = await marcoRossiAgent
             .get(`/api/teacher/uploads/${nonExistingStudentId}/${nonExistingApplicationId}`)
             .set('credentials', 'include')
             .expect(500);
@@ -1269,7 +1269,7 @@ describe('GET /api/teacher/uploads/:stud_id/:app_id', () => {
         const applicationId = 2;
 
         // Make the request
-        const response = await agent
+        const response = await marcoRossiAgent
             .get(`/api/teacher/uploads/${studentId}/${applicationId}`)
             .set('credentials', 'include')
             .expect(200);
@@ -1289,7 +1289,7 @@ describe('GET /api/teacher/uploads/:stud_id/:app_id', () => {
         // Create the directory without any files
         fs.mkdirSync(dir, {recursive: true});
 
-        const response = await agent
+        const response = await marcoRossiAgent
             .get(`/api/teacher/uploads/${studentId}/${applicationId}`)
             .expect(200);
 
@@ -1309,7 +1309,7 @@ describe('GET /api/teacher/uploads/:stud_id/:app_id', () => {
         const applicationId = 2;
 
         // Make the request
-        const response = await agent
+        const response = await marcoRossiAgent
             .get(`/api/teacher/uploads/${studentId}/${applicationId}`)
             .set('credentials', 'include')
             .expect(200);
