@@ -1019,3 +1019,64 @@ describe('POST /api/student/thesis-start-request', () => {
 
 });
 
+describe('GET /api/student/active-thesis-start-requests', () => {
+    test('should return an empty list of thesis start requests for the student', async () => {
+        // Logged as s318952
+
+        // Make the request to your API
+        const response = await agent
+            .get('/api/student/active-thesis-start-requests')
+            .set('Accept', 'application/json')
+            .set('credentials', 'include')
+            .send();
+
+        // Assert the response
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual([]);
+    });
+    test('should return a list of thesis start requests for the student', async () => {
+        // Logged as s318952
+        const request = db.prepare('INSERT INTO thesisStartRequest (student_id, application_id, proposal_id, title, description, supervisor_id, creation_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+          .run('s318952', 1, 1, 'Title', 'Description', 'd279620','2024-01-06T18:00:00.058Z','waiting for approval');
+
+        // Make the request to your API
+        const response = await agent
+            .get('/api/student/active-thesis-start-requests')
+            .set('Accept', 'application/json')
+            .set('credentials', 'include')
+            .send();
+
+        // Assert the response
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual([
+            {
+                id: request.lastInsertRowid,
+                student_id: 's318952',
+                application_id: 1,
+                proposal_id: 1,
+                title: 'Title',
+                description: 'Description',
+                supervisor_id: 'd279620',
+                creation_date: '2024-01-06T18:00:00.058Z',
+                approval_date: null,
+                status: 'waiting for approval'
+            }
+        ]);
+    });
+    test('should handle errors', async () => {
+        // Logged as s318952
+        jest.spyOn(thesisDao, 'getStudentActiveThesisStartRequests').mockRejectedValueOnce(new Error());
+
+        // Make the request to your API
+        const response = await agent
+            .get('/api/student/active-thesis-start-requests')
+            .set('Accept', 'application/json')
+            .set('credentials', 'include')
+            .send();
+
+        // Assert the response
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Internal Server Error');
+    });
+});
+
