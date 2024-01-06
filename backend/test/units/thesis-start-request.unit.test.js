@@ -14,6 +14,7 @@ jest.mock('../../src/services/db', () => ({
     prepare: jest.fn().mockReturnThis(),
     get: jest.fn(),
     run: jest.fn(),
+    all: jest.fn(),
     transaction: jest.fn().mockImplementation(callback => callback),
 }));
 
@@ -113,5 +114,48 @@ describe('createThesisStartRequest', () => {
     
         expect(requestId).toBe(1); // Replace with the expected result based on your implementation 
     });  
+});
+
+describe('getStudentActiveThesisStartRequests', () => {
+
+  test('returns active thesis start requests for the student', async () => {
+   
+    db.prepare().all.mockReturnValueOnce([
+      { 
+        id: 1, title: 'Title 1', 
+        student_id: 's318952',
+        application_id: '',
+        proposal_id: '',
+        title: 'Title 1',
+        description: 'Description 1', 
+        supervisor_id: 'd279620',
+        creationdate: '2021-01-01T00:00:00.000Z',
+        approval_date: null,
+        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL 
+      }
+    ]); 
+
+    const studentId = 's318952';
+    const result = await thesis.getStudentActiveThesisStartRequests(studentId);
+
+    const expectedQuery = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? AND ( status=? OR status=? OR status=?)`;
+    expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
+
+    expect(result).toEqual([
+      { 
+        id: 1, title: 'Title 1', 
+        student_id: 's318952',
+        application_id: '',
+        proposal_id: '',
+        title: 'Title 1',
+        description: 'Description 1', 
+        supervisor_id: 'd279620',
+        creationdate: '2021-01-01T00:00:00.000Z',
+        approval_date: null,
+        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL 
+      }
+    ]);
   });
+
+});
 
