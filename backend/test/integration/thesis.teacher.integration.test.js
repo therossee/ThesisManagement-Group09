@@ -11,6 +11,7 @@ const db = require('../../src/services/db');
 const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
+const CronTasksService = require("../../src/services/CronTasksService");
 
 let marcoRossiAgent;
 beforeAll(async () => {
@@ -25,6 +26,7 @@ beforeEach(() => {
 
 afterAll(async () => {
     await closeImapClient();
+    CronTasksService.stop();
 });
 
 describe('GET /api/teachers', () => {
