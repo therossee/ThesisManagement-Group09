@@ -15,4 +15,6 @@ router.get('/:id/career', authorization.isLoggedIn, authorization.isTeacher, con
 
 router.post('/thesis-start-request', authorization.isLoggedIn, authorization.isStudent, controller.newThesisStartRequest);
 
+router.get('/active-thesis-start-requests', authorization.isLoggedIn, authorization.isStudent, controller.getStudentActiveThesisStartRequests);
+
 module.exports = router;
