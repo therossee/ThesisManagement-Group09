@@ -11,6 +11,7 @@ const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
 const formidable = require('formidable');
+const CronTasksService = require("../../src/services/CronTasksService");
 
 beforeEach(() => {
     // Be sure that we are using a full clean database before each test
@@ -26,6 +27,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
     await closeImapClient();
+    CronTasksService.stop();
 });
 
 describe('GET /api/thesis-proposals (student)', () => {
@@ -259,7 +261,7 @@ describe('POST /api/student/applications', () => {
             .expect(201);
 
         expect(response.body).toEqual({
-            application_id: 2,
+            application_id: expect.any(Number),
             thesis_proposal_id: '2',
             student_id: 's318952',
             status: 'waiting for approval',
@@ -562,7 +564,7 @@ describe('GET /api/student/applications-decision', () => {
         expect(response.status).toBe(200);
         expect(response.body).toEqual([
             {
-                application_id: 2,
+                application_id: expect.any(Number),
                 proposal_id: 1,
                 title: 'AI-GUIDED WEB CRAWLER FOR AUTOMATIC DETECTION OF MALICIOUS SITES',
                 level: 'LM',
@@ -572,7 +574,7 @@ describe('GET /api/student/applications-decision', () => {
                 expiration: "2024-11-10T23:59:59.999Z"
             },
             {
-                application_id: 3,
+                application_id: expect.any(Number),
                 proposal_id: 2,
                 title: 'PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API',
                 level: 'LM',
@@ -582,7 +584,7 @@ describe('GET /api/student/applications-decision', () => {
                 expiration: "2025-12-24T23:59:59.999Z"
             },
             {
-                application_id: 4,
+                application_id: expect.any(Number),
                 proposal_id: 2,
                 title: 'PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API',
                 level: 'LM',

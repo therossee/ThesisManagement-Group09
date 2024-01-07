@@ -11,6 +11,10 @@ const session = require('express-session');
 const morgan = require('morgan');
 const cors = require('cors');
 
+/** Initialize all cron jobs **/
+const CronTasksService = require('./services/CronTasksService');
+CronTasksService.init();
+
 /** init express and set up the middlewares **/
 const app = express()
     .disable("x-powered-by")

@@ -17,6 +17,7 @@
     "better-sqlite3": "^9.0.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
+    "cron": "^3.1.6",
     "dayjs": "^1.11.10",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
@@ -29,6 +30,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/cron": "^2.4.0",
     "@types/imap": "^0.8.40",
     "@types/jest": "^29.5.6",
     "@types/supertest": "^2.0.16",
