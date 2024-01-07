@@ -63,11 +63,6 @@
   border-right: 1px solid #f0f0f0;
 }
 
-.menu-style {
-  height: calc(100vh - 64px);
-  /* 64px is header height */
-}
-
 .cover-style {
   background-color: white;
   z-index: 2;
