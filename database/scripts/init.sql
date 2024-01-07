@@ -581,7 +581,7 @@ VALUES
 INSERT INTO thesisStartRequest(student_id, application_id, proposal_id, title, description, supervisor_id, creation_date)
 VALUES
     ('s320213', 1, 1, 'AI-GUIDED WEB CRAWLER FOR AUTOMATIC DETECTION OF MALICIOUS SITES', 'This thesis focuses on developing an AI-guided web crawler for the automatic detection of malicious sites. The research aims to leverage artificial intelligence to enhance the efficiency and accuracy of web crawling in identifying and cataloging potentially harmful websites.', 'd279620', '2023-12-12T23:59:59.999Z'),
-    ('s321607', 2, 6, 'start request for optimization of check-in process in amazon thesis', 'This thesis analyzes and proposes solutions for optimizing check-in processes in Amazon''s logistics, focusing on RFID technology. It compares the proposed solution with Amazon''s development, emphasizing efficiency and cost considerations', 'd292715', '2023-11-30T23:59:59.999Z');
+    ('s321607', 2, 6, 'OPTIMIZATION OF CHECK-IN PROCESSES IN AMAZON LOGISTICS', 'This thesis analyzes and proposes solutions for optimizing check-in processes in Amazon''s logistics, focusing on RFID technology. It compares the proposed solution with Amazon''s development, emphasizing efficiency and cost considerations', 'd292715', '2023-11-30T23:59:59.999Z');
 
 INSERT INTO thesisStartRequest(student_id, title, description, supervisor_id, creation_date)
 VALUES
