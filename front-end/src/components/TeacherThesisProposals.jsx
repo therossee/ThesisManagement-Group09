@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { message, Popconfirm, Space, Table, Tag, Tooltip } from 'antd';
-import { CopyOutlined, DeleteOutlined, EditOutlined, EyeOutlined, InboxOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { message, Modal, Space, Table, Tag, Tooltip } from 'antd';
+import { CopyOutlined, DeleteOutlined, EditOutlined, EyeOutlined, ExclamationCircleFilled, InboxOutlined } from '@ant-design/icons';
 import API from '../API';
 
 function TeacherThesisProposals() {
@@ -11,7 +11,6 @@ function TeacherThesisProposals() {
 
     // Loading table data fetching
     const [isLoadingTable, setIsLoadingTable] = useState(true);
-
 
     const navigate = useNavigate();
 
@@ -91,34 +90,21 @@ function TeacherThesisProposals() {
                         <CopyOutlined style={{ fontSize: '20px' }} onClick={() => navigate(`/insert-proposal/${record.id}`)} />
                     </Tooltip>
                     <Tooltip title="Delete Proposal">
-                        <Popconfirm
-                            title="Confirm action"
-                            description="Are you sure you want to delete this proposal?"
-                            icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
-                            onConfirm={() => deleteProposalById(record.id)}
-                            okText="Yes"
-                            cancelText="No"
-                        >
-                            <DeleteOutlined style={{ fontSize: '20px' }} />
-                        </Popconfirm>
+                        <DeleteOutlined
+                            style={{ fontSize: '20px' }}
+                            onClick={() => showModal(
+                                "Are you sure you want to delete this proposal?",
+                                () => deleteProposalById(record.id))}
+                        />
                     </Tooltip>
                     <Tooltip title="Archive Proposal">
-                        <Popconfirm
-                            title="Confirm action"
-                            placement="left"
-                            icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
-                            description="Are you sure you want to archive this proposal?"
-                            cancelText="No"
-                            okText="Yes"
-                            onConfirm={() => archiveProposalById(record.id)}
-                            onCancel={() => { }}
-                        >
-                            <InboxOutlined style={{ fontSize: '20px' }} />
-                        </Popconfirm>
+                        <InboxOutlined
+                            style={{ fontSize: '20px' }}
+                            onClick={() => showModal(
+                                "Are you sure you want to archive this proposal?",
+                                () => archiveProposalById(record.id))}
+                        />
                     </Tooltip>
-
-
-
                 </Space >
             ),
         },
@@ -129,6 +115,18 @@ function TeacherThesisProposals() {
         bordered: false,
         scroll: { x: true },
         loading: isLoadingTable,
+    };
+
+    const showModal = (content, action) => {
+        Modal.confirm({
+            title: "Confirm action",
+            icon: <ExclamationCircleFilled />,
+            content: content,
+            onOk: action,
+            okText: "Yes",
+            okType: "danger",
+            cancelText: "No",
+        });
     };
 
     useEffect(() => {
@@ -178,7 +176,6 @@ function TeacherThesisProposals() {
             message.error(err.message ? err.message : err);
             setIsLoadingTable(false);
         }
-
     }
 
     return (
