@@ -92,90 +92,101 @@ async function getStudentApplicationDecision(req, res, next) {
  * @param {import('express').Response} res
  * @param {import('express').NextFunction} next
  */
-async function newThesisStartRequest(req, res, next) {  
-    try{
+async function newThesisStartRequest(req, res, next) {
+    try {
         const studentId = req.user.id;
         const { application_id, proposal_id, title, description, supervisor_id, internal_co_supervisors_ids } = req.body;
 
-        // Check if all required fields are present
-        if ( !title || !description || !supervisor_id ) {
-            return res.status(400).json({ error: 'Missing required fields'});
+        if (!title || !description || !supervisor_id) {
+            return res.status(400).json({ message: "Missing required fields." });
         }
 
-        // Check if the student exists
-        const student = await usersDao.getStudentById(studentId);
-        if (!student) {
-            return res.status(404).json({ error: `Student with id ${studentId} not found.` });
+        await checkStudentExistence(res, studentId);
+
+        if (application_id) {
+            await checkApplicationExistence(res, application_id);
         }
 
-        // Check if the application exists
-        if(application_id){
-            const application = await thesisDao.getApplicationById(application_id);
-            if (!application) {
-                return res.status(404).json({ error: `Application with id ${application_id} not found.` });
-            }
+        if (proposal_id) {
+            await checkProposalExistenceAndValidity(res, proposal_id);
         }
 
-        // Check if the proposal exists and is valid
-        if(proposal_id){
-            const proposal = await thesisDao.getThesisProposalById(proposal_id);
-            if (!proposal) {
-                return res.status(404).json({ error: `Thesis proposal with id ${proposal_id} not found.` });
-            }
-
-            if(proposal.is_archived==1){
-                return res.status(400).json({ error: `Thesis proposal with id ${proposal_id} is archived.` });
-            }
-
-            const currentDate = new AdvancedDate();
-            const expiration = new AdvancedDate(proposal.expiration);
-            const creationDate = new AdvancedDate(proposal.creation_date);
-
-            if(expiration.isBefore(currentDate)){
-                return res.status(400).json({ error: `Thesis proposal with id ${proposal_id} is expired.` });
-            }
-
-            if(currentDate.isBefore(creationDate)){
-                return res.status(400).json({ error: `Thesis proposal with id ${proposal_id} is not yet available.` });
-            }
-            
-        }
-
-        // Check if the supervisor exists
-        const supervisor = await usersDao.getTeacherById(supervisor_id);
-        if (!supervisor) {
-            return res.status(404).json({ error: `Supervisor with id ${supervisor_id} not found.` });
-        }
-
-        // Check if the internal co-supervisors exist
-        for (const id of internal_co_supervisors_ids) {
-            const internal_co_supervisor = await usersDao.getTeacherById(id);
-            if (!internal_co_supervisor) {
-                return res.status(404).json({ error: `Internal co-supervisor with id ${id} not found.` });
-            }
-        }
+        await checkSupervisorExistence(res, supervisor_id);
+        await checkInternalCoSupervisorsExistence(res, internal_co_supervisors_ids);
 
         await thesisDao.createThesisStartRequest(studentId, application_id, proposal_id, title, description, supervisor_id, internal_co_supervisors_ids)
-             .then(thesis_start_request_id => {
-                res.status(201).json({
-                    thesis_start_request_id: thesis_start_request_id,
-                    student_id: studentId,
-                    application_id: application_id,
-                    proposal_id: proposal_id,
-                    title: title,
-                    description: description,
-                    supervisor_id: supervisor_id,
-                    internal_co_supervisors_ids: internal_co_supervisors_ids,
-                    status: 'waiting for approval'
-                });
-             })
-             .catch(error => {
-                console.error(error);
-                res.status(500).json(`Failed to create thesis start request. ${error.message || error}`);
-             });
-       
-    } catch (e) {
-        next(e);
+        .then(thesis_start_request_id => {
+           res.status(201).json({
+               thesis_start_request_id: thesis_start_request_id,
+               student_id: studentId,
+               application_id: application_id,
+               proposal_id: proposal_id,
+               title: title,
+               description: description,
+               supervisor_id: supervisor_id,
+               internal_co_supervisors_ids: internal_co_supervisors_ids,
+               status: 'waiting for approval'
+           });
+        })
+        .catch(error => {
+           console.error(error);
+           res.status(500).json(`Failed to create thesis start request. ${error.message || error}`);
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function checkStudentExistence(res, studentId) {
+    const student = await usersDao.getStudentById(studentId);
+    if (!student) {
+        return res.status(404).json({ message: `Student with id ${studentId} not found.` });
+    }
+}
+
+async function checkApplicationExistence(res, application_id) {
+    const application = await thesisDao.getApplicationById(application_id);
+    if (!application) {
+        return res.status(404).json({ message: `Application with id ${application_id} not found.` });
+    }
+}
+
+async function checkProposalExistenceAndValidity(res, proposal_id) {
+    const proposal = await thesisDao.getThesisProposalById(proposal_id);
+    if (!proposal) {
+        return res.status(404).json({ message: `Thesis proposal with id ${proposal_id} not found.` });
+    }
+
+    if (proposal.is_archived === 1) {
+        return res.status(400).json({ message: `Thesis proposal with id ${proposal_id} is archived.` });
+    }
+
+    const currentDate = new AdvancedDate();
+    const expiration = new AdvancedDate(proposal.expiration);
+    const creationDate = new AdvancedDate(proposal.creation_date);
+
+    if (expiration.isBefore(currentDate)) {
+        return res.status(400).json({ message: `Thesis proposal with id ${proposal_id} is expired.` });
+    }
+
+    if (currentDate.isBefore(creationDate)) {
+        return res.status(400).json({ message: `Thesis proposal with id ${proposal_id} is not yet available.`});
+    }
+}
+
+async function checkSupervisorExistence(res, supervisor_id) {
+    const supervisor = await usersDao.getTeacherById(supervisor_id);
+    if (!supervisor) {
+        return res.status(404).json({ message: `Supervisor with id ${supervisor_id} not found.` });
+    }
+}
+
+async function checkInternalCoSupervisorsExistence(res, internal_co_supervisors_ids) {
+    for (const id of internal_co_supervisors_ids) {
+        const internal_co_supervisor = await usersDao.getTeacherById(id);
+        if (!internal_co_supervisor) {
+            return res.status(404).json({ message: `Internal co-supervisor with id ${id} not found.` });
+        }
     }
 }
 

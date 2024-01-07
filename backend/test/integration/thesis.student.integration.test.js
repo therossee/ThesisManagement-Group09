@@ -631,7 +631,7 @@ describe('POST /api/student/thesis-start-request', () => {
     
         expect(response.status).toBe(400);
         expect(response.body).toEqual({
-          error: 'Missing required fields',
+          message: 'Missing required fields.',
         });
     });
     
@@ -656,7 +656,7 @@ describe('POST /api/student/thesis-start-request', () => {
   
       expect(response.status).toBe(404);
       expect(response.body).toEqual({
-        error: 'Student with id s318952 not found.',
+        message: 'Student with id s318952 not found.',
       });
     });
 
@@ -679,7 +679,7 @@ describe('POST /api/student/thesis-start-request', () => {
     
         expect(response.status).toBe(404);
         expect(response.body).toEqual({
-          error: 'Application with id nonexistent_id not found.',
+          message: 'Application with id nonexistent_id not found.',
         });
     });
     
@@ -702,7 +702,7 @@ describe('POST /api/student/thesis-start-request', () => {
     
         expect(response.status).toBe(404);
         expect(response.body).toEqual({
-          error: 'Thesis proposal with id nonexistent_id not found.',
+          message: 'Thesis proposal with id nonexistent_id not found.',
         });
     });
 
@@ -734,7 +734,7 @@ describe('POST /api/student/thesis-start-request', () => {
     
         expect(response.status).toBe(400);
         expect(response.body).toEqual({
-          error: `Thesis proposal with id ${proposal.lastInsertRowid} is archived.`,
+          message: `Thesis proposal with id ${proposal.lastInsertRowid} is archived.`,
         });
     });
 
@@ -766,7 +766,7 @@ describe('POST /api/student/thesis-start-request', () => {
     
         expect(response.status).toBe(400);
         expect(response.body).toEqual({
-          error: `Thesis proposal with id ${proposal.lastInsertRowid} is expired.`,
+          message: `Thesis proposal with id ${proposal.lastInsertRowid} is expired.`,
         });
     });
 
@@ -798,7 +798,7 @@ describe('POST /api/student/thesis-start-request', () => {
     
         expect(response.status).toBe(400);
         expect(response.body).toEqual({
-          error: `Thesis proposal with id ${proposal.lastInsertRowid} is not yet available.`,
+          message: `Thesis proposal with id ${proposal.lastInsertRowid} is not yet available.`,
         });
     });
 
@@ -821,7 +821,7 @@ describe('POST /api/student/thesis-start-request', () => {
     
         expect(response.status).toBe(404);
         expect(response.body).toEqual({
-          error: 'Supervisor with id nonexistent_id not found.',
+          message: 'Supervisor with id nonexistent_id not found.',
         });
     });
     
@@ -844,7 +844,7 @@ describe('POST /api/student/thesis-start-request', () => {
   
       expect(response.status).toBe(404);
       expect(response.body).toEqual({
-        error: 'Internal co-supervisor with id nonexistent_id not found.',
+        message: 'Internal co-supervisor with id nonexistent_id not found.',
       });
     });
 
