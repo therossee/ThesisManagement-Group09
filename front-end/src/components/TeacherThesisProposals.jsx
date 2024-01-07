@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { message, Modal, Space, Table, Tag, Tooltip } from 'antd';
+import { message, Modal, Space, Table, Tag, Tooltip, Typography } from 'antd';
 import { CopyOutlined, DeleteOutlined, EditOutlined, EyeOutlined, ExclamationCircleFilled, InboxOutlined } from '@ant-design/icons';
 import API from '../API';
 
@@ -15,6 +15,8 @@ function TeacherThesisProposals() {
     const navigate = useNavigate();
 
     const [dirty, setDirty] = useState(true);
+
+    const {Paragraph, Text } = Typography;
 
     // Columns of the table
     const columns = [
@@ -93,7 +95,16 @@ function TeacherThesisProposals() {
                         <DeleteOutlined
                             style={{ fontSize: '20px' }}
                             onClick={() => showModal(
-                                "Are you sure you want to delete this proposal?",
+                                <div>
+                                    <Paragraph>
+                                        <Text strong>
+                                            Are you sure you want to delete this thesis proposal?
+                                        </Text>
+                                    </Paragraph>
+                                    <Paragraph>
+                                        <Text strong>Thesis title: </Text><Text>{record.title}</Text>
+                                    </Paragraph>
+                                </div>,
                                 () => deleteProposalById(record.id))}
                         />
                     </Tooltip>
@@ -101,7 +112,16 @@ function TeacherThesisProposals() {
                         <InboxOutlined
                             style={{ fontSize: '20px' }}
                             onClick={() => showModal(
-                                "Are you sure you want to archive this proposal?",
+                                <div>
+                                    <Paragraph>
+                                        <Text strong>
+                                            Are you sure you want to archive this thesis proposal?
+                                        </Text>
+                                    </Paragraph>
+                                    <Paragraph>
+                                        <Text strong>Thesis title: </Text><Text>{record.title}</Text>
+                                    </Paragraph>
+                                </div>,
                                 () => archiveProposalById(record.id))}
                         />
                     </Tooltip>

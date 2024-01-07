@@ -22,7 +22,7 @@ function TeacherApplications() {
     const [studentInfo, setStudentInfo] = useState(null);
     const [applicationId, setApplicationId] = useState(-1);
 
-    const { Title } = Typography;
+    const { Title, Paragraph, Text } = Typography;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -127,7 +127,18 @@ function TeacherApplications() {
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     showModal(
-                                                        "Are you sure you want to accept this application?",
+                                                        <div>
+                                                            <Paragraph>
+                                                                <Text strong>
+                                                                    Are you sure you want to accept this application?
+                                                                </Text>
+                                                            </Paragraph>
+                                                            <Paragraph>
+                                                                <Text strong>Thesis title: </Text><Text>{x.title}</Text>
+                                                                <br />
+                                                                <Text strong>Student: </Text><Text>{student.name + " " + student.surname}</Text>
+                                                            </Paragraph>
+                                                        </div>,
                                                         () => acceptApplication(x.id, student)
                                                     )
                                                 }}
@@ -141,7 +152,18 @@ function TeacherApplications() {
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     showModal(
-                                                        "Are you sure you want to reject this application?",
+                                                        <div>
+                                                            <Paragraph>
+                                                                <Text strong>
+                                                                    Are you sure you want to reject this application?
+                                                                </Text>
+                                                            </Paragraph>
+                                                            <Paragraph>
+                                                                <Text strong>Thesis title: </Text><Text>{x.title}</Text>
+                                                                <br />
+                                                                <Text strong>Student: </Text><Text>{student.name + " " + student.surname}</Text>
+                                                            </Paragraph>
+                                                        </div>,
                                                         () => rejectApplication(x.id, student)
                                                     )
                                                 }}
