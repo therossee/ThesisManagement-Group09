@@ -8,7 +8,7 @@ const db = require('../services/db');
 const AdvancedDate = require('../models/AdvancedDate');
 const NoThesisProposalError = require("../errors/NoThesisProposalError");
 const UnauthorizedActionError = require("../errors/UnauthorizedActionError");
-const {APPLICATION_STATUS} = require("../enums/application");
+const { APPLICATION_STATUS } = require("../enums/application");
 
 exports.createThesisProposal = (proposal_details, additional_details) => {
   return new Promise((resolve, reject) => {
@@ -702,6 +702,26 @@ exports.cancelOtherApplications = (studentId, proposalId) => {
 
     resolve(db.prepare(updateQuery).all(APPLICATION_STATUS.CANCELLED, studentId, proposalId, APPLICATION_STATUS.WAITING_FOR_APPROVAL));
   })
+};
+
+/**
+ * Cancel all applications waiting for approval on expired thesis proposals
+ *
+ * @return {Promise<ThesisApplicationRow[]>}
+ */
+exports.cancelWaitingApplicationsOnExpiredThesis = () => {
+  return new Promise( resolve => {
+    const date = new AdvancedDate();
+
+    const query = `UPDATE thesisApplication
+      SET status=?
+      WHERE status=? AND proposal_id IN (SELECT proposal_id FROM thesisProposal WHERE expiration < ?)
+      RETURNING *;`;
+
+    const result = db.prepare(query).all(APPLICATION_STATUS.CANCELLED, APPLICATION_STATUS.WAITING_FOR_APPROVAL, date.toISOString());
+
+    resolve(result);
+  });
 };
 
 exports.listApplicationsDecisionsFromStudent = (studentId) => {

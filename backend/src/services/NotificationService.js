@@ -78,7 +78,7 @@ class NotificationService {
 
             const supervisor = await usersDao.getTeacherById(thesis.supervisor_id);
             if (!supervisor) {
-                console.error(`Supervisor with id "${thesis.supervisor.id}" not found, cannot notify new application.`);
+                console.error(`Supervisor with id "${thesis.supervisor_id}" not found, cannot notify new application.`);
                 return;
             }
 

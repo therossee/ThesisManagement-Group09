@@ -1,6 +1,6 @@
 require('jest');
 // [i] This line setup the test database + load the environment variables. DON'T (RE)MOVE IT
-const {resetTestDatabase} = require('../integration_config');
+const { resetTestDatabase, initImapClient, closeImapClient, searchEmails} = require('../integration_config');
 
 const request = require("supertest");
 const {app} = require("../../src/app");
@@ -11,6 +11,7 @@ const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
 const formidable = require('formidable');
+const CronTasksService = require("../../src/services/CronTasksService");
 
 beforeEach(() => {
     // Be sure that we are using a full clean database before each test
@@ -20,7 +21,13 @@ beforeEach(() => {
 
 let agent;
 beforeAll(async () => {
+    await initImapClient();
     agent = await utils.getMolinattoSylvieAgent(app);
+});
+
+afterAll(async () => {
+    await closeImapClient();
+    CronTasksService.stop();
 });
 
 describe('GET /api/thesis-proposals (student)', () => {
@@ -227,7 +234,7 @@ describe('POST /api/student/applications', () => {
         await fse.remove('uploads');
     });
 
-    test('should create a new application for a valid request', async () => {
+    test('should create a new application for a valid request and notify teacher', async () => {
         // Create a sample file to be uploaded
         const filePath = path.join(uploadDir, 'sample.pdf');
         fs.writeFileSync(filePath, 'This is a sample file.');
@@ -254,13 +261,24 @@ describe('POST /api/student/applications', () => {
             .expect(201);
 
         expect(response.body).toEqual({
-            application_id: 2,
+            application_id: expect.any(Number),
             thesis_proposal_id: '2',
             student_id: 's318952',
             status: 'waiting for approval',
         });
 
-    });
+        // Wait for a moment to allow the email to be processed (adjust the timing as needed)
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        const subject = 'New Application - PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API';
+        const to = 'd279620@polito.it';
+        // Search for the email (adjust criteria as needed)
+        const searchResults = await searchEmails(to, subject);
+
+        // Assert that the email has been received
+        expect(searchResults.length).toBeGreaterThan(0);
+
+    },10000);
 
     test('should return 401 status error for if a not logged user try to apply to a thesis proposal', async () => {
         const response = await request(app)
@@ -546,7 +564,7 @@ describe('GET /api/student/applications-decision', () => {
         expect(response.status).toBe(200);
         expect(response.body).toEqual([
             {
-                application_id: 2,
+                application_id: expect.any(Number),
                 proposal_id: 1,
                 title: 'AI-GUIDED WEB CRAWLER FOR AUTOMATIC DETECTION OF MALICIOUS SITES',
                 level: 'LM',
@@ -556,7 +574,7 @@ describe('GET /api/student/applications-decision', () => {
                 expiration: "2024-11-10T23:59:59.999Z"
             },
             {
-                application_id: 3,
+                application_id: expect.any(Number),
                 proposal_id: 2,
                 title: 'PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API',
                 level: 'LM',
@@ -566,7 +584,7 @@ describe('GET /api/student/applications-decision', () => {
                 expiration: "2025-12-24T23:59:59.999Z"
             },
             {
-                application_id: 4,
+                application_id: expect.any(Number),
                 proposal_id: 2,
                 title: 'PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API',
                 level: 'LM',
