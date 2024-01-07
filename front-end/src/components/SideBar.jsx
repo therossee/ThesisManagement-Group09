@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { HomeOutlined, FileTextOutlined, HistoryOutlined, AuditOutlined, SettingOutlined } from '@ant-design/icons';
-import { Layout, Menu } from 'antd';
+import { Layout, Menu, Image } from 'antd';
 import { useAuth } from './authentication/useAuth';
 import '../css/style.css';
 
@@ -28,17 +28,12 @@ function SideBar() {
   return (
     <Sider breakpoint="lg" collapsedWidth="0" style={{ position: "sticky", left: "0", top: "0", height: "100vh", zIndex: "5" }}>
       <div className='logo-style'>
-      <img
+      <Image
         src="https://imgur.com/wYw8LZz.jpg"  
         alt="Polito Logo"
-        style={{ width: '90%', cursor: 'pointer', marginTop: '10px', marginBottom: '55px'}}
+        style={{ width: '90%', cursor: 'pointer', marginTop: '10px', marginBottom: '50px', marginLeft: '10px', marginRight: '10px'}}
         onClick={() => navigate('/')}
-        onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-                navigate('/');
-            }
-        }}
-        tabIndex="0" // Ensure the element is focusable
+        preview={false}
       />
  
       </div>

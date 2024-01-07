@@ -1,6 +1,6 @@
 import { Typography } from 'antd';
 import { useAuth } from '../components/authentication/useAuth';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import '../css/style.css';
 
 const { Title, Paragraph } = Typography;
@@ -11,12 +11,12 @@ function MobHome() {
 
     // We use the useRef hook to get a reference to the slider container
     const sliderRef = useRef(null);
-    const [images] = useState([
+    const images = [
         { id: 1, url: "https://imgur.com/hx0bwSH.jpg" },       
         { id: 2, url: "https://imgur.com/f2DDJGc.jpg" },
         { id: 3, url: "https://imgur.com/34iBlOD.jpg" },
         { id: 4, url: "https://imgur.com/Rac3Rjp.jpg" },
-    ]);
+    ];
 
     return (
         //Checking !variable is different than checking variable === false. The second one ensures it doesn't return truthy if undefined.
