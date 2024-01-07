@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import API from "../API";
-import { Alert, message, Divider, List, Skeleton, Avatar, Button, Flex, Typography, Tooltip } from 'antd';
-import { UserOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
+import { Alert, message, Divider, List, Skeleton, Avatar, Button, Flex, Typography, Tooltip, Modal } from 'antd';
+import { UserOutlined, CheckOutlined, CloseOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import StudentCV from "./StudentCV";
 
 function TeacherApplications() {
@@ -22,7 +22,7 @@ function TeacherApplications() {
     const [studentInfo, setStudentInfo] = useState(null);
     const [applicationId, setApplicationId] = useState(-1);
 
-    const { Title } = Typography;
+    const { Title, Paragraph, Text } = Typography;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -51,9 +51,20 @@ function TeacherApplications() {
                 message.error(err.message ? err.message : err);
             }
         };
-
         fetchData();
     }, [dirty]);
+
+    const showModal = (content, action) => {
+        Modal.confirm({
+            title: "Confirm action",
+            icon: <ExclamationCircleFilled />,
+            content: content,
+            onOk: action,
+            okText: "Yes",
+            okType: "danger",
+            cancelText: "No",
+        });
+    };
 
     const acceptApplication = async (proposalId, student) => {
         setButtonsLoading(true);
@@ -113,14 +124,50 @@ function TeacherApplications() {
                                                 loading={buttonsLoading}
                                                 disabled={buttonsLoading}
                                                 icon={<CheckOutlined />}
-                                                onClick={(e) => { e.stopPropagation(); acceptApplication(x.id, student) }} />
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    showModal(
+                                                        <div>
+                                                            <Paragraph>
+                                                                <Text strong>
+                                                                    Are you sure you want to accept this application?
+                                                                </Text>
+                                                            </Paragraph>
+                                                            <Paragraph>
+                                                                <Text strong>Thesis title: </Text><Text>{x.title}</Text>
+                                                                <br />
+                                                                <Text strong>Student: </Text><Text>{student.name + " " + student.surname}</Text>
+                                                            </Paragraph>
+                                                        </div>,
+                                                        () => acceptApplication(x.id, student)
+                                                    )
+                                                }}
+                                            />
                                         </Tooltip>
                                         <Tooltip title="Reject Application">
                                             <Button ghost danger
                                                 loading={buttonsLoading}
                                                 disabled={buttonsLoading}
                                                 icon={<CloseOutlined />}
-                                                onClick={(e) => { e.stopPropagation(); rejectApplication(x.id, student) }} />
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    showModal(
+                                                        <div>
+                                                            <Paragraph>
+                                                                <Text strong>
+                                                                    Are you sure you want to reject this application?
+                                                                </Text>
+                                                            </Paragraph>
+                                                            <Paragraph>
+                                                                <Text strong>Thesis title: </Text><Text>{x.title}</Text>
+                                                                <br />
+                                                                <Text strong>Student: </Text><Text>{student.name + " " + student.surname}</Text>
+                                                            </Paragraph>
+                                                        </div>,
+                                                        () => rejectApplication(x.id, student)
+                                                    )
+                                                }}
+                                            />
                                         </Tooltip>
                                     </Flex>
                                 </button>
@@ -129,7 +176,6 @@ function TeacherApplications() {
                     />
                 </div>
             </div >
-
         ))
         return ApplicationList;
     }
@@ -147,6 +193,5 @@ function TeacherApplications() {
             </div>
     )
 }
-
 
 export default TeacherApplications;
