@@ -581,7 +581,11 @@ VALUES
 INSERT INTO thesisStartRequest(student_id, application_id, proposal_id, title, description, supervisor_id, creation_date)
 VALUES
     ('s320213', 1, 1, 'AI-GUIDED WEB CRAWLER FOR AUTOMATIC DETECTION OF MALICIOUS SITES', 'This thesis focuses on developing an AI-guided web crawler for the automatic detection of malicious sites. The research aims to leverage artificial intelligence to enhance the efficiency and accuracy of web crawling in identifying and cataloging potentially harmful websites.', 'd279620', '2023-12-12T23:59:59.999Z'),
-    ('s321607', 2, 6, 'OPTIMIZATION OF CHECK-IN PROCESSES IN AMAZON LOGISTICS', 'This thesis analyzes and proposes solutions for optimizing check-in processes in Amazon''s logistics, focusing on RFID technology. It compares the proposed solution with Amazon''s development, emphasizing efficiency and cost considerations', 'd292715', '2023-11-30T23:59:59.999Z');
+    ('s321607', 2, 6, 'start request for optimization of check-in process in amazon thesis', 'This thesis analyzes and proposes solutions for optimizing check-in processes in Amazon''s logistics, focusing on RFID technology. It compares the proposed solution with Amazon''s development, emphasizing efficiency and cost considerations', 'd292715', '2023-11-30T23:59:59.999Z');
+
+INSERT INTO thesisStartRequest(student_id, title, description, supervisor_id, creation_date)
+VALUES
+    ('s319355', 'start request for a thesis to be defined', 'i''d like to start a thesis concerning numerical modelling and simulations with professor Ricci', 'd357587', '2023-11-30T23:59:59.999Z'); 
 
 INSERT INTO thesisStartCosupervisor(start_request_id, cosupervisor_id)
 VALUES
@@ -610,32 +614,4 @@ WHEN (NEW.proposal_id <> OLD.proposal_id
 )
 BEGIN
     SELECT RAISE(ABORT, 'The proposal_id is not present in the thesisProposal table or the proposal is deleted or archived');
-END;
-
-
--- Trigger that checks if the student_id in thesisStartRequest matches the student_id in thesisApplication
-CREATE TRIGGER check_student_id_in_start_request
-BEFORE INSERT ON thesisStartRequest
-FOR EACH ROW
-WHEN (NEW.application_id IS NOT NULL AND NEW.student_id NOT IN (SELECT student_id FROM thesisApplication WHERE application_id = NEW.application_id))
-BEGIN
-    SELECT RAISE(ABORT, 'The student_id does not match the student_id in thesisApplication');
-END;
-
--- Trigger that checks if the supervisor_id in thesisStartRequest matches the supervisor_id in thesisProposal
-CREATE TRIGGER check_supervisor_id_in_start_request
-BEFORE INSERT ON thesisStartRequest
-FOR EACH ROW
-WHEN (NEW.proposal_id IS NOT NULL AND NEW.supervisor_id NOT IN (SELECT supervisor_id FROM thesisProposal WHERE proposal_id = NEW.proposal_id))
-BEGIN
-    SELECT RAISE(ABORT, 'The supervisor_id does not match the supervisor_id in thesisProposal');
-END;
-
--- Trigger to check if the thesisStartCosupervisor(cosupervisor_id) matches thesisInternalCosupevisors(co_supervisor_id)
-CREATE TRIGGER check_cosupervisor_id_in_start_cosupervisor
-BEFORE INSERT ON thesisStartCoSupervisor
-FOR EACH ROW
-WHEN (NEW.cosupervisor_id NOT IN (SELECT co_supervisor_id FROM thesisInternalCosupevisors WHERE proposal_id = NEW.proposal_id))
-BEGIN
-    SELECT RAISE(ABORT, 'The cosupervisor_id does not match the co_supervisor_id in thesisInternalCosupevisors');
 END;
