@@ -8,8 +8,7 @@
 }
 
 .menu-style {
-  height: calc(89vh - 64px);
-  /* 64px is header height */
+  height: calc(100vh - 100px);
 }
 
 .wrapper-enlight{
@@ -63,9 +62,9 @@
 .logo-style {
   background-color: white;
   display: flex;
-  align-items: center;
   justify-content: center;
   border-right: 1px solid #f0f0f0;
+  height: 100px;
 }
 
 .cover-style {
