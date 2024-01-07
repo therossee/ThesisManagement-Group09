@@ -668,6 +668,26 @@ exports.cancelOtherApplications = (studentId, proposalId) => {
   })
 };
 
+/**
+ * Cancel all applications waiting for approval on expired thesis proposals
+ *
+ * @return {Promise<ThesisApplicationRow[]>}
+ */
+exports.cancelWaitingApplicationsOnExpiredThesis = () => {
+  return new Promise( resolve => {
+    const date = new AdvancedDate();
+
+    const query = `UPDATE thesisApplication
+      SET status=?
+      WHERE status=? AND proposal_id IN (SELECT proposal_id FROM thesisProposal WHERE expiration < ?)
+      RETURNING *;`;
+
+    const result = db.prepare(query).all(APPLICATION_STATUS.CANCELLED, APPLICATION_STATUS.WAITING_FOR_APPROVAL, date.toISOString());
+
+    resolve(result);
+  });
+};
+
 exports.listApplicationsDecisionsFromStudent = (studentId) => {
   return new Promise((resolve) => {
 
