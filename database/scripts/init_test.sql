@@ -292,3 +292,30 @@ WHEN (NEW.proposal_id <> OLD.proposal_id
 BEGIN
     SELECT RAISE(ABORT, 'The proposal_id is not present in the thesisProposal table or the proposal is deleted or archived');
 END;
+
+-- Trigger that checks if the student_id in thesisStartRequest matches the student_id in thesisApplication
+CREATE TRIGGER check_student_id_in_start_request
+BEFORE INSERT ON thesisStartRequest
+FOR EACH ROW
+WHEN (NEW.application_id IS NOT NULL AND NEW.student_id NOT IN (SELECT student_id FROM thesisApplication WHERE application_id = NEW.application_id))
+BEGIN
+    SELECT RAISE(ABORT, 'The student_id does not match the student_id in thesisApplication');
+END;
+
+-- Trigger that checks if the supervisor_id in thesisStartRequest matches the supervisor_id in thesisProposal
+CREATE TRIGGER check_supervisor_id_in_start_request
+BEFORE INSERT ON thesisStartRequest
+FOR EACH ROW
+WHEN (NEW.proposal_id IS NOT NULL AND NEW.supervisor_id NOT IN (SELECT supervisor_id FROM thesisProposal WHERE proposal_id = NEW.proposal_id))
+BEGIN
+    SELECT RAISE(ABORT, 'The supervisor_id does not match the supervisor_id in thesisProposal');
+END;
+
+-- Trigger to check if the thesisStartCosupervisor(cosupervisor_id) matches thesisInternalCosupevisors(co_supervisor_id)
+CREATE TRIGGER check_cosupervisor_id_in_start_cosupervisor
+BEFORE INSERT ON thesisStartCoSupervisor
+FOR EACH ROW
+WHEN (NEW.cosupervisor_id NOT IN (SELECT co_supervisor_id FROM thesisInternalCosupevisors WHERE proposal_id = NEW.proposal_id))
+BEGIN
+    SELECT RAISE(ABORT, 'The cosupervisor_id does not match the co_supervisor_id in thesisInternalCosupevisors');
+END;
