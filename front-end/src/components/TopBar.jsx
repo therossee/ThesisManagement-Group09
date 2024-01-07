@@ -35,9 +35,9 @@ function IsLoggedInForm() {
 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <div>
-        <Avatar size="medium" icon={<UserOutlined />} style={{ marginRight: '20px' }} />
-        <span> {userData.name} </span>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <Avatar size="medium" icon={<UserOutlined />} style={{ marginRight: '10px' }} />
+        <span>{userData.name}</span>
       </div>
       <div>
         {isTeacher && (
