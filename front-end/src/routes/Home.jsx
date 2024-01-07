@@ -14,7 +14,7 @@ function Home() {
     // We use the useRef hook to get a reference to the slider container
     const sliderRef = useRef(null);
     const scrollAmount = 100; // The amount to scroll when clicking the navigation buttons
-    const [images, setImages] = useState([
+    const [images] = useState([
         { id: 1, url: "https://imgur.com/hx0bwSH.jpg" },       
         { id: 2, url: "https://imgur.com/f2DDJGc.jpg" },
         { id: 3, url: "https://imgur.com/34iBlOD.jpg" },
