@@ -37,7 +37,7 @@ function SideBar() {
       />
  
       </div>
-      <Menu className="menu-style" mode="inline" items={navigation} selectedKeys={[window.location.pathname]} onClick={handleMenuClick} />
+      <Menu mode="inline" items={navigation} selectedKeys={[window.location.pathname]} onClick={handleMenuClick} />
     </Sider>
   );
 }
