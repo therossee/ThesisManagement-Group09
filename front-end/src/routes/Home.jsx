@@ -9,8 +9,6 @@ const { Title, Paragraph } = Typography;
 
 function Home() {
 
-    const { userData, isAuthenticated, isTeacher } = useAuth();
-
     // We use the useRef hook to get a reference to the slider container
     const sliderRef = useRef(null);
     const scrollAmount = 100; // The amount to scroll when clicking the navigation buttons
@@ -23,11 +21,8 @@ function Home() {
 
     return (
         //Checking !variable is different than checking variable === false. The second one ensures it doesn't return truthy if undefined.
-        <>
-            <Title className="home-title" style={{textAlign: 'center'}}>Welcome to PoliTO Thesis Management System!</Title>
-            {(isTeacher===true) && <Paragraph style={{ paddingLeft: "3%", textAlign: 'center' }}>Welcome professor {userData? userData.name : ""}! You can insert a new proposal or take a look for all the application requests.</Paragraph>}
-            {(isAuthenticated === true && isTeacher === false) && <Paragraph style={{ paddingLeft: "3%", textAlign: 'center' }}>Welcome {userData? userData.name : ""}! You can insert a new application request or take a look for all the proposals.</Paragraph>}
-            {(!isAuthenticated) && <Paragraph style={{ paddingLeft: "3%", textAlign: 'center' }}>Welcome guest! Start with logging in.</Paragraph>}
+        <>  
+            <HomeText/> 
             <div className="App">
             {/* Left navigation button */}
             <button
@@ -67,4 +62,19 @@ function Home() {
     )
 }
 
+function HomeText(){
+
+    const { userData, isAuthenticated, isTeacher } = useAuth();
+
+    return (
+        <>
+        <Title className="home-title" style={{textAlign: 'center'}}>Welcome to PoliTO Thesis Management System!</Title>
+        {(isTeacher===true) && <Paragraph style={{ paddingLeft: "3%", textAlign: 'center' }}>Welcome professor {userData? userData.name : ""}! You can insert a new proposal or take a look for all the application requests.</Paragraph>}
+        {(isAuthenticated === true && isTeacher === false) && <Paragraph style={{ paddingLeft: "3%", textAlign: 'center' }}>Welcome {userData? userData.name : ""}! You can insert a new application request or take a look for all the proposals.</Paragraph>}
+        {(!isAuthenticated) && <Paragraph style={{ paddingLeft: "3%", textAlign: 'center' }}>Welcome guest! Start with logging in.</Paragraph>}
+        </>
+    )
+}
+
 export default Home;
+export { HomeText };
