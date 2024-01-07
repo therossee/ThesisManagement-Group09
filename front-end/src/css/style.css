@@ -7,6 +7,11 @@
   background-color: white;
 }
 
+.menu-style {
+  height: calc(80vh - 64px);
+  /* 64px is header height */
+}
+
 .wrapper-enlight{
   display: flex;
   width: 100%;
