@@ -26,7 +26,7 @@ function SideBar() {
   };
 
   return (
-    <Sider breakpoint="lg" collapsedWidth="0" style={{ position: "sticky", left: "0", top: "0", height: "100vh", zIndex: "5" }}>
+    <Sider breakpoint="lg" collapsedWidth="0" style={{ position: "sticky", left: "0", top: "0", height: "100vh", zIndex: "5", backgroundColor: 'white' }}>
       <div className='logo-style'>
       <Image
         src="https://imgur.com/wYw8LZz.jpg"  
@@ -37,7 +37,7 @@ function SideBar() {
       />
  
       </div>
-      <Menu className="menu-style" mode="inline" items={navigation} selectedKeys={[window.location.pathname]} onClick={handleMenuClick} />
+      <Menu mode="inline" items={navigation} selectedKeys={[window.location.pathname]} onClick={handleMenuClick} />
     </Sider>
   );
 }
