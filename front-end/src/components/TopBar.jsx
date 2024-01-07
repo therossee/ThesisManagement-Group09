@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Badge, Layout } from "antd";
-import { BellOutlined, FileAddOutlined } from '@ant-design/icons';
+import { Badge, Layout, Avatar } from "antd";
+import { BellOutlined, FileAddOutlined, UserOutlined } from '@ant-design/icons';
 import { useAuth } from '../components/authentication/useAuth';
 import LoginButton from './authentication/LoginButton';
 import LogoutButton from './authentication/LogoutButton';
@@ -19,7 +19,9 @@ function TopBar() {
         {isAuthenticated ?
           <IsLoggedInForm />
           :
-          <LoginButton />
+          <div style={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
+            <LoginButton />
+          </div>
         }
       </Header >
     </>
@@ -28,21 +30,29 @@ function TopBar() {
 
 function IsLoggedInForm() {
 
-  const { isTeacher } = useAuth();
+  const { isTeacher, userData } = useAuth();
   const navigate = useNavigate();
 
   return (
-    <div>
-      {
-        isTeacher &&
-        <FileAddOutlined style={{ fontSize: '22px', verticalAlign: 'middle', marginRight: "20px" }} onClick={() => navigate("/insert-proposal")} />
-      }
-      <Badge count={1} style={{ marginRight: '22px' }}>
-        <BellOutlined style={{ fontSize: '22px', marginRight: '22px', verticalAlign: 'middle' }} />
-      </Badge>
-      <LogoutButton />
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <Avatar size="medium" icon={<UserOutlined />} style={{ marginRight: '10px' }} />
+        <span>{userData.name}</span>
+      </div>
+      <div>
+        {isTeacher && (
+          <FileAddOutlined
+            style={{ fontSize: '22px', verticalAlign: 'middle', marginRight: '20px' }}
+            onClick={() => navigate('/insert-proposal')}
+          />
+        )}
+        <Badge count={1} style={{ marginRight: '22px' }}>
+          <BellOutlined style={{ fontSize: '22px', marginRight: '22px', verticalAlign: 'middle' }} />
+        </Badge>
+        <LogoutButton />
+      </div>
     </div>
-  )
+  );
 }
 
 
