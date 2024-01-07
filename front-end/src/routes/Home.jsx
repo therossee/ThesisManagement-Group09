@@ -24,10 +24,10 @@ function Home() {
     return (
         //Checking !variable is different than checking variable === false. The second one ensures it doesn't return truthy if undefined.
         <>
-            <Title className="home-title">Welcome to PoliTO Thesis Management System!</Title>
-            {(isTeacher===true) && <Paragraph style={{ paddingLeft: "3%" }}>Welcome professor {userData? userData.name : ""}! You can insert a new proposal or take a look for all the application requests.</Paragraph>}
-            {(isAuthenticated === true && isTeacher === false) && <Paragraph style={{ paddingLeft: "3%" }}>Welcome {userData? userData.name : ""}! You can insert a new application request or take a look for all the proposals.</Paragraph>}
-            {(!isAuthenticated) && <Paragraph style={{ paddingLeft: "3%" }}>Welcome guest! Start with logging in.</Paragraph>}
+            <Title className="home-title" style={{textAlign: 'center'}}>Welcome to PoliTO Thesis Management System!</Title>
+            {(isTeacher===true) && <Paragraph style={{ paddingLeft: "3%", textAlign: 'center' }}>Welcome professor {userData? userData.name : ""}! You can insert a new proposal or take a look for all the application requests.</Paragraph>}
+            {(isAuthenticated === true && isTeacher === false) && <Paragraph style={{ paddingLeft: "3%", textAlign: 'center' }}>Welcome {userData? userData.name : ""}! You can insert a new application request or take a look for all the proposals.</Paragraph>}
+            {(!isAuthenticated) && <Paragraph style={{ paddingLeft: "3%", textAlign: 'center' }}>Welcome guest! Start with logging in.</Paragraph>}
             <div className="App">
             {/* Left navigation button */}
             <button
