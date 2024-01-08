@@ -2,6 +2,8 @@ const formidable = require("formidable");
 const thesisDao = require("../dao/thesis_dao");
 const usersDao = require("../dao/users_dao");
 const NotificationService = require("../services/NotificationService");
+const AdvancedDate = require("../models/AdvancedDate");
+const schemas = require("../schemas/thesis-start-request");
 
 /**
  * @param {PopulatedRequest} req
@@ -86,9 +88,56 @@ async function getStudentApplicationDecision(req, res, next) {
     }
 }
 
+/**
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+async function newThesisStartRequest(req, res, next) {
+    try {
+        const studentId = req.user.id;
+        
+        const thesisRequest = await schemas.APIThesisStartRequestSchema.parseAsync(req.body);
+
+        const thesis_start_request_id = await thesisDao.createThesisStartRequest(studentId, thesisRequest.title, thesisRequest.description, thesisRequest.supervisor_id, thesisRequest.internal_co_supervisors_ids, thesisRequest.application_id, thesisRequest.proposal_id )
+
+        res.status(201).json({
+            thesis_start_request_id: thesis_start_request_id,
+            student_id: studentId,
+            application_id: thesisRequest.application_id,
+            proposal_id: thesisRequest.proposal_id,
+            title: thesisRequest.title,
+            description: thesisRequest.description,
+            supervisor_id: thesisRequest.supervisor_id,
+            internal_co_supervisors_ids: thesisRequest.internal_co_supervisors_ids,
+            status: 'waiting for approval'
+        });
+        
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+async function getStudentActiveThesisStartRequests(req, res, next) {  
+    try {
+        const studentId = req.user.id;
+        const studentThesisStartRequests = await thesisDao.getStudentActiveThesisStartRequests(studentId);
+        res.json(studentThesisStartRequests);
+    } catch (e) {
+        next(e);
+    }
+}
+
 module.exports = {
     getStudentCareer,
     getStudentActiveApplication,
     applyForProposal,
     getStudentApplicationDecision,
+    newThesisStartRequest,
+    getStudentActiveThesisStartRequests
 };
