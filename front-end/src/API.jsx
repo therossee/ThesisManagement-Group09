@@ -179,7 +179,8 @@ async function getTeacherThesisApplications(proposalId) {
             surname: x.surname,
             status: x.status,
             application_id: x.application_id,
-            id: x.id
+            id: x.id,
+            creation_date: x.creation_date,
         }));
     } else {
         throw applications;

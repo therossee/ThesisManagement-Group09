@@ -626,7 +626,7 @@ exports.listThesisProposalsTeacher = (teacherId) => {
 exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
   return new Promise((resolve) => {
     const currentDate = new AdvancedDate().toISOString();
-    const getApplications = `SELECT s.name, s.surname, ta.status, s.id, ta.id AS application_id
+    const getApplications = `SELECT s.name, s.surname, ta.status, s.id, ta.id AS application_id, ta.creation_date
     FROM thesisApplication ta, thesisProposal tp, student s
     WHERE ta.proposal_id = tp.proposal_id 
       AND s.id = ta.student_id
