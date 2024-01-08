@@ -123,7 +123,7 @@ function TeacherApplications() {
                                         avatar={<Avatar src={<img src="https://i.imgur.com/QVI00J0.jpeg" alt="avatar" />} size="large" />}
                                         style={{ padding: ".5%" }}
                                         title={student.surname + " " + student.name}
-                                        description={<div style={{ textAlign: "left", marginTop: "-3px" }}>{student.id}</div>}
+                                        description={<div style={{ textAlign: "left", marginTop: "-4px" }}>{student.id}</div>}
                                     />
                                     <Flex wrap="wrap" gap="small" style={{ padding: ".5%", alignItems: 'center' }}>
                                         <Tooltip title="Accept Application">
