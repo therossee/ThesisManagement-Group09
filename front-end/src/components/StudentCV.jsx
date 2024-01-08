@@ -62,7 +62,7 @@ function StudentCV(props) {
                         <ColorLegenda />
                         <Avatar src={<img src="https://i.imgur.com/QVI00J0.jpeg" alt="avatar" />} size={140} />
                         <Title level={2} style={{ marginTop: '15px' }}>{studentInfo.surname} {studentInfo.name}</Title>
-                        <Tag color="#1677ff" style={{ borderRadius: "10px", marginLeft: "4px", marginTop: '-7px' }}>
+                        <Tag color="#1677ff" style={{ borderRadius: "10px", marginLeft: "5px", marginTop: '-7px' }}>
                             <Text style={{ color: "white" }}>
                                 {studentInfo.id}
                             </Text>
