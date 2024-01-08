@@ -13,8 +13,8 @@ router.get('/applications-decision', authorization.isLoggedIn, authorization.isS
 // WARNING: Even if we are in the student router, this endpoint is only for TEACHERS
 router.get('/:id/career', authorization.isLoggedIn, authorization.isTeacher, controller.getStudentCareer);
 
-router.post('/thesis-start-request', authorization.isLoggedIn, authorization.isStudent, controller.newThesisStartRequest);
+router.post('/thesis-start-requests', authorization.isLoggedIn, authorization.isStudent, controller.newThesisStartRequest);
 
-router.get('/active-thesis-start-requests', authorization.isLoggedIn, authorization.isStudent, controller.getStudentActiveThesisStartRequests);
+router.get('/thesis-start-requests/active', authorization.isLoggedIn, authorization.isStudent, controller.getStudentActiveThesisStartRequests);
 
 module.exports = router;

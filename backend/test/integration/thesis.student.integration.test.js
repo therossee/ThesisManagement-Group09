@@ -614,7 +614,7 @@ describe('GET /api/student/applications-decision', () => {
     });
 });
 
-describe('POST /api/student/thesis-start-request', () => {
+describe('POST /api/student/thesis-start-requests', () => {
     test('should return 400 with error message for missing required fields', async () => {
         const requestBody = {
           application_id: '',
@@ -624,7 +624,7 @@ describe('POST /api/student/thesis-start-request', () => {
         };
     
         const response = await agent
-          .post('/api/student/thesis-start-request')
+          .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
@@ -649,7 +649,7 @@ describe('POST /api/student/thesis-start-request', () => {
       };
   
       const response = await agent
-        .post('/api/student/thesis-start-request')
+        .post('/api/student/thesis-start-requests')
         .set('Accept', 'application/json')
         .set('credentials', 'include')
         .send(requestBody);
@@ -672,7 +672,7 @@ describe('POST /api/student/thesis-start-request', () => {
         };
     
         const response = await agent
-          .post('/api/student/thesis-start-request')
+          .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
@@ -695,7 +695,7 @@ describe('POST /api/student/thesis-start-request', () => {
         };
     
         const response = await agent
-          .post('/api/student/thesis-start-request')
+          .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
@@ -727,7 +727,7 @@ describe('POST /api/student/thesis-start-request', () => {
         };
     
         const response = await agent
-          .post('/api/student/thesis-start-request')
+          .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
@@ -759,7 +759,7 @@ describe('POST /api/student/thesis-start-request', () => {
         };
     
         const response = await agent
-          .post('/api/student/thesis-start-request')
+          .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
@@ -791,7 +791,7 @@ describe('POST /api/student/thesis-start-request', () => {
         };
     
         const response = await agent
-          .post('/api/student/thesis-start-request')
+          .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
@@ -814,7 +814,7 @@ describe('POST /api/student/thesis-start-request', () => {
         };
     
         const response = await agent
-          .post('/api/student/thesis-start-request')
+          .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
@@ -837,7 +837,7 @@ describe('POST /api/student/thesis-start-request', () => {
       };
   
       const response = await agent
-        .post('/api/student/thesis-start-request')
+        .post('/api/student/thesis-start-requests')
         .set('Accept', 'application/json')
         .set('credentials', 'include')
         .send(requestBody);
@@ -862,7 +862,7 @@ describe('POST /api/student/thesis-start-request', () => {
         };
     
         const response = await agent
-          .post('/api/student/thesis-start-request')
+          .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
@@ -885,7 +885,7 @@ describe('POST /api/student/thesis-start-request', () => {
         };
     
         const response = await agent
-          .post('/api/student/thesis-start-request')
+          .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
@@ -917,7 +917,7 @@ describe('POST /api/student/thesis-start-request', () => {
           };
   
           const response = await agent
-              .post('/api/student/thesis-start-request')
+              .post('/api/student/thesis-start-requests')
               .set('Accept', 'application/json')
               .set('credentials', 'include')
               .send(requestBody);
@@ -939,7 +939,7 @@ describe('POST /api/student/thesis-start-request', () => {
           };
   
           const response = await agent
-              .post('/api/student/thesis-start-request')
+              .post('/api/student/thesis-start-requests')
               .set('Accept', 'application/json')
               .set('credentials', 'include')
               .send(requestBody);
@@ -960,7 +960,7 @@ describe('POST /api/student/thesis-start-request', () => {
       };
 
       const response = await agent
-          .post('/api/student/thesis-start-request')
+          .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
@@ -997,7 +997,7 @@ describe('POST /api/student/thesis-start-request', () => {
         };
 
         const response = await agent
-            .post('/api/student/thesis-start-request')
+            .post('/api/student/thesis-start-requests')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
             .send(requestBody);
@@ -1021,13 +1021,13 @@ describe('POST /api/student/thesis-start-request', () => {
 
 });
 
-describe('GET /api/student/active-thesis-start-requests', () => {
+describe('GET /api/student/thesis-start-requests/active', () => {
     test('should return an empty list of thesis start requests for the student', async () => {
         // Logged as s318952
 
         // Make the request to your API
         const response = await agent
-            .get('/api/student/active-thesis-start-requests')
+            .get('/api/student/thesis-start-requests/active')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
             .send();
@@ -1043,7 +1043,7 @@ describe('GET /api/student/active-thesis-start-requests', () => {
 
         // Make the request to your API
         const response = await agent
-            .get('/api/student/active-thesis-start-requests')
+            .get('/api/student/thesis-start-requests/active')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
             .send();
@@ -1071,7 +1071,7 @@ describe('GET /api/student/active-thesis-start-requests', () => {
 
         // Make the request to your API
         const response = await agent
-            .get('/api/student/active-thesis-start-requests')
+            .get('/api/student/thesis-start-requests/active')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
             .send();
