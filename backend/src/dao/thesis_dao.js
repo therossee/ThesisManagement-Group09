@@ -817,7 +817,7 @@ exports.getStudentActiveThesisStartRequests = (student_id) => {
   return new Promise((resolve) => {
     const currentDate = new AdvancedDate().toISOString();
     const query = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? AND ( status=? OR status=? OR status=?)`;
-    const res = db.prepare(query).all(student_id, currentDate, THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL, THESIS_START_REQUEST_STATUS.ACCEPTED, THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED);
+    const res = db.prepare(query).get(student_id, currentDate, THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL, THESIS_START_REQUEST_STATUS.ACCEPTED, THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED);
     resolve(res)
   })
 };

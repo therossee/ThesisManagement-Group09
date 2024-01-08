@@ -14,7 +14,6 @@ jest.mock('../../src/services/db', () => ({
     prepare: jest.fn().mockReturnThis(),
     get: jest.fn(),
     run: jest.fn(),
-    all: jest.fn(),
     transaction: jest.fn().mockImplementation(callback => callback),
 }));
 
@@ -120,12 +119,11 @@ describe('getStudentActiveThesisStartRequests', () => {
 
   test('returns active thesis start requests for the student', async () => {
    
-    db.prepare().all.mockReturnValueOnce([
+    db.prepare().get.mockReturnValueOnce([
       { 
-        id: 1, title: 'Title 1', 
+        id: 1, 
+        title: 'Title 1', 
         student_id: 's318952',
-        application_id: '',
-        proposal_id: '',
         title: 'Title 1',
         description: 'Description 1', 
         supervisor_id: 'd279620',
@@ -143,10 +141,9 @@ describe('getStudentActiveThesisStartRequests', () => {
 
     expect(result).toEqual([
       { 
-        id: 1, title: 'Title 1', 
+        id: 1, 
+        title: 'Title 1', 
         student_id: 's318952',
-        application_id: '',
-        proposal_id: '',
         title: 'Title 1',
         description: 'Description 1', 
         supervisor_id: 'd279620',

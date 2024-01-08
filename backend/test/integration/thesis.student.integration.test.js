@@ -986,7 +986,7 @@ describe('POST /api/student/thesis-start-requests', () => {
 });
 
 describe('GET /api/student/thesis-start-requests/active', () => {
-    test('should return an empty list of thesis start requests for the student', async () => {
+    test('should return no thesis start requests for the student', async () => {
         // Logged as s318952
 
         // Make the request to your API
@@ -998,9 +998,9 @@ describe('GET /api/student/thesis-start-requests/active', () => {
 
         // Assert the response
         expect(response.status).toBe(200);
-        expect(response.body).toEqual([]);
+        expect(response.body).toEqual("");
     });
-    test('should return a list of thesis start requests for the student', async () => {
+    test('should return a thesis start requests for the student', async () => {
         // Logged as s318952
         const request = db.prepare('INSERT INTO thesisStartRequest (student_id, application_id, proposal_id, title, description, supervisor_id, creation_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
           .run('s318952', 1, 1, 'Title', 'Description', 'd279620','2024-01-06T18:00:00.058Z','waiting for approval');
@@ -1014,7 +1014,7 @@ describe('GET /api/student/thesis-start-requests/active', () => {
 
         // Assert the response
         expect(response.status).toBe(200);
-        expect(response.body).toEqual([
+        expect(response.body).toEqual(
             {
                 id: request.lastInsertRowid,
                 student_id: 's318952',
@@ -1027,7 +1027,7 @@ describe('GET /api/student/thesis-start-requests/active', () => {
                 approval_date: null,
                 status: 'waiting for approval'
             }
-        ]);
+        );
     });
     test('should handle errors', async () => {
         // Logged as s318952
