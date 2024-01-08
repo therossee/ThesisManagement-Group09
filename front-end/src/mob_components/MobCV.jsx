@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Avatar, Flex, message, Row, Skeleton, Tag, Typography } from 'antd';
 import {Collapse, Button, AutoCenter} from 'antd-mobile';
-import { UserOutlined } from '@ant-design/icons';
 import PropTypes from 'prop-types';
 import API from '../API';
 function MobCV(props) {
@@ -54,7 +53,7 @@ function MobCV(props) {
                     <Flex vertical justify="center" align="center">
                         <h3>Color legend for marks:</h3>
                         <ColorLegenda />
-                        <Avatar icon={<UserOutlined />} size={64} />
+                        <Avatar src={<img src="https://i.imgur.com/QVI00J0.jpeg" alt="avatar" />} size={64} />
                         <h4 style={{ marginTop: '15px' }}>{studentInfo.surname} {studentInfo.name}</h4>
                         <Tag color="#1677ff" style={{ borderRadius: "10px", marginLeft: "4px", marginTop: '-12px' }}>
                             <Text style={{ color: "white" }}>
