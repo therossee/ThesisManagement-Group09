@@ -786,11 +786,11 @@ exports.createThesisStartRequest = (student_id, title, description, supervisor_i
        VALUES (?, ?, ?, ?, ?);`;
 
       let res;
-      if(!application_id && !proposal_id){
-       res = db.prepare(addRequestQueryLessParamethers).run(student_id, title, description, supervisor_id, creation_date);
+      if(application_id && proposal_id){
+       res = db.prepare(addRequestQuery).run(student_id, application_id, proposal_id, title, description, supervisor_id, creation_date);
       }
       else{
-       res = db.prepare(addRequestQuery).run(student_id, application_id, proposal_id, title, description, supervisor_id, creation_date);
+       res = db.prepare(addRequestQueryLessParamethers).run(student_id, title, description, supervisor_id, creation_date);
       }
 
       const requestId = res.lastInsertRowid;
