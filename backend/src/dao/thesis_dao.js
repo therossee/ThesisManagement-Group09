@@ -749,7 +749,7 @@ exports.getApplicationById = (applicationId) => {
  * @param {string[]} internal_co_supervisors_ids
  * @return {Promise<string>}
  */
-exports.createThesisStartRequest = (student_id, application_id, proposal_id, title, description, supervisor_id, internal_co_supervisors_ids) => {
+exports.createThesisStartRequest = (student_id, title, description, supervisor_id, internal_co_supervisors_ids, application_id, proposal_id) => {
   return new Promise((resolve, reject) => {
 
     const creation_date = new AdvancedDate().toISOString();
@@ -763,7 +763,7 @@ exports.createThesisStartRequest = (student_id, application_id, proposal_id, tit
     }
 
     // check if the proposal belong to the degree of the student
-    if(proposal_id != ''){
+    if(proposal_id){
       const checkProposalDegree = `SELECT * FROM proposalCds WHERE proposal_id=? AND cod_degree=(SELECT cod_degree FROM student WHERE id=?)`;
       const proposal_correct = db.prepare(checkProposalDegree).get(proposal_id, student_id);
       if (!proposal_correct) {
@@ -786,7 +786,7 @@ exports.createThesisStartRequest = (student_id, application_id, proposal_id, tit
        VALUES (?, ?, ?, ?, ?);`;
 
       let res;
-      if(application_id == '' && proposal_id == ''){
+      if(!application_id && !proposal_id){
        res = db.prepare(addRequestQueryLessParamethers).run(student_id, title, description, supervisor_id, creation_date);
       }
       else{
