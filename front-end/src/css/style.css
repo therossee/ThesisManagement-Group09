@@ -7,6 +7,10 @@
   background-color: white;
 }
 
+.menu-style {
+  height: calc(100vh - 100px);
+}
+
 .wrapper-enlight{
   display: flex;
   width: 100%;
@@ -58,9 +62,9 @@
 .logo-style {
   background-color: white;
   display: flex;
-  align-items: center;
   justify-content: center;
   border-right: 1px solid #f0f0f0;
+  height: 100px;
 }
 
 .cover-style {
