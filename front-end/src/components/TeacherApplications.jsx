@@ -54,15 +54,15 @@ function TeacherApplications() {
         fetchData();
     }, [dirty]);
 
-    const showModal = (content, action) => {
+    const showModal = (content, action, okText, cancelText) => {
         Modal.confirm({
             title: "Confirm action",
             icon: <ExclamationCircleFilled />,
             content: content,
             onOk: action,
-            okText: "Yes",
+            okText: okText,
             okType: "danger",
-            cancelText: "No",
+            cancelText: cancelText,
         });
     };
 
@@ -139,7 +139,9 @@ function TeacherApplications() {
                                                                 <Text strong>Student: </Text><Text>{student.name + " " + student.surname}</Text>
                                                             </Paragraph>
                                                         </div>,
-                                                        () => acceptApplication(x.id, student)
+                                                        () => acceptApplication(x.id, student),
+                                                        "Yes, accept the application",
+                                                        "Cancel"
                                                     )
                                                 }}
                                             />
@@ -164,7 +166,9 @@ function TeacherApplications() {
                                                                 <Text strong>Student: </Text><Text>{student.name + " " + student.surname}</Text>
                                                             </Paragraph>
                                                         </div>,
-                                                        () => rejectApplication(x.id, student)
+                                                        () => rejectApplication(x.id, student),
+                                                        "Yes, reject the application",
+                                                        "Cancel"
                                                     )
                                                 }}
                                             />

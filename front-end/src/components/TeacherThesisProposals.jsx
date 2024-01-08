@@ -16,7 +16,7 @@ function TeacherThesisProposals() {
 
     const [dirty, setDirty] = useState(true);
 
-    const {Paragraph, Text } = Typography;
+    const { Paragraph, Text } = Typography;
 
     // Columns of the table
     const columns = [
@@ -105,7 +105,10 @@ function TeacherThesisProposals() {
                                         <Text strong>Thesis title: </Text><Text>{record.title}</Text>
                                     </Paragraph>
                                 </div>,
-                                () => deleteProposalById(record.id))}
+                                () => deleteProposalById(record.id),
+                                "Yes, delete it",
+                                "No, keep it"
+                            )}
                         />
                     </Tooltip>
                     <Tooltip title="Archive Proposal">
@@ -122,7 +125,10 @@ function TeacherThesisProposals() {
                                         <Text strong>Thesis title: </Text><Text>{record.title}</Text>
                                     </Paragraph>
                                 </div>,
-                                () => archiveProposalById(record.id))}
+                                () => archiveProposalById(record.id),
+                                "Yes, archive it",
+                                "No, keep it"
+                            )}
                         />
                     </Tooltip>
                 </Space >
@@ -137,15 +143,15 @@ function TeacherThesisProposals() {
         loading: isLoadingTable,
     };
 
-    const showModal = (content, action) => {
+    const showModal = (content, action, okText, cancelText) => {
         Modal.confirm({
             title: "Confirm action",
             icon: <ExclamationCircleFilled />,
             content: content,
             onOk: action,
-            okText: "Yes",
+            okText: okText,
             okType: "danger",
-            cancelText: "No",
+            cancelText: cancelText,
         });
     };
 
