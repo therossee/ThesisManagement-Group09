@@ -20,6 +20,7 @@ function errorHandler(err, req, res, _next) {
                     break;
                 default:
                     res.status(400).json({ message: 'Some properties are missing or invalid.', errors: err.issues });
+                    break;
             }
         default:
             console.error(err);
