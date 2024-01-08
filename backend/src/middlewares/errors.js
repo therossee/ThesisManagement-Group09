@@ -11,7 +11,16 @@ function errorHandler(err, req, res, _next) {
             err.sendHttpResponse(res);
             break;
         case err instanceof ZodError:
-            res.status(400).json({ message: 'Some properties are missing or invalid.', errors: err.issues });
+            switch (err.issues[0].code) {
+                case 'invalid_arguments':
+                    res.status(404).json({ message: err.issues[0].message });
+                    break;
+                case 'custom':
+                    res.status(400).json({ message: err.issues[0].message });
+                    break;
+                default:
+                    res.status(400).json({ message: 'Some properties are missing or invalid.', errors: err.issues });
+            }
             break;
         default:
             console.error(err);
