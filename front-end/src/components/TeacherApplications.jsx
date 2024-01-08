@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from 'react-router-dom';
 import { Alert, message, Divider, List, Skeleton, Avatar, Button, Flex, Typography, Tooltip, Modal } from 'antd';
-import { CheckOutlined, CloseOutlined, ExclamationCircleFilled } from '@ant-design/icons';
+import { CheckOutlined, CloseOutlined, ExclamationCircleFilled, UserOutlined } from '@ant-design/icons';
 import API from "../API";
 import StudentCV from "./StudentCV";
 
@@ -120,10 +120,10 @@ function TeacherApplications() {
                             <List.Item key={student.id}>
                                 <button className="wrapper-enlight" onClick={() => { setStudentInfo(student); setApplicationId(student.application_id); setIsOpen(true) }} onKeyDown={() => { }}>
                                     <List.Item.Meta
-                                        avatar={<Avatar src={<img src="https://i.imgur.com/QVI00J0.jpeg" alt="avatar" />} size="large" />}
+                                        avatar={<Avatar style={{ backgroundColor: '#1677ff' }} icon={<UserOutlined />} size="large" />}
                                         style={{ padding: ".5%" }}
                                         title={student.surname + " " + student.name}
-                                        description={<div style={{ textAlign: "left", marginTop: "-4px" }}>{student.id}</div>}
+                                        description={<div style={{ textAlign: "left", marginTop: "-5px" }}>{student.id}</div>}
                                     />
                                     <Flex wrap="wrap" gap="small" style={{ padding: ".5%", alignItems: 'center' }}>
                                         <Tooltip title="Accept Application">

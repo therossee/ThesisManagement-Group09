@@ -36,7 +36,7 @@ function IsLoggedInForm() {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <Avatar size="large" src={<img src="https://i.imgur.com/QVI00J0.jpeg" alt="avatar" />} style={{ marginRight: '10px' }} />
+        <Avatar size="large" style={{ backgroundColor: '#1677ff', marginRight: "10px" }} icon={<UserOutlined />} />
         <span>{userData.name}</span>
       </div>
       <div>

@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Avatar, Col, Drawer, Flex, message, Row, Skeleton, Tag, Typography, Button } from 'antd';
-import { ArrowDownOutlined } from '@ant-design/icons';
+import { ArrowDownOutlined, UserOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
 import PropTypes from 'prop-types';
 import API from '../API';
+
+dayjs.extend(localizedFormat);
 
 function StudentCV(props) {
 
@@ -49,6 +53,7 @@ function StudentCV(props) {
     return (
         <Drawer
             size="large"
+            title={`Creation Date: ${dayjs(studentInfo.creationDate).format('lll')}`}
             open={isOpen}
             onClose={() => setIsOpen(false)}
             extra={
@@ -60,7 +65,7 @@ function StudentCV(props) {
                 <>
                     <Flex vertical justify="center" align="center">
                         <ColorLegenda />
-                        <Avatar src={<img src="https://i.imgur.com/QVI00J0.jpeg" alt="avatar" />} size={140} />
+                        <Avatar style={{ backgroundColor: '#1677ff' }} icon={<UserOutlined />} size={130} />
                         <Title level={2} style={{ marginTop: '15px' }}>{studentInfo.surname} {studentInfo.name}</Title>
                         <Tag color="#1677ff" style={{ borderRadius: "10px", marginLeft: "5px", marginTop: '-7px' }}>
                             <Text style={{ color: "white" }}>

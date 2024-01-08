@@ -170,9 +170,7 @@ async function getTeacherThesisApplications(proposalId) {
         method: 'GET',
         credentials: 'include'
     });
-
     const applications = await response.json();
-
     if (response.ok) {
         return applications.map((x) => ({
             name: x.name,
