@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link } from 'react-router-dom';
 import { Alert, message, Divider, List, Skeleton, Avatar, Button, Flex, Typography, Tooltip, Modal } from 'antd';
 import { CheckOutlined, CloseOutlined, ExclamationCircleFilled, UserOutlined } from '@ant-design/icons';
-import PropTypes from 'prop-types';
 import API from "../API";
 import StudentCV from "./StudentCV";
 
