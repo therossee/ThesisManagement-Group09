@@ -34,14 +34,14 @@ afterEach(() => {
 describe('createThesisStartRequest', () => {
     test('handles unauthorized action error if student already has a request', async () => {
       
-      db.prepare().get.mockReturnValueOnce({ proposal_id: '3', cod_degree: 'LM-31'}); 
+      db.prepare().get.mockReturnValueOnce({ proposal_id: 3, cod_degree: 'LM-31'}); 
       
       // Assertions for rejected promise with UnauthorizedActionError
       await expect(
         thesis.createThesisStartRequest(
             's320213',
-            '1',
-            '3',
+            1,
+            3,
             'title',
             'description',
             'd279620',
@@ -62,8 +62,8 @@ describe('createThesisStartRequest', () => {
         await expect(
           thesis.createThesisStartRequest(
               's320213',
-              '1',
-              '3',
+              1,
+              3,
               'title',
               'description',
               'd279620',
@@ -83,36 +83,36 @@ describe('createThesisStartRequest', () => {
         
         const requestId = await thesis.createThesisStartRequest(
           's318952',
-          '',
-          '',
           'title',
           'description',
           'd279620',
           ['']
         );
     
-        expect(requestId).toBe(1); 
+        expect(requestId).toBe(1);
+        expect(db.transaction).toHaveBeenCalled(); 
     
     });
 
     test('creates a thesis start request with all parameters', async () => {
       
         db.prepare().get.mockReturnValueOnce(); 
-        db.prepare().get.mockReturnValueOnce({ proposal_id: '2', cod_degree: 'LM-31'}); 
+        db.prepare().get.mockReturnValueOnce({ proposal_id: 2, cod_degree: 'LM-31'}); 
         db.prepare().run.mockReturnValueOnce({lastInsertRowid: 1});
         db.prepare().run.mockReturnValueOnce({});
   
         const requestId = await thesis.createThesisStartRequest(
           's318952',
-          '1',
-          '2',
+          1,
+          2,
           'title',
           'description',
           'd279620',
           ['d370335']
         );
     
-        expect(requestId).toBe(1); // Replace with the expected result based on your implementation 
+        expect(requestId).toBe(1); 
+        expect(db.transaction).toHaveBeenCalled();
     });  
 });
 

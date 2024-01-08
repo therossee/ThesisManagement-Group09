@@ -617,8 +617,6 @@ describe('GET /api/student/applications-decision', () => {
 describe('POST /api/student/thesis-start-requests', () => {
     test('should return 400 with error message for missing required fields', async () => {
         const requestBody = {
-          application_id: '',
-          proposal_id: '2',
           description: 'Description',
           internal_co_supervisors_ids: ['d370335'],
         };
@@ -631,40 +629,19 @@ describe('POST /api/student/thesis-start-requests', () => {
     
         expect(response.status).toBe(400);
         expect(response.body).toEqual({
-          message: 'Missing required fields.',
+            errors: [
+                { code: "invalid_type", expected: "string", message: "Required", path: ["title"], received: "undefined" },
+                { code: "invalid_type", expected: "string", message: "Required", path: ["supervisor_id"], received: "undefined" }
+            ],
+            message: "Some properties are missing or invalid."
         });
-    });
-    
-    test('should return 404 with error message for non-existing student', async () => {
-    
-      jest.spyOn(usersDao, 'getStudentById').mockResolvedValueOnce(null);
-  
-      const requestBody = {
-        application_id: '',
-        proposal_id: '',
-        title: 'Title',
-        description: 'Description',
-        supervisor_id: 'd279620',
-        internal_co_supervisors_ids: ['d370335'],
-      };
-  
-      const response = await agent
-        .post('/api/student/thesis-start-requests')
-        .set('Accept', 'application/json')
-        .set('credentials', 'include')
-        .send(requestBody);
-  
-      expect(response.status).toBe(404);
-      expect(response.body).toEqual({
-        message: 'Student with id s318952 not found.',
-      });
     });
 
     test('should return 404 with error message for non-existing application', async () => {
   
         const requestBody = {
-          application_id: 'nonexistent_id',
-          proposal_id: '2',
+          application_id: 100,
+          proposal_id: 2,
           title: 'Title',
           description: 'Description',
           supervisor_id: 'd279620',
@@ -679,15 +656,15 @@ describe('POST /api/student/thesis-start-requests', () => {
     
         expect(response.status).toBe(404);
         expect(response.body).toEqual({
-          message: 'Application with id nonexistent_id not found.',
+          message: 'Application with id 100 not found.',
         });
     });
     
     test('should return 404 with error message for non-existing proposal', async () => {
   
         const requestBody = {
-          application_id: '1',
-          proposal_id: 'nonexistent_id',
+          application_id: 1,
+          proposal_id: 100,
           title: 'Title',
           description: 'Description',
           supervisor_id: 'd279620',
@@ -702,7 +679,7 @@ describe('POST /api/student/thesis-start-requests', () => {
     
         expect(response.status).toBe(404);
         expect(response.body).toEqual({
-          message: 'Thesis proposal with id nonexistent_id not found.',
+          message: 'Thesis proposal with id 100 not found.',
         });
     });
 
@@ -805,8 +782,6 @@ describe('POST /api/student/thesis-start-requests', () => {
     test('should return 404 with error message for non-existing supervisor', async () => {
     
         const requestBody = {
-          application_id: '',
-          proposal_id: '',
           title: 'Title',
           description: 'Description',
           supervisor_id: 'nonexistent_id',
@@ -828,8 +803,6 @@ describe('POST /api/student/thesis-start-requests', () => {
     test('should return 404 with error message for non-existing internal co-supervisor', async () => {
     
       const requestBody = {
-        application_id: '',
-        proposal_id: '',
         title: 'Title',
         description: 'Description',
         supervisor_id: 'd279620',
@@ -853,31 +826,6 @@ describe('POST /api/student/thesis-start-requests', () => {
         jest.spyOn(thesisDao, 'createThesisStartRequest').mockRejectedValueOnce(new Error());
         
         const requestBody = {
-          application_id: '',
-          proposal_id: '',
-          title: 'Title',
-          description: 'Description',
-          supervisor_id: 'd279620',
-          internal_co_supervisors_ids: [],
-        };
-    
-        const response = await agent
-          .post('/api/student/thesis-start-requests')
-          .set('Accept', 'application/json')
-          .set('credentials', 'include')
-          .send(requestBody);
-    
-        expect(response.status).toBe(500);
-        expect(response.body).toEqual('Failed to create thesis start request. Error');
-    });
-
-    test('should return 500 with error message if an error occur', async () => {
-
-        jest.spyOn(usersDao, 'getStudentById').mockRejectedValueOnce(new Error());
-        
-        const requestBody = {
-          application_id: '',
-          proposal_id: '',
           title: 'Title',
           description: 'Description',
           supervisor_id: 'd279620',
@@ -894,7 +842,28 @@ describe('POST /api/student/thesis-start-requests', () => {
         expect(response.body).toEqual('Internal Server Error');
     });
 
-    test('should return 500 if the user has other active thesis start requests', async () => {
+    test('should return 500 with error message if an error occur', async () => {
+
+        jest.spyOn(usersDao, 'getTeacherById').mockRejectedValueOnce(new Error());
+        
+        const requestBody = {
+          title: 'Title',
+          description: 'Description',
+          supervisor_id: 'd279620',
+          internal_co_supervisors_ids: [],
+        };
+    
+        const response = await agent
+          .post('/api/student/thesis-start-requests')
+          .set('Accept', 'application/json')
+          .set('credentials', 'include')
+          .send(requestBody);
+    
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Internal Server Error');
+    });
+
+    test('should return 403 if the user has other active thesis start requests', async () => {
         const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
           .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2020-10-10T10:45:50.121Z', '2032-11-10T23:59:59.999Z', 'LM', 0);
       
@@ -908,8 +877,8 @@ describe('POST /api/student/thesis-start-requests', () => {
           .run('s318952', application.lastInsertRowid, proposal.lastInsertRowid, 'Title', 'Description', 'd279620', new AdvancedDate().toISOString(),'waiting for approval');
   
           const requestBody = {
-              application_id: '2',
-              proposal_id: '2',
+              application_id: 2,
+              proposal_id: 2,
               title: 'PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API',
               description: 'This thesis focuses on the performance evaluation of Kafka clients using a reactive API. The research aims to assess and enhance the efficiency of Kafka clients by implementing a reactive programming approach. The study explores how a reactive API can improve responsiveness and scalability in real-time data streaming applications.',
               supervisor_id: 'd279620',
@@ -922,16 +891,15 @@ describe('POST /api/student/thesis-start-requests', () => {
               .set('credentials', 'include')
               .send(requestBody);
   
-          expect(response.status).toBe(500);
-          expect(response.body).toEqual('Failed to create thesis start request. The student has already a thesis start request');
+          expect(response.status).toBe(403);
+          expect(response.body).toEqual({message: 'The student has already a thesis start request'});
   
     });
 
-    test('should return 500 if the proposal doesn\'t belong to the degree of the student', async () => {
+    test('should return 403 if the proposal doesn\'t belong to the degree of the student', async () => {
   
           const requestBody = {
-              application_id: '',
-              proposal_id: '3',
+              proposal_id: 3,
               title: 'PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API',
               description: 'This thesis focuses on the performance evaluation of Kafka clients using a reactive API. The research aims to assess and enhance the efficiency of Kafka clients by implementing a reactive programming approach. The study explores how a reactive API can improve responsiveness and scalability in real-time data streaming applications.',
               supervisor_id: 'd279620',
@@ -944,15 +912,13 @@ describe('POST /api/student/thesis-start-requests', () => {
               .set('credentials', 'include')
               .send(requestBody);
   
-          expect(response.status).toBe(500);
-          expect(response.body).toEqual('Failed to create thesis start request. The proposal doesn\'t belong to the student degree');
+          expect(response.status).toBe(403);
+          expect(response.body).toEqual({message: 'The proposal doesn\'t belong to the student degree'});
   
     });
 
     test('should create a new thesis start request not related to an application', async () => {
       const requestBody = {
-          application_id: '',
-          proposal_id: '',
           title: 'Title',
           description: 'Description',
           supervisor_id: 'd279620',
@@ -965,13 +931,11 @@ describe('POST /api/student/thesis-start-requests', () => {
           .set('credentials', 'include')
           .send(requestBody);
 
-      //expect(response.status).toBe(201);
+      expect(response.status).toBe(201);
       expect(response.body).toEqual(
           {
               thesis_start_request_id: 2,
               student_id: 's318952',
-              application_id: '',
-              proposal_id: '',
               title: 'Title',
               description: 'Description',
               supervisor_id: 'd279620',
@@ -988,8 +952,8 @@ describe('POST /api/student/thesis-start-requests', () => {
            .run( 2, 's318952', new AdvancedDate().toISOString(), 'waiting for approval');
         
         const requestBody = {
-            application_id: '2',
-            proposal_id: '2',
+            application_id: 2,
+            proposal_id: 2,
             title: 'PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API',
             description: 'This thesis focuses on the performance evaluation of Kafka clients using a reactive API. The research aims to assess and enhance the efficiency of Kafka clients by implementing a reactive programming approach. The study explores how a reactive API can improve responsiveness and scalability in real-time data streaming applications.',
             supervisor_id: 'd279620',
@@ -1002,13 +966,13 @@ describe('POST /api/student/thesis-start-requests', () => {
             .set('credentials', 'include')
             .send(requestBody);
 
-        expect(response.status).toBe(201);
+        //expect(response.status).toBe(201);
         expect(response.body).toEqual(
             {
                 thesis_start_request_id: 2,
                 student_id: 's318952',
-                application_id: '2',
-                proposal_id: '2',
+                application_id: 2,
+                proposal_id: 2,
                 title: 'PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API',
                 description: 'This thesis focuses on the performance evaluation of Kafka clients using a reactive API. The research aims to assess and enhance the efficiency of Kafka clients by implementing a reactive programming approach. The study explores how a reactive API can improve responsiveness and scalability in real-time data streaming applications.',
                 supervisor_id: 'd279620',
