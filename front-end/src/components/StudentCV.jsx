@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Avatar, Col, Drawer, Flex, message, Row, Skeleton, Tag, Typography, Button } from 'antd';
-import { UserOutlined, ArrowDownOutlined } from '@ant-design/icons';
+import { ArrowDownOutlined, UserOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
 import PropTypes from 'prop-types';
 import API from '../API';
+
+dayjs.extend(localizedFormat);
 
 function StudentCV(props) {
 
@@ -36,13 +40,9 @@ function StudentCV(props) {
 
     function color(mark) {
         let colorCode;
-        if (mark < 20) {
-            colorCode = "#f5222d";
-        } else if (mark < 22) {
-            colorCode = "#fa8c16";
-        } else if (mark < 24) {
+        if (mark < 23) {
             colorCode = "#fadb14";
-        } else if (mark < 27) {
+        } else if (mark < 26) {
             colorCode = "#a0d911";
         } else {
             colorCode = "#52c41a";
@@ -53,6 +53,7 @@ function StudentCV(props) {
     return (
         <Drawer
             size="large"
+            title={`Creation Date: ${dayjs(studentInfo.creationDate).format('lll')}`}
             open={isOpen}
             onClose={() => setIsOpen(false)}
             extra={
@@ -64,9 +65,9 @@ function StudentCV(props) {
                 <>
                     <Flex vertical justify="center" align="center">
                         <ColorLegenda />
-                        <Avatar icon={<UserOutlined />} size={128} />
+                        <Avatar style={{ backgroundColor: '#1677ff' }} icon={<UserOutlined />} size={130} />
                         <Title level={2} style={{ marginTop: '15px' }}>{studentInfo.surname} {studentInfo.name}</Title>
-                        <Tag color="#1677ff" style={{ borderRadius: "10px", marginLeft: "4px", marginTop: '-7px' }}>
+                        <Tag color="#1677ff" style={{ borderRadius: "10px", marginLeft: "5px", marginTop: '-7px' }}>
                             <Text style={{ color: "white" }}>
                                 {studentInfo.id}
                             </Text>
@@ -111,11 +112,9 @@ function StudentCV(props) {
 function ColorLegenda() {
     return (
         <Row style={{ marginBottom: '40px' }}>
-            <Tag color="#f5222d">Less than 20</Tag>
-            <Tag color="#fa8c16">20 to 21</Tag>
-            <Tag color="#fadb14">22 to 23</Tag>
-            <Tag color="#a0d911">24 to 26</Tag>
-            <Tag color="#52c41a">27 and above</Tag>
+            <Tag color="#fadb14">Less than 23</Tag>
+            <Tag color="#a0d911">23 to 26</Tag>
+            <Tag color="#52c41a">26 and above</Tag>
         </Row>
     )
 }
@@ -133,6 +132,7 @@ StudentCV.propTypes = {
         name: PropTypes.string.isRequired,
         surname: PropTypes.string.isRequired,
         id: PropTypes.string.isRequired,
+        creationDate: PropTypes.string.isRequired,
     }),
 }
 

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import API from "../API";
+import { Link } from 'react-router-dom';
 import { Alert, message, Divider, List, Skeleton, Avatar, Button, Flex, Typography, Tooltip, Modal } from 'antd';
-import { UserOutlined, CheckOutlined, CloseOutlined, ExclamationCircleFilled } from '@ant-design/icons';
+import { CheckOutlined, CloseOutlined, ExclamationCircleFilled, UserOutlined } from '@ant-design/icons';
+import API from "../API";
 import StudentCV from "./StudentCV";
 
 function TeacherApplications() {
@@ -99,9 +100,11 @@ function TeacherApplications() {
                 <Skeleton loading={isLoading} active title={false}>
                     <Divider orientation="center">
                         <div style={{ whiteSpace: "normal" }}>
-                            <Title level={4} style={{ margin: "0" }}>
-                                {x.title}
-                            </Title>
+                            <Link to={`/view-proposal/${x.id}`}>
+                                <Title level={4} style={{ margin: "0" }} >
+                                    {x.title}
+                                </Title>
+                            </Link>
                         </div>
                     </Divider>
                 </Skeleton>
@@ -114,11 +117,12 @@ function TeacherApplications() {
                             <List.Item key={student.id}>
                                 <button className="wrapper-enlight" onClick={() => { setStudentInfo(student); setApplicationId(student.application_id); setIsOpen(true) }} onKeyDown={() => { }}>
                                     <List.Item.Meta
-                                        avatar={<Avatar icon={<UserOutlined />} />}
+                                        avatar={<Avatar style={{ backgroundColor: '#1677ff' }} icon={<UserOutlined />} size="large" />}
                                         style={{ padding: ".5%" }}
                                         title={student.surname + " " + student.name}
+                                        description={<div style={{ textAlign: "left", marginTop: "-5px" }}>{student.id}</div>}
                                     />
-                                    <Flex wrap="wrap" gap="small" style={{ padding: ".5%" }}>
+                                    <Flex wrap="wrap" gap="small" style={{ padding: ".5%", alignItems: 'center' }}>
                                         <Tooltip title="Accept Application">
                                             <Button ghost type="primary"
                                                 loading={buttonsLoading}
@@ -187,7 +191,7 @@ function TeacherApplications() {
     return (
         data.length > 0 ?
             <>
-                <Alert message="To view a specific applicant's CV and eventually the file uploaded within the application, simply click anywhere in the corresponding row." type="info" showIcon closable />
+                <Alert message="To view a specific applicant's CV and eventually the file uploaded within the application, simply click anywhere in the corresponding row. Also, to view the Thesis Proposal just click on its title." type="info" showIcon closable />
                 {isOpen && <StudentCV isOpen={isOpen} setIsOpen={setIsOpen} studentInfo={studentInfo} applicationId={applicationId} />}
                 <ApplicationsList />
             </>
