@@ -20,17 +20,19 @@ DROP TABLE IF EXISTS thesisInternalCoSupervisor;
 DROP TABLE IF EXISTS thesisProposal;
 DROP TABLE IF EXISTS career;
 DROP TABLE IF EXISTS externalCoSupervisor;
+DROP TABLE IF EXISTS secretaryClerk;
 DROP TABLE IF EXISTS teacher;
 DROP TABLE IF EXISTS student;
 DROP TABLE IF EXISTS degree;
 DROP TABLE IF EXISTS configuration;
 
--- Create the degree table
+-- Create the configuration table
 CREATE TABLE configuration (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL -- Stringified value
 );
 
+-- Create the degree table
 CREATE TABLE degree (
     cod_degree TEXT PRIMARY KEY,
     title_degree TEXT NOT NULL UNIQUE
@@ -57,6 +59,14 @@ CREATE TABLE teacher (
     email TEXT NOT NULL,
     cod_group TEXT NOT NULL,
     cod_department TEXT NOT NULL
+);
+
+-- Create the secretaryClerk table
+CREATE TABLE secretaryClerk (
+    id TEXT PRIMARY KEY,
+    surname TEXT NOT NULL,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL
 );
 
 -- Create the externalCoSupervisor table
@@ -114,6 +124,15 @@ CREATE TABLE thesisExternalCoSupervisor (
     PRIMARY KEY (proposal_id, co_supervisor_id)
 );
 
+-- Create the proposalCds table
+CREATE TABLE proposalCds(
+    proposal_id INTEGER NOT NULL,
+    cod_degree TEXT NOT NULL,
+    FOREIGN KEY (proposal_id) REFERENCES thesisProposal(proposal_id),
+    FOREIGN KEY (cod_degree) REFERENCES degree(cod_degree),
+    PRIMARY KEY(proposal_id, cod_degree)
+);
+
 -- Create the proposalKeyword table
 CREATE TABLE proposalKeyword (
     proposal_id INTEGER NOT NULL,
@@ -130,14 +149,6 @@ CREATE TABLE proposalGroup (
     PRIMARY KEY (proposal_id, cod_group)
 );
 
-CREATE TABLE proposalCds(
-    proposal_id INTEGER NOT NULL,
-    cod_degree TEXT NOT NULL,
-    FOREIGN KEY (proposal_id) REFERENCES thesisProposal(proposal_id),
-    FOREIGN KEY (cod_degree) REFERENCES degree(cod_degree),
-    PRIMARY KEY(proposal_id, cod_degree)
-);
-
 -- Create the thesisApplication table
 CREATE TABLE thesisApplication (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -149,6 +160,7 @@ CREATE TABLE thesisApplication (
     FOREIGN KEY(student_id) REFERENCES student(id)
 );
 
+-- Create the thesisStartRequest table
 CREATE TABLE thesisStartRequest (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     student_id TEXT NOT NULL,
@@ -166,6 +178,7 @@ CREATE TABLE thesisStartRequest (
     FOREIGN KEY(supervisor_id) REFERENCES teacher(id)
 );
 
+-- Create the thesisStartCosupervisor table
 CREATE TABLE thesisStartCosupervisor (
     start_request_id INTEGER NOT NULL,
     cosupervisor_id TEXT NOT NULL,
@@ -204,6 +217,16 @@ VALUES
     ('LM-34', 'Information Engineering for Business Organization'),
     ('LM-35', 'Industrial Production Engineering');
 
+-- Insert data into the student table
+INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year)
+VALUES
+    ('s320213', 'Barbato', 'Luca', 'Male', 'Italian', 's320213@studenti.polito.it', 'LM-31', 2020),
+    ('s321607', 'Beltran', 'Juan Carlos', 'Male', 'Colombian', 's321607@studenti.polito.it', 'L-09', 2020),
+    ('s314796', 'De Rossi', 'Daniele', 'Male', 'Italian', 's314796@studenti.polito.it', 'LM-32', 2020),
+    ('s318771', 'Husanu', 'Diana', 'Female', 'Romanian', 's318771@studenti.polito.it', 'LM-33', 2020),
+    ('s321529', 'Ladrat', 'Matteo', 'Male', 'French', 's321529@studenti.polito.it', 'L-08', 2020),
+    ('s318952', 'Molinatto', 'Sylvie', 'Female', 'Italian', 's318952@studenti.polito.it', 'LM-34', 2020),
+    ('s319355', 'Schiavone', 'Michele', 'Male', 'Italian', 's319355@studenti.polito.it', 'LM-35', 2020);
 
 -- Insert data into the teacher table
 INSERT INTO teacher (id, surname, name, email, cod_group, cod_department)
@@ -224,6 +247,10 @@ VALUES
     ('d392000', 'Santoro', 'Chiara', 'd392000@polito.it', 'Group5', 'Dep3'),
     ('d292715', 'Gatti', 'Isabella', 'd292715@polito.it', 'Group3', 'Dep4');
 
+-- Insert data into the secretaryClerk table
+INSERT INTO secretaryClerk (id, surname, name, email)
+VALUES ('sc12345', 'Rossi', 'Abbondanzio', 'abbondanzio.rossi@polito.it');
+
 -- Insert data into the externalCoSupervisor table
 INSERT INTO externalCoSupervisor (surname, name, email)
 VALUES
@@ -237,17 +264,6 @@ VALUES
     ('Moretti', 'Luca', 'luca.moretti@email.com'),
     ('Rossi', 'Isabella', 'isabella.rossi@email.com'),
     ('Russo', 'Marco', 'marco.russo@email.com');
-
--- Insert data into the student table
-INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year)
-VALUES
-    ('s320213', 'Barbato', 'Luca', 'Male', 'Italian', 's320213@studenti.polito.it', 'LM-31', 2020),
-    ('s321607', 'Beltran', 'Juan Carlos', 'Male', 'Colombian', 's321607@studenti.polito.it', 'L-09', 2020),
-    ('s314796', 'De Rossi', 'Daniele', 'Male', 'Italian', 's314796@studenti.polito.it', 'LM-32', 2020),
-    ('s318771', 'Husanu', 'Diana', 'Female', 'Romanian', 's318771@studenti.polito.it', 'LM-33', 2020),
-    ('s321529', 'Ladrat', 'Matteo', 'Male', 'French', 's321529@studenti.polito.it', 'L-08', 2020),
-    ('s318952', 'Molinatto', 'Sylvie', 'Female', 'Italian', 's318952@studenti.polito.it', 'LM-34', 2020),
-    ('s319355', 'Schiavone', 'Michele', 'Male', 'Italian', 's319355@studenti.polito.it', 'LM-35', 2020);
 
 -- Insert data into the career table
 INSERT INTO career (id, cod_course, title_course, cfu, grade, date)
@@ -402,6 +418,57 @@ VALUES
     'The study requires a background in audiology, cochlear implants, telemedicine, and an understanding of rehabilitation protocols. It aims to address the determinants of success in cochlear implantation, considering factors such as patients’ hearing history, post-lingual or pre-lingual status, age, learning ability, health and cochlear structure, and intelligence. The proposed solutions aim to enhance the rehabilitation process after CI surgery and address the lack of public information on this matter worldwide.',
     '2023-11-27T22:44:51.199Z', '2024-06-30T23:59:59.999Z', 'LM');
 
+-- Insert data into thesisInternalCoSupervisor table
+INSERT INTO thesisInternalCoSupervisor (proposal_id, co_supervisor_id)
+VALUES
+    (1, 'd277137'),
+    (1, 'd226682'),
+    (1, 'd392000'),
+    (2, 'd226682'),
+    (2, 'd258293'),
+    (3, 'd237188'),
+    (3, 'd392000'),
+    (3, 'd292715'),
+    (4, 'd350985'),
+    (4, 'd255269');
+
+
+-- Insert data into thesisExternalCoSupervisor table
+INSERT INTO thesisExternalCoSupervisor (proposal_id, co_supervisor_id)
+VALUES
+    (1, 1),
+    (1, 3),
+    (1, 2),
+    (1, 7),
+    (3, 4),
+    (4, 5);
+
+-- Insert data into proposalCds table
+INSERT INTO proposalCds(proposal_id, cod_degree)
+VALUES
+    (1, 'LM-31'),
+    (2, 'LM-32'),
+    (2, 'LM-33'),
+    (3, 'LM-34'),
+    (4, 'LM-33'),
+    (5, 'LM-32'),
+    (6, 'L-08'),
+    (6, 'L-09'),
+    (7, 'L-08'),
+    (7, 'L-09'),
+    (8, 'L-08'),
+    (8, 'L-09'),
+    (9, 'LM-31'),
+    (10, 'LM-31'),
+    (11, 'LM-32'),
+    (12, 'LM-32'),
+    (13, 'LM-33'),
+    (14, 'LM-33'),
+    (15, 'LM-34'),
+    (16, 'LM-34'),
+    (16, 'LM-35'),
+    (17, 'LM-35'),
+    (18, 'LM-35');
 
 -- Insert data into the proposalKeyword table
 INSERT INTO proposalKeyword (proposal_id, keyword)
@@ -487,32 +554,6 @@ VALUES
     (18, 'rehabilitation protocols'),
     (18, 'human hearing anatomy');
 
-
--- Insert data into thesisInternalCoSupervisor table
-INSERT INTO thesisInternalCoSupervisor (proposal_id, co_supervisor_id)
-VALUES
-    (1, 'd277137'),
-    (1, 'd226682'),
-    (1, 'd392000'),
-    (2, 'd226682'),
-    (2, 'd258293'),
-    (3, 'd237188'),
-    (3, 'd392000'),
-    (3, 'd292715'),
-    (4, 'd350985'),
-    (4, 'd255269');
-
-
--- Insert data into thesisExternalCoSupervisor table
-INSERT INTO thesisExternalCoSupervisor (proposal_id, co_supervisor_id)
-VALUES
-    (1, 1),
-    (1, 3),
-    (1, 2),
-    (1, 7),
-    (3, 4),
-    (4, 5);
-
 -- Insert data into proposalGroup table
 INSERT INTO proposalGroup (proposal_id, cod_group)
 VALUES
@@ -540,7 +581,6 @@ VALUES
     (17, 'Group1'),
     (18, 'Group5');
 
-
 -- Insert into thesisApplication
 INSERT INTO thesisApplication (proposal_id, student_id, creation_date)
 VALUES
@@ -552,41 +592,18 @@ VALUES
     (15, 's318952', '2023-11-28T18:56:39.186Z'),
     (18, 's319355', '2023-11-28T16:30:00.171Z');
 
-INSERT INTO proposalCds(proposal_id, cod_degree)
-VALUES
-    (1, 'LM-31'),
-    (2, 'LM-32'),
-    (2, 'LM-33'),
-    (3, 'LM-34'),
-    (4, 'LM-33'),
-    (5, 'LM-32'),
-    (6, 'L-08'),
-    (6, 'L-09'),
-    (7, 'L-08'),
-    (7, 'L-09'),
-    (8, 'L-08'),
-    (8, 'L-09'),
-    (9, 'LM-31'),
-    (10, 'LM-31'),
-    (11, 'LM-32'),
-    (12, 'LM-32'),
-    (13, 'LM-33'),
-    (14, 'LM-33'),
-    (15, 'LM-34'),
-    (16, 'LM-34'),
-    (16, 'LM-35'),
-    (17, 'LM-35'),
-    (18, 'LM-35');
-
+-- Insert into thesisStartRequest
 INSERT INTO thesisStartRequest(student_id, application_id, proposal_id, title, description, supervisor_id, creation_date)
 VALUES
     ('s320213', 1, 1, 'AI-GUIDED WEB CRAWLER FOR AUTOMATIC DETECTION OF MALICIOUS SITES', 'This thesis focuses on developing an AI-guided web crawler for the automatic detection of malicious sites. The research aims to leverage artificial intelligence to enhance the efficiency and accuracy of web crawling in identifying and cataloging potentially harmful websites.', 'd279620', '2023-12-12T23:59:59.999Z'),
     ('s321607', 2, 6, 'OPTIMIZATION OF CHECK-IN PROCESSES IN AMAZON LOGISTICS', 'This thesis analyzes and proposes solutions for optimizing check-in processes in Amazon''s logistics, focusing on RFID technology. It compares the proposed solution with Amazon''s development, emphasizing efficiency and cost considerations', 'd292715', '2023-11-30T23:59:59.999Z');
 
+-- Insert into thesisStartRequest
 INSERT INTO thesisStartRequest(student_id, title, description, supervisor_id, creation_date)
 VALUES
     ('s319355', 'start request for a thesis to be defined', 'i''d like to start a thesis concerning numerical modelling and simulations with professor Ricci', 'd357587', '2023-11-30T23:59:59.999Z'); 
 
+-- Insert into thesisStartCosupervisor
 INSERT INTO thesisStartCosupervisor(start_request_id, cosupervisor_id)
 VALUES
     (1, 'd277137'),
