@@ -280,7 +280,7 @@ describe('listApplicationsForTeacherThesisProposal', () => {
 
         // Call the function
         const result = await thesis.listApplicationsForTeacherThesisProposal(1, 'd1');
-        const expectedQuery = `SELECT s.name, s.surname, ta.status, s.id, ta.id AS application_id
+        const expectedQuery = `SELECT s.name, s.surname, ta.status, s.id, ta.id AS application_id, ta.creation_date
     FROM thesisApplication ta, thesisProposal tp, student s
     WHERE ta.proposal_id = tp.proposal_id 
       AND s.id = ta.student_id

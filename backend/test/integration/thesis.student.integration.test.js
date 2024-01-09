@@ -966,7 +966,7 @@ describe('POST /api/student/thesis-start-requests', () => {
             .set('credentials', 'include')
             .send(requestBody);
 
-        //expect(response.status).toBe(201);
+        expect(response.status).toBe(201);
         expect(response.body).toEqual(
             {
                 thesis_start_request_id: 2,
