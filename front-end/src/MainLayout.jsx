@@ -1,5 +1,6 @@
 import { Layout } from 'antd';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Applications from './routes/Applications'
 import Home from './routes/Home';
 import Errors from './routes/Errors';
 import VirtualClock from "./routes/VirtualClock.jsx";
@@ -7,10 +8,10 @@ import InsertProposal from './routes/InsertProposal';
 import EditProposal from './routes/EditProposal.jsx';
 import Proposals from './routes/Proposals';
 import ViewProposal from './routes/ViewProposal';
+import StartRequest from './routes/StartRequest';
 import SideBar from './components/SideBar';
 import TopBar from './components/TopBar';
-import './css/style.css';
-import Applications from './routes/Applications';
+import './css/style.css';;
 
 const { Content, Footer } = Layout;
 
@@ -31,6 +32,7 @@ function MainLayout() {
                             <Route path="/insert-proposal/:id?" element={<InsertProposal />} />
                             <Route path="/view-proposal/:id" element={<ViewProposal />} />
                             <Route path="/edit-proposal/:id" element={<EditProposal />} />
+                            <Route path="/start-request" element={<StartRequest />} />
                             <Route path="/*" element={<Errors code="404" />} />
                         </Routes>
                     </Content>

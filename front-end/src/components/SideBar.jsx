@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { HomeOutlined, FileTextOutlined, HistoryOutlined, AuditOutlined, SettingOutlined } from '@ant-design/icons';
+import { HomeOutlined, FileTextOutlined, HistoryOutlined, AuditOutlined, SettingOutlined, FileDoneOutlined } from '@ant-design/icons';
 import { Layout, Menu, Image } from 'antd';
 import { useAuth } from './authentication/useAuth';
 import '../css/style.css';
@@ -16,6 +16,7 @@ function SideBar() {
     { label: "Home", key: "/", icon: <HomeOutlined /> },
     isAuthenticated && { label: "Thesis Proposals", key: "/proposals", icon: <FileTextOutlined /> },
     isAuthenticated && { label: isTeacher ? "Thesis Applications" : "Applications History", key: "/applications", icon: isTeacher ? <AuditOutlined /> : <HistoryOutlined /> },
+    isAuthenticated && { label: "Thesis Start Request", key: "/start-request", icon: <FileDoneOutlined /> },
     { type: 'divider' },
     isTester && { label: "Administration", key: "/admin/virtual-clock", icon: <SettingOutlined /> }
   ];
