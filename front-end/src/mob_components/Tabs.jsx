@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { HomeOutlined, FileTextOutlined, FileAddOutlined, ToTopOutlined, ClockCircleOutlined } from '@ant-design/icons';
 
 function Tabs() {
-    const { isAuthenticated, isTester, isTeacher } = useAuth();
+    const { isAuthenticated, isTester, isTeacher, isStudent, isSecretaryClerk } = useAuth();
     const [selectedTab, setSelectedTab] = useState('homeTab');
     const navigate = useNavigate();
     const location = useLocation();
@@ -52,7 +52,7 @@ function Tabs() {
                 onPress={() => setSelectedTab('homeTab')}
             >
             </TabBar.Item>
-            {isAuthenticated && (
+            {isAuthenticated && (isStudent || isTeacher) && (
             <TabBar.Item 
                 title="Proposals"
                 key="/proposals" icon={<FileTextOutlined />} 
@@ -80,7 +80,7 @@ function Tabs() {
               onPress={() => setSelectedTab('insertTab')}
             />
             )}
-            {isAuthenticated && (
+            {isAuthenticated && (isStudent || isTeacher) && (
             <TabBar.Item 
                 title="Applications"
                 key="/applications" icon={<ToTopOutlined />}
