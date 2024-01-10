@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { HomeOutlined, FileTextOutlined, HistoryOutlined, AuditOutlined, SettingOutlined } from '@ant-design/icons';
+import { HomeOutlined, FileTextOutlined, HistoryOutlined, AuditOutlined, SettingOutlined, QuestionOutlined } from '@ant-design/icons';
 import { Layout, Menu } from 'antd';
 import { useAuth } from './authentication/useAuth';
 import '../css/style.css';
@@ -8,7 +8,7 @@ const { Sider } = Layout;
 
 function SideBar() {
 
-  const { isAuthenticated, isTeacher, isTester } = useAuth();
+  const { isAuthenticated, isTeacher, isSecretary, isTester } = useAuth();
   const navigate = useNavigate();
 
   // Define the menu items, using directly the route path as key
@@ -16,6 +16,7 @@ function SideBar() {
     { label: "Home", key: "/", icon: <HomeOutlined /> },
     isAuthenticated && { label: "Thesis Proposals", key: "/proposals", icon: <FileTextOutlined /> },
     isAuthenticated && { label: isTeacher ? "Thesis Applications" : "Applications History", key: "/applications", icon: isTeacher ? <AuditOutlined /> : <HistoryOutlined /> },
+    isAuthenticated && { label: isTeacher && "Thesis Start Request" , key: "/thesis-start-request", icon: isTeacher && <QuestionOutlined /> },
     { type: 'divider' },
     isTester && { label: "Administration", key: "/admin/virtual-clock", icon: <SettingOutlined /> }
   ];

@@ -186,6 +186,27 @@ async function getTeacherThesisApplications(proposalId) {
     }
 }
 
+async function getSecretaryStartRequest(proposalId) {
+    const response = await fetch(URL + `/secretary/startrequests/${proposalId}`, {
+        method: 'GET',
+        credentials: 'include'
+    });
+
+    const startRequests = await response.json();
+
+    if (response.ok) {
+        return startRequests.map((x) => ({
+            name: x.name,
+            surname: x.surname,
+            status: x.status,
+            application_id: x.application_id,
+            id: x.id
+        }));
+    } else {
+        throw startRequests;
+    }
+}
+
 async function insertProposal(proposal) {
     let response = await fetch(URL + '/teacher/thesis_proposals', {
         method: 'POST',
@@ -399,6 +420,6 @@ const API = {
     getUser,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById, getPDF
+    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById, getPDF, getSecretaryStartRequest
 };
 export default API;
