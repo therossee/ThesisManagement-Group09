@@ -1,9 +1,9 @@
 require('jest');
 
-const db = require('../../db');
-const configuration = require('../../configuration_dao');
+const db = require('../../src/services/db');
+const configuration = require('../../src/dao/configuration_dao');
 
-jest.mock('../../db', () => ({
+jest.mock('../../src/services/db', () => ({
     prepare: jest.fn(),
     get: jest.fn(),
     run: jest.fn()

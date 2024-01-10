@@ -1,10 +1,10 @@
 require('jest');
 
-const db = require('../../db');
-const users = require('../../users_dao');
+const db = require('../../src/services/db');
+const users = require('../../src/dao/users_dao');
 
 // Mocking the database
-jest.mock('../../db', () => ({
+jest.mock('../../src/services/db', () => ({
     prepare: jest.fn().mockReturnThis(),
     get: jest.fn(),
     all: jest.fn(),

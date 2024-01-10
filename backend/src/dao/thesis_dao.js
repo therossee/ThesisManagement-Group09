@@ -2,12 +2,14 @@
 
 /* Data Access Object (DAO) module for accessing thesis data */
 
-const db = require('./db');
 const fs = require('fs');
 const path = require('path');
-const AdvancedDate = require('./AdvancedDate');
-const NoThesisProposalError = require("./errors/NoThesisProposalError");
-const UnauthorizedActionError = require("./errors/UnauthorizedActionError");
+const db = require('../services/db');
+const AdvancedDate = require('../models/AdvancedDate');
+const NoThesisProposalError = require("../errors/NoThesisProposalError");
+const UnauthorizedActionError = require("../errors/UnauthorizedActionError");
+const {APPLICATION_STATUS} = require("../enums/application");
+const {THESIS_START_REQUEST_STATUS} = require("../enums/thesisStartRequest");
 
 exports.createThesisProposal = (proposal_details, additional_details) => {
   return new Promise((resolve, reject) => {
@@ -229,8 +231,8 @@ exports.getThesisProposal = (proposalId, studentId) => {
     const currentDate = new AdvancedDate().toISOString();
 
     // Check is the proposal is not already assigned
-    const checkProposalAssigned = `SELECT * FROM thesisApplication WHERE proposal_id=? AND status='accepted'`;
-    const proposal_assigned = db.prepare(checkProposalAssigned).get(proposalId);
+    const checkProposalAssigned = `SELECT * FROM thesisApplication WHERE proposal_id=? AND status=?`;
+    const proposal_assigned = db.prepare(checkProposalAssigned).get(proposalId, APPLICATION_STATUS.ACCEPTED);
 
     if(proposal_assigned){
       resolve(null);
@@ -281,9 +283,9 @@ exports.deleteThesisProposalById = (proposalId, supervisorId) => {
       const hasApplicationsApprovedQuery = `
         SELECT 1
         FROM thesisApplication
-        WHERE proposal_id = ? AND status = 'accepted';
+        WHERE proposal_id = ? AND status = ?;
       `;
-      const hasApplicationsApproved = db.prepare(hasApplicationsApprovedQuery).get(proposalId) != null;
+      const hasApplicationsApproved = db.prepare(hasApplicationsApprovedQuery).get(proposalId, APPLICATION_STATUS.ACCEPTED) != null;
       if (hasApplicationsApproved) {
         reject( new UnauthorizedActionError('Some applications has been accepted and, therefore, you can\'t delete this thesis') );
         return;
@@ -315,11 +317,11 @@ exports.deleteThesisProposalById = (proposalId, supervisorId) => {
 
       const cancelApplicationsQuery = `
         UPDATE thesisApplication
-        SET status = 'cancelled'
-        WHERE proposal_id = ? AND status = 'waiting for approval'
+        SET status = ?
+        WHERE proposal_id = ? AND status = ?
         RETURNING *;
       `;
-      resolve( db.prepare(cancelApplicationsQuery).all(proposalId) );
+      resolve( db.prepare(cancelApplicationsQuery).all(APPLICATION_STATUS.CANCELLED, proposalId, APPLICATION_STATUS.WAITING_FOR_APPROVAL) );
     })();
   })
 };
@@ -338,9 +340,9 @@ exports.archiveThesisProposalById = (proposalId, supervisorId) => {
       const hasApplicationsApprovedQuery = `
         SELECT 1
         FROM thesisApplication
-        WHERE proposal_id = ? AND status = 'accepted';
+        WHERE proposal_id = ? AND status = ?;
       `;
-      const hasApplicationsApproved = db.prepare(hasApplicationsApprovedQuery).get(proposalId) != null;
+      const hasApplicationsApproved = db.prepare(hasApplicationsApprovedQuery).get(proposalId, APPLICATION_STATUS.ACCEPTED) != null;
       if (hasApplicationsApproved) {
         reject( new UnauthorizedActionError('Some applications has been accepted and, therefore, you can\'t archive this thesis') );
         return;
@@ -372,11 +374,11 @@ exports.archiveThesisProposalById = (proposalId, supervisorId) => {
 
       const cancelApplicationsQuery = `
         UPDATE thesisApplication
-        SET status = 'cancelled'
-        WHERE proposal_id = ? AND status = 'waiting for approval'
+        SET status = ?
+        WHERE proposal_id = ? AND status = ?
         RETURNING *;
       `;
-      resolve( db.prepare(cancelApplicationsQuery).all(proposalId) );
+      resolve( db.prepare(cancelApplicationsQuery).all(APPLICATION_STATUS.CANCELLED, proposalId, APPLICATION_STATUS.WAITING_FOR_APPROVAL) );
     })();
   })
 };
@@ -399,14 +401,14 @@ exports.listThesisProposalsFromStudent = (studentId) => {
               SELECT 1
               FROM thesisApplication A
               WHERE A.proposal_id = P.proposal_id
-                AND A.status = 'accepted'
+                AND A.status = ?
           )
           AND P.expiration > ?
           AND P.creation_date < ?
           AND is_archived = 0
           AND is_deleted = 0;`;
 
-    const thesisProposals = db.prepare(query).all(studentId, currentDate, currentDate);
+    const thesisProposals = db.prepare(query).all(studentId, APPLICATION_STATUS.ACCEPTED, currentDate, currentDate);
     resolve(thesisProposals);
   })
 };
@@ -483,6 +485,351 @@ exports.getSupervisorOfProposal = (proposalId) => {
   })
 };
 
+exports.applyForProposal = (proposal_id, student_id, file) => {
+  return new Promise((resolve, reject) => {
+    const currentDate = new AdvancedDate().toISOString();
+
+    //  Check if the proposal belong to the degree of the student
+    const checkProposalDegree = `SELECT * FROM proposalCds WHERE proposal_id=? AND cod_degree=(SELECT cod_degree FROM student WHERE id=?)`;
+    const proposal_correct = db.prepare(checkProposalDegree).get(proposal_id, student_id);
+    if (!proposal_correct) {
+      reject(new UnauthorizedActionError("The proposal doesn't belong to the student degree"));
+      return;
+    }
+
+    // Check if the proposal is active
+    const checkProposalActive = `SELECT * FROM thesisProposal P WHERE P.proposal_id=?
+                                 AND P.expiration > ? AND P.creation_date < ? AND P.is_deleted = 0 AND is_archived = 0
+                                 AND NOT EXISTS (
+                                    SELECT 1
+                                    FROM thesisApplication A
+                                    WHERE A.proposal_id = P.proposal_id
+                                    AND A.status = ?
+                                )`;
+
+    const proposal_active = db.prepare(checkProposalActive).get(proposal_id, currentDate, currentDate, APPLICATION_STATUS.ACCEPTED);
+    if (!proposal_active) {
+      reject(new UnauthorizedActionError("The proposal is not active"));
+      return;
+    }
+
+    // Check if the user has already applied for other proposals
+    const checkAlreadyApplied = `SELECT * FROM thesisApplication WHERE student_id=? AND (status=? OR status=?)`;
+    const already_applied = db.prepare(checkAlreadyApplied).get(student_id, APPLICATION_STATUS.WAITING_FOR_APPROVAL, APPLICATION_STATUS.ACCEPTED);
+    if (already_applied) {
+      reject(new UnauthorizedActionError("The user has already applied for other proposals"));
+      return;
+    }
+
+    const insertApplicationQuery = `
+    INSERT INTO thesisApplication (proposal_id, student_id, creation_date)
+    VALUES (?, ?, ?); `; // at first, the application has the default status 'waiting for approval'
+
+    // Start a transaction
+    db.prepare('BEGIN TRANSACTION;').run();
+
+    try {
+      const res = db.prepare(insertApplicationQuery).run(proposal_id, student_id, currentDate);
+
+      if (file) {
+        if(file.mimetype !== 'application/pdf'){
+          reject(new Error("The file must be a PDF"));
+          return;
+        }
+        const dir = path.join(__dirname, '..', '..', 'uploads', student_id.toString(), res.lastInsertRowid.toString());
+        // Use try-catch to handle any errors during file writing
+        try {
+          const writePath = path.join(dir, file.originalFilename);
+          fs.mkdirSync(dir, { recursive: true });
+          fs.writeFileSync(writePath, fs.readFileSync(file.filepath));
+        } catch (fileError) {
+          console.error('Error writing file:', fileError);
+
+          // Rollback the SQLite transaction if there's an error
+          db.prepare('ROLLBACK;').run();
+          reject(new Error(fileError)); // Reject the promise with the file error
+          return;
+        }
+      }
+
+      // Commit the transaction if everything is successful
+      db.prepare('COMMIT;').run();
+      resolve(res.lastInsertRowid);
+    } catch (error) {
+      console.error('Error inserting application:', error);
+
+      // Rollback the SQLite transaction if there's an error
+      db.prepare('ROLLBACK;').run();
+      reject(new Error(error)); // Reject the promise with the main error
+    }
+  })
+};
+
+exports.listThesisProposalsTeacher = (teacherId) => {
+  return new Promise((resolve) => {
+    const currentDate = new AdvancedDate().toISOString();
+    const getProposals = `SELECT * 
+      FROM thesisProposal P
+      WHERE P.supervisor_id=?
+        AND NOT EXISTS (
+          SELECT 1
+          FROM thesisApplication A
+          WHERE A.proposal_id = P.proposal_id
+            AND A.status = ?
+        )
+        AND P.expiration > ?
+        AND creation_date < ?
+        AND is_archived = 0
+        AND is_deleted = 0;`;
+    const proposals = db.prepare(getProposals).all(teacherId, APPLICATION_STATUS.ACCEPTED, currentDate, currentDate);
+    resolve(proposals)
+
+  })
+};
+
+exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
+  return new Promise((resolve) => {
+    const currentDate = new AdvancedDate().toISOString();
+    const getApplications = `SELECT s.name, s.surname, ta.status, s.id, ta.id AS application_id, ta.creation_date
+    FROM thesisApplication ta, thesisProposal tp, student s
+    WHERE ta.proposal_id = tp.proposal_id 
+      AND s.id = ta.student_id
+      AND ta.proposal_id=?
+      AND tp.supervisor_id= ? 
+      AND ta.creation_date < ?
+      AND tp.expiration > ?
+      AND tp.creation_date < ?
+      AND tp.is_archived = 0
+      AND tp.is_deleted = 0;`;
+
+    const applications = db.prepare(getApplications).all(proposal_id, teacherId, currentDate, currentDate, currentDate);
+    resolve(applications)
+
+  })
+};
+
+/**
+ * Return the application with the given id
+ *
+ * @param {number} applicationId
+ * @return {Promise<ThesisApplicationRow | null>}
+ */
+exports.getThesisApplicationById = (applicationId) => {
+    return new Promise((resolve) => {
+        const query = `SELECT * FROM thesisApplication WHERE id = ?`;
+        const res = db.prepare(query).get(applicationId);
+        if (!res) {
+            resolve(null);
+        }
+
+        resolve(res);
+    })
+};
+
+exports.getStudentActiveApplication = (student_id) => {
+  return new Promise((resolve) => {
+    const currentDate = new AdvancedDate().toISOString();
+    const query = `SELECT proposal_id FROM thesisApplication WHERE student_id=? AND creation_date < ? AND ( status=? OR status=?)`;
+    const res = db.prepare(query).all(student_id, currentDate, APPLICATION_STATUS.WAITING_FOR_APPROVAL, APPLICATION_STATUS.ACCEPTED);
+    resolve(res)
+  })
+};
+
+exports.updateApplicationStatus = (studentId, proposalId, status) => {
+  return new Promise((resolve) => {
+    const query = `
+      UPDATE thesisApplication
+      SET status = ?
+      WHERE student_id = ? AND proposal_id = ? AND status = ? AND creation_date < ?
+    `;
+    const res = db.prepare(query).run(status, studentId, proposalId, APPLICATION_STATUS.WAITING_FOR_APPROVAL, new AdvancedDate().toISOString());
+
+    resolve(res.changes !== 0);
+  })
+};
+
+/**
+ * Cancel all applications waiting for approval for a given proposal except the one of the student
+ *
+ * @param {string} studentId
+ * @param {string} proposalId
+ * @return {Promise<ThesisApplicationRow[]>}
+ */
+exports.cancelOtherApplications = (studentId, proposalId) => {
+  return new Promise((resolve) => {
+    const updateQuery = `
+        UPDATE thesisApplication
+        SET status = ?
+        WHERE student_id <> ? AND proposal_id = ? AND status = ?
+        RETURNING *;
+      `;
+
+    resolve(db.prepare(updateQuery).all(APPLICATION_STATUS.CANCELLED, studentId, proposalId, APPLICATION_STATUS.WAITING_FOR_APPROVAL));
+  })
+};
+
+/**
+ * Cancel all applications waiting for approval on expired thesis proposals
+ *
+ * @return {Promise<ThesisApplicationRow[]>}
+ */
+exports.cancelWaitingApplicationsOnExpiredThesis = () => {
+  return new Promise( resolve => {
+    const date = new AdvancedDate();
+
+    const query = `UPDATE thesisApplication
+      SET status=?
+      WHERE status=? AND proposal_id IN (SELECT proposal_id FROM thesisProposal WHERE expiration < ?)
+      RETURNING *;`;
+
+    const result = db.prepare(query).all(APPLICATION_STATUS.CANCELLED, APPLICATION_STATUS.WAITING_FOR_APPROVAL, date.toISOString());
+
+    resolve(result);
+  });
+};
+
+exports.listApplicationsDecisionsFromStudent = (studentId) => {
+  return new Promise((resolve) => {
+
+    const getApplications = `SELECT ta.id AS "application_id", ta.proposal_id, tp.title,  tp.level, t.name AS "teacher_name" , t.surname AS "teacher_surname" ,ta.status, tp.expiration
+    FROM thesisApplication ta, thesisProposal tp, teacher t
+    WHERE ta.proposal_id = tp.proposal_id AND ta.student_id = ? AND t.id = tp.supervisor_id AND ta.creation_date < ?`;
+
+    const applications = db.prepare(getApplications).all(studentId, new AdvancedDate().toISOString());
+    resolve(applications)
+
+  })
+};
+
+exports.getThesisProposalCds = (proposalId) => {
+  return new Promise((resolve) => {
+    const query = `SELECT d.cod_degree, d.title_degree FROM proposalCds p, degree d WHERE proposal_id = ? AND p.cod_degree = d.cod_degree`;
+    const res = db.prepare(query).all(proposalId);
+    resolve(res);
+  })
+};
+
+exports.getThesisProposalTeacher = (proposalId, teacherId) => {
+  return new Promise((resolve) => {
+    const currentDate = new AdvancedDate().toISOString();
+
+    // Check is the proposal is not already assigned
+    const checkProposalAssigned = `SELECT * FROM thesisApplication WHERE proposal_id=? AND status=?`;
+    const proposal_assigned = db.prepare(checkProposalAssigned).get(proposalId, APPLICATION_STATUS.ACCEPTED);
+
+    if(proposal_assigned){
+      resolve(null);
+      return;
+    }
+
+    const query = `SELECT * FROM thesisProposal WHERE proposal_id = ? AND supervisor_id = ? 
+                   AND expiration > ? AND creation_date < ? AND is_deleted = 0 AND is_archived = 0;`;
+    const res = db.prepare(query).get(proposalId, teacherId, currentDate, currentDate);
+    resolve(res);
+  })
+};
+
+exports.getApplicationById = (applicationId) => {
+  return new Promise((resolve) => {
+    const query = `SELECT * FROM thesisApplication WHERE id = ?`;
+    const res = db.prepare(query).get(applicationId);
+    resolve(res);
+  })
+};
+
+/**
+ * Create a new thesis start request
+ *
+ * @param {string} student_id
+ * @param {string} application_id
+ * @param {string} proposal_id
+ * @param {string} title
+ * @param {string} description
+ * @param {string} supervisor_id
+ * @param {string[]} internal_co_supervisors_ids
+ * @return {Promise<string>}
+ */
+exports.createThesisStartRequest = (student_id, title, description, supervisor_id, internal_co_supervisors_ids, application_id, proposal_id) => {
+  return new Promise((resolve, reject) => {
+
+    const creation_date = new AdvancedDate().toISOString();
+
+    // check if the student has already a thesis start request
+    const checkAlreadyRequest = `SELECT * FROM thesisStartRequest WHERE student_id=? AND (status=? OR status=? OR status=?)`;
+    const already_request = db.prepare(checkAlreadyRequest).get(student_id, THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL, THESIS_START_REQUEST_STATUS.ACCEPTED, THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED);
+    if (already_request) {
+      reject(new UnauthorizedActionError("The student has already a thesis start request"));
+      return;
+    }
+
+    // check if the proposal belong to the degree of the student
+    if(proposal_id){
+      const checkProposalDegree = `SELECT * FROM proposalCds WHERE proposal_id=? AND cod_degree=(SELECT cod_degree FROM student WHERE id=?)`;
+      const proposal_correct = db.prepare(checkProposalDegree).get(proposal_id, student_id);
+      if (!proposal_correct) {
+        reject(new UnauthorizedActionError("The proposal doesn't belong to the student degree"));
+        return;
+      }
+    }
+
+    // Self-called transaction
+    db.transaction(() => {
+      
+      // Insert the thesis start request into the database with application_id and proposal_id
+      const addRequestQuery = 
+      `INSERT INTO thesisStartRequest (student_id, application_id, proposal_id, title, description, supervisor_id, creation_date) 
+       VALUES (?, ?, ?, ?, ?, ?, ?);`;
+
+      // Insert the thesis start request into the database without application_id and proposal_id
+      const addRequestQueryLessParamethers = 
+      `INSERT INTO thesisStartRequest (student_id, title, description, supervisor_id, creation_date) 
+       VALUES (?, ?, ?, ?, ?);`;
+
+      let res;
+      if(application_id && proposal_id){
+       res = db.prepare(addRequestQuery).run(student_id, application_id, proposal_id, title, description, supervisor_id, creation_date);
+      }
+      else{
+       res = db.prepare(addRequestQueryLessParamethers).run(student_id, title, description, supervisor_id, creation_date);
+      }
+
+      const requestId = res.lastInsertRowid;
+
+      // Insert the internal co-supervisors into the database
+      const addInternalCoSupervisorsQuery = `INSERT INTO thesisStartCosupervisor (start_request_id, cosupervisor_id) VALUES (?, ?);`;
+      for (const id of internal_co_supervisors_ids) {
+        db.prepare(addInternalCoSupervisorsQuery).run(requestId, id);
+      }
+      
+      resolve(requestId);
+
+    })()
+});
+};
+
+/**
+ * Return the active (not rejected) thesis start requests of the student with the given id
+ *
+ * @param {string} student_id
+ * @return {Promise<string>}
+ */
+exports.getStudentActiveThesisStartRequests = (student_id) => {
+  return new Promise((resolve) => {
+    const currentDate = new AdvancedDate().toISOString();
+    const query = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? AND ( status=? OR status=? OR status=?)`;
+    const res = db.prepare(query).get(student_id, currentDate, THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL, THESIS_START_REQUEST_STATUS.ACCEPTED, THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED);
+    resolve(res)
+  })
+};
+
+/**
+ * @typedef {Object} ThesisApplicationRow
+ *
+ * @property {string} proposal_id
+ * @property {string} student_id
+ * @property {string} status
+ * @property {string} creation_date
+ */
 
 /**
  * @typedef {Object} ThesisProposalRow
@@ -518,227 +865,4 @@ exports.getSupervisorOfProposal = (proposalId) => {
  * @property {string} surname
  * @property {string} name
  * @property {string} email
- */
-
-exports.applyForProposal = (proposal_id, student_id, file) => {
-  return new Promise((resolve, reject) => {
-    const currentDate = new AdvancedDate().toISOString();
-
-    //  Check if the proposal belong to the degree of the student
-    const checkProposalDegree = `SELECT * FROM proposalCds WHERE proposal_id=? AND cod_degree=(SELECT cod_degree FROM student WHERE id=?)`;
-    const proposal_correct = db.prepare(checkProposalDegree).get(proposal_id, student_id);
-    if (!proposal_correct) {
-      reject(new UnauthorizedActionError("The proposal doesn't belong to the student degree"));
-      return;
-    }
-
-    // Check if the proposal is active
-    const checkProposalActive = `SELECT * FROM thesisProposal P WHERE P.proposal_id=?
-                                 AND P.expiration > ? AND P.creation_date < ? AND P.is_deleted = 0 AND is_archived = 0
-                                 AND NOT EXISTS (
-                                    SELECT 1
-                                    FROM thesisApplication A
-                                    WHERE A.proposal_id = P.proposal_id
-                                    AND A.status = 'accepted'
-                                )`;
-
-    const proposal_active = db.prepare(checkProposalActive).get(proposal_id, currentDate, currentDate);
-    if (!proposal_active) {
-      reject(new Error("The proposal is not active"));
-      return;
-    }
-
-    // Check if the user has already applied for other proposals
-    const checkAlreadyApplied = `SELECT * FROM thesisApplication WHERE student_id=? AND (status='waiting for approval' OR status='accepted')`;
-    const already_applied = db.prepare(checkAlreadyApplied).get(student_id);
-    if (already_applied) {
-      reject(new UnauthorizedActionError("The user has already applied for other proposals"));
-      return;
-    }
-
-    const insertApplicationQuery = `
-    INSERT INTO thesisApplication (proposal_id, student_id, creation_date)
-    VALUES (?, ?, ?); `; // at first, the application has the default status 'waiting for approval'
-
-    // Start a transaction
-    db.prepare('BEGIN TRANSACTION;').run();
-
-    try {
-      const res = db.prepare(insertApplicationQuery).run(proposal_id, student_id, currentDate);
-
-      if (file) {
-        if(file.mimetype !== 'application/pdf'){
-          reject(new Error("The file must be a PDF"));
-          return;
-        }
-        const dir = path.join(__dirname, 'uploads', student_id.toString(), res.lastInsertRowid.toString());
-        // Use try-catch to handle any errors during file writing
-        try {
-          const writePath = path.join(dir, file.originalFilename);
-          fs.mkdirSync(dir, { recursive: true });
-          fs.writeFileSync(writePath, fs.readFileSync(file.filepath));
-        } catch (fileError) {
-          console.error('Error writing file:', fileError);
-
-          // Rollback the SQLite transaction if there's an error
-          db.prepare('ROLLBACK;').run();
-          reject(new Error(fileError)); // Reject the promise with the file error
-          return;
-        }
-      }
-
-      // Commit the transaction if everything is successful
-      db.prepare('COMMIT;').run();
-      resolve(res.lastInsertRowid);
-    } catch (error) {
-      console.error('Error inserting application:', error);
-
-      // Rollback the SQLite transaction if there's an error
-      db.prepare('ROLLBACK;').run();
-      reject(new Error(error)); // Reject the promise with the main error
-    }
-  })
-}
-
-exports.listThesisProposalsTeacher = (teacherId) => {
-  return new Promise((resolve) => {
-    const currentDate = new AdvancedDate().toISOString();
-    const getProposals = `SELECT * 
-      FROM thesisProposal P
-      WHERE P.supervisor_id=?
-        AND NOT EXISTS (
-          SELECT 1
-          FROM thesisApplication A
-          WHERE A.proposal_id = P.proposal_id
-            AND A.status = 'accepted'
-        )
-        AND P.expiration > ?
-        AND creation_date < ?
-        AND is_archived = 0
-        AND is_deleted = 0;`;
-    const proposals = db.prepare(getProposals).all(teacherId, currentDate, currentDate);
-    resolve(proposals)
-
-  })
-};
-
-exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
-  return new Promise((resolve) => {
-    const currentDate = new AdvancedDate().toISOString();
-    const getApplications = `SELECT s.name, s.surname, ta.status, s.id, ta.id AS application_id
-    FROM thesisApplication ta, thesisProposal tp, student s
-    WHERE ta.proposal_id = tp.proposal_id 
-      AND s.id = ta.student_id
-      AND ta.proposal_id=?
-      AND tp.supervisor_id= ? 
-      AND ta.creation_date < ?
-      AND tp.expiration > ?
-      AND tp.creation_date < ?
-      AND tp.is_archived = 0
-      AND tp.is_deleted = 0;`;
-
-    const applications = db.prepare(getApplications).all(proposal_id, teacherId, currentDate, currentDate, currentDate);
-    resolve(applications)
-
-  })
-};
-
-exports.getStudentActiveApplication = (student_id) => {
-  return new Promise((resolve) => {
-    const currentDate = new AdvancedDate().toISOString();
-    const query = `SELECT proposal_id FROM thesisApplication WHERE student_id=? AND creation_date < ? AND ( status='waiting for approval' OR status='accepted')`;
-    const res = db.prepare(query).all(student_id, currentDate);
-    resolve(res)
-  })
-};
-
-exports.updateApplicationStatus = (studentId, proposalId, status) => {
-  return new Promise((resolve, reject) => {
-    const query = `
-      UPDATE thesisApplication
-      SET status = ?
-      WHERE student_id = ? AND proposal_id = ? AND status = 'waiting for approval' AND creation_date < ?
-    `;
-    const res = db.prepare(query).run(status, studentId, proposalId, new AdvancedDate().toISOString());
-
-    resolve(res.changes !== 0);
-  })
-};
-
-/**
- * Cancel all applications waiting for approval for a given proposal except the one of the student
- *
- * @param {string} studentId
- * @param {string} proposalId
- * @return {Promise<ThesisApplicationRow[]>}
- */
-exports.cancelOtherApplications = (studentId, proposalId) => {
-  return new Promise((resolve, reject) => {
-    const updateQuery = `
-        UPDATE thesisApplication
-        SET status='cancelled'
-        WHERE student_id <> ? AND proposal_id = ? AND status = 'waiting for approval'
-        RETURNING *;
-      `;
-
-    resolve(db.prepare(updateQuery).all(studentId, proposalId));
-  })
-};
-
-exports.listApplicationsDecisionsFromStudent = (studentId) => {
-  return new Promise((resolve) => {
-
-    const getApplications = `SELECT ta.id AS "application_id", ta.proposal_id, tp.title,  tp.level, t.name AS "teacher_name" , t.surname AS "teacher_surname" ,ta.status, tp.expiration
-    FROM thesisApplication ta, thesisProposal tp, teacher t
-    WHERE ta.proposal_id = tp.proposal_id AND ta.student_id = ? AND t.id = tp.supervisor_id AND ta.creation_date < ?`;
-
-    const applications = db.prepare(getApplications).all(studentId, new AdvancedDate().toISOString());
-    resolve(applications)
-
-  })
-};
-exports.getThesisProposalCds = (proposalId) => {
-  return new Promise((resolve) => {
-    const query = `SELECT d.cod_degree, d.title_degree FROM proposalCds p, degree d WHERE proposal_id = ? AND p.cod_degree = d.cod_degree`;
-    const res = db.prepare(query).all(proposalId);
-    resolve(res);
-  })
-};
-
-exports.getThesisProposalTeacher = (proposalId, teacherId) => {
-  return new Promise((resolve) => {
-    const currentDate = new AdvancedDate().toISOString();
-
-    // Check is the proposal is not already assigned
-    const checkProposalAssigned = `SELECT * FROM thesisApplication WHERE proposal_id=? AND status='accepted'`;
-    const proposal_assigned = db.prepare(checkProposalAssigned).get(proposalId);
-
-    if(proposal_assigned){
-      resolve(null);
-      return;
-    }
-
-    const query = `SELECT * FROM thesisProposal WHERE proposal_id = ? AND supervisor_id = ? 
-                   AND expiration > ? AND creation_date < ? AND is_deleted = 0 AND is_archived = 0;`;
-    const res = db.prepare(query).get(proposalId, teacherId, currentDate, currentDate);
-    resolve(res);
-  })
-};
-
-exports.getApplicationById = (applicationId) => {
-  return new Promise((resolve) => {
-    const query = `SELECT * FROM thesisApplication WHERE id = ?`;
-    const res = db.prepare(query).get(applicationId);
-    resolve(res);
-  })
-};
-
-
-/**
- * @typedef {Object} ThesisApplicationRow
- *
- * @property {string} proposal_id
- * @property {string} student_id
- * @property {string} status
- * @property {string} creation_date
  */

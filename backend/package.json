@@ -2,14 +2,14 @@
   "name": "back-end",
   "version": "1.0.0",
   "description": "The back end service for the Thesis Management System",
-  "main": "index.js",
+  "main": "./src/index.js",
   "scripts": {
     "test": "jest --detectOpenHandles",
     "test:coverage": "jest --coverage --colors",
     "test:unit": "npx jest --coverage --coverageDirectory=coverage/coverage_unit --colors --runInBand units/*",
     "test:integration": "npx jest --coverage --coverageDirectory=coverage/coverage_integration  --runInBand --colors integration/*",
-    "start": "node index",
-    "dev": "nodemon index"
+    "start": "node ./src/index",
+    "dev": "nodemon ./src/index"
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +17,7 @@
     "better-sqlite3": "^9.0.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
+    "cron": "^3.1.6",
     "dayjs": "^1.11.10",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
@@ -29,6 +30,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/cron": "^2.4.0",
     "@types/imap": "^0.8.40",
     "@types/jest": "^29.5.6",
     "@types/supertest": "^2.0.16",
@@ -41,6 +43,12 @@
   },
   "jest": {
     "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx}"
+    ],
+    "coveragePathIgnorePatterns": [
+      "src/index.js"
+    ],
     "reporters": [
       "default",
       [

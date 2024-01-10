@@ -1,9 +1,10 @@
 require('jest');
 // [i] This line setup the test database + load the environment variables. DON'T (RE)MOVE IT
-const {resetTestDatabase} = require('../integration_config');
+const {resetTestDatabase, closeImapClient} = require('../integration_config');
 
-const {app} = require("../../app");
+const {app} = require("../../src/app");
 const utils = require("../utils");
+const CronTasksService = require("../../src/services/CronTasksService");
 
 beforeEach(() => {
     // Be sure that we are using a full clean database before each test
@@ -13,6 +14,10 @@ beforeEach(() => {
 let agent;
 beforeAll(async () => {
     agent = await utils.getMolinattoSylvieAgent(app, false);
+});
+
+afterAll(async () => {
+    CronTasksService.stop();
 });
 
 describe('Unauthorized user', () => {
