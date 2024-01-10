@@ -16,9 +16,7 @@ function SideBar() {
     { label: "Home", key: "/", icon: <HomeOutlined /> },
     isAuthenticated && { label: "Thesis Proposals", key: "/proposals", icon: <FileTextOutlined /> },
     isAuthenticated && { label: isTeacher ? "Thesis Applications" : "Applications History", key: "/applications", icon: isTeacher ? <AuditOutlined /> : <HistoryOutlined /> },
-    isAuthenticated && { label: "Thesis Start Request", key: "/start-request", icon: <FileDoneOutlined /> },
-    { type: 'divider' },
-    isTester && { label: "Administration", key: "/admin/virtual-clock", icon: <SettingOutlined /> }
+    isAuthenticated && { label: "Thesis Start Request", key: "/start-request", icon: <FileDoneOutlined /> }
   ];
 
   // Handle menu item clicks
@@ -30,9 +28,9 @@ function SideBar() {
     <Sider breakpoint="lg" collapsedWidth="0" style={{ position: "sticky", left: "0", top: "0", height: "100vh", zIndex: "5", backgroundColor: 'white' }}>
       <div className='logo-style'>
       <Image
-        src="https://imgur.com/wYw8LZz.jpg"  
+        src="https://upload.wikimedia.org/wikipedia/it/thumb/4/47/Logo_PoliTo_dal_2021_blu.png/1024px-Logo_PoliTo_dal_2021_blu.png"  
         alt="Polito Logo"
-        style={{ width: '90%', cursor: 'pointer', marginTop: '10px', marginBottom: '50px', marginLeft: '10px', marginRight: '10px'}}
+        style={{ width: '90%', cursor: 'pointer', marginTop: '10px', marginLeft: '10px', marginRight: '10px'}}
         onClick={() => navigate('/')}
         preview={false}
       />

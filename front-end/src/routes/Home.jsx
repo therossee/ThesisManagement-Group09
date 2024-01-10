@@ -68,10 +68,10 @@ function HomeText(){
 
     return (
         <>
-        <Title style={{textAlign: 'center'}}>Welcome to PoliTO Thesis Management System!</Title>
-        {(isTeacher===true) && <Paragraph style={{ paddingLeft: "3%", textAlign: 'center' }}>Welcome professor {userData? userData.name : ""}! You can insert a new proposal or take a look for all the application requests.</Paragraph>}
-        {(isAuthenticated === true && isTeacher === false) && <Paragraph style={{ paddingLeft: "3%", textAlign: 'center' }}>Welcome {userData? userData.name : ""}! You can insert a new application request or take a look for all the proposals.</Paragraph>}
-        {(!isAuthenticated) && <Paragraph style={{ paddingLeft: "3%", textAlign: 'center' }}>Welcome guest! Start with logging in.</Paragraph>}
+        <Title style={{ textAlign: "center" }} level={1}>👋 Welcome to <span style={{ color: "#1677ff" }}>PoliTO</span> Thesis Management System!</Title>
+        {(isTeacher===true) && <Paragraph style={{ textAlign: 'center' }}>Welcome professor {userData? userData.name : ""}! You can insert a new proposal or take a look for all the application requests.</Paragraph>}
+        {(isAuthenticated === true && isTeacher === false) && <Paragraph style={{ textAlign: 'center' }}>Welcome {userData? userData.name : ""}! You can insert a new application request or take a look for all the proposals.</Paragraph>}
+        {(!isAuthenticated) && <Paragraph style={{ textAlign: 'center' }}>Welcome guest! Start with logging in.</Paragraph>}
         </>
     )
 }
