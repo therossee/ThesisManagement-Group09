@@ -21,9 +21,20 @@ async function getMolinattoSylvieAgent(app, includeRoles = true) {
     return _getAgent(app, 's318952', 'Sylvie Molinatto', includeRoles ? 'student' : '');
 }
 
+/**
+ * Return a supertest agent logged as Rossi Abbondanzio (secretary clerk).
+ *
+ * @param {import('express').Express} app
+ * @param {boolean} includeRoles
+ */
+async function getRossiAbbondanzioAgent(app, includeRoles = true) {
+    return _getAgent(app, 'sc12345', 'Abbondanzio Rossi', includeRoles ? 'secretary clerk' : '');
+}
+
 module.exports = {
     getMarcoRossiAgent,
     getMolinattoSylvieAgent,
+    getRossiAbbondanzioAgent
 };
 
 async function _getAgent(app, id, name, roles) {
