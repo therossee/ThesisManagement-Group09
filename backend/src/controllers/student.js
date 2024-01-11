@@ -4,6 +4,7 @@ const usersDao = require("../dao/users_dao");
 const NotificationService = require("../services/NotificationService");
 const AdvancedDate = require("../models/AdvancedDate");
 const schemas = require("../schemas/thesis-start-request");
+const utils = require("./utils");
 
 /**
  * @param {PopulatedRequest} req
@@ -112,7 +113,7 @@ async function newThesisStartRequest(req, res, next) {
             co_supervisors: thesisRequest.internal_co_supervisors_ids,
             status: 'waiting for approval'
         }
-        res.status(201).send(await _populateThesisStartRequest(thesisStartRequest));
+        res.status(201).send(await utils._populateThesisStartRequest(thesisStartRequest));
         
     } catch (error) {
         next(error);
@@ -131,57 +132,11 @@ async function getStudentActiveThesisStartRequests(req, res, next) {
         if(!studentThesisStartRequest) {
             res.status(200).json();
         }
-        res.status(200).send(await _populateThesisStartRequest(studentThesisStartRequest));
+        res.status(200).send(await utils._populateThesisStartRequest(studentThesisStartRequest));
     } catch (e) {
         next(e);
     }
 }
-
-/**
- * Serialize and populate a thesis start request object in order to have all the data needed by the API
- *
- * @param {ThesisStartRequestRow} thesisStartRequestData
- * @return {Promise<object>}
- * @private
- */
-async function _populateThesisStartRequest(thesisStartRequestData) {
-    const coSupervisorsPromises = thesisStartRequestData.co_supervisors.map(async (id) => {
-        return await usersDao.getTeacherById(id);
-    });
-
-    const coSupervisors = await Promise.all(coSupervisorsPromises);
-
-    return {
-        id: thesisStartRequestData.id,
-        proposal_id: thesisStartRequestData.proposal_id,
-        application_id: thesisStartRequestData.application_id,
-        student: await usersDao.getStudentById(thesisStartRequestData.student_id),
-        supervisor: await usersDao.getTeacherById(thesisStartRequestData.supervisor_id),
-        co_supervisors: coSupervisors,
-        title: thesisStartRequestData.title,
-        description: thesisStartRequestData.description,
-        status: thesisStartRequestData.status,
-        creation_date: thesisStartRequestData.creation_date,
-        approval_date: thesisStartRequestData.approval_date,
-    };
-}
-
-/**
- * @typedef {Object} ThesisStartRequestRow
- *
- * @property {string} id
- * @property {string} proposal_id
- * @property {string} application_id
- * @property {string} student_id
- * @property {string} supervisor_id
- * @property {Array<string>} coSupervisors
- * @property {string} title
- * @property {string} description
- * @property {string} creation_date
- * @property {string} approval_date
- * @property {string} status
- * 
- */
 
 module.exports = {
     getStudentCareer,
