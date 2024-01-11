@@ -14,6 +14,7 @@ jest.mock('../../src/services/db', () => ({
     prepare: jest.fn().mockReturnThis(),
     get: jest.fn(),
     run: jest.fn(),
+    all: jest.fn(),
     transaction: jest.fn().mockImplementation(callback => callback),
 }));
 
@@ -147,6 +148,51 @@ describe('getStudentActiveThesisStartRequests', () => {
         title: 'Title 1',
         description: 'Description 1', 
         supervisor_id: 'd279620',
+        creationdate: '2021-01-01T00:00:00.000Z',
+        approval_date: null,
+        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL 
+      }
+    ]);
+  });
+
+});
+
+describe('listThesisStartRequests', () => {
+
+  test('returns all thesis start requests', async () => {
+   
+    db.prepare().all.mockReturnValueOnce([
+      { 
+        id: 1, 
+        title: 'Title 1', 
+        student_id: 's318952',
+        title: 'Title 1',
+        description: 'Description 1', 
+        supervisor_id: 'd279620',
+        creationdate: '2021-01-01T00:00:00.000Z',
+        approval_date: null,
+        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL 
+      }
+    ]);
+    
+    db.prepare().all.mockReturnValueOnce([{ cosupervisor_id: 'd370335' }])
+
+    const result = await thesis.listThesisStartRequests();
+
+    const expectedQuery = `SELECT * FROM thesisStartRequest WHERE creation_date < ?`;
+    expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
+
+    expect(result).toEqual([
+      { 
+        id: 1, 
+        title: 'Title 1', 
+        student_id: 's318952',
+        title: 'Title 1',
+        description: 'Description 1', 
+        supervisor_id: 'd279620',
+        co_supervisors: [
+          { cosupervisor_id: 'd370335' }
+        ],
         creationdate: '2021-01-01T00:00:00.000Z',
         approval_date: null,
         status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL 
