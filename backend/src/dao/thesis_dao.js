@@ -822,6 +822,35 @@ exports.getStudentActiveThesisStartRequests = (student_id) => {
   })
 };
 
+
+/**
+ * Return all the thesis start requests
+ *
+ * @return {Promise<string>}
+ */
+exports.listThesisStartRequests = () => {
+  return new Promise((resolve) => {
+    const currentDate = new AdvancedDate().toISOString();
+    const queryTSR = `SELECT * FROM thesisStartRequest WHERE creation_date < ?`;
+    const tsrList = db.prepare(queryTSR).all(currentDate);
+
+    const res = tsrList.map((tsr) => {
+      const queryCoSupervisors = `SELECT cosupervisor_id FROM thesisStartCosupervisor WHERE start_request_id=?`;
+      const co_supervisors = db.prepare(queryCoSupervisors).all(tsr.id);
+
+      // Add the coSupervisors attribute to the tsr object
+      const tsrWithCoSupervisors = {
+        ...tsr,
+        co_supervisors,
+      };
+
+      return tsrWithCoSupervisors;
+    });
+
+    resolve(res)
+  })
+};
+
 /**
  * @typedef {Object} ThesisApplicationRow
  *
