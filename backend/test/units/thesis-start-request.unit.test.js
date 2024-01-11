@@ -194,7 +194,7 @@ describe('listThesisStartRequests', () => {
         description: 'Description 1', 
         supervisor_id: 'd279620',
         co_supervisors: [
-          { cosupervisor_id: 'd370335' }
+          'd370335' 
         ],
         creationdate: '2021-01-01T00:00:00.000Z',
         approval_date: null,

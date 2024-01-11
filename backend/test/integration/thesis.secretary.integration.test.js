@@ -36,13 +36,25 @@ describe('GET /api/secretary-clerk/thesis-start-requests', () => {
             .set('Accept', 'application/json')
             .send();
 
-        expect(res.statusCode).toEqual(200);
+        expect(res.status).toEqual(200);
         expect(res.body).toEqual([{
             "id": 1,
             "application_id": 1,
             "proposal_id": 1,
-            "student_id": "s320213",
-            "supervisor_id": "d279620",
+            "student": {
+                id: "s320213",
+                email: "s320213@studenti.polito.it",
+                name: "Luca",
+                surname: "Barbato",
+            },
+            "supervisor": {
+                id: "d279620",
+                email: "d279620@polito.it",
+                name: "Marco",
+                surname: "Rossi",
+                cod_group: "Group1",
+                cod_department: "Dep1"
+            },
             "co_supervisors": [],
             "title": "AI-GUIDED WEB CRAWLER FOR AUTOMATIC DETECTION OF MALICIOUS SITES",
             "description": "This thesis focuses on developing an AI-guided web crawler for the automatic detection of malicious sites. The research aims to leverage artificial intelligence to enhance the efficiency and accuracy of web crawling in identifying and cataloging potentially harmful websites.",
@@ -65,14 +77,26 @@ describe('GET /api/secretary-clerk/thesis-start-requests', () => {
             .set('Accept', 'application/json')
             .send();
 
-        expect(res.statusCode).toEqual(200);
+        expect(res.status).toEqual(200);
         expect(res.body).toEqual([
             {
                 "id": 1,
                 "application_id": 1,
                 "proposal_id": 1,
-                "student_id": "s320213",
-                "supervisor_id": "d279620",
+                "student": {
+                    id: "s320213",
+                    email: "s320213@studenti.polito.it",
+                    name: "Luca",
+                    surname: "Barbato",
+                },
+                "supervisor": {
+                    id: "d279620",
+                    email: "d279620@polito.it",
+                    name: "Marco",
+                    surname: "Rossi",
+                    cod_group: "Group1",
+                    cod_department: "Dep1"
+                },
                 "co_supervisors": [],
                 "title": "AI-GUIDED WEB CRAWLER FOR AUTOMATIC DETECTION OF MALICIOUS SITES",
                 "description": "This thesis focuses on developing an AI-guided web crawler for the automatic detection of malicious sites. The research aims to leverage artificial intelligence to enhance the efficiency and accuracy of web crawling in identifying and cataloging potentially harmful websites.",
@@ -84,18 +108,37 @@ describe('GET /api/secretary-clerk/thesis-start-requests', () => {
                 "id": 2,
                 "application_id": null,
                 "proposal_id": null,
-                "student_id": "s318952",
-                "supervisor_id": "d279620",
-                "co_supervisors":  [{
-                    "cosupervisor_id": "d370335",
-                }],
+                "student": {
+                    "id": "s318952",
+                    "email": "s318952@studenti.polito.it",
+                    "name": "Sylvie",
+                    "surname": "Molinatto",
+                },
+                "supervisor": {
+                    id: "d279620",
+                    email: "d279620@polito.it",
+                    name: "Marco",
+                    surname: "Rossi",
+                    cod_group: "Group1",
+                    cod_department: "Dep1"
+                },
+                "co_supervisors":  [
+                    {
+                        id: "d370335",
+                        email: "d370335@polito.it",
+                        name: "Luca",
+                        surname: "Bianchi",
+                        cod_group: "Group2",
+                        cod_department: "Dep2"
+                    }
+                ],
                 "title": "title",
                 "description": "description",
                 "creation_date": expect.stringContaining(new AdvancedDate().toISOString().substring(0, 10)),
                 "approval_date": null,
                 "status": "waiting for approval",
             },
-    ]);
+        ]);
     });
 
     test('should handle errors', async () => {
