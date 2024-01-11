@@ -101,17 +101,18 @@ async function newThesisStartRequest(req, res, next) {
 
         const thesis_start_request_id = await thesisDao.createThesisStartRequest(studentId, thesisRequest.title, thesisRequest.description, thesisRequest.supervisor_id, thesisRequest.internal_co_supervisors_ids, thesisRequest.application_id, thesisRequest.proposal_id )
 
-        res.status(201).json({
-            thesis_start_request_id: thesis_start_request_id,
+        const thesisStartRequest = {
+            id: thesis_start_request_id,
             student_id: studentId,
             application_id: thesisRequest.application_id,
             proposal_id: thesisRequest.proposal_id,
             title: thesisRequest.title,
             description: thesisRequest.description,
             supervisor_id: thesisRequest.supervisor_id,
-            internal_co_supervisors_ids: thesisRequest.internal_co_supervisors_ids,
+            co_supervisors: thesisRequest.internal_co_supervisors_ids,
             status: 'waiting for approval'
-        });
+        }
+        res.status(201).send(await _populateThesisStartRequest(thesisStartRequest));
         
     } catch (error) {
         next(error);
@@ -126,12 +127,61 @@ async function newThesisStartRequest(req, res, next) {
 async function getStudentActiveThesisStartRequests(req, res, next) {  
     try {
         const studentId = req.user.id;
-        const studentThesisStartRequests = await thesisDao.getStudentActiveThesisStartRequests(studentId);
-        res.json(studentThesisStartRequests);
+        const studentThesisStartRequest = await thesisDao.getStudentActiveThesisStartRequests(studentId);
+        if(!studentThesisStartRequest) {
+            res.status(200).json();
+        }
+        res.status(200).send(await _populateThesisStartRequest(studentThesisStartRequest));
     } catch (e) {
         next(e);
     }
 }
+
+/**
+ * Serialize and populate a thesis start request object in order to have all the data needed by the API
+ *
+ * @param {ThesisStartRequestRow} thesisStartRequestData
+ * @return {Promise<object>}
+ * @private
+ */
+async function _populateThesisStartRequest(thesisStartRequestData) {
+    const coSupervisorsPromises = thesisStartRequestData.co_supervisors.map(async (id) => {
+        return await usersDao.getTeacherById(id);
+    });
+
+    const coSupervisors = await Promise.all(coSupervisorsPromises);
+
+    return {
+        id: thesisStartRequestData.id,
+        proposal_id: thesisStartRequestData.proposal_id,
+        application_id: thesisStartRequestData.application_id,
+        student: await usersDao.getStudentById(thesisStartRequestData.student_id),
+        supervisor: await usersDao.getTeacherById(thesisStartRequestData.supervisor_id),
+        co_supervisors: coSupervisors,
+        title: thesisStartRequestData.title,
+        description: thesisStartRequestData.description,
+        status: thesisStartRequestData.status,
+        creation_date: thesisStartRequestData.creation_date,
+        approval_date: thesisStartRequestData.approval_date,
+    };
+}
+
+/**
+ * @typedef {Object} ThesisStartRequestRow
+ *
+ * @property {string} id
+ * @property {string} proposal_id
+ * @property {string} application_id
+ * @property {string} student_id
+ * @property {string} supervisor_id
+ * @property {Array<string>} coSupervisors
+ * @property {string} title
+ * @property {string} description
+ * @property {string} creation_date
+ * @property {string} approval_date
+ * @property {string} status
+ * 
+ */
 
 module.exports = {
     getStudentCareer,
