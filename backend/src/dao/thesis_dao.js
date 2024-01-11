@@ -846,7 +846,7 @@ exports.listThesisStartRequests = () => {
 
     const res = tsrList.map((tsr) => {
       const queryCoSupervisors = `SELECT cosupervisor_id FROM thesisStartCosupervisor WHERE start_request_id=?`;
-      const co_supervisors = db.prepare(queryCoSupervisors).all(tsr.id);
+      const co_supervisors = db.prepare(queryCoSupervisors).all(tsr.id).map(entry => entry.cosupervisor_id);
 
       // Add the coSupervisors attribute to the tsr object
       const tsrWithCoSupervisors = {

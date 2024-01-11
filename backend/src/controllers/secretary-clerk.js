@@ -6,6 +6,8 @@ const AppError = require("../errors/AppError");
 const AdvancedDate = require("../models/AdvancedDate");
 const {APPLICATION_STATUS} = require("../enums/application");
 const NotificationService = require("../services/NotificationService");
+const utils = require("./utils");
+const { util } = require("zod");
 
 /**
  * @param {PopulatedRequest} req
@@ -15,7 +17,13 @@ const NotificationService = require("../services/NotificationService");
 async function listThesisStartRequests(req, res, next) {
     try {
         const thesisStartRequests = await thesisDao.listThesisStartRequests();
-        res.json(thesisStartRequests);
+        const requestsPopulated = await Promise.all(
+            thesisStartRequests.map(async request => {
+                return await utils._populateThesisStartRequest(request);
+            })
+        );
+
+        res.json(requestsPopulated);
     } catch (e) {
         next(e);
     }
