@@ -135,5 +135,5 @@ module.exports = {
     applyForProposal,
     getStudentApplicationDecision,
     newThesisStartRequest,
-    getStudentActiveThesisStartRequests,
+    getStudentActiveThesisStartRequests
 };
