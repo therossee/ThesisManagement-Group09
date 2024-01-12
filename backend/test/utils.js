@@ -21,9 +21,31 @@ async function getMolinattoSylvieAgent(app, includeRoles = true) {
     return _getAgent(app, 's318952', 'Sylvie Molinatto', includeRoles ? 'student' : '');
 }
 
+/**
+ * Return a supertest agent logged as Rossi Abbondanzio (secretary clerk).
+ *
+ * @param {import('express').Express} app
+ * @param {boolean} includeRoles
+ */
+async function getRossiAbbondanzioAgent(app, includeRoles = true) {
+    return _getAgent(app, 'sc12345', 'Abbondanzio Rossi', includeRoles ? 'secretary clerk' : '');
+}
+
+/**
+ * Return a supertest agent logged as a fake user with no roles.
+ *
+ * @param {import('express').Express} app
+ * @param {boolean} includeRoles
+ */
+async function getFakeAgent(app, includeRoles = true) {
+    return _getAgent(app, '11111', 'Fake Agent', includeRoles ? 'fake role' : '');
+}
+
 module.exports = {
     getMarcoRossiAgent,
     getMolinattoSylvieAgent,
+    getRossiAbbondanzioAgent,
+    getFakeAgent
 };
 
 async function _getAgent(app, id, name, roles) {

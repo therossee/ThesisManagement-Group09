@@ -139,7 +139,7 @@ describe('getStudentActiveThesisStartRequests', () => {
     const studentId = 's318952';
     const result = await thesis.getStudentActiveThesisStartRequests(studentId);
 
-    const expectedQuery = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? AND ( status=? OR status=? OR status=?)`;
+    const expectedQuery = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? AND ( status=? OR status=? OR status=? OR status=? )`;
     expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
    
     expect(result).toEqual(
@@ -158,5 +158,162 @@ describe('getStudentActiveThesisStartRequests', () => {
     );
   });
 
+});
+
+describe('listThesisStartRequests', () => {
+
+  test('returns all thesis start requests', async () => {
+   
+    db.prepare().all.mockReturnValueOnce([
+      { 
+        id: 1, 
+        title: 'Title 1', 
+        student_id: 's318952',
+        title: 'Title 1',
+        description: 'Description 1', 
+        supervisor_id: 'd279620',
+        creationdate: '2021-01-01T00:00:00.000Z',
+        approval_date: null,
+        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL 
+      }
+    ]);
+    
+    db.prepare().all.mockReturnValueOnce([{ cosupervisor_id: 'd370335' }])
+
+    const result = await thesis.listThesisStartRequests();
+
+    const expectedQuery = `SELECT * FROM thesisStartRequest WHERE creation_date < ?`;
+    expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
+
+    expect(result).toEqual([
+      { 
+        id: 1, 
+        title: 'Title 1', 
+        student_id: 's318952',
+        title: 'Title 1',
+        description: 'Description 1', 
+        supervisor_id: 'd279620',
+        co_supervisors: [
+          'd370335' 
+        ],
+        creationdate: '2021-01-01T00:00:00.000Z',
+        approval_date: null,
+        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL 
+      }
+    ]);
+  });
+
+});
+
+describe('getThesisStartRequestById', () => {
+  test('should fetch the thesis start request and its co-supervisors', async () => {
+    const request_id = 1;
+    const mockThesisStartRequest = {
+      id: 1,
+      student_id: 's318952',
+      supervisor_id: 'd279620',
+      title: 'Title 1',
+      description: 'Description 1',
+      creation_date: '2021-01-01T00:00:00.000Z',
+      approval_date: null,  
+      status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL,
+    };
+    const mockCoSupervisors = [{ cosupervisor_id: 'cosupervisor1' }, { cosupervisor_id: 'cosupervisor2' }];
+
+    // Mock the behavior of the database
+    db.prepare().get.mockReturnValueOnce(mockThesisStartRequest);
+    db.prepare().all.mockReturnValueOnce(mockCoSupervisors);
+
+    const result = await thesis.getThesisStartRequestById(request_id);
+
+    // Verify that the queries were prepared with the correct parameters
+    const expectedThesisQuery = `SELECT * FROM thesisStartRequest WHERE id = ? AND creation_date < ?`;
+    const expectedCoSupervisorsQuery = 'SELECT cosupervisor_id FROM thesisStartCosupervisor WHERE start_request_id=?';
+    expect(db.prepare).toHaveBeenCalledWith(expectedThesisQuery);
+    expect(db.prepare).toHaveBeenCalledWith(expectedCoSupervisorsQuery);
+
+    // Verify that the function resolves with the expected result
+    const expectedResolvedResult = { ...mockThesisStartRequest, co_supervisors: mockCoSupervisors.map(entry => entry.cosupervisor_id) };
+    expect(result).toEqual(expectedResolvedResult);
+  });
+
+  test('should fetch the thesis start request and an empty array of co-supervisors', async () => {
+    const request_id = 1;
+    const mockThesisStartRequest = {
+      id: 1,
+      student_id: 's318952',
+      supervisor_id: 'd279620',
+      title: 'Title 1',
+      description: 'Description 1',
+      creation_date: '2021-01-01T00:00:00.000Z',
+      approval_date: null,  
+      status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL,
+    };
+    const mockCoSupervisors = undefined;
+
+    // Mock the behavior of the database
+    db.prepare().get.mockReturnValueOnce(mockThesisStartRequest);
+    db.prepare().all.mockReturnValueOnce(mockCoSupervisors);
+
+    const result = await thesis.getThesisStartRequestById(request_id);
+
+    // Verify that the queries were prepared with the correct parameters
+    const expectedThesisQuery = `SELECT * FROM thesisStartRequest WHERE id = ? AND creation_date < ?`;
+    const expectedCoSupervisorsQuery = 'SELECT cosupervisor_id FROM thesisStartCosupervisor WHERE start_request_id=?';
+    expect(db.prepare).toHaveBeenCalledWith(expectedThesisQuery);
+    expect(db.prepare).toHaveBeenCalledWith(expectedCoSupervisorsQuery);
+
+    // Verify that the function resolves with the expected result
+    const expectedResolvedResult = { ...mockThesisStartRequest, co_supervisors: []};
+    expect(result).toEqual(expectedResolvedResult);
+  });
+
+  test('should handle the case where the thesis start request is not found', async () => {
+    const request_id = 2;
+
+    // Mock the behavior of the database to simulate an empty result for thesisStartRequest
+    db.prepare().get.mockReturnValueOnce(undefined);
+
+    const result = await thesis.getThesisStartRequestById(request_id);
+
+    // Verify that the function resolves with the expected result (null)
+    expect(result).toBeNull();
+  });
+});
+
+describe('updateThesisStartRequestStatus', () => {
+  test('should update the thesis start request status', async () => {
+    const request_id = 1;
+    const new_status = 'ACCEPTED';
+    const expectedRowCount = 1;
+
+    db.prepare().run.mockReturnValueOnce({changes: expectedRowCount});
+
+    const result = await thesis.updateThesisStartRequestStatus(request_id, new_status);
+
+    // Verify that the query was prepared with the correct parameters
+    const expectedQuery = `
+      UPDATE thesisStartRequest
+      SET status = ?
+      WHERE id = ?;
+    `;
+    expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
+    expect(db.prepare().run).toHaveBeenCalledWith(new_status, request_id);
+
+    // Verify that the function resolves with the expected result
+    expect(result).toBe(true); // Assuming changes property is 1, indicating success
+  });
+
+  test('should handle the case where the update operation fails', async () => {
+    const request_id = 1;
+    const new_status = 'REJECTED';
+    const expectedRowCount = 0;
+
+    db.prepare().run.mockReturnValue({ changes: 0 });
+
+    const result = await thesis.updateThesisStartRequestStatus(request_id, new_status);
+
+    expect(result).toBe(false); 
+  });
 });
 

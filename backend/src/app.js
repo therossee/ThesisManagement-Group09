@@ -94,6 +94,7 @@ app.use('/api', require('./routers/thesis-proposals') );
 app.use('/api', require('./routers/utils'));
 app.use('/api/student', require('./routers/student'));
 app.use('/api/teacher', require('./routers/teacher'));
+app.use('/api/secretary-clerk', require('./routers/secretary-clerk'));
 app.use('/api/system/virtual-clock', require('./routers/virtual-clock'));
 
 /** Error handling **/

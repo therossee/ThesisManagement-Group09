@@ -4,7 +4,7 @@ const controller = require('../controllers/utils');
 
 const router = express.Router({ mergeParams: true });
 
-router.get('/teachers', authorization.isLoggedIn, authorization.isTeacher, controller.listTeachers);
+router.get('/teachers', authorization.isLoggedIn, authorization.isTeacherOrStudent, controller.listTeachers);
 
 router.get('/externalCoSupervisors', authorization.isLoggedIn, authorization.isTeacher, controller.listExternalCoSupervisors);
 
