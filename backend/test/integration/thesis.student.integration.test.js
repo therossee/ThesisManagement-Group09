@@ -935,6 +935,8 @@ describe('POST /api/student/thesis-start-requests', () => {
       expect(response.body).toEqual(
           {
               id: 2,
+              application_id: null,
+              proposal_id: null,
               student: {
                 id: 's318952',
                 email: 's318952@studenti.polito.it',
@@ -961,6 +963,8 @@ describe('POST /api/student/thesis-start-requests', () => {
               ],
               title: 'Title',
               description: 'Description',
+              creation_date: expect.stringContaining(new AdvancedDate().toISOString().substring(0, 10)),
+              approval_date: null,
               status: 'waiting for approval'
           }
       );
@@ -991,7 +995,8 @@ describe('POST /api/student/thesis-start-requests', () => {
         expect(response.body).toEqual(
             {
                 id: 2,
-                id: 2,
+                application_id: 2,
+                proposal_id: 2,
                 student: {
                     id: 's318952',
                     email: 's318952@studenti.polito.it',
@@ -1007,8 +1012,8 @@ describe('POST /api/student/thesis-start-requests', () => {
                     cod_department: 'Dep1'
                 },
                 co_supervisors: [],
-                application_id: 2,
-                proposal_id: 2,
+                creation_date: expect.stringContaining(new AdvancedDate().toISOString().substring(0, 10)),
+                approval_date: null,
                 title: 'PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API',
                 description: 'This thesis focuses on the performance evaluation of Kafka clients using a reactive API. The research aims to assess and enhance the efficiency of Kafka clients by implementing a reactive programming approach. The study explores how a reactive API can improve responsiveness and scalability in real-time data streaming applications.',
                 status: 'waiting for approval'
