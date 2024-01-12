@@ -5,14 +5,14 @@ import { useAuth } from '../components/authentication/useAuth';
 
 function Proposals() {
 
-    const { isAuthenticated, isTeacher } = useAuth();
+    const { isAuthenticated, isTeacher, isStudent, isSecretaryClerk } = useAuth();
 
     return (
         //Checking !variable is different than checking variable === false. The second one ensures it doesn't return truthy if undefined.
         <>
-            {(isTeacher === true) && <TeacherThesisProposals />}
-            {(isAuthenticated === true && isTeacher === false) && <StudentThesisProposals />}
-            {!isAuthenticated && <Errors code="403" />}
+            {isTeacher === true && <TeacherThesisProposals />}
+            {isStudent === true && <StudentThesisProposals />}
+            {(!isAuthenticated || isSecretaryClerk === true) && <Errors code="403" />}
         </>
     )
 }

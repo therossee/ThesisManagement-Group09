@@ -4,6 +4,7 @@ const usersDao = require("../dao/users_dao");
 const NotificationService = require("../services/NotificationService");
 const AdvancedDate = require("../models/AdvancedDate");
 const schemas = require("../schemas/thesis-start-request");
+const utils = require("./utils");
 
 /**
  * @param {PopulatedRequest} req
@@ -101,17 +102,9 @@ async function newThesisStartRequest(req, res, next) {
 
         const thesis_start_request_id = await thesisDao.createThesisStartRequest(studentId, thesisRequest.title, thesisRequest.description, thesisRequest.supervisor_id, thesisRequest.internal_co_supervisors_ids, thesisRequest.application_id, thesisRequest.proposal_id )
 
-        res.status(201).json({
-            thesis_start_request_id: thesis_start_request_id,
-            student_id: studentId,
-            application_id: thesisRequest.application_id,
-            proposal_id: thesisRequest.proposal_id,
-            title: thesisRequest.title,
-            description: thesisRequest.description,
-            supervisor_id: thesisRequest.supervisor_id,
-            internal_co_supervisors_ids: thesisRequest.internal_co_supervisors_ids,
-            status: 'waiting for approval'
-        });
+        const thesisStartRequest = await thesisDao.getThesisStartRequestById(thesis_start_request_id);
+        
+        res.status(201).send(await utils._populateThesisStartRequest(thesisStartRequest));
         
     } catch (error) {
         next(error);
@@ -126,8 +119,11 @@ async function newThesisStartRequest(req, res, next) {
 async function getStudentActiveThesisStartRequests(req, res, next) {  
     try {
         const studentId = req.user.id;
-        const studentThesisStartRequests = await thesisDao.getStudentActiveThesisStartRequests(studentId);
-        res.json(studentThesisStartRequests);
+        const studentThesisStartRequest = await thesisDao.getStudentActiveThesisStartRequests(studentId);
+        if(!studentThesisStartRequest) {
+            res.status(200).json();
+        }
+        res.status(200).send(await utils._populateThesisStartRequest(studentThesisStartRequest));
     } catch (e) {
         next(e);
     }
