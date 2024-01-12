@@ -154,3 +154,108 @@ describe('GET /api/secretary-clerk/thesis-start-requests', () => {
         expect(res.statusCode).toEqual(500);
     });
 });
+
+describe('PATCH /api/secretary-clerk/thesis-start-requests/accept/:request_id', () => {
+    test('should accept a thesis start request', async () => {
+        const res = await agent
+            .patch('/api/secretary-clerk/thesis-start-requests/accept/1')
+            .set('credentials', 'include')
+            .set('Accept', 'application/json')
+            .send();
+
+        expect(res.status).toEqual(200);
+        expect(res.body).toEqual({message: "Thesis start request accepted successfully"});
+    });
+
+    test('should return 404 if the thesis start request does not exist', async () => {
+        const res = await agent
+            .patch('/api/secretary-clerk/thesis-start-requests/accept/999')
+            .set('credentials', 'include')
+            .set('Accept', 'application/json')
+            .send();
+
+        expect(res.status).toEqual(404);
+        expect(res.body).toEqual({message: "Thesis start request with id 999 not found."});
+    });
+
+    test('should return 400 if the thesis start request has already been accepted or rejected', async () => {
+        db.prepare(`UPDATE thesisStartRequest SET status = ? WHERE id = ?`)
+          .run("accepted by secretary", 1);
+        
+        const res = await agent
+            .patch('/api/secretary-clerk/thesis-start-requests/accept/1')
+            .set('credentials', 'include')
+            .set('Accept', 'application/json')
+            .send();
+
+        expect(res.status).toEqual(400);
+        expect(res.body).toEqual({message: "Thesis start request with id 1 has already been accepted or rejected."});
+    });
+
+    test('should handle errors', async () => {
+        jest.spyOn(thesisDao, 'updateThesisStartRequestStatus').mockImplementation(() => {
+            throw new Error();
+        });
+        const res = await agent
+            .patch('/api/secretary-clerk/thesis-start-requests/accept/1')
+            .set('credentials', 'include')
+            .set('Accept', 'application/json')
+            .send();
+
+        expect(res.status).toEqual(500);
+        expect(res.body).toEqual("Internal Server Error");
+    });
+});
+
+describe('PATCH /api/secretary-clerk/thesis-start-requests/reject/:request_id', () => {
+    test('should reject a thesis start request', async () => {
+        const res = await agent
+            .patch('/api/secretary-clerk/thesis-start-requests/reject/1')
+            .set('credentials', 'include')
+            .set('Accept', 'application/json')
+            .send();
+
+        expect(res.status).toEqual(200);
+        expect(res.body).toEqual({message: "Thesis start request rejected successfully"});
+    });
+
+    test('should return 404 if the thesis start request does not exist', async () => {
+        const res = await agent
+            .patch('/api/secretary-clerk/thesis-start-requests/reject/999')
+            .set('credentials', 'include')
+            .set('Accept', 'application/json')
+            .send();
+
+        expect(res.status).toEqual(404);
+        expect(res.body).toEqual({message: "Thesis start request with id 999 not found."});
+    });
+
+    test('should return 400 if the thesis start request has already been accepted or rejected', async () => {
+        db.prepare(`UPDATE thesisStartRequest SET status = ? WHERE id = ?`)
+          .run("rejected by secretary", 1);
+        
+        const res = await agent
+            .patch('/api/secretary-clerk/thesis-start-requests/reject/1')
+            .set('credentials', 'include')
+            .set('Accept', 'application/json')
+            .send();
+
+        expect(res.status).toEqual(400);
+        expect(res.body).toEqual({message: "Thesis start request with id 1 has already been accepted or rejected."});
+    });
+
+    test('should handle errors', async () => {
+        jest.spyOn(thesisDao, 'updateThesisStartRequestStatus').mockImplementation(() => {
+            throw new Error();
+        });
+        const res = await agent
+            .patch('/api/secretary-clerk/thesis-start-requests/reject/1')
+            .set('credentials', 'include')
+            .set('Accept', 'application/json')
+            .send();
+
+        expect(res.status).toEqual(500);
+        expect(res.body).toEqual("Internal Server Error");
+    });
+
+});
