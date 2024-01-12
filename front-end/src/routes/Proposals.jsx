@@ -10,8 +10,8 @@ function Proposals() {
     return (
         //Checking !variable is different than checking variable === false. The second one ensures it doesn't return truthy if undefined.
         <>
-            {(isAuthenticated === true && isTeacher === true) && <TeacherThesisProposals />}
-            {(isAuthenticated === true && isStudent === true) && <StudentThesisProposals />}
+            {isTeacher === true && <TeacherThesisProposals />}
+            {isStudent === true && <StudentThesisProposals />}
             {(!isAuthenticated || isSecretaryClerk === true) && <Errors code="403" />}
         </>
     )

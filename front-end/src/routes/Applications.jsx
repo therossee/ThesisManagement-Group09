@@ -8,8 +8,8 @@ function Applications() {
 
     return (
         <>
-            {(isAuthenticated === true && isTeacher === true) && <TeacherApplications />}
-            {(isAuthenticated === true && isStudent === true) && <StudentApplications />}
+            {isTeacher === true && <TeacherApplications />}
+            {isStudent === true && <StudentApplications />}
             {(!isAuthenticated || isSecretaryClerk === true) && <Errors code="403" />}
         </>
     );

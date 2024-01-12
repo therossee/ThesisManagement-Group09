@@ -8,8 +8,8 @@ function MobApplications() {
 
     return (
         <>
-            {(isAuthenticated === true && isTeacher === true) && <MobTeacherApplications />}
-            {(isAuthenticated === true && isStudent === true) && <StudentApplications />}
+            {isTeacher === true && <MobTeacherApplications />}
+            {isStudent === true && <StudentApplications />}
             {(!isAuthenticated || isSecretaryClerk === true) && <Errors code="403" />}
         </>
     );

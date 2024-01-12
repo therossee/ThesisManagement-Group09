@@ -8,16 +8,14 @@ const { Sider } = Layout;
 
 function SideBar() {
 
-  const { isAuthenticated, isTeacher, isStudent, isTester } = useAuth();
+  const { isTeacher, isStudent } = useAuth();
   const navigate = useNavigate();
 
   // Define the menu items, using directly the route path as key
   const navigation = [
     { label: "Home", key: "/", icon: <HomeOutlined /> },
-    isAuthenticated && (isTeacher || isStudent) && { label: "Thesis Proposals", key: "/proposals", icon: <FileTextOutlined /> },
-    isAuthenticated && (isTeacher || isStudent) && { label: isTeacher ? "Thesis Applications" : "Applications History", key: "/applications", icon: isTeacher ? <AuditOutlined /> : <HistoryOutlined /> },
-    { type: 'divider' },
-    isTester && { label: "Administration", key: "/admin/virtual-clock", icon: <SettingOutlined /> }
+    (isTeacher === true || isStudent === true) && { label: "Thesis Proposals", key: "/proposals", icon: <FileTextOutlined /> },
+    isStudent === true && { label: isTeacher ? "Thesis Applications" : "Applications History", key: "/applications", icon: isTeacher ? <AuditOutlined /> : <HistoryOutlined /> },
   ];
 
   // Handle menu item clicks

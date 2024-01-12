@@ -12,7 +12,7 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
 
-    // Keep track in the client if user is Teacher or not
+    // Keep track in the client of user role
     const [isTeacher, setIsTeacher] = useState(undefined);
     const [isStudent, setIsStudent] = useState(false);
     const [isSecretaryClerk, setIsSecretaryClerk] = useState(false); 
