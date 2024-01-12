@@ -862,6 +862,24 @@ exports.listThesisStartRequests = () => {
 };
 
 /**
+ * Return the proposal with the given id without performing any check
+ *
+ * @param {string} requestId
+ * @return {Promise<ThesisStartRequestRow | null>}
+ */
+exports.getThesisStartRequestById = (request_id) => {
+  return new Promise((resolve) => {
+    const query = `SELECT * FROM thesisStartRequest WHERE id = ? AND creation_date < ?`;
+    const thesisStartRequest = db.prepare(query).get(request_id, new AdvancedDate().toISOString());
+
+    const coSupervisorsQuery = 'SELECT cosupervisor_id FROM thesisStartCosupervisor WHERE start_request_id=?';
+    const coSupervisors = db.prepare(coSupervisorsQuery).all(request_id).map(entry => entry.cosupervisor_id);
+
+    resolve({ ...thesisStartRequest, co_supervisors: coSupervisors });
+  })
+};
+
+/**
  * @typedef {Object} ThesisApplicationRow
  *
  * @property {string} proposal_id

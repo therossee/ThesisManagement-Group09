@@ -102,17 +102,8 @@ async function newThesisStartRequest(req, res, next) {
 
         const thesis_start_request_id = await thesisDao.createThesisStartRequest(studentId, thesisRequest.title, thesisRequest.description, thesisRequest.supervisor_id, thesisRequest.internal_co_supervisors_ids, thesisRequest.application_id, thesisRequest.proposal_id )
 
-        const thesisStartRequest = {
-            id: thesis_start_request_id,
-            student_id: studentId,
-            application_id: thesisRequest.application_id,
-            proposal_id: thesisRequest.proposal_id,
-            title: thesisRequest.title,
-            description: thesisRequest.description,
-            supervisor_id: thesisRequest.supervisor_id,
-            co_supervisors: thesisRequest.internal_co_supervisors_ids,
-            status: 'waiting for approval'
-        }
+        const thesisStartRequest = await thesisDao.getThesisStartRequestById(thesis_start_request_id);
+        
         res.status(201).send(await utils._populateThesisStartRequest(thesisStartRequest));
         
     } catch (error) {
@@ -144,5 +135,5 @@ module.exports = {
     applyForProposal,
     getStudentApplicationDecision,
     newThesisStartRequest,
-    getStudentActiveThesisStartRequests
+    getStudentActiveThesisStartRequests,
 };
