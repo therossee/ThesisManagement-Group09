@@ -65,10 +65,24 @@ function isSecretaryClerk(req, res, next) {
     return res.status(403).json('Unauthorized');
 }
 
+/**
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+function isTeacherOrStudent(req, res, next) {
+    if (req.isAuthenticated() && (req.user.roles.includes(USER_ROLES.TEACHER) || req.user.roles.includes(USER_ROLES.STUDENT))) {
+        return next();
+    }
+
+    return res.status(403).json('Unauthorized');
+}
+
 module.exports = {
     isLoggedIn,
     isStudent,
     isTeacher,
     isTester,
-    isSecretaryClerk
+    isSecretaryClerk,
+    isTeacherOrStudent
 };
