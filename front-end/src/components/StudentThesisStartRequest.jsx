@@ -11,7 +11,7 @@ function StudentThesisStartRequest() {
         <div>
             <Row justify="start">
                 {formVisible ?
-                    <Button ghost type="primary">
+                    <Button ghost type="primary" onClick={() => setFormVisible(false)}>
                         &lt; Back to Thesis Start Request
                     </Button>
                     :
@@ -74,7 +74,7 @@ function AddThesisStartRequestForm() {
         }, [values]);
 
         return (
-            <Button type="primary" htmlType="submit" disabled={!submittable}>
+            <Button type="primary" htmlType="submit" disabled={!submittable && loading}>
                 Submit
             </Button>
         );
@@ -99,27 +99,40 @@ function AddThesisStartRequestForm() {
                         <Form.Item name="description" label="Description" rules={[{ required: true, message: "Description cannot be empty!" }]}>
                             <Input.TextArea rows={7} />
                         </Form.Item>
-                        <Form.Item name="supervisor" label="Supervisor" rules={[{ required: true, message: "Supervisor cannot be empty!" }]}>
-                            <Select
-                                placeholder="Select the Supervisor"
-                                loading={loading}
-                                options={options}
-                                filterOption={(input, option) =>
-                                    option.searchValue.toLowerCase().includes(input.toLowerCase())
-                                }
-                            />
-                        </Form.Item>
-                        <Form.Item name="co-supervisors" label="Internal co-Supervisors">
-                            <Select
-                                mode="multiple"
-                                placeholder="Select the internal co-Supervisors"
-                                loading={loading}
-                                options={options}
-                                filterOption={(input, option) =>
-                                    option.searchValue.toLowerCase().includes(input.toLowerCase())
-                                }
-                            />
-                        </Form.Item>
+                        <Row gutter={16}>
+                            <Col span={6}>
+                                <Form.Item
+                                    name="supervisor"
+                                    label="Supervisor"
+                                    rules={[{ required: true, message: "Supervisor cannot be empty!" }]}
+                                >
+                                    <Select
+                                        placeholder="Select the Supervisor"
+                                        loading={loading}
+                                        options={options}
+                                        filterOption={(input, option) =>
+                                            option.searchValue.toLowerCase().includes(input.toLowerCase())
+                                        }
+                                    />
+                                </Form.Item>
+                            </Col>
+                            <Col span={18}>
+                                <Form.Item
+                                    name="co-supervisors"
+                                    label="Internal co-Supervisors"
+                                >
+                                    <Select
+                                        mode="multiple"
+                                        placeholder="Select the internal co-Supervisors"
+                                        loading={loading}
+                                        options={options}
+                                        filterOption={(input, option) =>
+                                            option.searchValue.toLowerCase().includes(input.toLowerCase())
+                                        }
+                                    />
+                                </Form.Item>
+                            </Col>
+                        </Row>
                         <Form.Item>
                             <Space>
                                 <SubmitButton form={form} />
@@ -130,7 +143,7 @@ function AddThesisStartRequestForm() {
                 </Col>
                 <Col span={5} />
             </Row>
-        </div>
+        </div >
     )
 }
 
