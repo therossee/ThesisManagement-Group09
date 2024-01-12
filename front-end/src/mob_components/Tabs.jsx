@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { HomeOutlined, FileTextOutlined, FileAddOutlined, ToTopOutlined, ClockCircleOutlined } from '@ant-design/icons';
 
 function Tabs() {
-    const { isAuthenticated, isTester, isTeacher, isStudent, isSecretaryClerk } = useAuth();
+    const { isAuthenticated, isTester, isTeacher, isStudent } = useAuth();
     const [selectedTab, setSelectedTab] = useState('homeTab');
     const navigate = useNavigate();
     const location = useLocation();
