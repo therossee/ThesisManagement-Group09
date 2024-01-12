@@ -17,7 +17,7 @@ router.get('/thesis-start-requests', authorization.isLoggedIn, authorization.isS
 router.patch('/thesis-start-requests/accept/:request_id', authorization.isLoggedIn, authorization.isSecretaryClerk, controller.acceptThesisStartRequest);
 
 /**
- * Reject a thesis start requests.
+ * Reject a thesis start request.
  * 
  */
 router.patch('/thesis-start-requests/reject/:request_id', authorization.isLoggedIn, authorization.isSecretaryClerk, controller.rejectThesisStartRequest);
