@@ -1,13 +1,7 @@
-const { USER_ROLES } = require("../enums");
 const thesisDao = require("../dao/thesis_dao");
-const usersDao = require("../dao/users_dao");
-const schemas = require("../schemas");
-const AppError = require("../errors/AppError");
-const AdvancedDate = require("../models/AdvancedDate");
-const {APPLICATION_STATUS} = require("../enums/application");
-const NotificationService = require("../services/NotificationService");
+const {THESIS_START_REQUEST_STATUS} = require("../enums/thesisStartRequest");
 const utils = require("./utils");
-const { util } = require("zod");
+
 
 /**
  * @param {PopulatedRequest} req
@@ -29,6 +23,59 @@ async function listThesisStartRequests(req, res, next) {
     }
 }
 
+
+/**
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+async function acceptThesisStartRequest(req, res, next) {
+    try {
+        const requestId = req.params.request_id;
+        const thesisStartRequest = await thesisDao.getThesisStartRequestById(requestId);
+        if(!thesisStartRequest) {
+            res.status(404).json({ message: `Thesis start request with id ${requestId} not found.` });
+        }
+
+        if(thesisStartRequest.status !== THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL) {
+            res.status(400).json({ message: `Thesis start request with id ${requestId} has already been accepted or rejected.` });
+        }
+
+        await thesisDao.updateThesisStartRequestStatus(requestId, THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY)
+                .then(async () => {
+                    res.status(200).json({ message: "Thesis start request accepted successfully" });
+                });     
+    } catch (e) {
+        next(e);
+    }
+}
+
+/**
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+async function rejectThesisStartRequest(req, res, next) {
+    try {
+        const requestId = req.params.request_id;
+        const thesisStartRequest = await thesisDao.getThesisStartRequestById(requestId);
+        if(!thesisStartRequest) {
+            res.status(404).json({ message: `Thesis start request with id ${requestId} not found.` });
+        }
+        if(thesisStartRequest.status !== THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL) {
+            res.status(400).json({ message: `Thesis start request with id ${requestId} has already been accepted or rejected.` });
+        }
+        await thesisDao.updateThesisStartRequestStatus(requestId, THESIS_START_REQUEST_STATUS.REJECTED_BY_SECRETARY)
+                       .then(async () => {
+                          res.status(200).json({ message: "Thesis start request rejected successfully" });
+                       });
+    } catch (e) {
+        next(e);
+    }
+}
+
 module.exports = {
     listThesisStartRequests,
+    acceptThesisStartRequest,
+    rejectThesisStartRequest
 }
