@@ -755,8 +755,8 @@ exports.createThesisStartRequest = (student_id, title, description, supervisor_i
     const creation_date = new AdvancedDate().toISOString();
 
     // check if the student has already a thesis start request
-    const checkAlreadyRequest = `SELECT * FROM thesisStartRequest WHERE student_id=? AND (status=? OR status=? OR status=?)`;
-    const already_request = db.prepare(checkAlreadyRequest).get(student_id, THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL, THESIS_START_REQUEST_STATUS.ACCEPTED, THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED);
+    const checkAlreadyRequest = `SELECT * FROM thesisStartRequest WHERE student_id=? AND (status=? OR status=? OR status=? OR status=?)`;
+    const already_request = db.prepare(checkAlreadyRequest).get(student_id, THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL, THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY, THESIS_START_REQUEST_STATUS.ACCEPTED_BY_TEACHER, THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED);
     if (already_request) {
       reject(new UnauthorizedActionError("The student has already a thesis start request"));
       return;
@@ -816,8 +816,8 @@ exports.createThesisStartRequest = (student_id, title, description, supervisor_i
 exports.getStudentActiveThesisStartRequests = (student_id) => {
   return new Promise((resolve) => {
     const currentDate = new AdvancedDate().toISOString();
-    const query = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? AND ( status=? OR status=? OR status=?)`;
-    const tsr = db.prepare(query).get(student_id, currentDate, THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL, THESIS_START_REQUEST_STATUS.ACCEPTED, THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED);
+    const query = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? AND ( status=? OR status=? OR status=? OR status=? )`;
+    const tsr = db.prepare(query).get(student_id, currentDate, THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL, THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY, THESIS_START_REQUEST_STATUS.ACCEPTED_BY_TEACHER, THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED);
     
     if(tsr){
       const co_supervisors_query = 'SELECT cosupervisor_id FROM thesisStartCosupervisor WHERE start_request_id=?';
@@ -872,11 +872,35 @@ exports.getThesisStartRequestById = (request_id) => {
     const query = `SELECT * FROM thesisStartRequest WHERE id = ? AND creation_date < ?`;
     const thesisStartRequest = db.prepare(query).get(request_id, new AdvancedDate().toISOString());
 
+    if (!thesisStartRequest) {
+      resolve(null); // Return null if thesis start request is not found
+      return;
+    }
+
     const coSupervisorsQuery = 'SELECT cosupervisor_id FROM thesisStartCosupervisor WHERE start_request_id=?';
-    const coSupervisors = db.prepare(coSupervisorsQuery).all(request_id).map(entry => entry.cosupervisor_id);
+    const coSupervisorsResult = db.prepare(coSupervisorsQuery).all(request_id);
+
+    const coSupervisors = coSupervisorsResult ? coSupervisorsResult.map(entry => entry.cosupervisor_id) : [];
 
     resolve({ ...thesisStartRequest, co_supervisors: coSupervisors });
-  })
+  });
+};
+
+/**
+ * Accept/Reject a thesis start request
+ *
+ * @return {Promise<string>}
+ */
+exports.updateThesisStartRequestStatus = (request_id, new_status) => {
+  return new Promise((resolve) => {
+    const query = `
+      UPDATE thesisStartRequest
+      SET status = ?
+      WHERE id = ?;
+    `;
+    const res = db.prepare(query).run(new_status, request_id);
+    resolve(res.changes !== 0);
+    })
 };
 
 /**
