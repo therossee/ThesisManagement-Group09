@@ -1,11 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Button, Col, Row, Typography, Form, Input, Select, Space, message } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Button, Descriptions, Col, Row, Typography, Form, Input, Select, Space, message } from 'antd';
+import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
 import API from '../API';
+
+dayjs.extend(localizedFormat);
 
 function StudentThesisStartRequest() {
     // Trigger TSR Addition Form Visibility
     const [formVisible, setFormVisible] = useState(false);
+
+    const [trigger, setTrigger] = useState(true);
+
+    const [loading, setLoading] = useState(false);
+
+    const [disabled, setDisabled] = useState(false);
 
     return (
         <div>
@@ -15,48 +25,64 @@ function StudentThesisStartRequest() {
                         &lt; Back to Thesis Start Request
                     </Button>
                     :
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        size="large"
-                        style={{ marginTop: "10px" }}
-                        onClick={() => { setFormVisible(true) }}
-                    >
-                        Add New Thesis Start Request
-                    </Button>
+                    <>
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            size="large"
+                            style={{ marginTop: "10px" }}
+                            loading={loading}
+                            disabled={disabled}
+                            onClick={() => { setFormVisible(true) }}
+                        >
+                            Add New Thesis Start Request
+                        </Button>
+                        <Button type="link" icon={<ReloadOutlined />} loading={loading} onClick={() => (setTrigger(!trigger))}>Refresh</Button>
+                    </>
                 }
             </Row>
-            {formVisible ? <AddThesisStartRequestForm /> : <ViewThesisStartRequest />}
+            {formVisible ? <AddThesisStartRequestForm setFormVisible={setFormVisible} /> : <ViewThesisStartRequest trigger={trigger} setDisabled={setDisabled} setLoading={setLoading} />}
         </div>
     )
 }
 
-function AddThesisStartRequestForm() {
+function AddThesisStartRequestForm({ setFormVisible }) {
 
     const { Title } = Typography;
 
     const [form] = Form.useForm();
 
+    // Loading state for API calls to get teachers
     const [loading, setLoading] = useState(true);
 
     // Store list of supervisors and co-supervisors
     const [options, setOptions] = useState([]);
+
+    const [buttonLoading, setButtonLoading] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             try {
                 const teachers = await API.getTeachers();
-                setOptions(teachers);
+                const formattedTeachers = teachers.teachers.map((x) => ({
+                    value: x.id,
+                    label: `${x.name} ${x.surname}`,
+                    searchValue: `${x.id} ${x.name} ${x.surname}`,
+                }));
+                setOptions(formattedTeachers);
                 setLoading(false);
             } catch (err) {
                 message.error(err.message ? err.message : err);
+                setLoading(false);
             }
         };
         fetchData();
     }, []);
 
     const SubmitButton = ({ form }) => {
+
+        // Validating required form fields
         const [submittable, setSubmittable] = useState(false);
 
         // Watch all values
@@ -74,14 +100,23 @@ function AddThesisStartRequestForm() {
         }, [values]);
 
         return (
-            <Button type="primary" htmlType="submit" disabled={!submittable && loading}>
+            <Button type="primary" htmlType="submit" disabled={!submittable && loading} loading={buttonLoading}>
                 Submit
             </Button>
         );
     };
 
-    const onFinish = (values) => {
-        console.log('Received values from form: ', values);
+    const onFinish = async (values) => {
+        setButtonLoading(true);
+        try {
+            await API.insertThesisStartRequest(values);
+            message.success("Thesis Start Request successfully sent!");
+            setButtonLoading(false);
+            setFormVisible(false);
+        } catch (err) {
+            message.error(err.message ? err.message : err);
+            setButtonLoading(false);
+        }
     };
 
     return (
@@ -102,11 +137,12 @@ function AddThesisStartRequestForm() {
                         <Row gutter={16}>
                             <Col span={6}>
                                 <Form.Item
-                                    name="supervisor"
+                                    name="supervisor_id"
                                     label="Supervisor"
                                     rules={[{ required: true, message: "Supervisor cannot be empty!" }]}
                                 >
                                     <Select
+                                        showSearch
                                         placeholder="Select the Supervisor"
                                         loading={loading}
                                         options={options}
@@ -118,7 +154,7 @@ function AddThesisStartRequestForm() {
                             </Col>
                             <Col span={18}>
                                 <Form.Item
-                                    name="co-supervisors"
+                                    name="internal_co_supervisors_ids"
                                     label="Internal co-Supervisors"
                                 >
                                     <Select
@@ -147,10 +183,37 @@ function AddThesisStartRequestForm() {
     )
 }
 
-function ViewThesisStartRequest() {
-    return (
-        <></>
-    )
+function ViewThesisStartRequest({ trigger, setLoading, setDisabled }) {
+
+    const [activeThesisStartRequest, setActiveThesisStartRequest] = useState({});
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const activeTSR = await API.getStudentActiveThesisStartRequest();
+                if (Object.keys(activeTSR).length > 0)
+                    setDisabled(true);
+                setActiveThesisStartRequest(activeTSR);
+                setLoading(false);
+            } catch (err) {
+                message.error(err.message ? err.message : err);
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, [trigger]);
+
+    if (Object.keys(activeThesisStartRequest).length > 0) {
+        return(
+        <Descriptions title={"Thesis Start Request Submitted on: " + dayjs(activeThesisStartRequest.creation_date).format('lll')} bordered style={{ marginTop:"20px" }}/>
+        )
+    }
+    else {
+        return (
+            <h1>No active thesis start request (to change) ............</h1>
+        )
+    }
 }
 
 export default StudentThesisStartRequest;
