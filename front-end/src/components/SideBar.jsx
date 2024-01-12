@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { HomeOutlined, FileTextOutlined, HistoryOutlined, AuditOutlined, SettingOutlined } from '@ant-design/icons';
+import { HomeOutlined, FileTextOutlined, HistoryOutlined, AuditOutlined } from '@ant-design/icons';
 import { Layout, Menu, Image } from 'antd';
 import { useAuth } from './authentication/useAuth';
 import '../css/style.css';
