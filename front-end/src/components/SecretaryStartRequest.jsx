@@ -33,14 +33,13 @@ function TeacherApplications() {
                     const proposals = await API.getThesisProposals();
                     await Promise.all(
                         proposals.map(async (proposal) => {
-                            const startRequests = await API.getSecretaryStartRequest(proposal.id);
-                            if (startRequests.some((x) => x.status === "waiting for approval")) {
+                            const startRequests = await API.getTeacherThesisApplications(proposal.id);
                                 newData.push({
                                     id: proposal.id,
                                     title: proposal.title,
-                                    startRequests: startRequests.filter((x) => x.status === "waiting for approval"),
+                                    startRequests: startRequests,
                                 });
-                            }
+                            
                         })
                     );
                     setData(newData);
