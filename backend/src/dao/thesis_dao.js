@@ -9,6 +9,7 @@ const AdvancedDate = require('../models/AdvancedDate');
 const NoThesisProposalError = require("../errors/NoThesisProposalError");
 const UnauthorizedActionError = require("../errors/UnauthorizedActionError");
 const {APPLICATION_STATUS} = require("../enums/application");
+const {THESIS_START_REQUEST_STATUS} = require("../enums/thesisStartRequest");
 
 exports.createThesisProposal = (proposal_details, additional_details) => {
   return new Promise((resolve, reject) => {
@@ -484,43 +485,6 @@ exports.getSupervisorOfProposal = (proposalId) => {
   })
 };
 
-
-/**
- * @typedef {Object} ThesisProposalRow
- *
- * @property {string} proposal_id
- * @property {string} title
- * @property {string} supervisor_id
- * @property {string} type
- * @property {string} description
- * @property {string} [required_knowledge]
- * @property {string} [notes]
- * @property {string} expiration
- * @property {string} level
- * @property {string} cds
- * @property {1 | 0} is_deleted
- */
-
-/**
- * @typedef {Object} TeacherRow
- *
- * @property {string} id
- * @property {string} surname
- * @property {string} name
- * @property {string} email
- * @property {string} cod_group
- * @property {string} cod_department
- */
-
-/**
- * @typedef {Object} ExternalCoSupervisorRow
- *
- * @property {string} id
- * @property {string} surname
- * @property {string} name
- * @property {string} email
- */
-
 exports.applyForProposal = (proposal_id, student_id, file) => {
   return new Promise((resolve, reject) => {
     const currentDate = new AdvancedDate().toISOString();
@@ -626,7 +590,7 @@ exports.listThesisProposalsTeacher = (teacherId) => {
 exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
   return new Promise((resolve) => {
     const currentDate = new AdvancedDate().toISOString();
-    const getApplications = `SELECT s.name, s.surname, ta.status, s.id, ta.id AS application_id
+    const getApplications = `SELECT s.name, s.surname, ta.status, s.id, ta.id AS application_id, ta.creation_date
     FROM thesisApplication ta, thesisProposal tp, student s
     WHERE ta.proposal_id = tp.proposal_id 
       AND s.id = ta.student_id
@@ -704,6 +668,26 @@ exports.cancelOtherApplications = (studentId, proposalId) => {
   })
 };
 
+/**
+ * Cancel all applications waiting for approval on expired thesis proposals
+ *
+ * @return {Promise<ThesisApplicationRow[]>}
+ */
+exports.cancelWaitingApplicationsOnExpiredThesis = () => {
+  return new Promise( resolve => {
+    const date = new AdvancedDate();
+
+    const query = `UPDATE thesisApplication
+      SET status=?
+      WHERE status=? AND proposal_id IN (SELECT proposal_id FROM thesisProposal WHERE expiration < ?)
+      RETURNING *;`;
+
+    const result = db.prepare(query).all(APPLICATION_STATUS.CANCELLED, APPLICATION_STATUS.WAITING_FOR_APPROVAL, date.toISOString());
+
+    resolve(result);
+  });
+};
+
 exports.listApplicationsDecisionsFromStudent = (studentId) => {
   return new Promise((resolve) => {
 
@@ -716,6 +700,7 @@ exports.listApplicationsDecisionsFromStudent = (studentId) => {
 
   })
 };
+
 exports.getThesisProposalCds = (proposalId) => {
   return new Promise((resolve) => {
     const query = `SELECT d.cod_degree, d.title_degree FROM proposalCds p, degree d WHERE proposal_id = ? AND p.cod_degree = d.cod_degree`;
@@ -752,6 +737,171 @@ exports.getApplicationById = (applicationId) => {
   })
 };
 
+/**
+ * Create a new thesis start request
+ *
+ * @param {string} student_id
+ * @param {string} application_id
+ * @param {string} proposal_id
+ * @param {string} title
+ * @param {string} description
+ * @param {string} supervisor_id
+ * @param {string[]} internal_co_supervisors_ids
+ * @return {Promise<string>}
+ */
+exports.createThesisStartRequest = (student_id, title, description, supervisor_id, internal_co_supervisors_ids, application_id, proposal_id) => {
+  return new Promise((resolve, reject) => {
+
+    const creation_date = new AdvancedDate().toISOString();
+
+    // check if the student has already a thesis start request
+    const checkAlreadyRequest = `SELECT * FROM thesisStartRequest WHERE student_id=? AND (status=? OR status=? OR status=? OR status=?)`;
+    const already_request = db.prepare(checkAlreadyRequest).get(student_id, THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL, THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY, THESIS_START_REQUEST_STATUS.ACCEPTED_BY_TEACHER, THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED);
+    if (already_request) {
+      reject(new UnauthorizedActionError("The student has already a thesis start request"));
+      return;
+    }
+
+    // check if the proposal belong to the degree of the student
+    if(proposal_id){
+      const checkProposalDegree = `SELECT * FROM proposalCds WHERE proposal_id=? AND cod_degree=(SELECT cod_degree FROM student WHERE id=?)`;
+      const proposal_correct = db.prepare(checkProposalDegree).get(proposal_id, student_id);
+      if (!proposal_correct) {
+        reject(new UnauthorizedActionError("The proposal doesn't belong to the student degree"));
+        return;
+      }
+    }
+
+    // Self-called transaction
+    db.transaction(() => {
+      
+      // Insert the thesis start request into the database with application_id and proposal_id
+      const addRequestQuery = 
+      `INSERT INTO thesisStartRequest (student_id, application_id, proposal_id, title, description, supervisor_id, creation_date) 
+       VALUES (?, ?, ?, ?, ?, ?, ?);`;
+
+      // Insert the thesis start request into the database without application_id and proposal_id
+      const addRequestQueryLessParamethers = 
+      `INSERT INTO thesisStartRequest (student_id, title, description, supervisor_id, creation_date) 
+       VALUES (?, ?, ?, ?, ?);`;
+
+      let res;
+      if(application_id && proposal_id){
+       res = db.prepare(addRequestQuery).run(student_id, application_id, proposal_id, title, description, supervisor_id, creation_date);
+      }
+      else{
+       res = db.prepare(addRequestQueryLessParamethers).run(student_id, title, description, supervisor_id, creation_date);
+      }
+
+      const requestId = res.lastInsertRowid;
+
+      // Insert the internal co-supervisors into the database
+      const addInternalCoSupervisorsQuery = `INSERT INTO thesisStartCosupervisor (start_request_id, cosupervisor_id) VALUES (?, ?);`;
+      for (const id of internal_co_supervisors_ids) {
+        db.prepare(addInternalCoSupervisorsQuery).run(requestId, id);
+      }
+      
+      resolve(requestId);
+
+    })()
+});
+};
+
+/**
+ * Return the active (not rejected) thesis start requests of the student with the given id
+ *
+ * @param {string} student_id
+ * @return {Promise<ThesisStartRequestRow>}
+ */
+exports.getStudentActiveThesisStartRequests = (student_id) => {
+  return new Promise((resolve) => {
+    const currentDate = new AdvancedDate().toISOString();
+    const query = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? AND ( status=? OR status=? OR status=? OR status=? )`;
+    const tsr = db.prepare(query).get(student_id, currentDate, THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL, THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY, THESIS_START_REQUEST_STATUS.ACCEPTED_BY_TEACHER, THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED);
+    
+    if(tsr){
+      const co_supervisors_query = 'SELECT cosupervisor_id FROM thesisStartCosupervisor WHERE start_request_id=?';
+      const co_supervisors = db.prepare(co_supervisors_query).all(tsr.id).map(entry => entry.cosupervisor_id);
+      resolve({
+        ...tsr,
+        co_supervisors
+      });
+    }
+    
+    resolve(tsr)
+  })
+};
+
+
+/**
+ * Return all the thesis start requests
+ *
+ * @return {Promise<string>}
+ */
+exports.listThesisStartRequests = () => {
+  return new Promise((resolve) => {
+    const currentDate = new AdvancedDate().toISOString();
+    const queryTSR = `SELECT * FROM thesisStartRequest WHERE creation_date < ?`;
+    const tsrList = db.prepare(queryTSR).all(currentDate);
+
+    const res = tsrList.map((tsr) => {
+      const queryCoSupervisors = `SELECT cosupervisor_id FROM thesisStartCosupervisor WHERE start_request_id=?`;
+      const co_supervisors = db.prepare(queryCoSupervisors).all(tsr.id).map(entry => entry.cosupervisor_id);
+
+      // Add the coSupervisors attribute to the tsr object
+      const tsrWithCoSupervisors = {
+        ...tsr,
+        co_supervisors,
+      };
+
+      return tsrWithCoSupervisors;
+    });
+
+    resolve(res)
+  })
+};
+
+/**
+ * Return the proposal with the given id without performing any check
+ *
+ * @param {string} requestId
+ * @return {Promise<ThesisStartRequestRow | null>}
+ */
+exports.getThesisStartRequestById = (request_id) => {
+  return new Promise((resolve) => {
+    const query = `SELECT * FROM thesisStartRequest WHERE id = ? AND creation_date < ?`;
+    const thesisStartRequest = db.prepare(query).get(request_id, new AdvancedDate().toISOString());
+
+    if (!thesisStartRequest) {
+      resolve(null); // Return null if thesis start request is not found
+      return;
+    }
+
+    const coSupervisorsQuery = 'SELECT cosupervisor_id FROM thesisStartCosupervisor WHERE start_request_id=?';
+    const coSupervisorsResult = db.prepare(coSupervisorsQuery).all(request_id);
+
+    const coSupervisors = coSupervisorsResult ? coSupervisorsResult.map(entry => entry.cosupervisor_id) : [];
+
+    resolve({ ...thesisStartRequest, co_supervisors: coSupervisors });
+  });
+};
+
+/**
+ * Accept/Reject a thesis start request
+ *
+ * @return {Promise<string>}
+ */
+exports.updateThesisStartRequestStatus = (request_id, new_status) => {
+  return new Promise((resolve) => {
+    const query = `
+      UPDATE thesisStartRequest
+      SET status = ?
+      WHERE id = ?;
+    `;
+    const res = db.prepare(query).run(new_status, request_id);
+    resolve(res.changes !== 0);
+    })
+};
 
 /**
  * @typedef {Object} ThesisApplicationRow
@@ -760,4 +910,40 @@ exports.getApplicationById = (applicationId) => {
  * @property {string} student_id
  * @property {string} status
  * @property {string} creation_date
+ */
+
+/**
+ * @typedef {Object} ThesisProposalRow
+ *
+ * @property {string} proposal_id
+ * @property {string} title
+ * @property {string} supervisor_id
+ * @property {string} type
+ * @property {string} description
+ * @property {string} [required_knowledge]
+ * @property {string} [notes]
+ * @property {string} expiration
+ * @property {string} level
+ * @property {string} cds
+ * @property {1 | 0} is_deleted
+ */
+
+/**
+ * @typedef {Object} TeacherRow
+ *
+ * @property {string} id
+ * @property {string} surname
+ * @property {string} name
+ * @property {string} email
+ * @property {string} cod_group
+ * @property {string} cod_department
+ */
+
+/**
+ * @typedef {Object} ExternalCoSupervisorRow
+ *
+ * @property {string} id
+ * @property {string} surname
+ * @property {string} name
+ * @property {string} email
  */

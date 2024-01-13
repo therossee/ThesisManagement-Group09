@@ -5,6 +5,7 @@ const {resetTestDatabase} = require('../integration_config');
 const request = require("supertest");
 const {app} = require("../../src/app");
 const utils = require("../utils");
+const CronTasksService = require("../../src/services/CronTasksService");
 
 beforeEach(() => {
     // Be sure that we are using a full clean database before each test
@@ -14,6 +15,10 @@ beforeEach(() => {
 let agent;
 beforeAll(async () => {
     agent = await utils.getMolinattoSylvieAgent(app);
+});
+
+afterAll(async () => {
+    CronTasksService.stop();
 });
 
 describe('GET /users', () => {
