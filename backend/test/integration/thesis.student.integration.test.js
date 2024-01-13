@@ -779,6 +779,27 @@ describe('POST /api/student/thesis-start-requests', () => {
         });
     });
 
+    test('should return 400 with error message for supervisor also as a co-supervisor', async () => {
+       
+        const requestBody = {
+            title: 'Title',
+            description: 'Description',
+            supervisor_id: 'd279620',
+            internal_co_supervisors_ids: ['d279620'],
+        };
+    
+        const response = await agent
+          .post('/api/student/thesis-start-requests')
+          .set('Accept', 'application/json')
+          .set('credentials', 'include')
+          .send(requestBody);
+    
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({
+          message: `Supervisor cannot be also co-supervisor`,
+        });
+    });
+
     test('should return 404 with error message for non-existing supervisor', async () => {
     
         const requestBody = {
@@ -934,12 +955,37 @@ describe('POST /api/student/thesis-start-requests', () => {
       expect(response.status).toBe(201);
       expect(response.body).toEqual(
           {
-              thesis_start_request_id: 2,
-              student_id: 's318952',
+              id: 2,
+              application_id: null,
+              proposal_id: null,
+              student: {
+                id: 's318952',
+                email: 's318952@studenti.polito.it',
+                name: 'Sylvie',
+                surname: 'Molinatto'
+              },
+              supervisor: {
+                id: 'd279620',
+                email: 'd279620@polito.it',
+                name: 'Marco',
+                surname: 'Rossi',
+                cod_group: 'Group1',
+                cod_department: 'Dep1'
+              },
+              co_supervisors: [
+                {
+                    id: 'd370335',
+                    email: 'd370335@polito.it',
+                    name: 'Luca',
+                    surname: 'Bianchi',
+                    cod_group: 'Group2',
+                    cod_department: 'Dep2'
+                }
+              ],
               title: 'Title',
               description: 'Description',
-              supervisor_id: 'd279620',
-              internal_co_supervisors_ids: ['d370335'],
+              creation_date: expect.stringContaining(new AdvancedDate().toISOString().substring(0, 10)),
+              approval_date: null,
               status: 'waiting for approval'
           }
       );
@@ -969,14 +1015,28 @@ describe('POST /api/student/thesis-start-requests', () => {
         expect(response.status).toBe(201);
         expect(response.body).toEqual(
             {
-                thesis_start_request_id: 2,
-                student_id: 's318952',
+                id: 2,
                 application_id: 2,
                 proposal_id: 2,
+                student: {
+                    id: 's318952',
+                    email: 's318952@studenti.polito.it',
+                    name: 'Sylvie',
+                    surname: 'Molinatto'
+                },
+                supervisor: {
+                    id: 'd279620',
+                    email: 'd279620@polito.it',
+                    name: 'Marco',
+                    surname: 'Rossi',
+                    cod_group: 'Group1',
+                    cod_department: 'Dep1'
+                },
+                co_supervisors: [],
+                creation_date: expect.stringContaining(new AdvancedDate().toISOString().substring(0, 10)),
+                approval_date: null,
                 title: 'PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API',
                 description: 'This thesis focuses on the performance evaluation of Kafka clients using a reactive API. The research aims to assess and enhance the efficiency of Kafka clients by implementing a reactive programming approach. The study explores how a reactive API can improve responsiveness and scalability in real-time data streaming applications.',
-                supervisor_id: 'd279620',
-                internal_co_supervisors_ids: [],
                 status: 'waiting for approval'
             }
         );
@@ -998,9 +1058,9 @@ describe('GET /api/student/thesis-start-requests/active', () => {
 
         // Assert the response
         expect(response.status).toBe(200);
-        expect(response.body).toEqual("");
+        expect(response.body).toEqual({});
     });
-    test('should return a thesis start requests for the student', async () => {
+    test('should return a thesis start requests without co-supervisor for the student', async () => {
         // Logged as s318952
         const request = db.prepare('INSERT INTO thesisStartRequest (student_id, application_id, proposal_id, title, description, supervisor_id, creation_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
           .run('s318952', 1, 1, 'Title', 'Description', 'd279620','2024-01-06T18:00:00.058Z','waiting for approval');
@@ -1017,12 +1077,77 @@ describe('GET /api/student/thesis-start-requests/active', () => {
         expect(response.body).toEqual(
             {
                 id: request.lastInsertRowid,
-                student_id: 's318952',
+                student: {
+                    id: 's318952',
+                    email: 's318952@studenti.polito.it',
+                    name: 'Sylvie',
+                    surname: 'Molinatto'
+                },
                 application_id: 1,
                 proposal_id: 1,
                 title: 'Title',
                 description: 'Description',
-                supervisor_id: 'd279620',
+                supervisor:{
+                    id: 'd279620',
+                    email: 'd279620@polito.it',
+                    name: 'Marco',
+                    surname: 'Rossi',
+                    cod_group: 'Group1',
+                    cod_department: 'Dep1'
+                },
+                co_supervisors: [],
+                creation_date: '2024-01-06T18:00:00.058Z',
+                approval_date: null,
+                status: 'waiting for approval'
+            }
+        );
+    });
+    test('should return a thesis start requests with co-supervisor for the student', async () => {
+        // Logged as s318952
+        const request = db.prepare('INSERT INTO thesisStartRequest (student_id, application_id, proposal_id, title, description, supervisor_id, creation_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+          .run('s318952', 1, 1, 'Title', 'Description', 'd279620','2024-01-06T18:00:00.058Z','waiting for approval');
+
+        db.prepare('INSERT INTO thesisStartCosupervisor(start_request_id, cosupervisor_id) VALUES (?, ?)')
+          .run(request.lastInsertRowid, 'd370335');
+
+        // Make the request to your API
+        const response = await agent
+            .get('/api/student/thesis-start-requests/active')
+            .set('Accept', 'application/json')
+            .set('credentials', 'include')
+            .send();
+
+        // Assert the response
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(
+            {
+                id: request.lastInsertRowid,
+                student: {
+                    id: 's318952',
+                    email: 's318952@studenti.polito.it',
+                    name: 'Sylvie',
+                    surname: 'Molinatto'
+                },
+                application_id: 1,
+                proposal_id: 1,
+                title: 'Title',
+                description: 'Description',
+                supervisor:{
+                    id: 'd279620',
+                    email: 'd279620@polito.it',
+                    name: 'Marco',
+                    surname: 'Rossi',
+                    cod_group: 'Group1',
+                    cod_department: 'Dep1'
+                },
+                co_supervisors: [{
+                    id: 'd370335',
+                    email: 'd370335@polito.it',
+                    name: 'Luca',
+                    surname: 'Bianchi',
+                    cod_group: 'Group2',
+                    cod_department: 'Dep2'
+                }],
                 creation_date: '2024-01-06T18:00:00.058Z',
                 approval_date: null,
                 status: 'waiting for approval'

@@ -64,13 +64,14 @@ function Home() {
 
 function HomeText(){
 
-    const { userData, isAuthenticated, isTeacher } = useAuth();
+    const { userData, isAuthenticated, isTeacher, isStudent, isSecretaryClerk } = useAuth();
 
     return (
         <>
         <Title className="home-title" style={{textAlign: 'center'}}>Welcome to PoliTO Thesis Management System!</Title>
-        {(isTeacher===true) && <Paragraph style={{ paddingLeft: "3%", textAlign: 'center' }}>Welcome professor {userData? userData.name : ""}! You can insert a new proposal or take a look for all the application requests.</Paragraph>}
-        {(isAuthenticated === true && isTeacher === false) && <Paragraph style={{ paddingLeft: "3%", textAlign: 'center' }}>Welcome {userData? userData.name : ""}! You can insert a new application request or take a look for all the proposals.</Paragraph>}
+        {isTeacher===true && <Paragraph style={{ paddingLeft: "3%", textAlign: 'center' }}>Welcome professor {userData? userData.name : ""}! You can insert a new proposal or take a look for all the application requests.</Paragraph>}
+        {isStudent===true && <Paragraph style={{ paddingLeft: "3%", textAlign: 'center' }}>Welcome {userData? userData.name : ""}! You can insert a new application request or take a look for all the proposals.</Paragraph>}
+        {isSecretaryClerk===true && <Paragraph style={{ paddingLeft: "3%", textAlign: 'center' }}>Welcome secretary clerk {userData? userData.name : ""}! You can take a look for all thesis start requests.</Paragraph>}
         {(!isAuthenticated) && <Paragraph style={{ paddingLeft: "3%", textAlign: 'center' }}>Welcome guest! Start with logging in.</Paragraph>}
         </>
     )

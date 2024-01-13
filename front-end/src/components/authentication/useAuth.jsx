@@ -12,9 +12,10 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
 
-    // Keep track in the client if user is Teacher or not
+    // Keep track in the client of user role
     const [isTeacher, setIsTeacher] = useState(undefined);
-    const [isSecretary, setIsSecretary] = useState(undefined);
+    const [isStudent, setIsStudent] = useState(false);
+    const [isSecretaryClerk, setIsSecretaryClerk] = useState(false); 
     const [isTester, setIsTester] = useState(false);
 
     const [userData, setUserData] = useState(null);
@@ -35,8 +36,9 @@ export function AuthProvider({ children }) {
             try {
                 const user = await API.getUser();
                 setIsTeacher(user.roles.includes("teacher"));
-                setIsSecretary(user.roles.includes("secretary"));
+                setIsStudent(user.roles.includes("student"));
                 setIsTester(user.roles.includes("tester"));
+                setIsSecretaryClerk(user.roles.includes("secretary clerk"));
                 setUserData(user);
                 setIsAuthenticated(true);
             } catch (err) {
@@ -53,9 +55,10 @@ export function AuthProvider({ children }) {
         handleLogin,
         handleLogout,
         isTeacher,
-        isSecretary,
+        isStudent,
+        isSecretaryClerk,
         isTester
-    }), [isAuthenticated, userData, handleLogin, handleLogout, isTeacher, isSecretary, isTester]);
+    }), [isAuthenticated, userData, handleLogin, handleLogout, isTeacher, isStudent, isSecretaryClerk, isTester]);
 
     return (
         <AuthContext.Provider value={contextValue}>

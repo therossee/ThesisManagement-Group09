@@ -36,7 +36,6 @@ function SideBar() {
         onClick={() => navigate('/')}
         preview={false}
       />
- 
       </div>
       <Menu mode="inline" className='menu-style' items={navigation} selectedKeys={[window.location.pathname]} onClick={handleMenuClick} />
     </Sider>
