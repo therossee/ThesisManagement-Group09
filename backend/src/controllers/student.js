@@ -100,6 +100,10 @@ async function newThesisStartRequest(req, res, next) {
         
         const thesisRequest = await schemas.APIThesisStartRequestSchema.parseAsync(req.body);
 
+        if(thesisRequest.internal_co_supervisors_ids.includes(thesisRequest.supervisor_id)) {
+            res.status(400).json({message: "Supervisor cannot be also co-supervisor"});
+        }
+
         const thesis_start_request_id = await thesisDao.createThesisStartRequest(studentId, thesisRequest.title, thesisRequest.description, thesisRequest.supervisor_id, thesisRequest.internal_co_supervisors_ids, thesisRequest.application_id, thesisRequest.proposal_id )
 
         const thesisStartRequest = await thesisDao.getThesisStartRequestById(thesis_start_request_id);
