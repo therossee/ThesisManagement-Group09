@@ -125,7 +125,7 @@ async function getStudentActiveThesisStartRequests(req, res, next) {
         const studentId = req.user.id;
         const studentThesisStartRequest = await thesisDao.getStudentActiveThesisStartRequests(studentId);
         if(!studentThesisStartRequest) {
-            res.status(200).json();
+            res.status(200).json({});
         }
         res.status(200).send(await utils._populateThesisStartRequest(studentThesisStartRequest));
     } catch (e) {
