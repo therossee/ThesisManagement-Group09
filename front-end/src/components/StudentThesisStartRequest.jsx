@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button, Descriptions, Col, Row, Typography, Form, Input, Select, Space, message } from 'antd';
+import { Alert, Badge, Button, Descriptions, Col, Row, Typography, Form, Input, Select, Space, message, Skeleton } from 'antd';
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
@@ -19,7 +19,7 @@ function StudentThesisStartRequest() {
 
     return (
         <div>
-            <Row justify="start">
+            <Row justify="start" align="middle" style={{ marginTop: "10px" }}>
                 {formVisible ?
                     <Button ghost type="primary" onClick={() => setFormVisible(false)}>
                         &lt; Back to Thesis Start Request
@@ -30,7 +30,6 @@ function StudentThesisStartRequest() {
                             type="primary"
                             icon={<PlusOutlined />}
                             size="large"
-                            style={{ marginTop: "10px" }}
                             loading={loading}
                             disabled={disabled}
                             onClick={() => { setFormVisible(true) }}
@@ -41,7 +40,7 @@ function StudentThesisStartRequest() {
                     </>
                 }
             </Row>
-            {formVisible ? <AddThesisStartRequestForm setFormVisible={setFormVisible} /> : <ViewThesisStartRequest trigger={trigger} setDisabled={setDisabled} setLoading={setLoading} />}
+            {formVisible ? <AddThesisStartRequestForm setFormVisible={setFormVisible} /> : <ViewThesisStartRequest trigger={trigger} setDisabled={setDisabled} loading={loading} setLoading={setLoading} />}
         </div>
     )
 }
@@ -60,12 +59,16 @@ function AddThesisStartRequestForm({ setFormVisible }) {
 
     const [buttonLoading, setButtonLoading] = useState(false);
 
+    // Excluding X supervisor from the list of co-supervisors
+    const [selectedSupervisor, setSelectedSupervisor] = useState(null);
+
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             try {
                 const teachers = await API.getTeachers();
-                const formattedTeachers = teachers.teachers.map((x) => ({
+                const sortedTeachers = teachers.teachers.sort((a, b) => a.surname.localeCompare(b.surname));
+                const formattedTeachers = sortedTeachers.map((x) => ({
                     value: x.id,
                     label: `${x.name} ${x.surname}`,
                     searchValue: `${x.id} ${x.name} ${x.surname}`,
@@ -146,6 +149,10 @@ function AddThesisStartRequestForm({ setFormVisible }) {
                                         placeholder="Select the Supervisor"
                                         loading={loading}
                                         options={options}
+                                        onChange={(value) => {
+                                            setSelectedSupervisor(value);
+                                            form.resetFields(['internal_co_supervisors_ids'])
+                                        }}
                                         filterOption={(input, option) =>
                                             option.searchValue.toLowerCase().includes(input.toLowerCase())
                                         }
@@ -161,7 +168,8 @@ function AddThesisStartRequestForm({ setFormVisible }) {
                                         mode="multiple"
                                         placeholder="Select the internal co-Supervisors"
                                         loading={loading}
-                                        options={options}
+                                        options={options.map(option => option.value === selectedSupervisor ? { ...option, disabled: true } : option)}
+                                        disabled={!selectedSupervisor}
                                         filterOption={(input, option) =>
                                             option.searchValue.toLowerCase().includes(input.toLowerCase())
                                         }
@@ -183,9 +191,11 @@ function AddThesisStartRequestForm({ setFormVisible }) {
     )
 }
 
-function ViewThesisStartRequest({ trigger, setLoading, setDisabled }) {
+function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
 
     const [activeThesisStartRequest, setActiveThesisStartRequest] = useState({});
+
+    const { Title } = Typography;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -204,14 +214,115 @@ function ViewThesisStartRequest({ trigger, setLoading, setDisabled }) {
         fetchData();
     }, [trigger]);
 
+    function getStatus(status) {
+        switch (status) {
+            case "waiting for approval":
+                return <Badge status="processing" text="1/3 - Waiting for approval from the secretariat" />;
+            case "accepted by secretary clerk":
+                return <Badge status="processing" text="2/3 - Waiting for approval from the teacher" />;
+            case "changes requested":
+                return <Badge status="warning" text="2/3 - Changes requested. Please, take action here" />;
+            case "accepted by teacher":
+                return <Badge status="success" text="3/3 - Accepted" />;
+            default:
+                return <Badge status="error" text="Failed fetching/parsing information" />
+        }
+    }
+
     if (Object.keys(activeThesisStartRequest).length > 0) {
-        return(
-        <Descriptions title={"Thesis Start Request Submitted on: " + dayjs(activeThesisStartRequest.creation_date).format('lll')} bordered style={{ marginTop:"20px" }}/>
+
+        // Items of the Table
+        const items = [
+            {
+                key: '1',
+                label: 'Thesis Start Request Title',
+                span: 3,
+                children: activeThesisStartRequest.title,
+            },
+            {
+                key: '2',
+                label: 'Submitted on',
+                span: 1,
+                children: dayjs(activeThesisStartRequest.creation_date).format('lll'),
+            },
+            {
+                key: '3',
+                label: 'Supervisor',
+                span: 3,
+                children: activeThesisStartRequest.supervisor.name + " " + activeThesisStartRequest.supervisor.surname,
+            },
+            {
+                key: '4',
+                label: 'Supervisor ID',
+                span: 1,
+                children: activeThesisStartRequest.supervisor.id,
+            },
+            {
+                key: '5',
+                label: 'Status',
+                span: 3,
+                children: getStatus(activeThesisStartRequest.status),
+            },
+            {
+                key: '6',
+                label: 'Approval Date',
+                span: 1,
+                children: activeThesisStartRequest.approval_date ? dayjs(activeThesisStartRequest.approval_date).format('lll') : "Not yet approved",
+            },
+            {
+                key: '7',
+                label: 'Description',
+                span: 4,
+                children: activeThesisStartRequest.description,
+            },
+        ];
+
+        // Add co-supervisors to the items array
+        activeThesisStartRequest.co_supervisors.forEach((cosupervisor, index) => {
+            const cosupervisorItem = {
+                key: `co-supervisor-${index}`,
+                label: `Co-Supervisor #${index + 1}`,
+                span: 3,
+                children: cosupervisor.name + " " + cosupervisor.surname,
+            };
+            const cosupervisorIdItem = {
+                key: `co-supervisor-id-${index}`,
+                label: `Co-Supervisor #${index + 1} ID`,
+                span: 1,
+                children: cosupervisor.id,
+            };
+            items.splice(4 + index * 2, 0, cosupervisorItem, cosupervisorIdItem);
+        });
+
+        return (
+            loading ?
+                <Skeleton active />
+                :
+                <>
+                    {activeThesisStartRequest.status === "changes requested" &&
+                        <Alert
+                            message="The supervisor has requested changes to your submission."
+                            description="Teacher Message(strong): message"
+                            type="warning"
+                            showIcon
+                            closable
+                            style={{ marginTop: "10px" }}
+                        />
+                    }
+                    <Descriptions
+                        bordered
+                        layout="vertical"
+                        column={4}
+                        items={items}
+                        style={{ marginTop: "15px" }} />
+                </>
         )
     }
     else {
         return (
-            <h1>No active thesis start request (to change) ............</h1>
+            <Row justify="start">
+                <Title level={4}>Submit your first Thesis Start Request using the button on the top-left corner!</Title>
+            </Row>
         )
     }
 }

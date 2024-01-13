@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Layout, FloatButton } from 'antd';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import { SettingFilled } from '@ant-design/icons';
@@ -20,12 +21,14 @@ function MainLayout() {
     const { Content } = Layout;
     const { isTester } = useAuth();
 
+    const [collapsed, setCollapsed] = useState(false);
+
     return (
         <Router>
             <Layout>
-                <SideBar />
+                <SideBar collapsed={collapsed} setCollapsed={setCollapsed} />
                 <Layout>
-                    <TopBar />
+                    <TopBar collapsed={collapsed} setCollapsed={setCollapsed} />
                     <Content className="content-style">
                         <Routes>
                             <Route path="/" element={<Home />} />

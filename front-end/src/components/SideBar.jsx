@@ -1,12 +1,12 @@
 import { useNavigate } from 'react-router-dom';
-import { HomeOutlined, FileTextOutlined, HistoryOutlined, AuditOutlined, SettingOutlined, FileDoneOutlined } from '@ant-design/icons';
+import { HomeOutlined, FileTextOutlined, HistoryOutlined, AuditOutlined, FileDoneOutlined } from '@ant-design/icons';
 import { Layout, Menu, Image } from 'antd';
 import { useAuth } from './authentication/useAuth';
 import '../css/style.css';
 
 const { Sider } = Layout;
 
-function SideBar() {
+function SideBar({ collapsed, setCollapsed }) {
 
   const { isTeacher, isStudent } = useAuth();
   const navigate = useNavigate();
@@ -24,19 +24,32 @@ function SideBar() {
     key && navigate(key);
   };
 
+  const toggleCollapsed = () => {
+    setCollapsed(!collapsed);
+  };
+
   return (
-    <Sider breakpoint="lg" collapsedWidth="0" style={{ position: "sticky", left: "0", top: "0", height: "100vh", zIndex: "5", backgroundColor: 'white' }}>
-      <div className='logo-style'>
-      <Image
-        src="https://upload.wikimedia.org/wikipedia/it/thumb/4/47/Logo_PoliTo_dal_2021_blu.png/1024px-Logo_PoliTo_dal_2021_blu.png"  
-        alt="Polito Logo"
-        style={{ width: '90%', cursor: 'pointer', marginTop: '10px', marginLeft: '10px', marginRight: '10px'}}
-        onClick={() => navigate('/')}
-        preview={false}
-      />
-      </div>
-      <Menu mode="inline" className='menu-style' items={navigation} selectedKeys={[window.location.pathname]} onClick={handleMenuClick} />
-    </Sider>
+    <>
+      <Sider
+        breakpoint="lg"
+        collapsedWidth="0"
+        collapsed={collapsed}
+        onCollapse={toggleCollapsed}
+        trigger={null}
+        style={{ position: "sticky", left: "0", top: "0", height: "100vh", zIndex: "5", backgroundColor: 'white' }}
+      >
+        <div className='logo-style'>
+          <Image
+            src="https://upload.wikimedia.org/wikipedia/it/thumb/4/47/Logo_PoliTo_dal_2021_blu.png/1024px-Logo_PoliTo_dal_2021_blu.png"
+            alt="Polito Logo"
+            style={{ width: '90%', cursor: 'pointer', marginTop: '10px', marginLeft: '10px', marginRight: '10px' }}
+            onClick={() => navigate('/')}
+            preview={false}
+          />
+        </div>
+        <Menu mode="inline" className='menu-style' items={navigation} selectedKeys={[window.location.pathname]} onClick={handleMenuClick} />
+      </Sider>
+    </>
   );
 }
 
