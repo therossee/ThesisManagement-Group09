@@ -782,6 +782,8 @@ In our database there are the following tables:
 - career (**id**, **cod_course**, title_course, cfu, grade, date)
   
   → the career table contains all the courses taken by the students. The field 'id' is the student id, so it is possible to know all the courses a specific student attended filtering by the id.
+- secretaryClerk(**id**, surname, name, email)
+  
 - thesisProposal (**proposal_id**, title, supervisor_id, type, description, required_knowledge, creation_date, expiration, level, is_deleted, is_archived)
   
   → this table contains all the relevant information for a thesis proposal. We can also be aware if a particular thesis is deleted or archived by the attributes 'is_deleted' and 'is_archived' (0 → non deleted/archived, 1 otherwise)
@@ -867,6 +869,17 @@ Here, a more detailed visualisation of the tables:
 | grade         | real    | **NOT NULL**                                   |
 | date          | text    | **NOT NULL**                                   |
 | PRIMARY KEY   | id, cod_course                              |
+
+---
+
+##### Secretary Clerk Table
+
+| Column  | Type | Constraints       |
+|---------|------|-------------------|
+| id      | TEXT | **PK**            |
+| surname | TEXT | **NOT NULL**      |
+| name    | TEXT | **NOT NULL**      |
+| email   | TEXT | **NOT NULL**      |
 
 ---
 
