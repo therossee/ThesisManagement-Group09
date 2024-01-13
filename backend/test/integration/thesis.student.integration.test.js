@@ -1058,7 +1058,7 @@ describe('GET /api/student/thesis-start-requests/active', () => {
 
         // Assert the response
         expect(response.status).toBe(200);
-        expect(response.body).toEqual("");
+        expect(response.body).toEqual({});
     });
     test('should return a thesis start requests without co-supervisor for the student', async () => {
         // Logged as s318952
