@@ -3,11 +3,11 @@ import SecretaryStartRequest from "../components/SecretaryStartRequest";
 import { useAuth } from '../components/authentication/useAuth';
 
 function Applications() {
-    const { isAuthenticated, isTeacher } = useAuth();
+    const { isAuthenticated, isSecretaryClerk } = useAuth();
 
     return (
         <>
-            {(isTeacher === true) && <SecretaryStartRequest />}
+            {(isSecretaryClerk === true) && <SecretaryStartRequest />}
             {!isAuthenticated && <Errors code="403" />}
         </>
     );

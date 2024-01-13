@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { Link } from 'react-router-dom';
+import { Alert, message, Divider, List, Skeleton, Avatar, Button, Flex, Typography, Tooltip, Modal } from 'antd';
+import { CheckOutlined, CloseOutlined, ExclamationCircleFilled, UserOutlined } from '@ant-design/icons';
 import API from "../API";
-import { Alert, message, Divider, List, Skeleton, Avatar, Button, Flex, Typography, Tooltip } from 'antd';
-import { UserOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import StudentCV from "./StudentCV";
 
 function TeacherApplications() {
@@ -22,27 +23,18 @@ function TeacherApplications() {
     const [studentInfo, setStudentInfo] = useState(null);
     const [applicationId, setApplicationId] = useState(-1);
 
-    const { Title } = Typography;
+    const { Title, Paragraph, Text } = Typography;
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 if (dirty) {
                     setIsLoading(true);
-                    let newData = [];
-                    const proposals = await API.getThesisProposals();
-                    await Promise.all(
-                        proposals.map(async (proposal) => {
-                            const startRequests = await API.getTeacherThesisApplications(proposal.id);
-                                newData.push({
-                                    id: proposal.id,
-                                    title: proposal.title,
-                                    startRequests: startRequests,
-                                });
-                            
-                        })
-                    );
-                    setData(newData);
+                    const startRequests = await API.getSecretaryStartRequest();
+                    setData(startRequests);
+                    startRequests.map((x) => {
+                        console.log(x);
+                    })
                     setIsLoading(false);
                     setDirty(false);
                 }
@@ -50,11 +42,22 @@ function TeacherApplications() {
                 message.error(err.message ? err.message : err);
             }
         };
-
         fetchData();
     }, [dirty]);
 
-    const acceptRequest = async (proposalId, student) => {
+    const showModal = (content, action, okText, cancelText) => {
+        Modal.confirm({
+            title: "Confirm action",
+            icon: <ExclamationCircleFilled />,
+            content: content,
+            onOk: action,
+            okText: okText,
+            okType: "danger",
+            cancelText: cancelText,
+        });
+    };
+
+    const acceptApplication = async (proposalId, student) => {
         setButtonsLoading(true);
         try {
             await API.acceptThesisApplications(proposalId, student.id);
@@ -68,7 +71,7 @@ function TeacherApplications() {
     };
 
 
-    const rejectRequest = async (proposalId, student) => {
+    const rejectApplication = async (proposalId, student) => {
         setButtonsLoading(true);
         try {
             await API.rejectThesisApplications(proposalId, student.id);
@@ -81,15 +84,17 @@ function TeacherApplications() {
         }
     };
 
-    function StartRequestsList() {
-        let startRequestList = data.map((x) => (
+    function ApplicationsList() {
+        let ApplicationList = data.map((x) => (
             <div key={x.id} >
                 <Skeleton loading={isLoading} active title={false}>
                     <Divider orientation="center">
                         <div style={{ whiteSpace: "normal" }}>
-                            <Title level={4} style={{ margin: "0" }}>
-                                {x.title}
-                            </Title>
+                            <Link to={`/view-proposal/${x.id}`}>
+                                <Title level={4} style={{ margin: "0" }} >
+                                    {x.title}
+                                </Title>
+                            </Link>
                         </div>
                     </Divider>
                 </Skeleton>
@@ -97,29 +102,70 @@ function TeacherApplications() {
                     <List
                         loading={isLoading}
                         itemLayout="horizontal"
-                        dataSource={x.applications}
-                        renderItem={(student) => (
-                            <List.Item key={student.id}>
-                                <button className="wrapper-enlight" onClick={() => { setStudentInfo(student); setApplicationId(student.application_id); setIsOpen(true) }} onKeyDown={() => { }}>
+                        dataSource={x}
+                        renderItem={(request) => (
+                            <List.Item key={request.student.id}>
+                                <button className="wrapper-enlight" onClick={() => { setStudentInfo(request.student); setApplicationId(request.application_id); setIsOpen(true) }} onKeyDown={() => { }}>
                                     <List.Item.Meta
-                                        avatar={<Avatar icon={<UserOutlined />} />}
+                                        avatar={<Avatar style={{ backgroundColor: '#1677ff' }} icon={<UserOutlined />} size="large" />}
                                         style={{ padding: ".5%" }}
-                                        title={student.surname + " " + student.name}
+                                        title={request.student.surname + " " + request.student.name}
+                                        description={<div style={{ textAlign: "left", marginTop: "-5px" }}>{request.student.id}</div>}
                                     />
-                                    <Flex wrap="wrap" gap="small" style={{ padding: ".5%" }}>
+                                    <Flex wrap="wrap" gap="small" style={{ padding: ".5%", alignItems: 'center' }}>
                                         <Tooltip title="Accept Application">
                                             <Button ghost type="primary"
                                                 loading={buttonsLoading}
                                                 disabled={buttonsLoading}
                                                 icon={<CheckOutlined />}
-                                                onClick={(e) => { e.stopPropagation(); acceptRequest(x.id, student) }} />
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    showModal(
+                                                        <div>
+                                                            <Paragraph>
+                                                                <Text strong>
+                                                                    Are you sure you want to accept this application?
+                                                                </Text>
+                                                            </Paragraph>
+                                                            <Paragraph>
+                                                                <Text strong>Thesis title: </Text><Text>{x.title}</Text>
+                                                                <br />
+                                                                <Text strong>Student: </Text><Text>{request.student.name + " " + request.student.surname}</Text>
+                                                            </Paragraph>
+                                                        </div>,
+                                                        () => acceptApplication(x.id, student),
+                                                        "Yes, accept the application",
+                                                        "Cancel"
+                                                    )
+                                                }}
+                                            />
                                         </Tooltip>
                                         <Tooltip title="Reject Application">
                                             <Button ghost danger
                                                 loading={buttonsLoading}
                                                 disabled={buttonsLoading}
                                                 icon={<CloseOutlined />}
-                                                onClick={(e) => { e.stopPropagation(); rejectRequest(x.id, student) }} />
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    showModal(
+                                                        <div>
+                                                            <Paragraph>
+                                                                <Text strong>
+                                                                    Are you sure you want to reject this application?
+                                                                </Text>
+                                                            </Paragraph>
+                                                            <Paragraph>
+                                                                <Text strong>Thesis title: </Text><Text>{x.title}</Text>
+                                                                <br />
+                                                                <Text strong>Student: </Text><Text>{request.student.name + " " + request.student.surname}</Text>
+                                                            </Paragraph>
+                                                        </div>,
+                                                        () => rejectApplication(x.id, student),
+                                                        "Yes, reject the application",
+                                                        "Cancel"
+                                                    )
+                                                }}
+                                            />
                                         </Tooltip>
                                     </Flex>
                                 </button>
@@ -128,17 +174,16 @@ function TeacherApplications() {
                     />
                 </div>
             </div >
-
         ))
-        return startRequestList;
+        return ApplicationList;
     }
 
     return (
         data.length > 0 ?
             <>
-                <Alert message="To view a specific applicant's CV and eventually the file uploaded within the application, simply click anywhere in the corresponding row." type="info" showIcon closable />
+                <Alert message="To view a specific applicant's CV and eventually the file uploaded within the application, simply click anywhere in the corresponding row. Also, to view the Thesis Proposal just click on its title." type="info" showIcon closable />
                 {isOpen && <StudentCV isOpen={isOpen} setIsOpen={setIsOpen} studentInfo={studentInfo} applicationId={applicationId} />}
-                <StartRequestsList />
+                <ApplicationsList />
             </>
             :
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -146,6 +191,5 @@ function TeacherApplications() {
             </div>
     )
 }
-
 
 export default TeacherApplications;

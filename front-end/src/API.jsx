@@ -185,8 +185,8 @@ async function getTeacherThesisApplications(proposalId) {
     }
 }
 
-async function getSecretaryStartRequest(proposalId) {
-    const response = await fetch(URL + `/secretary/startrequests/${proposalId}`, {
+async function getSecretaryStartRequest() {
+    const response = await fetch(URL + `/secretary-clerk/thesis-start-requests`, {
         method: 'GET',
         credentials: 'include'
     });
@@ -195,11 +195,17 @@ async function getSecretaryStartRequest(proposalId) {
 
     if (response.ok) {
         return startRequests.map((x) => ({
-            name: x.name,
-            surname: x.surname,
-            status: x.status,
+            id: x.id,
+            proposal_id: x.proposal_id,
             application_id: x.application_id,
-            id: x.id
+            student: x.student,
+            supervisor: x.supervisor,
+            co_supervisors: x.co_supervisors,
+            title: x.title,
+            description: x.description,
+            status: x.status,
+            creation_date: x.creation_date,
+            approval_date: x.approval_date,
         }));
     } else {
         throw startRequests;
@@ -405,10 +411,10 @@ async function getPDF(student_id, applicationId) {
         credentials: 'include',
     });
     if (response.ok) {
-            const file = await response.blob();
-            if (file.type === "application/pdf")
-                return file;
-            return null;
+        const file = await response.blob();
+        if (file.type === "application/pdf")
+            return file;
+        return null;
     } else {
         throw response.json();
     }
