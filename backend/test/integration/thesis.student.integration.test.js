@@ -779,6 +779,27 @@ describe('POST /api/student/thesis-start-requests', () => {
         });
     });
 
+    test('should return 400 with error message for supervisor also as a co-supervisor', async () => {
+       
+        const requestBody = {
+            title: 'Title',
+            description: 'Description',
+            supervisor_id: 'd279620',
+            internal_co_supervisors_ids: ['d279620'],
+        };
+    
+        const response = await agent
+          .post('/api/student/thesis-start-requests')
+          .set('Accept', 'application/json')
+          .set('credentials', 'include')
+          .send(requestBody);
+    
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({
+          message: `Supervisor cannot be also co-supervisor`,
+        });
+    });
+
     test('should return 404 with error message for non-existing supervisor', async () => {
     
         const requestBody = {
@@ -1037,7 +1058,7 @@ describe('GET /api/student/thesis-start-requests/active', () => {
 
         // Assert the response
         expect(response.status).toBe(200);
-        expect(response.body).toEqual("");
+        expect(response.body).toEqual({});
     });
     test('should return a thesis start requests without co-supervisor for the student', async () => {
         // Logged as s318952
