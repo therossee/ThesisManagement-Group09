@@ -721,11 +721,10 @@ Error Responses:
 
 ## Database File
 
-The project includes a file named 'database.sqlite' located in the 'database' folder. This file contains the actual database used by the project. You can explore the tables and fields described in this documentation section by opening the 'database.sqlite' file.
+The project includes a file named 'database.sqlite' located in the 'database' folder. This file contains the actual database used by the project.
 
 ## Table of Contents
 
-- [Introduction](#introduction)
 - [Features](#features)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
@@ -734,8 +733,6 @@ The project includes a file named 'database.sqlite' located in the 'database' fo
   - [Tables](#tables)
   - [Relationships](#relationships)
 - [Sample Queries](#sample-queries)
-
-## Introduction
 
 ## Features
 
