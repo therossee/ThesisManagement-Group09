@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { HomeOutlined, FileTextOutlined, HistoryOutlined, AuditOutlined, SettingOutlined, QuestionOutlined } from '@ant-design/icons';
-import { Layout, Menu } from 'antd';
+import { HomeOutlined, FileTextOutlined, HistoryOutlined, AuditOutlined, QuestionOutlined } from '@ant-design/icons';
+import { Layout, Menu, Image } from 'antd';
 import { useAuth } from './authentication/useAuth';
 import '../css/style.css';
 
@@ -8,17 +8,15 @@ const { Sider } = Layout;
 
 function SideBar() {
 
-  const { isAuthenticated, isTeacher, isSecretaryClerk, isTester } = useAuth();
+  const { isTeacher, isStudent } = useAuth();
   const navigate = useNavigate();
 
   // Define the menu items, using directly the route path as key
   const navigation = [
     { label: "Home", key: "/", icon: <HomeOutlined /> },
-    isAuthenticated && { label: "Thesis Proposals", key: "/proposals", icon: <FileTextOutlined /> },
-    isAuthenticated && { label: isTeacher ? "Thesis Applications" : "Applications History", key: "/applications", icon: isTeacher ? <AuditOutlined /> : <HistoryOutlined /> },
-    isAuthenticated && { label: isTeacher && "Thesis Start Request" , key: "/thesis-start-request", icon: isTeacher && <QuestionOutlined /> },
-    { type: 'divider' },
-    isTester && { label: "Administration", key: "/admin/virtual-clock", icon: <SettingOutlined /> }
+    (isTeacher === true || isStudent === true) && { label: "Thesis Proposals", key: "/proposals", icon: <FileTextOutlined /> },
+    isStudent === true && { label: isTeacher ? "Thesis Applications" : "Applications History", key: "/applications", icon: isTeacher ? <AuditOutlined /> : <HistoryOutlined /> },
+    isTeacher && { label: isTeacher && "Thesis Start Request" , key: "/thesis-start-request", icon: isTeacher && <QuestionOutlined /> },
   ];
 
   // Handle menu item clicks
