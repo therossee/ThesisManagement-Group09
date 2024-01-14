@@ -502,11 +502,12 @@ exports.getThesisProposalTeacher = (proposalId, teacherId) => {
 
 
 /**
- * Handle failure scenarios when deleting a thesis proposal
+ * Handle failure scenarios when deleting or archiving a thesis proposal
  *
  * @param {string} proposalId
  * @param {string} now
- * @param {function} reject
+ * @param {string} operation
+ * @return {Promise<void>}
  */
 async function _handleFailure(proposalId, now, operation) {
   return new Promise(async (resolve, reject) => {
@@ -516,7 +517,7 @@ async function _handleFailure(proposalId, now, operation) {
       reject(new NoThesisProposalError(proposalId));
     } else if (thesis.expiration <= now) {
       // Thesis proposal expired
-      reject(new UnauthorizedActionError(`You can\'t ${operation} a thesis already expired`));
+      reject(new UnauthorizedActionError(`You can't ${operation} a thesis already expired`));
     } else {
       // The supervisor is not the owner of the thesis proposal
       reject(new UnauthorizedActionError('You are not the supervisor of this thesis'));
