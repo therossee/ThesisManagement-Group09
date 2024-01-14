@@ -717,4 +717,5 @@ Error Responses:
 
 
 
-# DATABASE DOCUMENTATION
+## DATABASE DOCUMENTATION
+You can check all useful information of the documentation in this the [db_documentation.md](https://github.com/therossee/ThesisManagement-Group09/blob/task/270-database-documentation/database/db_documentation.md) file, in the `documentation` directory.
