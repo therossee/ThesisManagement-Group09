@@ -10,6 +10,7 @@ const db = require('../../src/services/db');
 const thesis_proposal = require('../../src/dao/thesis_proposal_dao');
 const UnauthorizedActionError = require("../../src/errors/UnauthorizedActionError");
 const NoThesisProposalError = require("../../src/errors/NoThesisProposalError");
+const InvalidActionError = require("../../src/errors/InvalidActionError");
 const {APPLICATION_STATUS} = require("../../src/enums/application");
 
 // Mocking the database
@@ -559,6 +560,126 @@ describe('archiveThesisProposalById', () => {
             expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
         );
         expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+    });
+});
+
+describe('unarchiveThesisProposalById', () => {
+    const mockProposalId = 1;
+    const mockSupervisorId = 'd12345';
+    const mockExpiration = '2025-12-31T10:30:04.000Z';
+    const mockExpiredProposal = {
+        proposal_id: mockProposalId,
+        title: 'Test Proposal',
+        supervisor_id: mockSupervisorId,
+        type: 'Test Type',
+        description: 'Test Description',
+        required_knowledge: 'Test Knowledge',
+        notes: 'Test Notes',
+        creation_date: '2020-01-01T10:30:04.000Z',
+        expiration: '2022-01-01T10:30:04.000Z',
+        level: 'Test Level',
+        is_deleted: 0,
+        is_archived: 0,
+    };
+    const mockArchivedProposal = {
+        proposal_id: mockProposalId,
+        title: 'Test Proposal',
+        supervisor_id: mockSupervisorId,
+        type: 'Test Type',
+        description: 'Test Description',
+        required_knowledge: 'Test Knowledge',
+        notes: 'Test Notes',
+        creation_date: '2020-01-01T10:30:04.000Z',
+        expiration: '2025-01-01T10:30:04.000Z',
+        level: 'Test Level',
+        is_deleted: 0,
+        is_archived: 1,
+    };
+    const mockActiveProposal = {
+        proposal_id: mockProposalId,
+        title: 'Test Proposal',
+        supervisor_id: mockSupervisorId,
+        type: 'Test Type',
+        description: 'Test Description',
+        required_knowledge: 'Test Knowledge',
+        notes: 'Test Notes',
+        creation_date: '2020-01-01T10:30:04.000Z',
+        expiration: '2025-12-31T10:30:04.000Z',
+        level: 'Test Level',
+        is_deleted: 0,
+        is_archived: 0,
+    };
+
+    test('should unarchive an expired proposal with a new expiration date', async () => {
+        
+        db.prepare().get.mockReturnValueOnce(mockExpiredProposal);
+        db.prepare().get.mockReturnValueOnce();
+        jest.spyOn(thesis_proposal, 'getThesisProposalTeacher').mockReturnValueOnce(mockActiveProposal);
+        
+        const result = await thesis_proposal.unarchiveThesisProposalById(mockProposalId, mockSupervisorId, mockExpiration);
+
+        expect(result).toEqual(mockActiveProposal);
+    });
+
+    test('should unarchive an archived proposal with a new expiration date', async () => {
+        
+        db.prepare().get.mockReturnValueOnce(mockArchivedProposal);
+        db.prepare().get.mockReturnValueOnce();
+        jest.spyOn(thesis_proposal, 'getThesisProposalTeacher').mockReturnValueOnce(mockActiveProposal);
+        
+        const result = await thesis_proposal.unarchiveThesisProposalById(mockProposalId, mockSupervisorId, mockExpiration);
+
+        expect(result).toEqual(mockActiveProposal);
+    });
+
+    test('should unarchive an archived proposal without a new expiration date', async () => {
+        
+        db.prepare().get.mockReturnValueOnce(mockArchivedProposal);
+        db.prepare().get.mockReturnValueOnce();
+        jest.spyOn(thesis_proposal, 'getThesisProposalTeacher').mockReturnValueOnce(mockActiveProposal);
+        
+        const result = await thesis_proposal.unarchiveThesisProposalById(mockProposalId, mockSupervisorId);
+
+        expect(result).toEqual(mockActiveProposal);
+    });
+
+    test('should throw NoThesisProposalError if no proposal is found', async () => {
+        db.prepare().get.mockReturnValueOnce();
+
+        await expect(thesis_proposal.unarchiveThesisProposalById(mockProposalId, mockSupervisorId, mockExpiration)
+        ).rejects.toThrow(NoThesisProposalError);
+    });
+
+    test('should throw InvalidActionError if proposal is already assigned', async () => {
+        db.prepare().get.mockReturnValueOnce(mockExpiredProposal);
+        db.prepare().get.mockReturnValueOnce({
+            id: 1,
+            proposal_id: mockProposalId,
+            student_id: 's1',
+            creation_date: '2021-01-01T10:30:04.000Z',
+            status: 'accepted',
+        });
+
+        await expect(thesis_proposal.unarchiveThesisProposalById(mockProposalId, mockSupervisorId, mockExpiration)
+        ).rejects.toThrow(new InvalidActionError('You can\'t un-archive a thesis that has already been assigned'));
+    });
+
+    test('should throw InvalidActionError if proposal is expired and no new expiration date is provided', async () => {
+        db.prepare().get.mockReturnValueOnce(mockExpiredProposal);
+        db.prepare().get.mockReturnValueOnce();
+
+        await expect(
+        thesis_proposal.unarchiveThesisProposalById(mockProposalId, mockSupervisorId)
+        ).rejects.toThrow(new InvalidActionError('The thesis proposal is expired and you must specify a new expiration date'));
+    });
+
+    test('should throw InvalidActionError if proposal is neither expired nor archived', async () => {
+        db.prepare().get.mockReturnValueOnce(mockActiveProposal);
+        db.prepare().get.mockReturnValueOnce();
+
+        await expect(
+        thesis_proposal.unarchiveThesisProposalById(mockProposalId, mockSupervisorId)
+        ).rejects.toThrow(new InvalidActionError('You can\'t un-archive a thesis that wasn\'t archived manually OR that is not expired'));
     });
 });
 
