@@ -6,6 +6,7 @@ const AppError = require("../errors/AppError");
 const AdvancedDate = require("../models/AdvancedDate");
 const {APPLICATION_STATUS} = require("../enums/application");
 const NotificationService = require("../services/NotificationService");
+const NoThesisProposalError = require("../errors/NoThesisProposalError");
 
 /**
  * @param {PopulatedRequest} req
@@ -274,13 +275,39 @@ async function archiveThesisProposalById(req, res, next) {
     }
 }
 
+/**
+ *
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+async function unarchiveThesisProposalById(req, res, next) {
+    try {
+        const teacherId = req.user.id;
+        const proposalId = Number(req.params.id);
+        if (isNaN(proposalId)) {
+            throw new NoThesisProposalError(proposalId);
+        }
+
+        const { expiration } = schemas.APIUnarchiveThesisProposalSchema.parse(req.body);
+
+        const proposal = await thesisDao.unarchiveThesisProposalById(proposalId, teacherId, expiration);
+        const cds = await thesisDao.getThesisProposalCds(proposalId);
+
+        res.status(200).json( _populateProposal(proposal, cds) );
+    } catch (e) {
+        next(e);
+    }
+}
+
 module.exports = {
     listThesisProposals,
     createThesisProposal,
     getThesisProposalById,
     updateThesisProposalById,
     deleteThesisProposalById,
-    archiveThesisProposalById
+    archiveThesisProposalById,
+    unarchiveThesisProposalById
 };
 
 

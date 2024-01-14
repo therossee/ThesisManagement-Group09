@@ -6,10 +6,10 @@ const fs = require('fs');
 const path = require('path');
 const db = require('../services/db');
 const AdvancedDate = require('../models/AdvancedDate');
+const InvalidActionError = require("../errors/InvalidActionError");
 const NoThesisProposalError = require("../errors/NoThesisProposalError");
 const UnauthorizedActionError = require("../errors/UnauthorizedActionError");
-const {APPLICATION_STATUS} = require("../enums/application");
-const {THESIS_START_REQUEST_STATUS} = require("../enums/thesisStartRequest");
+const { APPLICATION_STATUS, THESIS_START_REQUEST_STATUS} = require("../enums");
 
 exports.createThesisProposal = (proposal_details, additional_details) => {
   return new Promise((resolve, reject) => {
@@ -382,6 +382,62 @@ exports.archiveThesisProposalById = (proposalId, supervisorId) => {
     })();
   })
 };
+
+/**
+ * Un-archive a thesis proposal properly
+ *
+ * @param {number} proposalId
+ * @param {string} supervisorId
+ * @param {string} [expiration]
+ *
+ * @return {Promise<ThesisProposalRow>}
+ */
+exports.unarchiveThesisProposalById = async (proposalId, supervisorId, expiration) => {
+  /** @type {ThesisProposalRow | null} */
+  let proposal = null;
+  const transaction = db.transaction(() => {
+    const now = new AdvancedDate();
+
+    proposal = db.prepare('SELECT * FROM thesisProposal WHERE proposal_id = ? AND supervisor_id = ? AND is_deleted = 0;').get(proposalId, supervisorId);
+    if (!proposal) {
+      throw new NoThesisProposalError(proposalId);
+    }
+
+    const application = db.prepare('SELECT * FROM thesisApplication WHERE proposal_id = ? AND status = ?;').get(proposalId, APPLICATION_STATUS.ACCEPTED);
+    if (application) {
+      throw new InvalidActionError('You can\'t un-archive a thesis that has already been assigned');
+    }
+
+    const thesisExpiration = new AdvancedDate(proposal.expiration);
+    switch (true) {
+      case thesisExpiration.isBefore(now):
+        if (!expiration) {
+          throw new InvalidActionError('You must specify an expiration date for the thesis proposal');
+        }
+
+        db.prepare('UPDATE thesisProposal SET is_archived = 0, expiration = ? WHERE proposal_id = ?;')
+            .run(expiration, proposalId);
+
+        break;
+      case proposal.is_archived:
+        if (expiration) {
+          db.prepare('UPDATE thesisProposal SET is_archived = 0, expiration = ? WHERE proposal_id = ?;')
+                .run(expiration, proposalId);
+        } else {
+          db.prepare('UPDATE thesisProposal SET is_archived = 0 WHERE proposal_id = ?;')
+                .run(proposalId);
+        }
+
+        break;
+      default:
+        throw new InvalidActionError('You can\'t un-archive a thesis that wasn\'t archived manually OR that is not expired');
+    }
+  });
+  transaction();
+
+  return proposal;
+};
+
 /**
  * Return the list of thesis proposals related to a student degree
  *
@@ -701,6 +757,12 @@ exports.listApplicationsDecisionsFromStudent = (studentId) => {
   })
 };
 
+/**
+ * Return all degree related to a thesis proposal
+ *
+ * @param {string | number} proposalId
+ * @return {Promise<{ cod_degree: string; title_degree: string; }>}
+ */
 exports.getThesisProposalCds = (proposalId) => {
   return new Promise((resolve) => {
     const query = `SELECT d.cod_degree, d.title_degree FROM proposalCds p, degree d WHERE proposal_id = ? AND p.cod_degree = d.cod_degree`;
@@ -774,14 +836,14 @@ exports.createThesisStartRequest = (student_id, title, description, supervisor_i
 
     // Self-called transaction
     db.transaction(() => {
-      
+
       // Insert the thesis start request into the database with application_id and proposal_id
-      const addRequestQuery = 
+      const addRequestQuery =
       `INSERT INTO thesisStartRequest (student_id, application_id, proposal_id, title, description, supervisor_id, creation_date) 
        VALUES (?, ?, ?, ?, ?, ?, ?);`;
 
       // Insert the thesis start request into the database without application_id and proposal_id
-      const addRequestQueryLessParamethers = 
+      const addRequestQueryLessParamethers =
       `INSERT INTO thesisStartRequest (student_id, title, description, supervisor_id, creation_date) 
        VALUES (?, ?, ?, ?, ?);`;
 
@@ -800,7 +862,7 @@ exports.createThesisStartRequest = (student_id, title, description, supervisor_i
       for (const id of internal_co_supervisors_ids) {
         db.prepare(addInternalCoSupervisorsQuery).run(requestId, id);
       }
-      
+
       resolve(requestId);
 
     })()
@@ -818,7 +880,7 @@ exports.getStudentActiveThesisStartRequests = (student_id) => {
     const currentDate = new AdvancedDate().toISOString();
     const query = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? AND ( status=? OR status=? OR status=? OR status=? )`;
     const tsr = db.prepare(query).get(student_id, currentDate, THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL, THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY, THESIS_START_REQUEST_STATUS.ACCEPTED_BY_TEACHER, THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED);
-    
+
     if(tsr){
       const co_supervisors_query = 'SELECT cosupervisor_id FROM thesisStartCosupervisor WHERE start_request_id=?';
       const co_supervisors = db.prepare(co_supervisors_query).all(tsr.id).map(entry => entry.cosupervisor_id);
@@ -827,7 +889,7 @@ exports.getStudentActiveThesisStartRequests = (student_id) => {
         co_supervisors
       });
     }
-    
+
     resolve(tsr)
   })
 };
@@ -849,12 +911,10 @@ exports.listThesisStartRequests = () => {
       const co_supervisors = db.prepare(queryCoSupervisors).all(tsr.id).map(entry => entry.cosupervisor_id);
 
       // Add the coSupervisors attribute to the tsr object
-      const tsrWithCoSupervisors = {
+      return {
         ...tsr,
         co_supervisors,
       };
-
-      return tsrWithCoSupervisors;
     });
 
     resolve(res)
@@ -864,7 +924,7 @@ exports.listThesisStartRequests = () => {
 /**
  * Return the proposal with the given id without performing any check
  *
- * @param {string} requestId
+ * @param {string} request_id
  * @return {Promise<ThesisStartRequestRow | null>}
  */
 exports.getThesisStartRequestById = (request_id) => {
@@ -926,6 +986,7 @@ exports.updateThesisStartRequestStatus = (request_id, new_status) => {
  * @property {string} level
  * @property {string} cds
  * @property {1 | 0} is_deleted
+ * @property {1 | 0} is_archived
  */
 
 /**
