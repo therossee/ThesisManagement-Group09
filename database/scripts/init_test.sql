@@ -20,17 +20,19 @@ DROP TABLE IF EXISTS thesisInternalCoSupervisor;
 DROP TABLE IF EXISTS thesisProposal;
 DROP TABLE IF EXISTS career;
 DROP TABLE IF EXISTS externalCoSupervisor;
+DROP TABLE IF EXISTS secretaryClerk;
 DROP TABLE IF EXISTS teacher;
 DROP TABLE IF EXISTS student;
 DROP TABLE IF EXISTS degree;
 DROP TABLE IF EXISTS configuration;
 
--- Create the degree table
+-- Create the configuration table
 CREATE TABLE configuration (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL -- Stringified value
 );
 
+-- Create the degree table
 CREATE TABLE degree (
     cod_degree TEXT PRIMARY KEY,
     title_degree TEXT NOT NULL UNIQUE
@@ -57,6 +59,14 @@ CREATE TABLE teacher (
     email TEXT NOT NULL,
     cod_group TEXT NOT NULL,
     cod_department TEXT NOT NULL
+);
+
+-- Create the secretaryClerk table
+CREATE TABLE secretaryClerk (
+    id TEXT PRIMARY KEY,
+    surname TEXT NOT NULL,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL
 );
 
 -- Create the externalCoSupervisor table
@@ -114,6 +124,15 @@ CREATE TABLE thesisExternalCoSupervisor (
     PRIMARY KEY (proposal_id, co_supervisor_id)
 );
 
+-- Create the proposalCds table
+CREATE TABLE proposalCds(
+    proposal_id INTEGER NOT NULL,
+    cod_degree TEXT NOT NULL,
+    FOREIGN KEY (proposal_id) REFERENCES thesisProposal(proposal_id),
+    FOREIGN KEY (cod_degree) REFERENCES degree(cod_degree),
+    PRIMARY KEY(proposal_id, cod_degree)
+);
+
 -- Create the proposalKeyword table
 CREATE TABLE proposalKeyword (
     proposal_id INTEGER NOT NULL,
@@ -130,14 +149,6 @@ CREATE TABLE proposalGroup (
     PRIMARY KEY (proposal_id, cod_group)
 );
 
-CREATE TABLE proposalCds(
-    proposal_id INTEGER NOT NULL,
-    cod_degree TEXT NOT NULL,
-    FOREIGN KEY (proposal_id) REFERENCES thesisProposal(proposal_id),
-    FOREIGN KEY (cod_degree) REFERENCES degree(cod_degree),
-    PRIMARY KEY(proposal_id, cod_degree)
-);
-
 -- Create the thesisApplication table
 CREATE TABLE thesisApplication (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -149,13 +160,14 @@ CREATE TABLE thesisApplication (
     FOREIGN KEY(student_id) REFERENCES student(id)
 );
 
+-- Create the thesisStartRequest table
 CREATE TABLE thesisStartRequest (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     student_id TEXT NOT NULL,
     application_id INTEGER,
     proposal_id INTEGER,
-    title TEXT,
-    description TEXT,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
     supervisor_id TEXT NOT NULL,
     creation_date DATE NOT NULL,
     approval_date DATE,
@@ -166,6 +178,7 @@ CREATE TABLE thesisStartRequest (
     FOREIGN KEY(supervisor_id) REFERENCES teacher(id)
 );
 
+-- Create the thesisStartCosupervisor table
 CREATE TABLE thesisStartCosupervisor (
     start_request_id INTEGER NOT NULL,
     cosupervisor_id TEXT NOT NULL,
@@ -187,18 +200,23 @@ VALUES
     ('L-08', 'Ingegneria Elettronica'),
     ('LM-31', 'Ingegneria dell''Automazione');
 
--- Insert data into the teacher table
-INSERT INTO teacher (id, surname, name, email, cod_group, cod_department)
-VALUES
-    ('d279620', 'Rossi', 'Marco', 'd279620@polito.it', 'Group1', 'Dep1'),
-    ('d370335', 'Bianchi', 'Luca', 'd370335@polito.it', 'Group2', 'Dep2');
-
 -- Insert data into the student table
 INSERT INTO student (id, surname, name, gender, nationality, email, cod_degree, enrollment_year)
 VALUES
     ('s320213', 'Barbato', 'Luca', 'Male', 'Italian', 's320213@studenti.polito.it', 'LM-31', 2020),
     ('s321529', 'Ladrat', 'Matteo', 'Male', 'French', 's321529@studenti.polito.it', 'L-08', 2020),
     ('s318952', 'Molinatto', 'Sylvie', 'Female', 'Italian', 's318952@studenti.polito.it', 'L-08', 2020);
+
+-- Insert data into the teacher table
+INSERT INTO teacher (id, surname, name, email, cod_group, cod_department)
+VALUES
+    ('d279620', 'Rossi', 'Marco', 'd279620@polito.it', 'Group1', 'Dep1'),
+    ('d370335', 'Bianchi', 'Luca', 'd370335@polito.it', 'Group2', 'Dep2');
+
+-- Insert data into the secretaryClerk table
+INSERT INTO secretaryClerk (id, surname, name, email)
+VALUES
+    ('sc12345', 'Rossi', 'Abbondanzio', 'abbondanzio.rossi@polito.it');
 
 -- Insert data into the externalCoSupervisor table
 INSERT INTO externalCoSupervisor (id, surname, name, email)
@@ -213,7 +231,7 @@ VALUES ('s318952', 'COURSE_CODE_1', 'Course Title 1', 5, 30, '2023-01-01'),
        ('s318952', 'COURSE_CODE_2', 'Course Title 2', 4, 25, '2023-02-01'),
        ('s318952', 'COURSE_CODE_3', 'Course Title 3', 3, 27, '2023-03-01');
 
--- Insert data into the thesis proposal table
+-- Insert data into the thesisProposal table
 INSERT INTO thesisProposal (proposal_id, title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)
 VALUES
     (1, 'AI-GUIDED WEB CRAWLER FOR AUTOMATIC DETECTION OF MALICIOUS SITES', 'd279620', 'research project',
@@ -234,19 +252,20 @@ VALUES
      'The project involves implementing cutting-edge machine learning algorithms to enhance the accuracy of malicious site detection. Collaboration with cybersecurity experts is essential to ensure the crawlers effectiveness against evolving threats. Optimization of web crawling algorithms for real-time detection requires a deep understanding of both web technologies and performance optimization techniques.',
      '2023-09-17T21:37:01.176Z', '2026-04-01T23:59:59.999Z', 'LM');
 
--- Insert data into the thesis external co-supervisor table
+-- Insert data into the thesisExternalCoSupervisor table
 INSERT INTO thesisExternalCoSupervisor (proposal_id, co_supervisor_id)
 VALUES
     (1, 1),
     (2, 2);
 
-INSERT INTO proposalGroup (proposal_id, cod_group)
+-- Insert data into the proposalCds table
+INSERT INTO proposalCds(proposal_id, cod_degree)
 VALUES
-    (1, 'Group1'),
-    (2, 'Group1'),
-    (3, 'Group1');
+    (1, 'L-08'),
+    (2, 'L-08'),
+    (3, 'LM-31');
 
--- Insert data into the proposal keyword table
+-- Insert data into the proposalKeyword table
 INSERT INTO proposalKeyword (proposal_id, keyword)
 VALUES
     (1, 'AI'),
@@ -256,20 +275,23 @@ VALUES
     (2, 'reactive API'),
     (3, 'QUIC');
 
--- Insert data into the proposal CDS table
-INSERT INTO proposalCds(proposal_id, cod_degree)
+-- Insert data into the proposalGroup table
+INSERT INTO proposalGroup (proposal_id, cod_group)
 VALUES
-    (1, 'L-08'),
-    (2, 'L-08'),
-    (3, 'LM-31');
+    (1, 'Group1'),
+    (2, 'Group1'),
+    (3, 'Group1');
 
+-- Insert data into the thesisApplication table
 INSERT INTO thesisApplication (proposal_id, student_id, creation_date, status)
 VALUES
     (3, 's320213', '2021-03-17T21:37:01.176Z', 'accepted');
 
+-- Insert data into the thesisStartRequest table
 INSERT INTO thesisStartRequest(student_id, application_id, proposal_id, title, description, supervisor_id, creation_date)
 VALUES
-    ('s320213', 1, 1, 'start request for ai-guided web crawler thesis', 'will to start the thesis in january for which application is accepted', 'd279620', '2023-12-12T23:59:59.999Z');
+    ('s320213', 1, 1, 'AI-GUIDED WEB CRAWLER FOR AUTOMATIC DETECTION OF MALICIOUS SITES', 'This thesis focuses on developing an AI-guided web crawler for the automatic detection of malicious sites. The research aims to leverage artificial intelligence to enhance the efficiency and accuracy of web crawling in identifying and cataloging potentially harmful websites.', 'd279620', '2023-12-12T23:59:59.999Z');
+
 
 -- Create a trigger that check that the proposal_id of the thesisApplication table is present in the thesisProposal table
 -- and that the proposal is not deleted or archived for the insertion and the update

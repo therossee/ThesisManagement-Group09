@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import API from "../API";
 import { Button, Alert, message, Divider, List, Skeleton, Avatar, Flex, Typography, Tooltip } from 'antd';
-import { UserOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
+import { CheckOutlined, CloseOutlined, UserOutlined } from '@ant-design/icons';
 import MobCV from "../mob_components/MobCV";
 
 function MobTeacherApplications() {
@@ -103,7 +103,7 @@ function MobTeacherApplications() {
                             <List.Item key={student.id}>
                                 <div className="wrapper-enlight" onClick={() => { setStudInfo(student); setAppId(student.application_id); setTab("cv") }} onKeyDown={() => { }} role="button">
                                     <List.Item.Meta
-                                        avatar={<Avatar icon={<UserOutlined />} />}
+                                        avatar={<Avatar style={{ backgroundColor: '#1677ff' }} icon={<UserOutlined />} />}
                                         style={{ padding: ".5%" }}
                                         title={student.surname + " " + student.name}
                                     />

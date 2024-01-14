@@ -202,16 +202,15 @@ async function getTeacherThesisApplications(proposalId) {
         method: 'GET',
         credentials: 'include'
     });
-
     const applications = await response.json();
-
     if (response.ok) {
         return applications.map((x) => ({
             name: x.name,
             surname: x.surname,
             status: x.status,
             application_id: x.application_id,
-            id: x.id
+            id: x.id,
+            creation_date: x.creation_date,
         }));
     } else {
         throw applications;
