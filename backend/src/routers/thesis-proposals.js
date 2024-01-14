@@ -38,4 +38,14 @@ router.delete('/thesis-proposals/:id', authorization.isLoggedIn, authorization.i
  */
 router.patch('/thesis-proposals/archive/:id', authorization.isLoggedIn, authorization.isTeacher, controller.archiveThesisProposalById);
 
+/**
+ * List all archived thesis proposals without pagination but restricted to the current teacher.
+ */
+router.get('/archived-thesis-proposals/', authorization.isLoggedIn, controller.listArchivedThesisProposals);
+
+/**
+ * Give the possibility to manually publish an archived thesis proposal by its ID.
+ * Only the teacher can publish his own archived thesis proposal.
+ */
+router.patch('/thesis-proposals/publish/:id', authorization.isLoggedIn, authorization.isTeacher, controller.publishThesisProposalById);
 module.exports = router;
