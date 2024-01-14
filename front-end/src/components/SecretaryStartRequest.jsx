@@ -30,13 +30,15 @@ function TeacherApplications() {
             try {
                 if (dirty) {
                     setIsLoading(true);
+                    const newData = [];
                     const startRequests = await API.getSecretaryStartRequest();
-                    setData(startRequests);
                     startRequests.map((x) => {
-                        console.log(x);
+                        newData.push(x);
                     })
+                    setData(newData);
                     setIsLoading(false);
                     setDirty(false);
+                    console.log(newData);
                 }
             } catch (err) {
                 message.error(err.message ? err.message : err);
@@ -87,8 +89,11 @@ function TeacherApplications() {
     function ApplicationsList() {
         let ApplicationList = data.map((x) => (
             <div key={x.id} >
+                
                 <Skeleton loading={isLoading} active title={false}>
+                     
                     <Divider orientation="center">
+                    {x.proposal_id?
                         <div style={{ whiteSpace: "normal" }}>
                             <Link to={`/view-proposal/${x.id}`}>
                                 <Title level={4} style={{ margin: "0" }} >
@@ -96,82 +101,17 @@ function TeacherApplications() {
                                 </Title>
                             </Link>
                         </div>
-                    </Divider>
+                        :
+                        <div style={{ whiteSpace: "normal" }}>
+                            <Title level={4} style={{ margin: "0" }} >
+                                OTHER REQUESTS
+                            </Title> 
+                    </div>
+                        }
+                    </Divider> 
                 </Skeleton>
                 <div style={{ marginRight: "18%", marginLeft: "18%" }}>
-                    <List
-                        loading={isLoading}
-                        itemLayout="horizontal"
-                        dataSource={x}
-                        renderItem={(request) => (
-                            <List.Item key={request.student.id}>
-                                <button className="wrapper-enlight" onClick={() => { setStudentInfo(request.student); setApplicationId(request.application_id); setIsOpen(true) }} onKeyDown={() => { }}>
-                                    <List.Item.Meta
-                                        avatar={<Avatar style={{ backgroundColor: '#1677ff' }} icon={<UserOutlined />} size="large" />}
-                                        style={{ padding: ".5%" }}
-                                        title={request.student.surname + " " + request.student.name}
-                                        description={<div style={{ textAlign: "left", marginTop: "-5px" }}>{request.student.id}</div>}
-                                    />
-                                    <Flex wrap="wrap" gap="small" style={{ padding: ".5%", alignItems: 'center' }}>
-                                        <Tooltip title="Accept Application">
-                                            <Button ghost type="primary"
-                                                loading={buttonsLoading}
-                                                disabled={buttonsLoading}
-                                                icon={<CheckOutlined />}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    showModal(
-                                                        <div>
-                                                            <Paragraph>
-                                                                <Text strong>
-                                                                    Are you sure you want to accept this application?
-                                                                </Text>
-                                                            </Paragraph>
-                                                            <Paragraph>
-                                                                <Text strong>Thesis title: </Text><Text>{x.title}</Text>
-                                                                <br />
-                                                                <Text strong>Student: </Text><Text>{request.student.name + " " + request.student.surname}</Text>
-                                                            </Paragraph>
-                                                        </div>,
-                                                        () => acceptApplication(x.id, student),
-                                                        "Yes, accept the application",
-                                                        "Cancel"
-                                                    )
-                                                }}
-                                            />
-                                        </Tooltip>
-                                        <Tooltip title="Reject Application">
-                                            <Button ghost danger
-                                                loading={buttonsLoading}
-                                                disabled={buttonsLoading}
-                                                icon={<CloseOutlined />}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    showModal(
-                                                        <div>
-                                                            <Paragraph>
-                                                                <Text strong>
-                                                                    Are you sure you want to reject this application?
-                                                                </Text>
-                                                            </Paragraph>
-                                                            <Paragraph>
-                                                                <Text strong>Thesis title: </Text><Text>{x.title}</Text>
-                                                                <br />
-                                                                <Text strong>Student: </Text><Text>{request.student.name + " " + request.student.surname}</Text>
-                                                            </Paragraph>
-                                                        </div>,
-                                                        () => rejectApplication(x.id, student),
-                                                        "Yes, reject the application",
-                                                        "Cancel"
-                                                    )
-                                                }}
-                                            />
-                                        </Tooltip>
-                                    </Flex>
-                                </button>
-                            </List.Item>
-                        )}
-                    />
+                
                 </div>
             </div >
         ))
