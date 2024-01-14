@@ -287,7 +287,7 @@ async function unarchiveThesisProposalById(req, res, next) {
         const teacherId = req.user.id;
         const proposalId = Number(req.params.id);
         if (isNaN(proposalId)) {
-            throw new NoThesisProposalError(proposalId);
+            throw new NoThesisProposalError(req.params.id);
         }
 
         const { expiration } = schemas.APIUnarchiveThesisProposalSchema.parse(req.query);
