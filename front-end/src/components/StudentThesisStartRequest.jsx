@@ -312,6 +312,7 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
                     <Descriptions
                         bordered
                         layout="vertical"
+                        size="middle"
                         column={4}
                         items={items}
                         style={{ marginTop: "15px" }} />
