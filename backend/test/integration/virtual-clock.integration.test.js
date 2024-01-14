@@ -74,7 +74,6 @@ describe('[INTEGRATION] Virtual Clock APIs', () => {
 
         test('should update the virtual clock without newDate', async () => {
             const newOffset = 0;
-            const date = dayjs().add(newOffset, 'ms').toISOString();
 
             const res = await testerAgent.post('/api/system/virtual-clock')
                 .set('Content-Type', 'application/json')

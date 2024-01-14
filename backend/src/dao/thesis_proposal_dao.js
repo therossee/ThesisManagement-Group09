@@ -260,12 +260,8 @@ exports.deleteThesisProposalById = (proposalId, supervisorId) => {
       const res = db.prepare(deleteThesisProposalQuery).run(proposalId, supervisorId, now, now);
       if (res.changes === 0) {
         // Handle failure scenarios
-        try {
-          await _handleFailure.call(this, proposalId, now, "delete");
-        } catch (error) {
-          reject(error);
-          return;
-        }
+        await _handleFailure.call(this, proposalId, now, reject,"delete");
+        return;
       }
 
       const cancelApplicationsQuery = `
@@ -310,12 +306,8 @@ exports.archiveThesisProposalById = (proposalId, supervisorId) => {
       const res = db.prepare(archiveThesisProposalQuery).run(proposalId, supervisorId, now, now);
       if (res.changes === 0) {
         // Handle failure scenarios
-        try {
-          await _handleFailure.call(this, proposalId, now, "archive");
-        } catch (error) {
-          reject(error);
-          return;
-        }
+        await _handleFailure.call(this, proposalId, now, reject, "archive");
+        return;
       }
 
       const cancelApplicationsQuery = `
@@ -506,10 +498,10 @@ exports.getThesisProposalTeacher = (proposalId, teacherId) => {
  *
  * @param {string} proposalId
  * @param {string} now
- * @param {string} operation
+ * @param {string} 
+ * @return {Promise<void>}
  */
-async function _handleFailure(proposalId, now, operation) {
-  return new Promise(async (resolve, reject) => {
+async function _handleFailure(proposalId, now, reject, operation) {
     const thesis = await this.getThesisProposalById(proposalId);
     if (thesis == null || thesis.creation_date > now) {
       // No thesis proposal with the given id
@@ -521,7 +513,6 @@ async function _handleFailure(proposalId, now, operation) {
       // The supervisor is not the owner of the thesis proposal
       reject(new UnauthorizedActionError('You are not the supervisor of this thesis'));
     }
-  });
 }
 
 

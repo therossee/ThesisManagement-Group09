@@ -296,8 +296,6 @@ describe('GET /api/keywords', () => {
         expect(response.body).toEqual({keywords: ["AI", "web development", "research", "reactive API", "QUIC"]});
     });
 
-    // TODO: Add tests on authentication controls
-
     test('should handle errors and return 500', async () => {
         jest.spyOn(utilsDao, 'getAllKeywords').mockRejectedValueOnce(new Error());
 
@@ -375,7 +373,6 @@ describe('GET /api/thesis-proposals (teacher)', () => {
                     proposal_id: 1,
                     title: "AI-GUIDED WEB CRAWLER FOR AUTOMATIC DETECTION OF MALICIOUS SITES",
                     type: 'research project',
-                    title: 'AI-GUIDED WEB CRAWLER FOR AUTOMATIC DETECTION OF MALICIOUS SITES',
                     description: 'This thesis focuses on developing an AI-guided web crawler for the automatic detection of malicious sites. The research aims to leverage artificial intelligence to enhance the efficiency and accuracy of web crawling in identifying and cataloging potentially harmful websites.',
                     requiredKnowledge: 'web development, cybersecurity, and machine learning',
                     notes: 'The project involves implementing machine learning algorithms for pattern recognition, collaborating with cybersecurity experts, and optimizing web crawling algorithms for real-time detection',

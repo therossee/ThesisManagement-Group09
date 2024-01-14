@@ -289,7 +289,7 @@ describe('NotificationService', () => {
 
             await NotificationService.emitNewApplicationCreated('existingApplication', 'existingStudent', 'existingProposal');
         
-            expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to send email to supervisor of the thesis \"existingProposal\"', 'Error while retrieving thesis');
+            expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to send email to supervisor of the thesis "existingProposal"', 'Error while retrieving thesis');
         });
 
         test('sends email successfully', async () => {

@@ -125,7 +125,6 @@ describe('getStudentActiveThesisStartRequests', () => {
         id: 1, 
         title: 'Title 1', 
         student_id: 's318952',
-        title: 'Title 1',
         description: 'Description 1', 
         supervisor_id: 'd279620',
         creation_date: '2021-01-01T00:00:00.000Z',
@@ -147,7 +146,6 @@ describe('getStudentActiveThesisStartRequests', () => {
         id: 1, 
         title: 'Title 1', 
         student_id: 's318952',
-        title: 'Title 1',
         description: 'Description 1', 
         supervisor_id: 'd279620',
         co_supervisors: ['d370335'],
@@ -182,7 +180,6 @@ describe('listThesisStartRequests', () => {
         id: 1, 
         title: 'Title 1', 
         student_id: 's318952',
-        title: 'Title 1',
         description: 'Description 1', 
         supervisor_id: 'd279620',
         creationdate: '2021-01-01T00:00:00.000Z',
@@ -203,7 +200,6 @@ describe('listThesisStartRequests', () => {
         id: 1, 
         title: 'Title 1', 
         student_id: 's318952',
-        title: 'Title 1',
         description: 'Description 1', 
         supervisor_id: 'd279620',
         co_supervisors: [
@@ -320,7 +316,6 @@ describe('updateThesisStartRequestStatus', () => {
   test('should handle the case where the update operation fails', async () => {
     const request_id = 1;
     const new_status = 'REJECTED';
-    const expectedRowCount = 0;
 
     db.prepare().run.mockReturnValue({ changes: 0 });
 

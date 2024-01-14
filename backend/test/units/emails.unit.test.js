@@ -25,7 +25,6 @@ jest.mock('nodemailer', () => {
                     }
                     if (email.to === 's318952@studenti.polito.it') {
                         callback(null, { response: 'OK' });
-                        return;
                     }
                 })
             };

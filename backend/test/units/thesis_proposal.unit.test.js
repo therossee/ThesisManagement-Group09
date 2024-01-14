@@ -72,7 +72,7 @@ describe('createThesisProposal', () => {
             cds: proposalData.cds,
         };
 
-        const proposalId = await thesis_proposal.createThesisProposal(proposalData, additional_details);
+        const proposalId = await thesis_proposal.createThesisProposal(proposal_details, additional_details);
 
         expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
         expect(db.prepare).toHaveBeenCalledTimes(12); // 12 queries
@@ -113,7 +113,7 @@ describe('createThesisProposal', () => {
             cds: proposalData.cds,
         };
 
-        const proposalId = await thesis_proposal.createThesisProposal(proposalData, additional_details);
+        const proposalId = await thesis_proposal.createThesisProposal(proposal_details, additional_details);
 
         expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
         expect(db.prepare).toHaveBeenCalledTimes(6);
@@ -603,7 +603,6 @@ describe('listThesisProposalsFromStudent', () => {
         const result = await thesis_proposal.listThesisProposalsFromStudent(studentId, currentDate, currentDate);
 
         expect(result).toEqual(mockedData);
-        //expect(db.prepare().all).toHaveBeenCalledWith(studentId, currentDate, currentDate);
 
         expect(db.prepare().all.mock.calls[0][0]).toBe(studentId);
     });
@@ -781,8 +780,6 @@ describe('listThesisProposalsTeacher', () => {
         const result = await thesis_proposal.listThesisProposalsFromStudent(studentId);
 
         expect(result).toEqual(mockedData);
-        // expect(db.prepare().all).toHaveBeenCalledWith(studentId);
-
         expect(db.prepare().all.mock.calls[0][0]).toBe(studentId);
     });
 });
