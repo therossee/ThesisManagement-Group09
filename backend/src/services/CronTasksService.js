@@ -1,5 +1,6 @@
 const { CronJob } = require('cron');
-const thesisDao = require('../dao/thesis_dao');
+const thesisproposalDao = require('../dao/thesis_proposal_dao');
+const thesisApplicationDao = require('../dao/thesis_application_dao');
 const NotificationService = require("./NotificationService");
 
 class CronTasksService {
@@ -21,7 +22,7 @@ class CronTasksService {
 
     static _setupCronJobForCancelingApplicationOnExpiredThesis() {
         this._cronJobs[this.JOB_NAMES.THESIS_EXPIRED] = new CronJob("0 0 * * *", () => {
-            thesisDao.cancelWaitingApplicationsOnExpiredThesis()
+            thesisApplicationDao.cancelWaitingApplicationsOnExpiredThesis()
                 .then(async updated => {
                     if (updated.length === 0) {
                         return;
