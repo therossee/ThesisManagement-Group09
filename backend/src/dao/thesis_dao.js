@@ -412,14 +412,14 @@ exports.unarchiveThesisProposalById = async (proposalId, supervisorId, expiratio
     switch (true) {
       case thesisExpiration.isBefore(now):
         if (!expiration) {
-          throw new InvalidActionError('You must specify an expiration date for the thesis proposal');
+          throw new InvalidActionError('The thesis proposal is expired and you must specify a new expiration date');
         }
 
         db.prepare('UPDATE thesisProposal SET is_archived = 0, expiration = ? WHERE proposal_id = ?;')
             .run(expiration, proposalId);
 
         break;
-      case proposal.is_archived:
+      case Boolean(proposal.is_archived):
         if (expiration) {
           db.prepare('UPDATE thesisProposal SET is_archived = 0, expiration = ? WHERE proposal_id = ?;')
                 .run(expiration, proposalId);
@@ -435,7 +435,7 @@ exports.unarchiveThesisProposalById = async (proposalId, supervisorId, expiratio
   });
   transaction();
 
-  return proposal;
+  return exports.getThesisProposalTeacher(proposalId, supervisorId);
 };
 
 /**
@@ -771,6 +771,13 @@ exports.getThesisProposalCds = (proposalId) => {
   })
 };
 
+/**
+ * Return the thesis proposal with the given id if the teacher is the supervisor
+ *
+ * @param {string | number} proposalId
+ * @param {string} teacherId
+ * @return {Promise<ThesisProposalRow | null>}
+ */
 exports.getThesisProposalTeacher = (proposalId, teacherId) => {
   return new Promise((resolve) => {
     const currentDate = new AdvancedDate().toISOString();

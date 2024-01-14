@@ -289,12 +289,12 @@ async function unarchiveThesisProposalById(req, res, next) {
             throw new NoThesisProposalError(proposalId);
         }
 
-        const { expiration } = schemas.APIUnarchiveThesisProposalSchema.parse(req.body);
+        const { expiration } = schemas.APIUnarchiveThesisProposalSchema.parse(req.query);
 
         const proposal = await thesisDao.unarchiveThesisProposalById(proposalId, teacherId, expiration);
         const cds = await thesisDao.getThesisProposalCds(proposalId);
 
-        res.status(200).json( _populateProposal(proposal, cds) );
+        res.status(200).json( await _populateProposal(proposal, cds) );
     } catch (e) {
         next(e);
     }
