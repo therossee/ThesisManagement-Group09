@@ -2,9 +2,9 @@
 
 /* Data Access Object (DAO) module for accessing thesis proposals data */
 
-const fs = require('fs');
 const db = require('../services/db');
 const AdvancedDate = require('../models/AdvancedDate');
+const InvalidActionError = require("../errors/InvalidActionError");
 const NoThesisProposalError = require("../errors/NoThesisProposalError");
 const UnauthorizedActionError = require("../errors/UnauthorizedActionError");
 const {APPLICATION_STATUS} = require("../enums/application");
@@ -12,7 +12,7 @@ const {APPLICATION_STATUS} = require("../enums/application");
 /**
  * Create a new thesis proposal
  *
- * @param {object} proposal_detail -> title, supervisor_id, type, description, required_knowledge, notes, expiration, level
+ * @param {object} proposal_details -> title, supervisor_id, type, description, required_knowledge, notes, expiration, level
  * @param {object} additional_details -> keywords, internal_co_supervisors_id, external_co_supervisors_id, unique_groups, cds
  * @return {Promise<string>}
  */
@@ -322,6 +322,61 @@ exports.archiveThesisProposalById = (proposalId, supervisorId) => {
 };
 
 /**
+ * Un-archive a thesis proposal properly
+ *
+ * @param {number} proposalId
+ * @param {string} supervisorId
+ * @param {string} [expiration]
+ *
+ * @return {Promise<ThesisProposalRow>}
+ */
+exports.unarchiveThesisProposalById = async (proposalId, supervisorId, expiration) => {
+  /** @type {ThesisProposalRow | null} */
+  let proposal = null;
+  const transaction = db.transaction(() => {
+    const now = new AdvancedDate();
+
+    proposal = db.prepare('SELECT * FROM thesisProposal WHERE proposal_id = ? AND supervisor_id = ? AND is_deleted = 0;').get(proposalId, supervisorId);
+    if (!proposal) {
+      throw new NoThesisProposalError(proposalId);
+    }
+
+    const application = db.prepare('SELECT * FROM thesisApplication WHERE proposal_id = ? AND status = ?;').get(proposalId, APPLICATION_STATUS.ACCEPTED);
+    if (application) {
+      throw new InvalidActionError('You can\'t un-archive a thesis that has already been assigned');
+    }
+
+    const thesisExpiration = new AdvancedDate(proposal.expiration);
+    switch (true) {
+      case thesisExpiration.isBefore(now):
+        if (!expiration) {
+          throw new InvalidActionError('The thesis proposal is expired and you must specify a new expiration date');
+        }
+
+        db.prepare('UPDATE thesisProposal SET is_archived = 0, expiration = ? WHERE proposal_id = ?;')
+            .run(expiration, proposalId);
+
+        break;
+      case Boolean(proposal.is_archived):
+        if (expiration) {
+          db.prepare('UPDATE thesisProposal SET is_archived = 0, expiration = ? WHERE proposal_id = ?;')
+                .run(expiration, proposalId);
+        } else {
+          db.prepare('UPDATE thesisProposal SET is_archived = 0 WHERE proposal_id = ?;')
+                .run(proposalId);
+        }
+
+        break;
+      default:
+        throw new InvalidActionError('You can\'t un-archive a thesis that wasn\'t archived manually OR that is not expired');
+    }
+  });
+  transaction();
+
+  return exports.getThesisProposalTeacher(proposalId, supervisorId);
+};
+
+/**
  * Return the list of thesis proposals related to a student degree
  *
  * @param {string} studentId
@@ -426,7 +481,7 @@ exports.getSupervisorOfProposal = (proposalId) => {
 
 /**
  * Return the list of thesis proposals of a teacher
- * 
+ *
  * @param {string} teacherId
  * @returns {Promise<ThesisProposalRow[]>}
  */
@@ -454,8 +509,8 @@ exports.listThesisProposalsTeacher = (teacherId) => {
 
 /**
  * Return the list of course of studies of a thesis proposal
- * 
- * @param {string} proposalId 
+ *
+ * @param {string | number} proposalId
  * @returns {Promise<DegreeRow[]>}
  */
 exports.getThesisProposalCds = (proposalId) => {
@@ -468,9 +523,10 @@ exports.getThesisProposalCds = (proposalId) => {
 
 /**
  * Return the thesis proposal with the given id and the given teacher as supervisor
- * 
- * @param {string} proposalId 
- * @returns {Promise<ThesisProposalRow[]>}
+ *
+ * @param {string | number} proposalId
+ * @param {string} teacherId
+ * @returns {Promise<ThesisProposalRow | null>}
  */
 exports.getThesisProposalTeacher = (proposalId, teacherId) => {
   return new Promise((resolve) => {
@@ -498,7 +554,9 @@ exports.getThesisProposalTeacher = (proposalId, teacherId) => {
  *
  * @param {string} proposalId
  * @param {string} now
- * @param {string} 
+ * @param {Function} reject
+ * @param {string} operation
+ *
  * @return {Promise<void>}
  */
 async function _handleFailure(proposalId, now, reject, operation) {
@@ -539,6 +597,7 @@ async function _handleFailure(proposalId, now, reject, operation) {
  * @property {string} level
  * @property {string} cds
  * @property {1 | 0} is_deleted
+ * @property {1 | 0} is_archived
  */
 
 /**
@@ -563,7 +622,7 @@ async function _handleFailure(proposalId, now, reject, operation) {
 
 /**
  * @typedef {Object} DegreeRow
- * 
+ *
  * @property {string} cod_degree
  * @property {string} title_degree
  */

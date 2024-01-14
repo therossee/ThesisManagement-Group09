@@ -1394,3 +1394,263 @@ describe('GET /api/teacher/uploads/:stud_id/:app_id', () => {
         expect(response.header['content-type']).toEqual('application/pdf');
     });
 });
+
+describe('DELETE /api/thesis-proposals/:id/archive', () => {
+    test('should unarchive thesis proposal and return the updated proposal', async () => {
+        
+        const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+            .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2022-10-10T10:45:50.121Z', '2025-11-10T23:59:59.999Z', 'LM', 1);
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+            .run(proposal.lastInsertRowid, 'L-08');
+        db.prepare('INSERT INTO proposalGroup (proposal_id, cod_group) VALUES (?, ?)')
+            .run(proposal.lastInsertRowid, 'Group1');
+    
+        // Make a request to the API endpoint
+        const response = await marcoRossiAgent
+          .delete(`/api/thesis-proposals/${proposal.lastInsertRowid}/archive`)
+          .set('credentials', 'include')
+          .query({ expiration: '2025-12-20T23:59:59.999Z' });
+    
+        // Assertions
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({
+            id: proposal.lastInsertRowid,
+            title: 'Title',
+            status: 'ACTIVE',
+            supervisor: {
+                id: 'd279620',
+                name: 'Marco',
+                surname: 'Rossi',
+                email: 'd279620@polito.it',
+                codGroup: 'Group1',
+                codDepartment: 'Dep1'
+            },
+            coSupervisors: {
+                internal: [],
+                external: []
+            },
+            type: 'research project',
+            description: 'Description',
+            requiredKnowledge: 'Required knowledge',
+            notes: 'Notes',
+            creation_date: '2022-10-10T10:45:50.121Z',
+            expiration: '2025-12-20T23:59:59.999Z',
+            level: 'LM',
+            cds: [
+                {
+                    "cod_degree": "L-08",
+                    "title_degree": "Ingegneria Elettronica",
+                }
+            ],
+            keywords: [],
+            groups: ['Group1']
+        });
+    });
+
+    test('should return 404 error if the thesis proposal id is not a nummber', async () => {
+        // Make a request to the API endpoint
+        const response = await marcoRossiAgent
+          .delete(`/api/thesis-proposals/'1'/archive`)
+          .set('credentials', 'include')
+          .query({ expiration: '2025-12-20T23:59:59.999Z' });
+    
+        // Assertions
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({message: 'No thesis proposal with id \'1\' found'});
+    });
+
+    test('should return 404 error if the thesis proposal doesn\'t exist', async () => {
+        // Make a request to the API endpoint
+        const response = await marcoRossiAgent
+          .delete(`/api/thesis-proposals/100/archive`)
+          .set('credentials', 'include')
+          .query({ expiration: '2025-12-20T23:59:59.999Z' });
+    
+        // Assertions
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({message: 'No thesis proposal with id 100 found'});
+    });
+
+    test('should return 400 error if the proposal is already assigned', async () => {
+        
+        const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+            .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2022-10-10T10:45:50.121Z', '2025-11-10T23:59:59.999Z', 'LM', 1);
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+            .run(proposal.lastInsertRowid, 'L-08');
+        db.prepare('INSERT INTO proposalGroup (proposal_id, cod_group) VALUES (?, ?)')
+            .run(proposal.lastInsertRowid, 'Group1');
+        db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
+            .run('s318952', proposal.lastInsertRowid, new Date().toISOString(), 'accepted');
+    
+        // Make a request to the API endpoint
+        const response = await marcoRossiAgent
+          .delete(`/api/thesis-proposals/${proposal.lastInsertRowid}/archive`)
+          .set('credentials', 'include')
+          .query({ expiration: '2025-12-20T23:59:59.999Z' });
+    
+        // Assertions
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({message: 'You can\'t un-archive a thesis that has already been assigned'});
+    });
+
+    test('should return 400 error if the proposal is expired and it\s not specified a new expiration date', async () => {
+        
+        const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+            .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2022-10-10T10:45:50.121Z', '2023-11-10T23:59:59.999Z', 'LM', 1);
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+            .run(proposal.lastInsertRowid, 'L-08');
+        db.prepare('INSERT INTO proposalGroup (proposal_id, cod_group) VALUES (?, ?)')
+            .run(proposal.lastInsertRowid, 'Group1');
+        
+        // Make a request to the API endpoint
+        const response = await marcoRossiAgent
+          .delete(`/api/thesis-proposals/${proposal.lastInsertRowid}/archive`)
+          .set('credentials', 'include');
+    
+        // Assertions
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({message: 'The thesis proposal is expired and you must specify a new expiration date'});
+    });
+
+    test('should unarchive an expired proposal by giving a new valid expiration date', async () => {
+        
+        const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+            .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2022-10-10T10:45:50.121Z', '2023-11-10T23:59:59.999Z', 'LM', 0);
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+            .run(proposal.lastInsertRowid, 'L-08');
+        db.prepare('INSERT INTO proposalGroup (proposal_id, cod_group) VALUES (?, ?)')
+            .run(proposal.lastInsertRowid, 'Group1');
+        
+        // Make a request to the API endpoint
+        const response = await marcoRossiAgent
+          .delete(`/api/thesis-proposals/${proposal.lastInsertRowid}/archive`)
+          .set('credentials', 'include')
+          .query({ expiration: '2025-12-20T23:59:59.999Z' });
+    
+        // Assertions
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({
+            id: proposal.lastInsertRowid,
+            title: 'Title',
+            status: 'ACTIVE',
+            supervisor: {
+                id: 'd279620',
+                name: 'Marco',
+                surname: 'Rossi',
+                email: 'd279620@polito.it',
+                codGroup: 'Group1',
+                codDepartment: 'Dep1'
+            },
+            coSupervisors: {
+                internal: [],
+                external: []
+            },
+            type: 'research project',
+            description: 'Description',
+            requiredKnowledge: 'Required knowledge',
+            notes: 'Notes',
+            creation_date: '2022-10-10T10:45:50.121Z',
+            expiration: '2025-12-20T23:59:59.999Z',
+            level: 'LM',
+            cds: [
+                {
+                    "cod_degree": "L-08",
+                    "title_degree": "Ingegneria Elettronica",
+                }
+            ],
+            keywords: [],
+            groups: ['Group1']
+        });
+    });
+
+    test('should unarchive an archived proposal which is not expired', async () => {
+        
+        const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+            .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2022-10-10T10:45:50.121Z', '2025-11-10T23:59:59.999Z', 'LM', 1);
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+            .run(proposal.lastInsertRowid, 'L-08');
+        db.prepare('INSERT INTO proposalGroup (proposal_id, cod_group) VALUES (?, ?)')
+            .run(proposal.lastInsertRowid, 'Group1');
+        
+        // Make a request to the API endpoint
+        const response = await marcoRossiAgent
+          .delete(`/api/thesis-proposals/${proposal.lastInsertRowid}/archive`)
+          .set('credentials', 'include');
+    
+        // Assertions
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({
+            id: proposal.lastInsertRowid,
+            title: 'Title',
+            status: 'ACTIVE',
+            supervisor: {
+                id: 'd279620',
+                name: 'Marco',
+                surname: 'Rossi',
+                email: 'd279620@polito.it',
+                codGroup: 'Group1',
+                codDepartment: 'Dep1'
+            },
+            coSupervisors: {
+                internal: [],
+                external: []
+            },
+            type: 'research project',
+            description: 'Description',
+            requiredKnowledge: 'Required knowledge',
+            notes: 'Notes',
+            creation_date: '2022-10-10T10:45:50.121Z',
+            expiration: '2025-11-10T23:59:59.999Z',
+            level: 'LM',
+            cds: [
+                {
+                    "cod_degree": "L-08",
+                    "title_degree": "Ingegneria Elettronica",
+                }
+            ],
+            keywords: [],
+            groups: ['Group1']
+        });
+    });
+
+    test('should return 400 error if the proposal is neither expired nor archived', async () => {
+        
+        const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+            .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2022-10-10T10:45:50.121Z', '2025-11-10T23:59:59.999Z', 'LM', 0);
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+            .run(proposal.lastInsertRowid, 'L-08');
+        db.prepare('INSERT INTO proposalGroup (proposal_id, cod_group) VALUES (?, ?)')
+            .run(proposal.lastInsertRowid, 'Group1');
+        
+        // Make a request to the API endpoint
+        const response = await marcoRossiAgent
+          .delete(`/api/thesis-proposals/${proposal.lastInsertRowid}/archive`)
+          .set('credentials', 'include');
+    
+        // Assertions
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({message: 'You can\'t un-archive a thesis that wasn\'t archived manually OR that is not expired'});
+    });
+    
+    test('should handle errors', async () => {
+        const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+            .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2022-10-10T10:45:50.121Z', '2025-11-10T23:59:59.999Z', 'LM', 1);
+        db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
+            .run(proposal.lastInsertRowid, 'L-08');
+        db.prepare('INSERT INTO proposalGroup (proposal_id, cod_group) VALUES (?, ?)')
+            .run(proposal.lastInsertRowid, 'Group1');
+        
+        // Mock the function in your thesisProposalDao module to throw an error
+        jest.spyOn(thesisProposalDao, 'unarchiveThesisProposalById').mockRejectedValue(new Error('Test error'));
+  
+        // Make a request to the API endpoint
+        const response = await marcoRossiAgent
+          .delete(`/api/thesis-proposals/${proposal.lastInsertRowid}/archive`)
+          .set('credentials', 'include')
+          .query({ expiration: '2025-12-20T23:59:59.999Z' });
+  
+        // Assertions
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Internal Server Error');
+    });
+});
