@@ -2,7 +2,6 @@
 
 /* Data Access Object (DAO) module for accessing thesis proposals data */
 
-const fs = require('fs');
 const db = require('../services/db');
 const AdvancedDate = require('../models/AdvancedDate');
 const InvalidActionError = require("../errors/InvalidActionError");
@@ -13,7 +12,7 @@ const {APPLICATION_STATUS} = require("../enums/application");
 /**
  * Create a new thesis proposal
  *
- * @param {object} proposal_detail -> title, supervisor_id, type, description, required_knowledge, notes, expiration, level
+ * @param {object} proposal_details -> title, supervisor_id, type, description, required_knowledge, notes, expiration, level
  * @param {object} additional_details -> keywords, internal_co_supervisors_id, external_co_supervisors_id, unique_groups, cds
  * @return {Promise<string>}
  */
@@ -511,7 +510,7 @@ exports.listThesisProposalsTeacher = (teacherId) => {
 /**
  * Return the list of course of studies of a thesis proposal
  *
- * @param {string} proposalId
+ * @param {string | number} proposalId
  * @returns {Promise<DegreeRow[]>}
  */
 exports.getThesisProposalCds = (proposalId) => {
@@ -555,7 +554,9 @@ exports.getThesisProposalTeacher = (proposalId, teacherId) => {
  *
  * @param {string} proposalId
  * @param {string} now
- * @param {string}
+ * @param {Function} reject
+ * @param {string} operation
+ *
  * @return {Promise<void>}
  */
 async function _handleFailure(proposalId, now, reject, operation) {
