@@ -1,7 +1,6 @@
 /database/node_modules
-/database/*
+/database/
 !/database/db_documentation.md
-!/database/database.sqlite
 **/.env
 **/node_modules
 **/coverage
