@@ -42,7 +42,6 @@ class NotificationService {
         } catch (e) {
             console.error(`Failed to send email to student "${studentId}"`, e);
         }
-    }
 
     /**
      * Notify the supervisor that a student has applied for his/her thesis proposal.
@@ -96,6 +95,6 @@ class NotificationService {
             console.error(`Failed to send email to supervisor of the thesis "${proposalId}"`, e);
         }
     }
-}
 
+}
 module.exports = NotificationService;
