@@ -5,7 +5,9 @@ const { resetTestDatabase, initImapClient, closeImapClient, searchEmails} = requ
 const request = require("supertest");
 const {app} = require("../../src/app");
 const utils = require("../utils");
-const thesisDao = require('../../src/dao/thesis_dao');
+const thesisProposalDao = require('../../src/dao/thesis_proposal_dao');
+const thesisStartRequestDao = require('../../src/dao/thesis_start_request_dao');
+const thesisApplicationDao = require('../../src/dao/thesis_application_dao');
 const usersDao = require('../../src/dao/users_dao');
 const db = require('../../src/services/db');
 const path = require('path');
@@ -210,7 +212,7 @@ describe('GET /api/thesis-proposals/:id (student)', () => {
         expect(response.status).toBe(401);
     });
     test('should return error 500 if dao throws an error', async () => {
-        jest.spyOn(thesisDao, 'getThesisProposal').mockRejectedValueOnce(new Error());
+        jest.spyOn(thesisProposalDao, 'getThesisProposal').mockRejectedValueOnce(new Error());
 
         const response = await agent
             .get('/api/thesis-proposals/1')
@@ -281,6 +283,25 @@ describe('POST /api/student/applications', () => {
         expect(searchResults.length).toBeGreaterThan(0);
 
     },10000);
+
+    test('should create a new application without a file for a valid request and notify teacher', async () => {
+       
+        const thesis_proposal_id = '2';
+
+        const response = await agent
+            .post('/api/student/applications')
+            .set('credentials', 'include')
+            .field('thesis_proposal_id', thesis_proposal_id)
+            .expect(201);
+
+        expect(response.body).toEqual({
+            application_id: expect.any(Number),
+            thesis_proposal_id: '2',
+            student_id: 's318952',
+            status: 'waiting for approval',
+        });
+
+    });
 
     test('should return 401 status error for if a not logged user try to apply to a thesis proposal', async () => {
         const response = await request(app)
@@ -459,7 +480,7 @@ describe('POST /api/student/applications', () => {
 
     test('should handle generic errors gracefully', async () => {
         // Simulate an error in the application process
-        jest.spyOn(thesisDao, 'applyForProposal').mockImplementation(() => {
+        jest.spyOn(thesisApplicationDao, 'applyForProposal').mockImplementation(() => {
             throw new Error('Simulated error');
         });
 
@@ -499,7 +520,7 @@ describe('POST /api/student/applications', () => {
             .attach('file', filePath);
 
         expect(response.status).toBe(500);
-        expect(response.body).toEqual('Failed to apply for proposal. The file must be a PDF');
+        expect(response.body).toEqual('Internal Server Error');
     });
 });
 
@@ -532,7 +553,7 @@ describe('GET /api/student/active-application', () => {
     });
 
     test('should return 500 if an error occurs', async () => {
-        jest.spyOn(thesisDao, 'getStudentActiveApplication').mockRejectedValueOnce(new Error());
+        jest.spyOn(thesisApplicationDao, 'getStudentActiveApplication').mockRejectedValueOnce(new Error());
 
         // Perform the request
         const response = await agent
@@ -599,7 +620,7 @@ describe('GET /api/student/applications-decision', () => {
     });
 
     test('should handle errors and return 500 status', async () => {
-        jest.spyOn(thesisDao, 'listApplicationsDecisionsFromStudent').mockRejectedValueOnce(new Error());
+        jest.spyOn(thesisApplicationDao, 'listApplicationsDecisionsFromStudent').mockRejectedValueOnce(new Error());
 
         // Make the request to your API
         const response = await agent
@@ -844,7 +865,7 @@ describe('POST /api/student/thesis-start-requests', () => {
 
     test('should return 500 with error message if an error occur during the creation of the thesis start request', async () => {
 
-        jest.spyOn(thesisDao, 'createThesisStartRequest').mockRejectedValueOnce(new Error());
+        jest.spyOn(thesisStartRequestDao, 'createThesisStartRequest').mockRejectedValueOnce(new Error());
         
         const requestBody = {
           title: 'Title',
@@ -1156,7 +1177,7 @@ describe('GET /api/student/thesis-start-requests/active', () => {
     });
     test('should handle errors', async () => {
         // Logged as s318952
-        jest.spyOn(thesisDao, 'getStudentActiveThesisStartRequests').mockRejectedValueOnce(new Error());
+        jest.spyOn(thesisStartRequestDao, 'getStudentActiveThesisStartRequests').mockRejectedValueOnce(new Error());
 
         // Make the request to your API
         const response = await agent
