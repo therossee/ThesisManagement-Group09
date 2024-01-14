@@ -507,7 +507,6 @@ exports.getThesisProposalTeacher = (proposalId, teacherId) => {
  * @param {string} proposalId
  * @param {string} now
  * @param {string} operation
- * @return {Promise<void>}
  */
 async function _handleFailure(proposalId, now, operation) {
   return new Promise(async (resolve, reject) => {
