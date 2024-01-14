@@ -1,6 +1,6 @@
 'use strict';
 
-/* Data Access Object (DAO) module for accessing thesis data */
+/* Data Access Object (DAO) module for accessing thesis start requests data */
 
 const db = require('../services/db');
 const AdvancedDate = require('../models/AdvancedDate');
