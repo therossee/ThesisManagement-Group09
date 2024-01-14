@@ -259,20 +259,13 @@ exports.deleteThesisProposalById = (proposalId, supervisorId) => {
       `;
       const res = db.prepare(deleteThesisProposalQuery).run(proposalId, supervisorId, now, now);
       if (res.changes === 0) {
-        // We try to understand the reason of the failure
-        const thesis = await this.getThesisProposalById(proposalId);
-        if (thesis == null || thesis.creation_date > now) {
-          // No thesis proposal with the given id
-          reject( new NoThesisProposalError(proposalId) );
-        } else if (thesis.expiration <= now) {
-          // Thesis proposal expired
-          reject( new UnauthorizedActionError('You can\'t delete a thesis already expired') );
-        } else {
-          // The supervisor is not the owner of the thesis proposal
-          reject( new UnauthorizedActionError('You are not the supervisor of this thesis') );
+        // Handle failure scenarios
+        try {
+          await _handleFailure.call(this, proposalId, now, "delete");
+        } catch (error) {
+          reject(error);
+          return;
         }
-
-        return;
       }
 
       const cancelApplicationsQuery = `
@@ -316,20 +309,13 @@ exports.archiveThesisProposalById = (proposalId, supervisorId) => {
       `;
       const res = db.prepare(archiveThesisProposalQuery).run(proposalId, supervisorId, now, now);
       if (res.changes === 0) {
-        // We try to understand the reason of the failure
-        const thesis = await this.getThesisProposalById(proposalId);
-        if (thesis == null || thesis.creation_date > now) {
-          // No thesis proposal with the given id
-          reject( new NoThesisProposalError(proposalId) );
-        } else if (thesis.expiration <= now) {
-          // Thesis proposal expired
-          reject( new UnauthorizedActionError('You can\'t archive a thesis already expired') );
-        } else {
-          // The supervisor is not the owner of the thesis proposal
-          reject( new UnauthorizedActionError('You are not the supervisor of this thesis') );
+        // Handle failure scenarios
+        try {
+          await _handleFailure.call(this, proposalId, now, "archive");
+        } catch (error) {
+          reject(error);
+          return;
         }
-
-        return;
       }
 
       const cancelApplicationsQuery = `
@@ -513,6 +499,31 @@ exports.getThesisProposalTeacher = (proposalId, teacherId) => {
     resolve(res);
   })
 };
+
+
+/**
+ * Handle failure scenarios when deleting a thesis proposal
+ *
+ * @param {string} proposalId
+ * @param {string} now
+ * @param {function} reject
+ */
+async function _handleFailure(proposalId, now, operation) {
+  return new Promise(async (resolve, reject) => {
+    const thesis = await this.getThesisProposalById(proposalId);
+    if (thesis == null || thesis.creation_date > now) {
+      // No thesis proposal with the given id
+      reject(new NoThesisProposalError(proposalId));
+    } else if (thesis.expiration <= now) {
+      // Thesis proposal expired
+      reject(new UnauthorizedActionError(`You can\'t ${operation} a thesis already expired`));
+    } else {
+      // The supervisor is not the owner of the thesis proposal
+      reject(new UnauthorizedActionError('You are not the supervisor of this thesis'));
+    }
+  });
+}
+
 
 /**
  * @typedef {Object} ThesisApplicationRow
