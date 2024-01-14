@@ -5,7 +5,7 @@ require('jest');
  */
 
 const db = require('../../src/services/db');
-const thesis = require('../../src/dao/thesis_dao');
+const thesis_start_request = require('../../src/dao/thesis_start_request_dao');
 const {THESIS_START_REQUEST_STATUS} = require("../../src/enums/thesisStartRequest");
 const UnauthorizedActionError = require('../../src/errors/UnauthorizedActionError');
 
@@ -38,7 +38,7 @@ describe('createThesisStartRequest', () => {
       
       // Assertions for rejected promise with UnauthorizedActionError
       await expect(
-        thesis.createThesisStartRequest(
+        thesis_start_request.createThesisStartRequest(
             's320213',
             1,
             3,
@@ -60,7 +60,7 @@ describe('createThesisStartRequest', () => {
         
         // Assertions for rejected promise with UnauthorizedActionError
         await expect(
-          thesis.createThesisStartRequest(
+          thesis_start_request.createThesisStartRequest(
               's320213',
               1,
               3,
@@ -81,7 +81,7 @@ describe('createThesisStartRequest', () => {
         db.prepare().run.mockReturnValueOnce({lastInsertRowid: 1});
         db.prepare().run.mockReturnValueOnce({});
         
-        const requestId = await thesis.createThesisStartRequest(
+        const requestId = await thesis_start_request.createThesisStartRequest(
           's318952',
           'title',
           'description',
@@ -101,7 +101,7 @@ describe('createThesisStartRequest', () => {
         db.prepare().run.mockReturnValueOnce({lastInsertRowid: 1});
         db.prepare().run.mockReturnValueOnce({});
   
-        const requestId = await thesis.createThesisStartRequest(
+        const requestId = await thesis_start_request.createThesisStartRequest(
           's318952',
           1,
           2,
@@ -137,7 +137,7 @@ describe('getStudentActiveThesisStartRequests', () => {
     db.prepare().all.mockReturnValueOnce([{ cosupervisor_id: 'd370335' }]);
 
     const studentId = 's318952';
-    const result = await thesis.getStudentActiveThesisStartRequests(studentId);
+    const result = await thesis_start_request.getStudentActiveThesisStartRequests(studentId);
 
     const expectedQuery = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? AND ( status=? OR status=? OR status=? OR status=? )`;
     expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
@@ -156,6 +156,19 @@ describe('getStudentActiveThesisStartRequests', () => {
         status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL 
       }
     );
+  });
+
+  test('returns no thesis start requests for the student', async () => {
+   
+    db.prepare().get.mockReturnValueOnce(undefined); 
+
+    const studentId = 's318952';
+    const result = await thesis_start_request.getStudentActiveThesisStartRequests(studentId);
+
+    const expectedQuery = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? AND ( status=? OR status=? OR status=? OR status=? )`;
+    expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
+   
+    expect(result).toEqual();
   });
 
 });
@@ -180,7 +193,7 @@ describe('listThesisStartRequests', () => {
     
     db.prepare().all.mockReturnValueOnce([{ cosupervisor_id: 'd370335' }])
 
-    const result = await thesis.listThesisStartRequests();
+    const result = await thesis_start_request.listThesisStartRequests();
 
     const expectedQuery = `SELECT * FROM thesisStartRequest WHERE creation_date < ?`;
     expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
@@ -224,7 +237,7 @@ describe('getThesisStartRequestById', () => {
     db.prepare().get.mockReturnValueOnce(mockThesisStartRequest);
     db.prepare().all.mockReturnValueOnce(mockCoSupervisors);
 
-    const result = await thesis.getThesisStartRequestById(request_id);
+    const result = await thesis_start_request.getThesisStartRequestById(request_id);
 
     // Verify that the queries were prepared with the correct parameters
     const expectedThesisQuery = `SELECT * FROM thesisStartRequest WHERE id = ? AND creation_date < ?`;
@@ -255,7 +268,7 @@ describe('getThesisStartRequestById', () => {
     db.prepare().get.mockReturnValueOnce(mockThesisStartRequest);
     db.prepare().all.mockReturnValueOnce(mockCoSupervisors);
 
-    const result = await thesis.getThesisStartRequestById(request_id);
+    const result = await thesis_start_request.getThesisStartRequestById(request_id);
 
     // Verify that the queries were prepared with the correct parameters
     const expectedThesisQuery = `SELECT * FROM thesisStartRequest WHERE id = ? AND creation_date < ?`;
@@ -274,7 +287,7 @@ describe('getThesisStartRequestById', () => {
     // Mock the behavior of the database to simulate an empty result for thesisStartRequest
     db.prepare().get.mockReturnValueOnce(undefined);
 
-    const result = await thesis.getThesisStartRequestById(request_id);
+    const result = await thesis_start_request.getThesisStartRequestById(request_id);
 
     // Verify that the function resolves with the expected result (null)
     expect(result).toBeNull();
@@ -289,7 +302,7 @@ describe('updateThesisStartRequestStatus', () => {
 
     db.prepare().run.mockReturnValueOnce({changes: expectedRowCount});
 
-    const result = await thesis.updateThesisStartRequestStatus(request_id, new_status);
+    const result = await thesis_start_request.updateThesisStartRequestStatus(request_id, new_status);
 
     // Verify that the query was prepared with the correct parameters
     const expectedQuery = `
@@ -311,7 +324,7 @@ describe('updateThesisStartRequestStatus', () => {
 
     db.prepare().run.mockReturnValue({ changes: 0 });
 
-    const result = await thesis.updateThesisStartRequestStatus(request_id, new_status);
+    const result = await thesis_start_request.updateThesisStartRequestStatus(request_id, new_status);
 
     expect(result).toBe(false); 
   });

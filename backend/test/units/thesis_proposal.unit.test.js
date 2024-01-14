@@ -7,7 +7,7 @@ require('jest');
 
 const AdvancedDate = require('../../src/models/AdvancedDate');
 const db = require('../../src/services/db');
-const thesis = require('../../src/dao/thesis_dao');
+const thesis_proposal = require('../../src/dao/thesis_proposal_dao');
 const UnauthorizedActionError = require("../../src/errors/UnauthorizedActionError");
 const NoThesisProposalError = require("../../src/errors/NoThesisProposalError");
 const {APPLICATION_STATUS} = require("../../src/enums/application");
@@ -72,7 +72,7 @@ describe('createThesisProposal', () => {
             cds: proposalData.cds,
         };
 
-        const proposalId = await thesis.createThesisProposal(proposalData, additional_details);
+        const proposalId = await thesis_proposal.createThesisProposal(proposalData, additional_details);
 
         expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
         expect(db.prepare).toHaveBeenCalledTimes(12); // 12 queries
@@ -113,7 +113,7 @@ describe('createThesisProposal', () => {
             cds: proposalData.cds,
         };
 
-        const proposalId = await thesis.createThesisProposal(proposalData, additional_details);
+        const proposalId = await thesis_proposal.createThesisProposal(proposalData, additional_details);
 
         expect(proposalId).toBe(1); // Assuming your mock database always returns proposalId 1
         expect(db.prepare).toHaveBeenCalledTimes(6);
@@ -156,7 +156,7 @@ describe('createThesisProposal', () => {
 
         // Adding "await" before the thesis.createThesisProposal
         await expect(
-            thesis.createThesisProposal(proposal_details, additional_details)
+            thesis_proposal.createThesisProposal(proposal_details, additional_details)
         ).rejects.toEqual(new Error("The expiration date must be after the creation date"));
     });
 });
@@ -182,7 +182,7 @@ describe('updateThesisProposal', () => {
         };
 
         // Call the function and assert the result
-        const result = await thesis.updateThesisProposal(proposalId, supervisorId, thesisData);
+        const result = await thesis_proposal.updateThesisProposal(proposalId, supervisorId, thesisData);
         expect(result).toEqual(proposalId); // Assuming that the function resolves with the proposal_id on success
         expect(db.prepare).toHaveBeenCalledTimes(16); // 16 queries
     });
@@ -202,7 +202,7 @@ describe('updateThesisProposal', () => {
         };
         db.prepare().run.mockReturnValueOnce({changes: 0});
         // Call the function and assert the result
-        const result = await thesis.updateThesisProposal(proposalId, supervisorId, thesisData);
+        const result = await thesis_proposal.updateThesisProposal(proposalId, supervisorId, thesisData);
         expect(result).toBeNull();
     });
 });
@@ -249,7 +249,7 @@ describe('getThesisProposal', () => {
         db.prepare().get.mockReturnValueOnce(undefined).mockReturnValueOnce(expectedResult);
 
         // Act
-        const result = await thesis.getThesisProposal(proposalId, studentId);
+        const result = await thesis_proposal.getThesisProposal(proposalId, studentId);
 
         // Assert
         expect(result).toEqual(expectedResult);
@@ -264,7 +264,7 @@ describe('getThesisProposal', () => {
         db.prepare().get.mockReturnValueOnce(undefined).mockReturnValueOnce(undefined);
 
         // Act
-        const result = await thesis.getThesisProposal(proposalId, studentId);
+        const result = await thesis_proposal.getThesisProposal(proposalId, studentId);
 
         // Assert
         expect(result).toBeNull();
@@ -283,106 +283,12 @@ describe('getThesisProposal', () => {
         });
 
         // Act
-        const result = await thesis.getThesisProposal(proposalId, studentId);
+        const result = await thesis_proposal.getThesisProposal(proposalId, studentId);
 
         // Assert
         expect(result).toEqual(null);
     });
 
-});
-
-describe('listThesisProposalsFromStudent', () => {
-
-    test('should return the result of the db query', async () => {
-        const studentId = "1";
-        const currentDate = new AdvancedDate().toISOString();
-        const mockedData = [
-            {
-                id: "1",
-                title: 'Test Proposal',
-                supervisor_id: 1,
-                type: 'Test Type',
-                description: 'Test Description',
-                required_knowledge: 'Test Knowledge',
-                notes: 'Test Notes',
-                expiration: '2023-12-31',
-                level: 'Test Level'
-            }
-        ];
-
-        db.prepare().all.mockClear().mockReturnValue(mockedData);
-
-        const result = await thesis.listThesisProposalsFromStudent(studentId, currentDate, currentDate);
-
-        expect(result).toEqual(mockedData);
-        expect(db.prepare().all).toHaveBeenCalledWith(
-            studentId,
-            APPLICATION_STATUS.ACCEPTED,
-            expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
-            expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/));
-    });
-
-    test('should return an empty list', async () => {
-        const studentId = "1";
-        const currentDate = new AdvancedDate().toISOString();
-        const mockedData = [];
-
-        db.prepare().all.mockClear().mockReturnValue(mockedData);
-
-        const result = await thesis.listThesisProposalsFromStudent(studentId, currentDate, currentDate);
-
-        expect(result).toEqual(mockedData);
-        //expect(db.prepare().all).toHaveBeenCalledWith(studentId, currentDate, currentDate);
-
-        expect(db.prepare().all.mock.calls[0][0]).toBe(studentId);
-    });
-});
-
-describe('listThesisProposalsTeacher', () => {
-
-    test('should return an array of thesis proposals for a teacher', async () => {
-        const teacherId = "1";
-        // Mock the response from the database
-        const mockProposals = [
-            {proposal_id: 1, title: 'Proposal1'},
-            {proposal_id: 2, title: 'Proposal2'},
-        ];
-        const currentDate = new AdvancedDate().toISOString();
-        const expectedQuery = `SELECT * 
-      FROM thesisProposal P
-      WHERE P.supervisor_id=?
-        AND NOT EXISTS (
-          SELECT 1
-          FROM thesisApplication A
-          WHERE A.proposal_id = P.proposal_id
-            AND A.status = ?
-        )
-        AND P.expiration > ?
-        AND creation_date < ?
-        AND is_archived = 0
-        AND is_deleted = 0;`;
-        // Mock the SQLite database query
-        db.prepare.mockClear().mockReturnValueOnce({all: jest.fn(() => mockProposals)});
-
-        // Call the function
-        const result = await thesis.listThesisProposalsTeacher(teacherId, currentDate, currentDate);
-        // Assertions
-        expect(result).toEqual(mockProposals);
-        expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
-    });
-    test('should return an empty list', async () => {
-        const studentId = "1";
-        const mockedData = [];
-
-        db.prepare().all.mockReturnValue(mockedData);
-
-        const result = await thesis.listThesisProposalsFromStudent(studentId);
-
-        expect(result).toEqual(mockedData);
-        // expect(db.prepare().all).toHaveBeenCalledWith(studentId);
-
-        expect(db.prepare().all.mock.calls[0][0]).toBe(studentId);
-    });
 });
 
 describe('getThesisProposalById', () => {
@@ -423,7 +329,7 @@ describe('getThesisProposalById', () => {
 
         db.prepare().get.mockReturnValue(expectedResult);
 
-        const result = await thesis.getThesisProposalById(proposalId);
+        const result = await thesis_proposal.getThesisProposalById(proposalId);
         const expectedQuery = `SELECT * FROM thesisProposal P
         JOIN proposalCds PC ON P.proposal_id = PC.proposal_id
         JOIN degree D ON PC.cod_degree = D.cod_degree
@@ -432,43 +338,6 @@ describe('getThesisProposalById', () => {
         expect(result).toEqual(expectedResult);
         expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
     });
-});
-
-describe('getThesisProposalTeacher', () => {
-
-    test('should return teacher given thesisProposalId and teacherId', async () => {
-        const proposalId = 1;
-        const teacherId = "d1";
-        const expectedResult = {
-            id: "d1",
-            surname: "SurnameMock",
-            name: "NameMock",
-            email: "emailMock",
-            codGroup: "G1",
-            cod_department: "dep1"
-        };
-
-        db.prepare().get.mockReturnValueOnce(undefined).mockReturnValueOnce(expectedResult);
-
-        const result = await thesis.getThesisProposalTeacher(proposalId, teacherId);
-
-        expect(result).toEqual(expectedResult);
-    });
-
-    test('should return null when the proposal is already assigned', async () => {
-        const proposalId = 2;
-        const teacheId = "d2";
-
-        db.prepare().get.mockReturnValueOnce({
-            proposalId: 2,
-            teacheId: "d2",
-            status: 'accepted'
-        });
-
-        const result = await thesis.getThesisProposalTeacher(proposalId, teacheId);
-
-        expect(result).toEqual(null);
-    })
 });
 
 describe('deleteThesisProposalById', () => {
@@ -480,7 +349,7 @@ describe('deleteThesisProposalById', () => {
         db.prepare().get.mockReturnValueOnce({proposal_id: 1, status: 'accepted'});
         jest.clearAllMocks();
 
-        await expect(thesis.deleteThesisProposalById(proposalId, supervisorId)).rejects.toThrow(UnauthorizedActionError);
+        await expect(thesis_proposal.deleteThesisProposalById(proposalId, supervisorId)).rejects.toThrow(UnauthorizedActionError);
         expect(db.prepare).toHaveBeenCalledTimes(1);
     });
 
@@ -493,7 +362,7 @@ describe('deleteThesisProposalById', () => {
         db.prepare().get.mockReturnValueOnce(undefined);
         jest.clearAllMocks();
 
-        await expect(thesis.deleteThesisProposalById(proposalId, supervisorId)).rejects.toThrow(NoThesisProposalError);
+        await expect(thesis_proposal.deleteThesisProposalById(proposalId, supervisorId)).rejects.toThrow(NoThesisProposalError);
         expect(db.prepare).toHaveBeenCalledTimes(3);
     });
 
@@ -509,7 +378,7 @@ describe('deleteThesisProposalById', () => {
         });
         jest.clearAllMocks();
 
-        await expect(thesis.deleteThesisProposalById(proposalId, supervisorId)).rejects.toThrow(NoThesisProposalError);
+        await expect(thesis_proposal.deleteThesisProposalById(proposalId, supervisorId)).rejects.toThrow(NoThesisProposalError);
         expect(db.prepare).toHaveBeenCalledTimes(3);
     });
 
@@ -526,7 +395,7 @@ describe('deleteThesisProposalById', () => {
         });
         jest.clearAllMocks();
 
-        await expect(thesis.deleteThesisProposalById(proposalId, supervisorId)).rejects.toThrow(UnauthorizedActionError);
+        await expect(thesis_proposal.deleteThesisProposalById(proposalId, supervisorId)).rejects.toThrow(UnauthorizedActionError);
         expect(db.prepare).toHaveBeenCalledTimes(3);
     });
 
@@ -544,7 +413,7 @@ describe('deleteThesisProposalById', () => {
         });
         jest.clearAllMocks();
 
-        await expect(thesis.deleteThesisProposalById(proposalId, supervisorId)).rejects.toThrow(UnauthorizedActionError);
+        await expect(thesis_proposal.deleteThesisProposalById(proposalId, supervisorId)).rejects.toThrow(UnauthorizedActionError);
         expect(db.prepare).toHaveBeenCalledTimes(3);
     });
 
@@ -563,7 +432,7 @@ describe('deleteThesisProposalById', () => {
         db.prepare().all.mockReturnValueOnce(mockedApplications);
         jest.clearAllMocks();
 
-        const res = await thesis.deleteThesisProposalById(proposalId, supervisorId);
+        const res = await thesis_proposal.deleteThesisProposalById(proposalId, supervisorId);
         expect(res).toEqual(mockedApplications);
         expect(db.prepare).toHaveBeenCalledTimes(3);
     });
@@ -577,7 +446,7 @@ describe('archiveThesisProposalById', () => {
         db.prepare().get.mockReturnValueOnce(null); // No accepted applications
         db.prepare().run.mockReturnValueOnce({changes: 1}); // Successful archiving
 
-        const result = await thesis.archiveThesisProposalById(proposalId, supervisorId);
+        const result = await thesis_proposal.archiveThesisProposalById(proposalId, supervisorId);
 
         expect(db.prepare().get).toHaveBeenCalledWith(proposalId, APPLICATION_STATUS.ACCEPTED);
         expect(db.prepare().run).toHaveBeenCalledWith(
@@ -587,7 +456,7 @@ describe('archiveThesisProposalById', () => {
             expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
         );
 
-        expect(result).toEqual([]);
+        expect(result).toEqual(undefined);
     });
 
     test('rejects with UnauthorizedActionError for a thesis with accepted applications', async () => {
@@ -596,7 +465,7 @@ describe('archiveThesisProposalById', () => {
 
         db.prepare().get.mockReturnValueOnce({});
 
-        await expect(thesis.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(UnauthorizedActionError);
+        await expect(thesis_proposal.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(UnauthorizedActionError);
 
         expect(db.prepare().get).toHaveBeenCalledWith(proposalId, APPLICATION_STATUS.ACCEPTED);
     });
@@ -612,7 +481,7 @@ describe('archiveThesisProposalById', () => {
 
         db.prepare().get.mockReturnValueOnce(null); // No thesis proposal with the given id
 
-        await expect(thesis.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(NoThesisProposalError); // No thesis proposal with the given id
+        await expect(thesis_proposal.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(NoThesisProposalError); // No thesis proposal with the given id
         expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
         expect(db.prepare().run).toHaveBeenCalledWith(
             proposalId,
@@ -634,7 +503,7 @@ describe('archiveThesisProposalById', () => {
 
         db.prepare().get.mockReturnValueOnce({creation_date: '2030-11-10T23:59:59.999Z'});
 
-        await expect(thesis.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(NoThesisProposalError); // No thesis proposal with the given id
+        await expect(thesis_proposal.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(NoThesisProposalError); // No thesis proposal with the given id
         expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
         expect(db.prepare().run).toHaveBeenCalledWith(
             proposalId,
@@ -656,7 +525,7 @@ describe('archiveThesisProposalById', () => {
 
         db.prepare().get.mockReturnValueOnce({expiration: '2020-11-10T23:59:59.999Z'}); // Expired thesis
 
-        await expect(thesis.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(new UnauthorizedActionError('You can\'t archive a thesis already expired'));
+        await expect(thesis_proposal.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(new UnauthorizedActionError('You can\'t archive a thesis already expired'));
         expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
         expect(db.prepare().run).toHaveBeenCalledWith(
             proposalId,
@@ -681,7 +550,7 @@ describe('archiveThesisProposalById', () => {
             creation_date: '2020-11-10T23:59:59.999Z'
         }); // No thesis proposal with the given id
 
-        await expect(thesis.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(new UnauthorizedActionError('You are not the supervisor of this thesis')); // No thesis proposal with the given id
+        await expect(thesis_proposal.archiveThesisProposalById(proposalId, supervisorId)).rejects.toThrow(new UnauthorizedActionError('You are not the supervisor of this thesis')); // No thesis proposal with the given id
         expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
         expect(db.prepare().run).toHaveBeenCalledWith(
             proposalId,
@@ -691,4 +560,297 @@ describe('archiveThesisProposalById', () => {
         );
         expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
     });
+});
+
+describe('listThesisProposalsFromStudent', () => {
+
+    test('should return the result of the db query', async () => {
+        const studentId = "1";
+        const currentDate = new AdvancedDate().toISOString();
+        const mockedData = [
+            {
+                id: "1",
+                title: 'Test Proposal',
+                supervisor_id: 1,
+                type: 'Test Type',
+                description: 'Test Description',
+                required_knowledge: 'Test Knowledge',
+                notes: 'Test Notes',
+                expiration: '2023-12-31',
+                level: 'Test Level'
+            }
+        ];
+
+        db.prepare().all.mockClear().mockReturnValue(mockedData);
+
+        const result = await thesis_proposal.listThesisProposalsFromStudent(studentId, currentDate, currentDate);
+
+        expect(result).toEqual(mockedData);
+        expect(db.prepare().all).toHaveBeenCalledWith(
+            studentId,
+            APPLICATION_STATUS.ACCEPTED,
+            expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+            expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/));
+    });
+
+    test('should return an empty list', async () => {
+        const studentId = "1";
+        const currentDate = new AdvancedDate().toISOString();
+        const mockedData = [];
+
+        db.prepare().all.mockClear().mockReturnValue(mockedData);
+
+        const result = await thesis_proposal.listThesisProposalsFromStudent(studentId, currentDate, currentDate);
+
+        expect(result).toEqual(mockedData);
+        //expect(db.prepare().all).toHaveBeenCalledWith(studentId, currentDate, currentDate);
+
+        expect(db.prepare().all.mock.calls[0][0]).toBe(studentId);
+    });
+});
+
+describe('getKeywordsOfProposal', () => {
+
+    test('should return the result of the db query', async () => {
+        const proposalId = "1";
+        const mockedData = [
+            {
+                proposal_id: proposalId,
+                keyword: "Keyword1"
+            },
+            {
+                proposal_id: proposalId,
+                keyword: "Keyword2"
+            }
+        ];
+        const expectedResult = mockedData.map(row => row.keyword);
+
+        db.prepare().all.mockReturnValue(mockedData);
+
+        const result = await thesis_proposal.getKeywordsOfProposal(proposalId);
+
+        expect(result).toEqual(expectedResult);
+        expect(db.prepare().all).toHaveBeenCalledWith(proposalId);
+    });
+
+    test('should return an empty list', async () => {
+        const proposalId = "1";
+        const mockedData = [];
+        const expectedResult = mockedData.map(row => row.keyword);
+
+        db.prepare().all.mockReturnValue(mockedData);
+
+        const result = await thesis_proposal.getKeywordsOfProposal(proposalId);
+
+        expect(result).toEqual(expectedResult);
+        expect(db.prepare().all).toHaveBeenCalledWith(proposalId);
+    });
+});
+
+describe('getProposalGroups', () => {
+
+    test('should return the result of the db query', async () => {
+        const proposalId = "1";
+        const mockedData = [
+            {
+                proposal_id: proposalId,
+                cod_group: "Group1"
+            },
+            {
+                proposal_id: proposalId,
+                cod_group: "Group2"
+            }
+        ];
+        const expectedResult = mockedData.map(row => row.cod_group);
+
+        db.prepare().all.mockReturnValue(mockedData);
+
+        const result = await thesis_proposal.getProposalGroups(proposalId);
+
+        expect(result).toEqual(expectedResult);
+        expect(db.prepare().all).toHaveBeenCalledWith(proposalId);
+    })
+});
+
+describe('getInternalCoSupervisorsOfProposal', () => {
+
+    test('should return the result of the db query', async () => {
+        const proposalId = "1";
+        const mockedData = {
+            id: "1",
+            surname: "MockedSurname",
+            name: "MockedName",
+            email: "mocked@gmail.com",
+            cod_group: "Group1",
+            cod_department: "Dep1",
+            proposal_id: proposalId,
+            co_supervisor_id: "1"
+        };
+
+        db.prepare().all.mockReturnValue(mockedData);
+
+        const result = await thesis_proposal.getInternalCoSupervisorsOfProposal(proposalId);
+
+        expect(result).toEqual(mockedData);
+        expect(db.prepare().all).toHaveBeenCalledWith(proposalId);
+    });
+});
+
+describe('getExternalCoSupervisorsOfProposal', () => {
+
+    test('should return the result of the db query', async () => {
+        const proposalId = "1";
+        const mockedData = {
+            id: "1",
+            surname: "MockedSurname",
+            name: "MockedName",
+            email: "mocked@gmail.com",
+            proposal_id: proposalId,
+            co_supervisor_id: "1"
+        };
+
+        db.prepare().all.mockReturnValue(mockedData);
+
+        const result = await thesis_proposal.getExternalCoSupervisorsOfProposal(proposalId);
+
+        expect(result).toEqual(mockedData);
+        expect(db.prepare().all).toHaveBeenCalledWith(proposalId);
+    });
+});
+
+describe('getSupervisorOfProposal', () => {
+
+    test('should return the result of the db query', async () => {
+        const proposalId = "1";
+        const mockedData = {
+            id: "1",
+            surname: "MockedSurname",
+            name: "MockedName",
+            email: "mocked@gmail.com",
+            cod_group: "Group1",
+            cod_department: "Dep1"
+        };
+
+        db.prepare().get.mockReturnValue(mockedData);
+
+        const result = await thesis_proposal.getSupervisorOfProposal(proposalId);
+
+        expect(result).toEqual(mockedData);
+        expect(db.prepare().get).toHaveBeenCalledWith(proposalId);
+    });
+});
+
+describe('listThesisProposalsTeacher', () => {
+
+    test('should return an array of thesis proposals for a teacher', async () => {
+        const teacherId = "1";
+        // Mock the response from the database
+        const mockProposals = [
+            {proposal_id: 1, title: 'Proposal1'},
+            {proposal_id: 2, title: 'Proposal2'},
+        ];
+        const currentDate = new AdvancedDate().toISOString();
+        const expectedQuery = `SELECT * 
+      FROM thesisProposal P
+      WHERE P.supervisor_id=?
+        AND NOT EXISTS (
+          SELECT 1
+          FROM thesisApplication A
+          WHERE A.proposal_id = P.proposal_id
+            AND A.status = ?
+        )
+        AND P.expiration > ?
+        AND creation_date < ?
+        AND is_archived = 0
+        AND is_deleted = 0;`;
+        // Mock the SQLite database query
+        db.prepare.mockClear().mockReturnValueOnce({all: jest.fn(() => mockProposals)});
+
+        // Call the function
+        const result = await thesis_proposal.listThesisProposalsTeacher(teacherId, currentDate, currentDate);
+        // Assertions
+        expect(result).toEqual(mockProposals);
+        expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
+    });
+    test('should return an empty list', async () => {
+        const studentId = "1";
+        const mockedData = [];
+
+        db.prepare().all.mockReturnValue(mockedData);
+
+        const result = await thesis_proposal.listThesisProposalsFromStudent(studentId);
+
+        expect(result).toEqual(mockedData);
+        // expect(db.prepare().all).toHaveBeenCalledWith(studentId);
+
+        expect(db.prepare().all.mock.calls[0][0]).toBe(studentId);
+    });
+});
+
+describe('getThesisProposalCds', () => {
+
+    test('should return thesis proposal cds', async () => {
+        const proposalId = 1;
+        const expectedQuery = `SELECT d.cod_degree, d.title_degree FROM proposalCds p, degree d WHERE proposal_id = ? AND p.cod_degree = d.cod_degree`;
+        const expectedResult = [{cds: 'TestCds'}];
+
+        db.prepare().all.mockReturnValueOnce(expectedResult);
+
+        const result = await thesis_proposal.getThesisProposalCds(proposalId);
+
+        expect(result).toEqual(expectedResult);
+        expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
+    });
+
+    test('should handle an empty result set', async () => {
+        // Arrange
+        const proposalId = 2;
+
+        // Mock the all function to return an empty array
+        db.prepare().all.mockReturnValueOnce([]);
+
+        // Act
+        const result = await thesis_proposal.getThesisProposalCds(proposalId);
+
+        // Assert
+        expect(result).toEqual([]);
+    });
+
+});
+
+describe('getThesisProposalTeacher', () => {
+
+    test('should return teacher given thesisProposalId and teacherId', async () => {
+        const proposalId = 1;
+        const teacherId = "d1";
+        const expectedResult = {
+            id: "d1",
+            surname: "SurnameMock",
+            name: "NameMock",
+            email: "emailMock",
+            codGroup: "G1",
+            cod_department: "dep1"
+        };
+
+        db.prepare().get.mockReturnValueOnce(undefined).mockReturnValueOnce(expectedResult);
+
+        const result = await thesis_proposal.getThesisProposalTeacher(proposalId, teacherId);
+
+        expect(result).toEqual(expectedResult);
+    });
+
+    test('should return null when the proposal is already assigned', async () => {
+        const proposalId = 2;
+        const teacheId = "d2";
+
+        db.prepare().get.mockReturnValueOnce({
+            proposalId: 2,
+            teacheId: "d2",
+            status: 'accepted'
+        });
+
+        const result = await thesis_proposal.getThesisProposalTeacher(proposalId, teacheId);
+
+        expect(result).toEqual(null);
+    })
 });
