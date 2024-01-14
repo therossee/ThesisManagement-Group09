@@ -17,13 +17,13 @@ const APIThesisProposalSchema = z.object({
     expiration: z.string().transform( (expiration, ctx) => {
         const exp = new AdvancedDate(expiration);
         if (!exp.date.isValid()) {
-            ctx.addIssue({ code: z.ZodIssueCode.invalid_date, message: 'Invalid date format' });
+            ctx.addIssue({ code: z.ZodIssueCode.invalid_date, message: 'Invalid date format', fatal: true });
             return z.NEVER;
         }
 
         const currentDate = new AdvancedDate();
         if (exp.isBefore(currentDate)) {
-            ctx.addIssue({ code: z.ZodIssueCode.invalid_date, message: 'Expiration date must be in the future' });
+            ctx.addIssue({ code: z.ZodIssueCode.invalid_date, message: 'Expiration date must be in the future', fatal: true });
             return z.NEVER;
         }
 

@@ -11,6 +11,8 @@ const db = require('../../src/services/db');
 const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
+const CronTasksService = require("../../src/services/CronTasksService");
+const AdvancedDate = require('../../src/models/AdvancedDate');
 
 let marcoRossiAgent;
 beforeAll(async () => {
@@ -25,6 +27,7 @@ beforeEach(() => {
 
 afterAll(async () => {
     await closeImapClient();
+    CronTasksService.stop();
 });
 
 describe('GET /api/teachers', () => {
@@ -709,7 +712,7 @@ describe('GET /api/teacher/applications/:proposal_id', () => {
         // Assertions
         expect(response.status).toBe(200);
         expect(response.body).toEqual([
-            {application_id: 2, id: 's321529', name: 'Matteo', surname: 'Ladrat', status: 'waiting for approval'}
+            {application_id: 2, creation_date: expect.stringContaining(new AdvancedDate().toISOString().substring(0, 10)), id: 's321529', name: 'Matteo', surname: 'Ladrat', status: 'waiting for approval'}
         ]);
     });
 

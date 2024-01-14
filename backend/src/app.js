@@ -11,6 +11,10 @@ const session = require('express-session');
 const morgan = require('morgan');
 const cors = require('cors');
 
+/** Initialize all cron jobs **/
+const CronTasksService = require('./services/CronTasksService');
+CronTasksService.init();
+
 /** init express and set up the middlewares **/
 const app = express()
     .disable("x-powered-by")
@@ -90,6 +94,7 @@ app.use('/api', require('./routers/thesis-proposals') );
 app.use('/api', require('./routers/utils'));
 app.use('/api/student', require('./routers/student'));
 app.use('/api/teacher', require('./routers/teacher'));
+app.use('/api/secretary-clerk', require('./routers/secretary-clerk'));
 app.use('/api/system/virtual-clock', require('./routers/virtual-clock'));
 
 /** Error handling **/

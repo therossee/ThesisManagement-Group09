@@ -1,6 +1,10 @@
 const formidable = require("formidable");
 const thesisDao = require("../dao/thesis_dao");
 const usersDao = require("../dao/users_dao");
+const NotificationService = require("../services/NotificationService");
+const AdvancedDate = require("../models/AdvancedDate");
+const schemas = require("../schemas/thesis-start-request");
+const utils = require("./utils");
 
 /**
  * @param {PopulatedRequest} req
@@ -83,9 +87,55 @@ async function getStudentApplicationDecision(req, res, next) {
     }
 }
 
+/**
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+async function newThesisStartRequest(req, res, next) {
+    try {
+        const studentId = req.user.id;
+        
+        const thesisRequest = await schemas.APIThesisStartRequestSchema.parseAsync(req.body);
+
+        if(thesisRequest.internal_co_supervisors_ids.includes(thesisRequest.supervisor_id)) {
+            res.status(400).json({message: "Supervisor cannot be also co-supervisor"});
+        }
+
+        const thesis_start_request_id = await thesisDao.createThesisStartRequest(studentId, thesisRequest.title, thesisRequest.description, thesisRequest.supervisor_id, thesisRequest.internal_co_supervisors_ids, thesisRequest.application_id, thesisRequest.proposal_id )
+
+        const thesisStartRequest = await thesisDao.getThesisStartRequestById(thesis_start_request_id);
+        
+        res.status(201).send(await utils._populateThesisStartRequest(thesisStartRequest));
+        
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+async function getStudentActiveThesisStartRequests(req, res, next) {  
+    try {
+        const studentId = req.user.id;
+        const studentThesisStartRequest = await thesisDao.getStudentActiveThesisStartRequests(studentId);
+        if(!studentThesisStartRequest) {
+            res.status(200).json({});
+        }
+        res.status(200).send(await utils._populateThesisStartRequest(studentThesisStartRequest));
+    } catch (e) {
+        next(e);
+    }
+}
+
 module.exports = {
     getStudentCareer,
     getStudentActiveApplication,
     getStudentApplications,
     getStudentApplicationDecision,
+    newThesisStartRequest,
+    getStudentActiveThesisStartRequests
 };
