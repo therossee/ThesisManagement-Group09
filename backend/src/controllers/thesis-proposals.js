@@ -276,13 +276,39 @@ async function archiveThesisProposalById(req, res, next) {
     }
 }
 
+/**
+ *
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+async function unarchiveThesisProposalById(req, res, next) {
+    try {
+        const teacherId = req.user.id;
+        const proposalId = Number(req.params.id);
+        if (isNaN(proposalId)) {
+            throw new NoThesisProposalError(req.params.id);
+        }
+
+        const { expiration } = schemas.APIUnarchiveThesisProposalSchema.parse(req.query);
+
+        const proposal = await thesisProposalDao.unarchiveThesisProposalById(proposalId, teacherId, expiration);
+        const cds = await thesisProposalDao.getThesisProposalCds(proposalId);
+
+        res.status(200).json( await _populateProposal(proposal, cds) );
+    } catch (e) {
+        next(e);
+    }
+}
+
 module.exports = {
     listThesisProposals,
     createThesisProposal,
     getThesisProposalById,
     updateThesisProposalById,
     deleteThesisProposalById,
-    archiveThesisProposalById
+    archiveThesisProposalById,
+    unarchiveThesisProposalById
 };
 
 

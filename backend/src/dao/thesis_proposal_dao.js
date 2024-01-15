@@ -4,6 +4,7 @@
 
 const db = require('../services/db');
 const AdvancedDate = require('../models/AdvancedDate');
+const InvalidActionError = require("../errors/InvalidActionError");
 const NoThesisProposalError = require("../errors/NoThesisProposalError");
 const UnauthorizedActionError = require("../errors/UnauthorizedActionError");
 const {APPLICATION_STATUS} = require("../enums/application");
@@ -311,6 +312,61 @@ exports.archiveThesisProposalById = async (proposalId, supervisorId) => {
 };
 
 /**
+ * Un-archive a thesis proposal properly
+ *
+ * @param {number} proposalId
+ * @param {string} supervisorId
+ * @param {string} [expiration]
+ *
+ * @return {Promise<ThesisProposalRow>}
+ */
+exports.unarchiveThesisProposalById = async (proposalId, supervisorId, expiration) => {
+  /** @type {ThesisProposalRow | null} */
+  let proposal = null;
+  const transaction = db.transaction(() => {
+    const now = new AdvancedDate();
+
+    proposal = db.prepare('SELECT * FROM thesisProposal WHERE proposal_id = ? AND supervisor_id = ? AND is_deleted = 0;').get(proposalId, supervisorId);
+    if (!proposal) {
+      throw new NoThesisProposalError(proposalId);
+    }
+
+    const application = db.prepare('SELECT * FROM thesisApplication WHERE proposal_id = ? AND status = ?;').get(proposalId, APPLICATION_STATUS.ACCEPTED);
+    if (application) {
+      throw new InvalidActionError('You can\'t un-archive a thesis that has already been assigned');
+    }
+
+    const thesisExpiration = new AdvancedDate(proposal.expiration);
+    switch (true) {
+      case thesisExpiration.isBefore(now):
+        if (!expiration) {
+          throw new InvalidActionError('The thesis proposal is expired and you must specify a new expiration date');
+        }
+
+        db.prepare('UPDATE thesisProposal SET is_archived = 0, expiration = ? WHERE proposal_id = ?;')
+            .run(expiration, proposalId);
+
+        break;
+      case Boolean(proposal.is_archived):
+        if (expiration) {
+          db.prepare('UPDATE thesisProposal SET is_archived = 0, expiration = ? WHERE proposal_id = ?;')
+                .run(expiration, proposalId);
+        } else {
+          db.prepare('UPDATE thesisProposal SET is_archived = 0 WHERE proposal_id = ?;')
+                .run(proposalId);
+        }
+
+        break;
+      default:
+        throw new InvalidActionError('You can\'t un-archive a thesis that wasn\'t archived manually OR that is not expired');
+    }
+  });
+  transaction();
+
+  return exports.getThesisProposalTeacher(proposalId, supervisorId);
+};
+
+/**
  * Return the list of thesis proposals related to a student degree
  *
  * @param {string} studentId
@@ -424,7 +480,7 @@ exports.listThesisProposalsTeacher = async (teacherId) => {
 /**
  * Return the list of course of studies of a thesis proposal
  *
- * @param {string} proposalId
+ * @param {string | number} proposalId
  * @returns {Promise<DegreeRow[]>}
  */
 exports.getThesisProposalCds = async (proposalId) => {
@@ -435,7 +491,7 @@ exports.getThesisProposalCds = async (proposalId) => {
 /**
  * Return the thesis proposal with the given id and the given teacher as supervisor
  *
- * @param {string} proposalId
+ * @param {string | number} proposalId
  * @param {string} teacherId
  * @returns {Promise<ThesisProposalRow | null>}
  */
@@ -465,7 +521,6 @@ exports.getThesisProposalTeacher = (proposalId, teacherId) => {
  *
  * @return {Promise<void>}
  */
-
 function _handleFailure(proposalId, now, operation) {
     const thesis = this.getThesisProposalById(proposalId);
     if (thesis == null || thesis.creation_date > now) {
@@ -504,6 +559,7 @@ function _handleFailure(proposalId, now, operation) {
  * @property {string} level
  * @property {string} cds
  * @property {1 | 0} is_deleted
+ * @property {1 | 0} is_archived
  */
 
 /**
