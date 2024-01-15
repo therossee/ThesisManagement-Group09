@@ -2,11 +2,13 @@
 
 ## Database File
 
-The project includes a file named 'database.sqlite' located in the 'database' folder. This file contains the actual database used by the project.
+Within the project, you will find a file named 'database.sqlite' situated in the 'database' directory. This file serves as the primary database for the project. Additionally, there is another database, 'test_database.sqlite,' which is exclusively employed for testing purposes.
+The 'scripts' folder contains the two SQL files responsible for generating the respective databases.
 
 ## Table of Contents
 
-- [Features](#features)
+- [Introduction](#introduction)
+- [Key Features](#features)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
@@ -14,13 +16,13 @@ The project includes a file named 'database.sqlite' located in the 'database' fo
   - [Tables](#tables)
   - [Relationships](#relationships)
 
-## Features
+## Introduction
 
 The database is a **relational database**, which means that it stores data in tables with defined relationships between them. This structure makes it easy to query and manage data, and it is also well-suited for storing complex relationships between entities like students, thesis proposals, supervisors, and co-supervisors.
   
 It is **implemented using SQLite**, which is a lightweight, embedded SQL database engine that is often used for personal applications or for storing data within applications. It is a good choice for this project because it is easy to use and deploy, and it is also relatively efficient for the size of data that will be stored.
-  
-Key Features:
+
+## Key Features
 - _Data integrity_: Foreign key constraints are used to ensure referential integrity between tables, maintaining consistency and preventing orphaned records. This means that for example when a student is deleted, their thesis proposals are also deleted, and when a thesis proposal is deleted, the associated applications and start requests are also deleted. This helps to maintain data consistency.
 - _Normalization_: The database is normalized to the third normal form, which means that it is well-organized and less likely to contain data anomalies. Redundancy and dependency issues in the data are minimized.
 - _Auto-incrementing IDs_: Certain tables use auto-incrementing primary key IDs, ensuring the automatic generation of unique identifiers for each record.
