@@ -2,6 +2,8 @@ require('jest');
 
 const db = require('../../src/services/db');
 const users = require('../../src/dao/users_dao');
+const { USER_ROLES } = require('../../src/enums/user');
+
 
 // Mocking the database
 jest.mock('../../src/services/db', () => ({
@@ -117,4 +119,75 @@ describe('getStudentCareer', () => {
         expect(result).toBeUndefined();
     });
 
+});
+
+describe('getTeacherById', () => {
+    test('returns teacher info for a valid teacher ID', async () => {
+        const validTeacherId = 't1';
+        const teacherData = {
+            id: 't1',
+            surname: 'TeacherSurname',
+            name: 'TeacherName',
+            email: 't1@polito.it',
+            cod_group: 'Group1',
+            cod_department: 'Department1',
+        };
+
+        // Mock the db.prepare.get function to return teacher info
+        db.prepare().get.mockReturnValueOnce(teacherData);
+
+        // Call the function and assert the result
+        const result = await users.getTeacherById(validTeacherId);
+
+        // Check if the db.prepare.get function was called with the correct arguments
+        expect(db.prepare().get).toHaveBeenCalledWith(validTeacherId);
+
+        // Check if the function resolves with the expected student info
+        expect(result).toEqual(teacherData);
+      
+    });
+
+    test('returns null for an invalid teacher ID', async () => {
+
+        const invalidTeacherId = '1'/* invalid teacher ID */;
+
+        // Mock the db.prepare.get function to return null
+        db.prepare().get.mockReturnValueOnce(null);
+
+        // Call the function and assert the result
+        const result = await users.getTeacherById(invalidTeacherId);
+
+        // Check if the db.prepare.get function was called with the correct arguments
+        expect(db.prepare().get).toHaveBeenCalledWith(invalidTeacherId);
+
+        // Check if the function resolves with null
+        expect(result).toBeNull();
+    });
+});
+
+describe('getGroup', () => {
+
+    test('returns the cod_group for a given teacher ID', async () => {
+        const teacherId = 1;
+        const expectedCodGroup = 'Group1';
+
+        // Mock the database query result
+        db.prepare().get.mockReturnValue({cod_group: expectedCodGroup});
+
+        const result = await users.getGroup(teacherId);
+
+        expect(result).toBe(expectedCodGroup);
+        expect(db.prepare().get).toHaveBeenCalledWith(teacherId);
+    });
+    test('handles errors and rejects the promise if the database query fails', async () => {
+        const teacherId = 1;
+
+        // Mock the database query to throw an error
+        db.prepare().get.mockImplementation(() => {
+            throw new Error('Database query failed');
+        });
+
+        await expect(users.getGroup(teacherId)).rejects.toThrow('Database query failed');
+        expect(db.prepare().get).toHaveBeenCalledWith(teacherId);
+    });
 });

@@ -71,6 +71,20 @@ exports.getTeacherById = (id) => {
     })
 };
 
+/**
+ * Return the group of the teacher with the given id
+ * 
+ * @param {string} teacherId 
+ * @returns {Promise<string>}
+ */
+exports.getGroup = (teacherId) => {
+    return new Promise((resolve) => {
+      const getGroupQuery = `SELECT cod_group FROM teacher WHERE id=? `;
+      const res = db.prepare(getGroupQuery).get(teacherId);
+      resolve(res.cod_group)
+    })
+};
+
 
 /**
  * @typedef {Object} DegreePartialRow

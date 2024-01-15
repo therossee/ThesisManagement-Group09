@@ -33,6 +33,11 @@ router.put('/thesis-proposals/:id', authorization.isLoggedIn, authorization.isTe
 router.delete('/thesis-proposals/:id', authorization.isLoggedIn, authorization.isTeacher, controller.deleteThesisProposalById);
 
 /**
+ * Give the possibility to manually un-archive a thesis proposal by its ID.
+ */
+router.delete('/thesis-proposals/:id/archive', authorization.isLoggedIn, authorization.isTeacher, controller.unarchiveThesisProposalById);
+
+/**
  * Give the possibility to manually archive a thesis proposal by its ID.
  * Only the teacher can archive his own thesis proposal.
  */
