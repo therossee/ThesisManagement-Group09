@@ -116,9 +116,9 @@ describe('createThesisStartRequest', () => {
     });
 });
 
-describe('getStudentActiveThesisStartRequests', () => {
+describe('getStudentLastThesisStartRequest', () => {
 
-  test('returns active thesis start requests for the student', async () => {
+  test('returns the last thesis start request for the student', async () => {
 
     db.prepare().get.mockReturnValueOnce(
       {
@@ -136,9 +136,9 @@ describe('getStudentActiveThesisStartRequests', () => {
     db.prepare().all.mockReturnValueOnce([{ cosupervisor_id: 'd370335' }]);
 
     const studentId = 's318952';
-    const result = await thesis_start_request.getStudentActiveThesisStartRequests(studentId);
+    const result = await thesis_start_request.getStudentLastThesisStartRequest(studentId);
 
-    const expectedQuery = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? AND ( status=? OR status=? OR status=? OR status=? )`;
+    const expectedQuery = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? ORDER BY creation_date DESC LIMIT 1;`;
     expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
 
     expect(result).toEqual(
@@ -161,9 +161,9 @@ describe('getStudentActiveThesisStartRequests', () => {
     db.prepare().get.mockReturnValueOnce(undefined);
 
     const studentId = 's318952';
-    const result = await thesis_start_request.getStudentActiveThesisStartRequests(studentId);
+    const result = await thesis_start_request.getStudentLastThesisStartRequest(studentId);
 
-    const expectedQuery = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? AND ( status=? OR status=? OR status=? OR status=? )`;
+    const expectedQuery = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? ORDER BY creation_date DESC LIMIT 1;`;
     expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
 
     expect(result).toEqual(null);
