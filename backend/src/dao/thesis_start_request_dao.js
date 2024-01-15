@@ -78,16 +78,16 @@ exports.createThesisStartRequest = (student_id, title, description, supervisor_i
 };
   
 /**
- * Return the active (not rejected) thesis start requests of the student with the given id
+ * Return the last thesis start request of the student with the given id
  *
  * @param {string} student_id
  * @return {Promise<ThesisStartRequestRow>}
  */
-exports.getStudentActiveThesisStartRequests = (student_id) => {
+exports.getStudentLastThesisStartRequest = (student_id) => {
   return new Promise((resolve) => {
     const currentDate = new AdvancedDate().toISOString();
-    const query = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? AND ( status=? OR status=? OR status=? OR status=? )`;
-    const tsr = db.prepare(query).get(student_id, currentDate, THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL, THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY, THESIS_START_REQUEST_STATUS.ACCEPTED_BY_TEACHER, THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED);
+    const query = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? ORDER BY creation_date DESC LIMIT 1;`;
+    const tsr = db.prepare(query).get(student_id, currentDate);
     
     if(tsr){
       const co_supervisors_query = 'SELECT cosupervisor_id FROM thesisStartCosupervisor WHERE start_request_id=?';
