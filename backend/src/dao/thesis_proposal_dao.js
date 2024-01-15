@@ -1,15 +1,21 @@
 'use strict';
 
-/* Data Access Object (DAO) module for accessing thesis data */
+/* Data Access Object (DAO) module for accessing thesis proposals data */
 
-const fs = require('fs');
-const path = require('path');
 const db = require('../services/db');
 const AdvancedDate = require('../models/AdvancedDate');
+const InvalidActionError = require("../errors/InvalidActionError");
 const NoThesisProposalError = require("../errors/NoThesisProposalError");
 const UnauthorizedActionError = require("../errors/UnauthorizedActionError");
-const { APPLICATION_STATUS } = require("../enums/application");
+const {APPLICATION_STATUS} = require("../enums/application");
 
+/**
+ * Create a new thesis proposal
+ *
+ * @param {object} proposal_details -> title, supervisor_id, type, description, required_knowledge, notes, expiration, level
+ * @param {object} additional_details -> keywords, internal_co_supervisors_id, external_co_supervisors_id, unique_groups, cds
+ * @return {Promise<string>}
+ */
 exports.createThesisProposal = (proposal_details, additional_details) => {
   return new Promise((resolve, reject) => {
 
@@ -78,9 +84,6 @@ exports.createThesisProposal = (proposal_details, additional_details) => {
 
       resolve(proposalId)
     })()
-      .catch((err) => {
-        reject(err);
-      });
   });
 };
 
@@ -175,48 +178,6 @@ exports.updateThesisProposal = (proposal_id, supervisor_id, thesis) => {
   })
 };
 
-exports.getTeacherListExcept = (id) => {
-  return new Promise((resolve) => {
-    const query = `SELECT * FROM teacher WHERE id <> ?; `;
-    const teachers = db.prepare(query).all(id);
-    resolve(teachers);
-  })
-};
-
-exports.getExternalCoSupervisorList = () => {
-  return new Promise((resolve) => {
-    const query = `SELECT * FROM externalCoSupervisor;`;
-    const externalCoSupervisors = db.prepare(query).all();
-    resolve(externalCoSupervisors);
-  })
-};
-
-exports.getGroup = (teacherId) => {
-  return new Promise((resolve) => {
-    const getGroupQuery = `SELECT cod_group FROM teacher WHERE id=? `;
-    const res = db.prepare(getGroupQuery).get(teacherId);
-    resolve(res.cod_group)
-  })
-};
-
-exports.getAllKeywords = () => {
-  return new Promise((resolve) => {
-    const getKeywords = `SELECT DISTINCT(keyword) FROM proposalKeyword`;
-    const res = db.prepare(getKeywords).all();
-    // Extracting the keyword property from each row
-    const keywords = res.map(row => row.keyword);
-    resolve(keywords)
-  })
-};
-
-exports.getDegrees = () => {
-  return new Promise((resolve) => {
-    const getDegrees = `SELECT * FROM degree`;
-    const res = db.prepare(getDegrees).all();
-    resolve(res)
-  })
-};
-
 /**
  * Return the proposal with the given id related to a student degree (if exists)
  *
@@ -298,19 +259,8 @@ exports.deleteThesisProposalById = (proposalId, supervisorId) => {
       `;
       const res = db.prepare(deleteThesisProposalQuery).run(proposalId, supervisorId, now, now);
       if (res.changes === 0) {
-        // We try to understand the reason of the failure
-        const thesis = await this.getThesisProposalById(proposalId);
-        if (thesis == null || thesis.creation_date > now) {
-          // No thesis proposal with the given id
-          reject( new NoThesisProposalError(proposalId) );
-        } else if (thesis.expiration <= now) {
-          // Thesis proposal expired
-          reject( new UnauthorizedActionError('You can\'t delete a thesis already expired') );
-        } else {
-          // The supervisor is not the owner of the thesis proposal
-          reject( new UnauthorizedActionError('You are not the supervisor of this thesis') );
-        }
-
+        // Handle failure scenarios
+        await _handleFailure.call(this, proposalId, now, reject,"delete");
         return;
       }
 
@@ -355,19 +305,8 @@ exports.archiveThesisProposalById = (proposalId, supervisorId) => {
       `;
       const res = db.prepare(archiveThesisProposalQuery).run(proposalId, supervisorId, now, now);
       if (res.changes === 0) {
-        // We try to understand the reason of the failure
-        const thesis = await this.getThesisProposalById(proposalId);
-        if (thesis == null || thesis.creation_date > now) {
-          // No thesis proposal with the given id
-          reject( new NoThesisProposalError(proposalId) );
-        } else if (thesis.expiration <= now) {
-          // Thesis proposal expired
-          reject( new UnauthorizedActionError('You can\'t archive a thesis already expired') );
-        } else {
-          // The supervisor is not the owner of the thesis proposal
-          reject( new UnauthorizedActionError('You are not the supervisor of this thesis') );
-        }
-
+        // Handle failure scenarios
+        await _handleFailure.call(this, proposalId, now, reject, "archive");
         return;
       }
 
@@ -381,6 +320,62 @@ exports.archiveThesisProposalById = (proposalId, supervisorId) => {
     })();
   })
 };
+
+/**
+ * Un-archive a thesis proposal properly
+ *
+ * @param {number} proposalId
+ * @param {string} supervisorId
+ * @param {string} [expiration]
+ *
+ * @return {Promise<ThesisProposalRow>}
+ */
+exports.unarchiveThesisProposalById = async (proposalId, supervisorId, expiration) => {
+  /** @type {ThesisProposalRow | null} */
+  let proposal = null;
+  const transaction = db.transaction(() => {
+    const now = new AdvancedDate();
+
+    proposal = db.prepare('SELECT * FROM thesisProposal WHERE proposal_id = ? AND supervisor_id = ? AND is_deleted = 0;').get(proposalId, supervisorId);
+    if (!proposal) {
+      throw new NoThesisProposalError(proposalId);
+    }
+
+    const application = db.prepare('SELECT * FROM thesisApplication WHERE proposal_id = ? AND status = ?;').get(proposalId, APPLICATION_STATUS.ACCEPTED);
+    if (application) {
+      throw new InvalidActionError('You can\'t un-archive a thesis that has already been assigned');
+    }
+
+    const thesisExpiration = new AdvancedDate(proposal.expiration);
+    switch (true) {
+      case thesisExpiration.isBefore(now):
+        if (!expiration) {
+          throw new InvalidActionError('The thesis proposal is expired and you must specify a new expiration date');
+        }
+
+        db.prepare('UPDATE thesisProposal SET is_archived = 0, expiration = ? WHERE proposal_id = ?;')
+            .run(expiration, proposalId);
+
+        break;
+      case Boolean(proposal.is_archived):
+        if (expiration) {
+          db.prepare('UPDATE thesisProposal SET is_archived = 0, expiration = ? WHERE proposal_id = ?;')
+                .run(expiration, proposalId);
+        } else {
+          db.prepare('UPDATE thesisProposal SET is_archived = 0 WHERE proposal_id = ?;')
+                .run(proposalId);
+        }
+
+        break;
+      default:
+        throw new InvalidActionError('You can\'t un-archive a thesis that wasn\'t archived manually OR that is not expired');
+    }
+  });
+  transaction();
+
+  return exports.getThesisProposalTeacher(proposalId, supervisorId);
+};
+
 /**
  * Return the list of thesis proposals related to a student degree
  *
@@ -484,123 +479,12 @@ exports.getSupervisorOfProposal = (proposalId) => {
   })
 };
 
-
 /**
- * @typedef {Object} ThesisProposalRow
+ * Return the list of thesis proposals of a teacher
  *
- * @property {string} proposal_id
- * @property {string} title
- * @property {string} supervisor_id
- * @property {string} type
- * @property {string} description
- * @property {string} [required_knowledge]
- * @property {string} [notes]
- * @property {string} expiration
- * @property {string} level
- * @property {string} cds
- * @property {1 | 0} is_deleted
+ * @param {string} teacherId
+ * @returns {Promise<ThesisProposalRow[]>}
  */
-
-/**
- * @typedef {Object} TeacherRow
- *
- * @property {string} id
- * @property {string} surname
- * @property {string} name
- * @property {string} email
- * @property {string} cod_group
- * @property {string} cod_department
- */
-
-/**
- * @typedef {Object} ExternalCoSupervisorRow
- *
- * @property {string} id
- * @property {string} surname
- * @property {string} name
- * @property {string} email
- */
-
-exports.applyForProposal = (proposal_id, student_id, file) => {
-  return new Promise((resolve, reject) => {
-    const currentDate = new AdvancedDate().toISOString();
-
-    //  Check if the proposal belong to the degree of the student
-    const checkProposalDegree = `SELECT * FROM proposalCds WHERE proposal_id=? AND cod_degree=(SELECT cod_degree FROM student WHERE id=?)`;
-    const proposal_correct = db.prepare(checkProposalDegree).get(proposal_id, student_id);
-    if (!proposal_correct) {
-      reject(new UnauthorizedActionError("The proposal doesn't belong to the student degree"));
-      return;
-    }
-
-    // Check if the proposal is active
-    const checkProposalActive = `SELECT * FROM thesisProposal P WHERE P.proposal_id=?
-                                 AND P.expiration > ? AND P.creation_date < ? AND P.is_deleted = 0 AND is_archived = 0
-                                 AND NOT EXISTS (
-                                    SELECT 1
-                                    FROM thesisApplication A
-                                    WHERE A.proposal_id = P.proposal_id
-                                    AND A.status = ?
-                                )`;
-
-    const proposal_active = db.prepare(checkProposalActive).get(proposal_id, currentDate, currentDate, APPLICATION_STATUS.ACCEPTED);
-    if (!proposal_active) {
-      reject(new UnauthorizedActionError("The proposal is not active"));
-      return;
-    }
-
-    // Check if the user has already applied for other proposals
-    const checkAlreadyApplied = `SELECT * FROM thesisApplication WHERE student_id=? AND (status=? OR status=?)`;
-    const already_applied = db.prepare(checkAlreadyApplied).get(student_id, APPLICATION_STATUS.WAITING_FOR_APPROVAL, APPLICATION_STATUS.ACCEPTED);
-    if (already_applied) {
-      reject(new UnauthorizedActionError("The user has already applied for other proposals"));
-      return;
-    }
-
-    const insertApplicationQuery = `
-    INSERT INTO thesisApplication (proposal_id, student_id, creation_date)
-    VALUES (?, ?, ?); `; // at first, the application has the default status 'waiting for approval'
-
-    // Start a transaction
-    db.prepare('BEGIN TRANSACTION;').run();
-
-    try {
-      const res = db.prepare(insertApplicationQuery).run(proposal_id, student_id, currentDate);
-
-      if (file) {
-        if(file.mimetype !== 'application/pdf'){
-          reject(new Error("The file must be a PDF"));
-          return;
-        }
-        const dir = path.join(__dirname, '..', '..', 'uploads', student_id.toString(), res.lastInsertRowid.toString());
-        // Use try-catch to handle any errors during file writing
-        try {
-          const writePath = path.join(dir, file.originalFilename);
-          fs.mkdirSync(dir, { recursive: true });
-          fs.writeFileSync(writePath, fs.readFileSync(file.filepath));
-        } catch (fileError) {
-          console.error('Error writing file:', fileError);
-
-          // Rollback the SQLite transaction if there's an error
-          db.prepare('ROLLBACK;').run();
-          reject(new Error(fileError)); // Reject the promise with the file error
-          return;
-        }
-      }
-
-      // Commit the transaction if everything is successful
-      db.prepare('COMMIT;').run();
-      resolve(res.lastInsertRowid);
-    } catch (error) {
-      console.error('Error inserting application:', error);
-
-      // Rollback the SQLite transaction if there's an error
-      db.prepare('ROLLBACK;').run();
-      reject(new Error(error)); // Reject the promise with the main error
-    }
-  })
-};
-
 exports.listThesisProposalsTeacher = (teacherId) => {
   return new Promise((resolve) => {
     const currentDate = new AdvancedDate().toISOString();
@@ -623,119 +507,12 @@ exports.listThesisProposalsTeacher = (teacherId) => {
   })
 };
 
-exports.listApplicationsForTeacherThesisProposal = (proposal_id, teacherId) => {
-  return new Promise((resolve) => {
-    const currentDate = new AdvancedDate().toISOString();
-    const getApplications = `SELECT s.name, s.surname, ta.status, s.id, ta.id AS application_id
-    FROM thesisApplication ta, thesisProposal tp, student s
-    WHERE ta.proposal_id = tp.proposal_id 
-      AND s.id = ta.student_id
-      AND ta.proposal_id=?
-      AND tp.supervisor_id= ? 
-      AND ta.creation_date < ?
-      AND tp.expiration > ?
-      AND tp.creation_date < ?
-      AND tp.is_archived = 0
-      AND tp.is_deleted = 0;`;
-
-    const applications = db.prepare(getApplications).all(proposal_id, teacherId, currentDate, currentDate, currentDate);
-    resolve(applications)
-
-  })
-};
-
 /**
- * Return the application with the given id
+ * Return the list of course of studies of a thesis proposal
  *
- * @param {number} applicationId
- * @return {Promise<ThesisApplicationRow | null>}
+ * @param {string | number} proposalId
+ * @returns {Promise<DegreeRow[]>}
  */
-exports.getThesisApplicationById = (applicationId) => {
-    return new Promise((resolve) => {
-        const query = `SELECT * FROM thesisApplication WHERE id = ?`;
-        const res = db.prepare(query).get(applicationId);
-        if (!res) {
-            resolve(null);
-        }
-
-        resolve(res);
-    })
-};
-
-exports.getStudentActiveApplication = (student_id) => {
-  return new Promise((resolve) => {
-    const currentDate = new AdvancedDate().toISOString();
-    const query = `SELECT proposal_id FROM thesisApplication WHERE student_id=? AND creation_date < ? AND ( status=? OR status=?)`;
-    const res = db.prepare(query).all(student_id, currentDate, APPLICATION_STATUS.WAITING_FOR_APPROVAL, APPLICATION_STATUS.ACCEPTED);
-    resolve(res)
-  })
-};
-
-exports.updateApplicationStatus = (studentId, proposalId, status) => {
-  return new Promise((resolve) => {
-    const query = `
-      UPDATE thesisApplication
-      SET status = ?
-      WHERE student_id = ? AND proposal_id = ? AND status = ? AND creation_date < ?
-    `;
-    const res = db.prepare(query).run(status, studentId, proposalId, APPLICATION_STATUS.WAITING_FOR_APPROVAL, new AdvancedDate().toISOString());
-
-    resolve(res.changes !== 0);
-  })
-};
-
-/**
- * Cancel all applications waiting for approval for a given proposal except the one of the student
- *
- * @param {string} studentId
- * @param {string} proposalId
- * @return {Promise<ThesisApplicationRow[]>}
- */
-exports.cancelOtherApplications = (studentId, proposalId) => {
-  return new Promise((resolve) => {
-    const updateQuery = `
-        UPDATE thesisApplication
-        SET status = ?
-        WHERE student_id <> ? AND proposal_id = ? AND status = ?
-        RETURNING *;
-      `;
-
-    resolve(db.prepare(updateQuery).all(APPLICATION_STATUS.CANCELLED, studentId, proposalId, APPLICATION_STATUS.WAITING_FOR_APPROVAL));
-  })
-};
-
-/**
- * Cancel all applications waiting for approval on expired thesis proposals
- *
- * @return {Promise<ThesisApplicationRow[]>}
- */
-exports.cancelWaitingApplicationsOnExpiredThesis = () => {
-  return new Promise( resolve => {
-    const date = new AdvancedDate();
-
-    const query = `UPDATE thesisApplication
-      SET status=?
-      WHERE status=? AND proposal_id IN (SELECT proposal_id FROM thesisProposal WHERE expiration < ?)
-      RETURNING *;`;
-
-    const result = db.prepare(query).all(APPLICATION_STATUS.CANCELLED, APPLICATION_STATUS.WAITING_FOR_APPROVAL, date.toISOString());
-
-    resolve(result);
-  });
-};
-
-exports.listApplicationsDecisionsFromStudent = (studentId) => {
-  return new Promise((resolve) => {
-
-    const getApplications = `SELECT ta.id AS "application_id", ta.proposal_id, tp.title,  tp.level, t.name AS "teacher_name" , t.surname AS "teacher_surname" ,ta.status, tp.expiration
-    FROM thesisApplication ta, thesisProposal tp, teacher t
-    WHERE ta.proposal_id = tp.proposal_id AND ta.student_id = ? AND t.id = tp.supervisor_id AND ta.creation_date < ?`;
-
-    const applications = db.prepare(getApplications).all(studentId, new AdvancedDate().toISOString());
-    resolve(applications)
-
-  })
-};
 exports.getThesisProposalCds = (proposalId) => {
   return new Promise((resolve) => {
     const query = `SELECT d.cod_degree, d.title_degree FROM proposalCds p, degree d WHERE proposal_id = ? AND p.cod_degree = d.cod_degree`;
@@ -744,6 +521,13 @@ exports.getThesisProposalCds = (proposalId) => {
   })
 };
 
+/**
+ * Return the thesis proposal with the given id and the given teacher as supervisor
+ *
+ * @param {string | number} proposalId
+ * @param {string} teacherId
+ * @returns {Promise<ThesisProposalRow | null>}
+ */
 exports.getThesisProposalTeacher = (proposalId, teacherId) => {
   return new Promise((resolve) => {
     const currentDate = new AdvancedDate().toISOString();
@@ -764,13 +548,30 @@ exports.getThesisProposalTeacher = (proposalId, teacherId) => {
   })
 };
 
-exports.getApplicationById = (applicationId) => {
-  return new Promise((resolve) => {
-    const query = `SELECT * FROM thesisApplication WHERE id = ?`;
-    const res = db.prepare(query).get(applicationId);
-    resolve(res);
-  })
-};
+
+/**
+ * Handle failure scenarios when deleting or archiving a thesis proposal
+ *
+ * @param {string} proposalId
+ * @param {string} now
+ * @param {Function} reject
+ * @param {string} operation
+ *
+ * @return {Promise<void>}
+ */
+async function _handleFailure(proposalId, now, reject, operation) {
+    const thesis = await this.getThesisProposalById(proposalId);
+    if (thesis == null || thesis.creation_date > now) {
+      // No thesis proposal with the given id
+      reject(new NoThesisProposalError(proposalId));
+    } else if (thesis.expiration <= now) {
+      // Thesis proposal expired
+      reject(new UnauthorizedActionError(`You can't ${operation} a thesis already expired`));
+    } else {
+      // The supervisor is not the owner of the thesis proposal
+      reject(new UnauthorizedActionError('You are not the supervisor of this thesis'));
+    }
+}
 
 
 /**
@@ -780,4 +581,48 @@ exports.getApplicationById = (applicationId) => {
  * @property {string} student_id
  * @property {string} status
  * @property {string} creation_date
+ */
+
+/**
+ * @typedef {Object} ThesisProposalRow
+ *
+ * @property {string} proposal_id
+ * @property {string} title
+ * @property {string} supervisor_id
+ * @property {string} type
+ * @property {string} description
+ * @property {string} [required_knowledge]
+ * @property {string} [notes]
+ * @property {string} expiration
+ * @property {string} level
+ * @property {string} cds
+ * @property {1 | 0} is_deleted
+ * @property {1 | 0} is_archived
+ */
+
+/**
+ * @typedef {Object} TeacherRow
+ *
+ * @property {string} id
+ * @property {string} surname
+ * @property {string} name
+ * @property {string} email
+ * @property {string} cod_group
+ * @property {string} cod_department
+ */
+
+/**
+ * @typedef {Object} ExternalCoSupervisorRow
+ *
+ * @property {string} id
+ * @property {string} surname
+ * @property {string} name
+ * @property {string} email
+ */
+
+/**
+ * @typedef {Object} DegreeRow
+ *
+ * @property {string} cod_degree
+ * @property {string} title_degree
  */

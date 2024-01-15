@@ -1,7 +1,10 @@
 const formidable = require("formidable");
-const thesisDao = require("../dao/thesis_dao");
+const thesisStartRequestDao = require("../dao/thesis_start_request_dao");
+const thesisApplicationDao = require("../dao/thesis_application_dao");
 const usersDao = require("../dao/users_dao");
 const NotificationService = require("../services/NotificationService");
+const schemas = require("../schemas/thesis-start-request");
+const utils = require("./utils");
 
 /**
  * @param {PopulatedRequest} req
@@ -30,7 +33,7 @@ async function getStudentCareer(req, res, next) {
 async function getStudentActiveApplication(req, res, next) {
     try {
         const studentId = req.user.id;
-        const studentApplications = await thesisDao.getStudentActiveApplication(studentId);
+        const studentApplications = await thesisApplicationDao.getStudentActiveApplication(studentId);
         res.json(studentApplications);
     } catch (e) {
         next(e);
@@ -55,7 +58,7 @@ async function applyForProposal(req, res, next) {
         const upload = (files.file) ? files.file[0] : undefined;
 
         try {
-            const applicationId = await thesisDao.applyForProposal(thesis_proposal_id, student_id, upload);
+            const applicationId = await thesisApplicationDao.applyForProposal(thesis_proposal_id, student_id, upload);
 
             await NotificationService.emitNewApplicationCreated(applicationId, student_id, thesis_proposal_id);
 
@@ -79,8 +82,52 @@ async function applyForProposal(req, res, next) {
 async function getStudentApplicationDecision(req, res, next) {
     try {
         const studentId = req.user.id;
-        const applications = await thesisDao.listApplicationsDecisionsFromStudent(studentId);
+        const applications = await thesisApplicationDao.listApplicationsDecisionsFromStudent(studentId);
         res.json(applications);
+    } catch (e) {
+        next(e);
+    }
+}
+
+/**
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+async function newThesisStartRequest(req, res, next) {
+    try {
+        const studentId = req.user.id;
+        
+        const thesisRequest = await schemas.APIThesisStartRequestSchema.parseAsync(req.body);
+
+        if(thesisRequest.internal_co_supervisors_ids.includes(thesisRequest.supervisor_id)) {
+            res.status(400).json({message: "Supervisor cannot be also co-supervisor"});
+        }
+
+        const thesis_start_request_id = await thesisStartRequestDao.createThesisStartRequest(studentId, thesisRequest.title, thesisRequest.description, thesisRequest.supervisor_id, thesisRequest.internal_co_supervisors_ids, thesisRequest.application_id, thesisRequest.proposal_id )
+
+        const thesisStartRequest = await thesisStartRequestDao.getThesisStartRequestById(thesis_start_request_id);
+        
+        res.status(201).send(await utils._populateThesisStartRequest(thesisStartRequest));
+        
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+async function getStudentActiveThesisStartRequests(req, res, next) {  
+    try {
+        const studentId = req.user.id;
+        const studentThesisStartRequest = await thesisStartRequestDao.getStudentActiveThesisStartRequests(studentId);
+        if(!studentThesisStartRequest) {
+            res.status(200).json({});
+        }
+        res.status(200).send(await utils._populateThesisStartRequest(studentThesisStartRequest));
     } catch (e) {
         next(e);
     }
@@ -91,4 +138,6 @@ module.exports = {
     getStudentActiveApplication,
     applyForProposal,
     getStudentApplicationDecision,
+    newThesisStartRequest,
+    getStudentActiveThesisStartRequests
 };

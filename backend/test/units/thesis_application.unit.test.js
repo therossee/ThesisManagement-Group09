@@ -5,9 +5,10 @@ require('jest');
  */
 
 const db = require('../../src/services/db');
-const thesis = require('../../src/dao/thesis_dao');
+const thesisApplication = require('../../src/dao/thesis_application_dao');
 const fs = require('fs');
 const {APPLICATION_STATUS} = require("../../src/enums/application");
+const AdvancedDate = require('../../src/models/AdvancedDate');
 
 // Mocking the database
 jest.mock('../../src/services/db', () => ({
@@ -57,7 +58,7 @@ describe('applyForProposal', () => {
         db.prepare().get.mockReturnValueOnce();
         db.prepare().run.mockReturnValue({lastInsertRowid: 1});
 
-        const applicationId = await thesis.applyForProposal(proposal_id, student_id);
+        const applicationId = await thesisApplication.applyForProposal(proposal_id, student_id);
 
         expect(applicationId).toBe(1);
     });
@@ -95,7 +96,7 @@ describe('applyForProposal', () => {
         });
 
         // Call the function
-        const result = await thesis.applyForProposal(proposal_id, student_id, file);
+        const result = await thesisApplication.applyForProposal(proposal_id, student_id, file);
 
         // Assertions
         expect(result).toBe(1);
@@ -141,7 +142,7 @@ describe('applyForProposal', () => {
         });
 
         // Call the function
-        await expect(thesis.applyForProposal(proposal_id, student_id, file)).rejects.toEqual(new Error('The file must be a PDF'));
+        await expect(thesisApplication.applyForProposal(proposal_id, student_id, file)).rejects.toEqual(new Error('The file must be a PDF'));
 
     });
     test('handle properly file errors', async () => {
@@ -179,7 +180,7 @@ describe('applyForProposal', () => {
         });
 
         // Call the function
-        await expect(thesis.applyForProposal(proposal_id, student_id, file)).rejects.toEqual(new Error('Error'));
+        await expect(thesisApplication.applyForProposal(proposal_id, student_id, file)).rejects.toEqual(new Error('Error'));
 
     });
     test('handle properly db errors', async () => {
@@ -203,9 +204,10 @@ describe('applyForProposal', () => {
         });
         db.prepare().get.mockReturnValueOnce();
         db.prepare().run.mockReturnValueOnce();
-        db.prepare().run.mockImplementation(() => {
+        db.prepare().run.mockImplementationOnce(() => {
             throw new Error();
         });
+        
 
         // Mock the file-related functions
         const file = {
@@ -219,7 +221,7 @@ describe('applyForProposal', () => {
         });
 
         // Call the function
-        await expect(thesis.applyForProposal(proposal_id, student_id, file)).rejects.toEqual(new Error());
+        await expect(thesisApplication.applyForProposal(proposal_id, student_id, file)).rejects.toEqual(new Error('Error'));
 
     });
     test('applies for a proposal not belonging to his cds', async () => {
@@ -229,7 +231,7 @@ describe('applyForProposal', () => {
 
         db.prepare().get.mockReturnValueOnce();
 
-        await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual(new Error("The proposal doesn't belong to the student degree"));
+        await expect(thesisApplication.applyForProposal(proposal_id, student_id)).rejects.toEqual(new Error("The proposal doesn't belong to the student degree"));
     });
     test('applies for a proposal not active', async () => {
         // Mock data
@@ -239,7 +241,7 @@ describe('applyForProposal', () => {
         db.prepare().get.mockReturnValueOnce({proposal_id: 1, cod_degree: 'L-01'});
         db.prepare().get.mockReturnValueOnce();
 
-        await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual(new Error("The proposal is not active"));
+        await expect(thesisApplication.applyForProposal(proposal_id, student_id)).rejects.toEqual(new Error("The proposal is not active"));
 
     });
     test('applies for a proposal while he has already applied for another', async () => {
@@ -262,7 +264,7 @@ describe('applyForProposal', () => {
         });
         db.prepare().get.mockReturnValueOnce({proposal_id: 1, cod_degree: 'L-01', status: 'waiting for approval'});
 
-        await expect(thesis.applyForProposal(proposal_id, student_id)).rejects.toEqual(new Error("The user has already applied for other proposals"));
+        await expect(thesisApplication.applyForProposal(proposal_id, student_id)).rejects.toEqual(new Error("The user has already applied for other proposals"));
     });
 });
 
@@ -279,18 +281,19 @@ describe('listApplicationsForTeacherThesisProposal', () => {
         db.prepare.mockClear().mockReturnValueOnce({all: jest.fn(() => mockApplications)});
 
         // Call the function
-        const result = await thesis.listApplicationsForTeacherThesisProposal(1, 'd1');
-        const expectedQuery = `SELECT s.name, s.surname, ta.status, s.id, ta.id AS application_id
-    FROM thesisApplication ta, thesisProposal tp, student s
-    WHERE ta.proposal_id = tp.proposal_id 
-      AND s.id = ta.student_id
-      AND ta.proposal_id=?
-      AND tp.supervisor_id= ? 
-      AND ta.creation_date < ?
-      AND tp.expiration > ?
-      AND tp.creation_date < ?
-      AND tp.is_archived = 0
-      AND tp.is_deleted = 0;`;
+        const result = await thesisApplication.listApplicationsForTeacherThesisProposal(1, 'd1');
+        const expectedQuery = 
+        `SELECT s.name, s.surname, ta.status, s.id, ta.id AS application_id, ta.creation_date
+      FROM thesisApplication ta, thesisProposal tp, student s
+      WHERE ta.proposal_id = tp.proposal_id 
+        AND s.id = ta.student_id
+        AND ta.proposal_id=?
+        AND tp.supervisor_id= ? 
+        AND ta.creation_date < ?
+        AND tp.expiration > ?
+        AND tp.creation_date < ?
+        AND tp.is_archived = 0
+        AND tp.is_deleted = 0;`
         // Assertions
         expect(result).toEqual(mockApplications);
         expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
@@ -308,7 +311,7 @@ describe('getStudentActiveApplication', () => {
         db.prepare().all.mockReturnValueOnce(expectedResult);
 
         // Act
-        const result = await thesis.getStudentActiveApplication(student_id);
+        const result = await thesisApplication.getStudentActiveApplication(student_id);
         const expectedQuery = `SELECT proposal_id FROM thesisApplication WHERE student_id=? AND creation_date < ? AND ( status=? OR status=?)`;
 
         // Assert
@@ -324,7 +327,7 @@ describe('getStudentActiveApplication', () => {
         db.prepare().all.mockReturnValueOnce([]);
 
         // Act
-        const result = await thesis.getStudentActiveApplication(student_id);
+        const result = await thesisApplication.getStudentActiveApplication(student_id);
 
         // Assert
         expect(result).toEqual([]);
@@ -345,7 +348,7 @@ describe('updateApplicationStatus', () => {
         db.prepare().run.mockReturnValueOnce({changes: expectedRowCount});
 
         // Act
-        const result = await thesis.updateApplicationStatus(studentId, proposalId, status);
+        const result = await thesisApplication.updateApplicationStatus(studentId, proposalId, status);
 
         // Assert
         expect(result).toEqual(true);
@@ -361,7 +364,7 @@ describe('updateApplicationStatus', () => {
         db.prepare().run.mockReturnValueOnce({changes: expectedRowCount});
 
         // Act
-        const result = await thesis.updateApplicationStatus(studentId, proposalId, status);
+        const result = await thesisApplication.updateApplicationStatus(studentId, proposalId, status);
 
         // Assert
         expect(result).toEqual(false);
@@ -379,7 +382,7 @@ describe('updateApplicationStatus', () => {
         });
 
         // Act and Assert
-        await expect(thesis.updateApplicationStatus(studentId, proposalId, status)).rejects.toThrow('Some error');
+        await expect(thesisApplication.updateApplicationStatus(studentId, proposalId, status)).rejects.toThrow('Some error');
     });
 });
 
@@ -401,7 +404,7 @@ describe('cancelOtherApplications', () => {
         ]);
 
         // Act
-        const result = await thesis.cancelOtherApplications(studentId, proposalId);
+        const result = await thesisApplication.cancelOtherApplications(studentId, proposalId);
 
         // Assert
         expect(result).toEqual(rowUpdated);
@@ -418,7 +421,40 @@ describe('cancelOtherApplications', () => {
         });
 
         // Act and Assert
-        await expect(thesis.cancelOtherApplications(studentId, proposalId)).rejects.toThrow('Some error');
+        await expect(thesisApplication.cancelOtherApplications(studentId, proposalId)).rejects.toThrow('Some error');
+    });
+});
+
+describe('cancelWaitingApplicationsOnExpiredThesis', () => {
+    
+    test('should cancel waiting applications on expired thesis proposals', async () => {
+  
+      // Mock the result of the query
+      const mockResult = [
+        { /* Application data for the first row */ },
+        { /* Application data for the second row */ },
+        // Add more rows as needed
+      ];
+      db.prepare().all.mockReturnValueOnce(mockResult);
+  
+      // Call the function
+      const result = await thesisApplication.cancelWaitingApplicationsOnExpiredThesis();
+  
+      // Assertions
+      expect(result).toEqual(mockResult);
+  
+      // Verify the prepared SQL query
+      const expectedQuery = `UPDATE thesisApplication
+      SET status=?
+      WHERE status=? AND proposal_id IN (SELECT proposal_id FROM thesisProposal WHERE expiration < ?)
+      RETURNING *;`;
+  
+      expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
+      expect(db.prepare().all).toHaveBeenCalledWith(
+        APPLICATION_STATUS.CANCELLED,
+        APPLICATION_STATUS.WAITING_FOR_APPROVAL,
+        expect.stringContaining(new AdvancedDate().toISOString().substring(0, 10))
+      );
     });
 });
 
@@ -442,7 +478,7 @@ describe('listApplicationsDecisionsFromStudent', () => {
 
         db.prepare().all.mockReturnValueOnce(expectedResult);
 
-        const result = await thesis.listApplicationsDecisionsFromStudent(studentId);
+        const result = await thesisApplication.listApplicationsDecisionsFromStudent(studentId);
 
         expect(result).toEqual(expectedResult);
         expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
@@ -465,7 +501,7 @@ describe('getApplicationById', () => {
 
         db.prepare().get.mockReturnValue(expectedResult);
 
-        const result = await thesis.getApplicationById(applicationId);
+        const result = await thesisApplication.getApplicationById(applicationId);
         const expectedQuery = `SELECT * FROM thesisApplication WHERE id = ?`;
 
         expect(result).toEqual(expectedResult);
