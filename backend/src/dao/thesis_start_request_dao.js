@@ -77,23 +77,18 @@ exports.createThesisStartRequest = async (student_id, title, description, superv
  * @param {string} student_id
  * @return {Promise<ThesisStartRequestRow | null>}
  */
-exports.getStudentLastThesisStartRequest = (student_id) => {
-  return new Promise((resolve) => {
-    const currentDate = new AdvancedDate().toISOString();
-    const query = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? ORDER BY creation_date DESC LIMIT 1;`;
-    const tsr = db.prepare(query).get(student_id, currentDate);
+exports.getStudentLastThesisStartRequest = async (student_id) => {
+  const currentDate = new AdvancedDate().toISOString();
+  const query = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? ORDER BY creation_date DESC LIMIT 1;`;
+  const tsr = db.prepare(query).get(student_id, currentDate);
+  if (!tsr) {
+    return null;
+  }
 
-    if(tsr){
-      const co_supervisors_query = 'SELECT cosupervisor_id FROM thesisStartCosupervisor WHERE start_request_id=?';
-      const co_supervisors = db.prepare(co_supervisors_query).all(tsr.id).map(entry => entry.cosupervisor_id);
-      resolve({
-        ...tsr,
-        co_supervisors
-      });
-    }
+  const co_supervisors_query = 'SELECT cosupervisor_id FROM thesisStartCosupervisor WHERE start_request_id=?';
+  const co_supervisors = db.prepare(co_supervisors_query).all(tsr.id).map(entry => entry.cosupervisor_id);
 
-    resolve(tsr)
-  })
+  return { ...tsr, co_supervisors };
 };
 
 
