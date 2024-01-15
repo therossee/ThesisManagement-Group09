@@ -1,11 +1,13 @@
 const { USER_ROLES } = require("../enums");
-const thesisDao = require("../dao/thesis_dao");
+const thesisProposalDao = require("../dao/thesis_proposal_dao");
+const thesisApplicationDao = require("../dao/thesis_application_dao");
 const usersDao = require("../dao/users_dao");
 const schemas = require("../schemas");
 const AppError = require("../errors/AppError");
 const AdvancedDate = require("../models/AdvancedDate");
 const {APPLICATION_STATUS} = require("../enums/application");
 const NotificationService = require("../services/NotificationService");
+const NoThesisProposalError = require("../errors/NoThesisProposalError");
 
 /**
  * @param {PopulatedRequest} req
@@ -16,7 +18,7 @@ async function listThesisProposals(req, res, next) {
     try {
         if (req.user.roles.includes(USER_ROLES.STUDENT)) {
             const studentId = req.user.id;
-            const proposals = await thesisDao.listThesisProposalsFromStudent(studentId);
+            const proposals = await thesisProposalDao.listThesisProposalsFromStudent(studentId);
             const cds = await usersDao.getStudentDegree(studentId);
             const proposalsPopulated = await Promise.all(
                 proposals.map(async proposal => {
@@ -33,10 +35,10 @@ async function listThesisProposals(req, res, next) {
             };
             res.json({ $metadata: metadata, items: proposalsPopulated });
         } else if (req.user.roles.includes(USER_ROLES.TEACHER)) {
-            const thesisProposals = await thesisDao.listThesisProposalsTeacher(req.user.id);
+            const thesisProposals = await thesisProposalDao.listThesisProposalsTeacher(req.user.id);
             const proposalsPopulated = await Promise.all(
                 thesisProposals.map(async proposal => {
-                    const cds = await thesisDao.getThesisProposalCds(proposal.proposal_id);
+                    const cds = await thesisProposalDao.getThesisProposalCds(proposal.proposal_id);
                     return await _populateProposal(proposal, cds);
                 })
             );
@@ -79,13 +81,13 @@ async function createThesisProposal(req, res, next) {
         const unique_groups = new Set();
 
         // Get supervisor's group and add it to the array
-        const supervisor_group = await thesisDao.getGroup(supervisor_id);
+        const supervisor_group = await usersDao.getGroup(supervisor_id);
         unique_groups.add(supervisor_group);
 
         // Check if there are co-supervisors and if yes, retrieve their cod_group
         if (internal_co_supervisors_id.length > 0) {
             for (const internal_co_supervisor of internal_co_supervisors_id) {
-                const co_supervisor_group = await thesisDao.getGroup(internal_co_supervisor);
+                const co_supervisor_group = await usersDao.getGroup(internal_co_supervisor);
                 unique_groups.add(co_supervisor_group);
             }
         }
@@ -93,7 +95,7 @@ async function createThesisProposal(req, res, next) {
         const proposal_details = { title, supervisor_id, type, description, required_knowledge, notes, expiration, level };
         const additional_details = { internal_co_supervisors_id, external_co_supervisors_id, unique_groups, keywords, cds };
 
-        await thesisDao.createThesisProposal(proposal_details, additional_details)
+        await thesisProposalDao.createThesisProposal(proposal_details, additional_details)
             .then((thesisProposalId) => {
                 res.status(201).json(
                     {
@@ -134,7 +136,7 @@ async function getThesisProposalById(req, res, next) {
             const studentId = req.user.id;
             const proposalId = req.params.id;
 
-            const proposal = await thesisDao.getThesisProposal(proposalId, studentId);
+            const proposal = await thesisProposalDao.getThesisProposal(proposalId, studentId);
             const studentDegree = await usersDao.getStudentDegree(studentId);
             if (!proposal) {
                 return res.status(404).json({ message: `Thesis proposal with id ${proposalId} not found.` });
@@ -146,8 +148,8 @@ async function getThesisProposalById(req, res, next) {
             const teacherId = req.user.id;
             const proposalId = req.params.id;
 
-            const proposal = await thesisDao.getThesisProposalTeacher(proposalId, teacherId);
-            const cds = await thesisDao.getThesisProposalCds(proposalId);
+            const proposal = await thesisProposalDao.getThesisProposalTeacher(proposalId, teacherId);
+            const cds = await thesisProposalDao.getThesisProposalCds(proposalId);
             if (!proposal) {
                 return res.status(404).json({ message: `Thesis proposal with id ${proposalId} not found.` });
             }
@@ -174,7 +176,7 @@ async function updateThesisProposalById(req, res, next) {
         const supervisor_id = req.user.id;
         const proposal_id = req.params.id;
 
-        const applications = await thesisDao.listApplicationsForTeacherThesisProposal(proposal_id, supervisor_id);
+        const applications = await thesisApplicationDao.listApplicationsForTeacherThesisProposal(proposal_id, supervisor_id);
         if (applications.some(application => application.status === APPLICATION_STATUS.ACCEPTED)) {
             return res.status(403).json({ message: 'Cannot edit a proposal with accepted applications.' });
         }
@@ -183,24 +185,24 @@ async function updateThesisProposalById(req, res, next) {
 
         // Set to store all grous
         const unique_groups = new Set();
-        await thesisDao.getGroup(supervisor_id).then(group => unique_groups.add(group));
+        await usersDao.getGroup(supervisor_id).then(group => unique_groups.add(group));
         await Promise.all(
             thesis.internal_co_supervisors_id.map(async id => {
-                return thesisDao.getGroup(id).then(group => unique_groups.add(group));
+                return usersDao.getGroup(id).then(group => unique_groups.add(group));
             })
         );
         thesis.groups = [...unique_groups];
 
-        const id = await thesisDao.updateThesisProposal(proposal_id, supervisor_id, thesis);
+        const id = await thesisProposalDao.updateThesisProposal(proposal_id, supervisor_id, thesis);
         if (!id) {
             return res.status(404).json({ message: `Thesis proposal with id ${proposal_id} not found.` });
         }
 
-        const proposal = await thesisDao.getThesisProposalById(proposal_id);
+        const proposal = await thesisProposalDao.getThesisProposalById(proposal_id);
         if (!proposal) {
             return res.status(404).json({ message: `Thesis proposal with id ${proposal_id} not found.` });
         }
-        const cds = await thesisDao.getThesisProposalCds(proposal_id);
+        const cds = await thesisProposalDao.getThesisProposalCds(proposal_id);
 
         res.status(200).send(await _populateProposal(proposal, cds));
     } catch (e) {
@@ -218,7 +220,7 @@ async function deleteThesisProposalById(req, res, next) {
         const teacherId = req.user.id;
         const proposalId = req.params.id;
 
-        await thesisDao.deleteThesisProposalById(proposalId, teacherId)
+        await thesisProposalDao.deleteThesisProposalById(proposalId, teacherId)
             .then(applicationsCancelled => {
                 setImmediate(() => {
                     const reason = 'The thesis proposal has been removed from the website.';
@@ -251,7 +253,7 @@ async function archiveThesisProposalById(req, res, next) {
         const teacherId = req.user.id;
         const proposalId = req.params.id;
 
-        await thesisDao.archiveThesisProposalById(proposalId, teacherId)
+        await thesisProposalDao.archiveThesisProposalById(proposalId, teacherId)
             .then(applicationsArchived => {
                 setImmediate(() => {
                     const reason = 'The thesis proposal has been archived from the website.';
@@ -274,13 +276,39 @@ async function archiveThesisProposalById(req, res, next) {
     }
 }
 
+/**
+ *
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+async function unarchiveThesisProposalById(req, res, next) {
+    try {
+        const teacherId = req.user.id;
+        const proposalId = Number(req.params.id);
+        if (isNaN(proposalId)) {
+            throw new NoThesisProposalError(req.params.id);
+        }
+
+        const { expiration } = schemas.APIUnarchiveThesisProposalSchema.parse(req.query);
+
+        const proposal = await thesisProposalDao.unarchiveThesisProposalById(proposalId, teacherId, expiration);
+        const cds = await thesisProposalDao.getThesisProposalCds(proposalId);
+
+        res.status(200).json( await _populateProposal(proposal, cds) );
+    } catch (e) {
+        next(e);
+    }
+}
+
 module.exports = {
     listThesisProposals,
     createThesisProposal,
     getThesisProposalById,
     updateThesisProposalById,
     deleteThesisProposalById,
-    archiveThesisProposalById
+    archiveThesisProposalById,
+    unarchiveThesisProposalById
 };
 
 
@@ -297,14 +325,14 @@ async function _populateProposal(proposalData, cds) {
         id: proposalData.proposal_id,
         title: proposalData.title,
         status: _getProposalStatus(proposalData),
-        supervisor: await thesisDao.getSupervisorOfProposal(proposalData.proposal_id)
+        supervisor: await thesisProposalDao.getSupervisorOfProposal(proposalData.proposal_id)
             .then(_serializeTeacher),
         coSupervisors: {
-            internal: await thesisDao.getInternalCoSupervisorsOfProposal(proposalData.proposal_id)
+            internal: await thesisProposalDao.getInternalCoSupervisorsOfProposal(proposalData.proposal_id)
                 .then(supervisors => {
                     return supervisors.map(supervisor => _serializeTeacher(supervisor));
                 }),
-            external: await thesisDao.getExternalCoSupervisorsOfProposal(proposalData.proposal_id)
+            external: await thesisProposalDao.getExternalCoSupervisorsOfProposal(proposalData.proposal_id)
         },
         type: proposalData.type,
         description: proposalData.description,
@@ -314,8 +342,8 @@ async function _populateProposal(proposalData, cds) {
         expiration: proposalData.expiration,
         level: proposalData.level,
         cds: cds,
-        keywords: await thesisDao.getKeywordsOfProposal(proposalData.proposal_id),
-        groups: await thesisDao.getProposalGroups(proposalData.proposal_id)
+        keywords: await thesisProposalDao.getKeywordsOfProposal(proposalData.proposal_id),
+        groups: await thesisProposalDao.getProposalGroups(proposalData.proposal_id)
     };
 }
 

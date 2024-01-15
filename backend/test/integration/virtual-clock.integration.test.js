@@ -72,6 +72,19 @@ describe('[INTEGRATION] Virtual Clock APIs', () => {
             expect(res.body.offset).toBeAnIntegerCloseTo(newOffset, 100);
         });
 
+        test('should update the virtual clock without newDate', async () => {
+            const newOffset = 0;
+
+            const res = await testerAgent.post('/api/system/virtual-clock')
+                .set('Content-Type', 'application/json')
+                .set('credentials', 'include')
+                .send();
+
+            expect(res.status).toBe(200);
+            expect(res.body).toHaveProperty('date');
+            expect(res.body.offset).toBeAnIntegerCloseTo(newOffset, 100);
+        });
+
         test('should update the virtual clock and cancel all waiting applications', async () => {
             db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
                 .run('s321529', 1, new Date().toISOString(), 'waiting for approval');

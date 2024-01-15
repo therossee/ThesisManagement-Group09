@@ -23,7 +23,7 @@ describe("isStudent", () => {
     test('should return 403 if try to access to a route reserved to students without being a student', async () => {
        
         const response = await agent
-            .get('/api/student/thesis-start-requests/active')
+            .get('/api/student/thesis-start-requests/last')
             .set('Accept', 'application/json')
             .set('credentials', 'include');
         
@@ -71,7 +71,7 @@ describe("isSecretaryClerk", () => {
 describe("isTeacherOrStudent", () => {
     test('should return 403 if try to access to a route reserved to teachers or students without being a teacher or a student', async () => {
         const response = await agent
-            .get('/api/student/thesis-start-requests/active')
+            .get('/api/student/thesis-start-requests/last')
             .set('Accept', 'application/json')
             .set('credentials', 'include');
         

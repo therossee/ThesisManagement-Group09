@@ -1,4 +1,4 @@
-const thesisDao = require("../dao/thesis_dao");
+const utilsDao = require("../dao/utils_dao");
 const usersDao = require("../dao/users_dao");
 
 /**
@@ -9,7 +9,7 @@ const usersDao = require("../dao/users_dao");
 async function listTeachers(req, res, next) {
     try {
         const excludedTeacherId = req.user.id;
-        const teacherList = await thesisDao.getTeacherListExcept(excludedTeacherId);
+        const teacherList = await utilsDao.getTeacherListExcept(excludedTeacherId);
 
         res.json({ teachers: teacherList });
     } catch (error) {
@@ -24,7 +24,7 @@ async function listTeachers(req, res, next) {
  */
 async function listExternalCoSupervisors(req, res, next) {
     try {
-        const externalCoSupervisorList = await thesisDao.getExternalCoSupervisorList();
+        const externalCoSupervisorList = await utilsDao.getExternalCoSupervisorList();
 
         res.json({ externalCoSupervisors: externalCoSupervisorList });
     } catch (error) {
@@ -39,7 +39,7 @@ async function listExternalCoSupervisors(req, res, next) {
  */
 async function listKeywords(req, res, next) {
     try {
-        const keywords = await thesisDao.getAllKeywords();
+        const keywords = await utilsDao.getAllKeywords();
         res.json({ keywords });
     } catch (error) {
         next(error);
@@ -53,7 +53,7 @@ async function listKeywords(req, res, next) {
  */
 async function listDegrees(req, res, next) {
     try {
-        const degrees = await thesisDao.getDegrees();
+        const degrees = await utilsDao.getDegrees();
         res.json(degrees);
     } catch (error) {
         next(error);
