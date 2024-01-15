@@ -4,7 +4,7 @@ const { resetTestDatabase, initImapClient, closeImapClient, searchEmails} = requ
 const request = require("supertest");
 const {app} = require("../../src/app");
 const utils = require("../utils");
-const thesisDao = require('../../src/dao/thesis_dao');
+const thesisStartRequestDao = require('../../src/dao/thesis_start_request_dao');
 const db = require('../../src/services/db');
 const AdvancedDate = require('../../src/models/AdvancedDate');
 const CronTasksService = require("../../src/services/CronTasksService");
@@ -142,7 +142,7 @@ describe('GET /api/secretary-clerk/thesis-start-requests', () => {
     });
 
     test('should handle errors', async () => {
-        jest.spyOn(thesisDao, 'listThesisStartRequests').mockImplementation(() => {
+        jest.spyOn(thesisStartRequestDao, 'listThesisStartRequests').mockImplementation(() => {
             throw new Error();
         });
         const res = await agent
@@ -193,7 +193,7 @@ describe('PATCH /api/secretary-clerk/thesis-start-requests/accept/:request_id', 
     });
 
     test('should handle errors', async () => {
-        jest.spyOn(thesisDao, 'updateThesisStartRequestStatus').mockImplementation(() => {
+        jest.spyOn(thesisStartRequestDao, 'updateThesisStartRequestStatus').mockImplementation(() => {
             throw new Error();
         });
         const res = await agent
@@ -245,7 +245,7 @@ describe('PATCH /api/secretary-clerk/thesis-start-requests/reject/:request_id', 
     });
 
     test('should handle errors', async () => {
-        jest.spyOn(thesisDao, 'updateThesisStartRequestStatus').mockImplementation(() => {
+        jest.spyOn(thesisStartRequestDao, 'updateThesisStartRequestStatus').mockImplementation(() => {
             throw new Error();
         });
         const res = await agent

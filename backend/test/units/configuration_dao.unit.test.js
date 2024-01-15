@@ -38,11 +38,11 @@ describe('Configuration DAO', () => {
             expect(db.prepare().get).toHaveBeenCalledWith(key);
         });
 
-        test('should return null if the key is not found', async () => {
+        test('should return null if the key is not found', () => {
             const key = 'key';
             db.prepare().get.mockReturnValueOnce(undefined);
 
-            const result = await configuration.getIntegerValue(key);
+            const result = configuration.getIntegerValue(key);
 
             expect(result).toBeNull();
             expect(db.prepare).toHaveBeenCalledWith(expect.any(String));

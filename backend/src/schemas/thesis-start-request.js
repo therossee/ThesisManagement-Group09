@@ -2,7 +2,8 @@
 
 const z = require('zod');
 const usersDao = require("../dao/users_dao");
-const thesisDao = require("../dao/thesis_dao");
+const thesisProposalDao = require("../dao/thesis_proposal_dao");
+const thesisApplicationDao = require("../dao/thesis_application_dao");
 const AdvancedDate = require("../models/AdvancedDate");
 
 const APIThesisStartRequestSchema = z.object({
@@ -20,7 +21,7 @@ const APIThesisStartRequestSchema = z.object({
         if (!application_id) {
             return null;
         }
-        const application = await thesisDao.getApplicationById(application_id);
+        const application = await thesisApplicationDao.getApplicationById(application_id);
         if (!application) {
             ctx.addIssue({ code: z.ZodIssueCode.invalid_arguments, message: `Application with id ${application_id} not found.`, fatal: true});
             return z.NEVER;
@@ -31,7 +32,7 @@ const APIThesisStartRequestSchema = z.object({
         if (!proposal_id) {
             return null;
         }
-        const proposal = await thesisDao.getThesisProposalById(proposal_id);
+        const proposal = await thesisProposalDao.getThesisProposalById(proposal_id);
         if (!proposal) {
             ctx.addIssue({ code: z.ZodIssueCode.invalid_arguments, message: `Thesis proposal with id ${proposal_id} not found.`, fatal: true});
             return z.NEVER;
