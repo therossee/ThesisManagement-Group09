@@ -211,6 +211,8 @@ exports.getThesisProposal = async (proposalId, studentId) => {
  * @return {ThesisProposalRow | null}
  */
 exports.getThesisProposalById = (proposalId) => {
+  // Do not set this function as async to avoid useless complexity in "_handleFailure" function
+
   const query = `SELECT * FROM thesisProposal P
         JOIN proposalCds PC ON P.proposal_id = PC.proposal_id
         JOIN degree D ON PC.cod_degree = D.cod_degree

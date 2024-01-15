@@ -198,7 +198,7 @@ async function updateThesisProposalById(req, res, next) {
             throw new NoThesisProposalError(proposal_id);
         }
 
-        const proposal = await thesisProposalDao.getThesisProposalById(proposal_id);
+        const proposal = thesisProposalDao.getThesisProposalById(proposal_id);
         if (!proposal) {
             throw new NoThesisProposalError(proposal_id);
         }
