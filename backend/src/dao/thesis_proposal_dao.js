@@ -573,6 +573,28 @@ async function _handleFailure(proposalId, now, reject, operation) {
     }
 }
 
+exports.listArchivedThesisProposalsTeacher = (teacherId) => {
+  return new Promise((resolve) => {
+    const currentDate = new AdvancedDate().toISOString();
+    const getProposals = `SELECT * 
+      FROM thesisProposal P
+      WHERE P.supervisor_id=?
+        AND NOT EXISTS (
+          SELECT 1
+          FROM thesisApplication A
+          WHERE A.proposal_id = P.proposal_id
+            AND A.status = ?
+        )
+        AND P.expiration > ?
+        AND creation_date < ?
+        AND is_archived = 1
+        AND is_deleted = 0;`;
+    const proposals = db.prepare(getProposals).all(teacherId, APPLICATION_STATUS.ACCEPTED, currentDate, currentDate);
+    resolve(proposals)
+
+  })
+};
+
 
 /**
  * @typedef {Object} ThesisApplicationRow

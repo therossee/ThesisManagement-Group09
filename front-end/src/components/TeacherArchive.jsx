@@ -146,15 +146,6 @@ function TeacherArchive() {
         }
     }
 
-    async function publishProposalById(id) {
-        try {
-            await API.publishProposalById(id);
-            message.success("Proposal published successfully");
-            setDirty(true);
-        } catch (err) {
-            setIsLoadingTable(false);
-        }
-    }
 
     return (
         <Table {...tableProps} columns={columns} dataSource={data} />
