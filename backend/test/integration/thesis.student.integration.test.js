@@ -1066,13 +1066,13 @@ describe('POST /api/student/thesis-start-requests', () => {
 
 });
 
-describe('GET /api/student/thesis-start-requests/active', () => {
-    test('should return no thesis start requests for the student', async () => {
+describe('GET /api/student/thesis-start-requests/last', () => {
+    test('should return no thesis start request for the student', async () => {
         // Logged as s318952
 
         // Make the request to your API
         const response = await agent
-            .get('/api/student/thesis-start-requests/active')
+            .get('/api/student/thesis-start-requests/last')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
             .send();
@@ -1081,14 +1081,14 @@ describe('GET /api/student/thesis-start-requests/active', () => {
         expect(response.status).toBe(200);
         expect(response.body).toEqual({});
     });
-    test('should return a thesis start requests without co-supervisor for the student', async () => {
+    test('should return the last thesis start request without co-supervisor for the student', async () => {
         // Logged as s318952
         const request = db.prepare('INSERT INTO thesisStartRequest (student_id, application_id, proposal_id, title, description, supervisor_id, creation_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
           .run('s318952', 1, 1, 'Title', 'Description', 'd279620','2024-01-06T18:00:00.058Z','waiting for approval');
 
         // Make the request to your API
         const response = await agent
-            .get('/api/student/thesis-start-requests/active')
+            .get('/api/student/thesis-start-requests/last')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
             .send();
@@ -1123,17 +1123,20 @@ describe('GET /api/student/thesis-start-requests/active', () => {
             }
         );
     });
-    test('should return a thesis start requests with co-supervisor for the student', async () => {
+    test('should return the last thesis start request with co-supervisor for the student', async () => {
         // Logged as s318952
+        db.prepare('INSERT INTO thesisStartRequest (student_id, application_id, proposal_id, title, description, supervisor_id, creation_date, approval_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
+          .run('s318952', 1, 1, 'Title', 'Description', 'd279620','2023-01-06T18:00:00.058Z', '2023-02-06T10:30:00.005Z','rejected');
+
         const request = db.prepare('INSERT INTO thesisStartRequest (student_id, application_id, proposal_id, title, description, supervisor_id, creation_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
           .run('s318952', 1, 1, 'Title', 'Description', 'd279620','2024-01-06T18:00:00.058Z','waiting for approval');
-
+        
         db.prepare('INSERT INTO thesisStartCosupervisor(start_request_id, cosupervisor_id) VALUES (?, ?)')
-          .run(request.lastInsertRowid, 'd370335');
+        .run(request.lastInsertRowid, 'd370335');
 
         // Make the request to your API
         const response = await agent
-            .get('/api/student/thesis-start-requests/active')
+            .get('/api/student/thesis-start-requests/last')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
             .send();
@@ -1177,11 +1180,11 @@ describe('GET /api/student/thesis-start-requests/active', () => {
     });
     test('should handle errors', async () => {
         // Logged as s318952
-        jest.spyOn(thesisStartRequestDao, 'getStudentActiveThesisStartRequests').mockRejectedValueOnce(new Error());
+        jest.spyOn(thesisStartRequestDao, 'getStudentLastThesisStartRequest').mockRejectedValueOnce(new Error());
 
         // Make the request to your API
         const response = await agent
-            .get('/api/student/thesis-start-requests/active')
+            .get('/api/student/thesis-start-requests/last')
             .set('Accept', 'application/json')
             .set('credentials', 'include')
             .send();
