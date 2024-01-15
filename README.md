@@ -718,4 +718,4 @@ Error Responses:
 
 
 ## DATABASE DOCUMENTATION
-You can check all useful information of the documentation in this the [db_documentation.md](https://github.com/therossee/ThesisManagement-Group09/blob/task/270-database-documentation/database/db_documentation.md) file, in the `documentation` directory.
+You can check all useful information about the documentation in this the [README.md](https://github.com/therossee/ThesisManagement-Group09/blob/main/database/README.md) file of the `database` directory.

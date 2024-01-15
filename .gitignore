@@ -1,6 +1,6 @@
 /database/node_modules
-/database/
-!/database/db_documentation.md
+/database/*
+!/database/README.md
 **/.env
 **/node_modules
 **/coverage
