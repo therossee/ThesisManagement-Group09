@@ -202,8 +202,7 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
             setLoading(true);
             try {
                 const activeTSR = await API.getStudentActiveThesisStartRequest();
-                if (Object.keys(activeTSR).length > 0)
-                    setDisabled(true);
+                setDisabled(checkDisabled(activeTSR));
                 setActiveThesisStartRequest(activeTSR);
                 setLoading(false);
             } catch (err) {
@@ -214,18 +213,29 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
         fetchData();
     }, [trigger]);
 
+    function checkDisabled(activeTSR) {
+        if ((Object.keys(activeTSR).length > 0))
+            if (activeTSR.status != "rejected by secretary clerk" && activeTSR.status != "rejected by teacher")
+                return true; // Disable the button to add a new TSR
+        return false; // Enable the button to add a new TSR
+    }
+
     function getStatus(status) {
         switch (status) {
             case "waiting for approval":
-                return <Badge status="processing" text="1/3 - Waiting for approval from the secretariat" />;
+                return <Badge status="processing" text={<strong>1/3 - Waiting for approval from the secretariat</strong>} />;
+            case "rejected by secretary clerk":
+                return <Badge status="error" text={<strong>1/3 - Rejected by the secretariat, you can submit a new one</strong>} />;
             case "accepted by secretary clerk":
-                return <Badge status="processing" text="2/3 - Waiting for approval from the teacher" />;
+                return <Badge status="processing" text={<strong>2/3 - Waiting for approval from the teacher</strong>} />;
             case "changes requested":
-                return <Badge status="warning" text="2/3 - Changes requested. Please, take action here" />;
+                return <Badge status="warning" text={<strong>2/3 - Changes requested. Please, take action here</strong>} />;
+            case "rejected by teacher":
+                return <Badge status="error" text={<strong>2/3 - Rejected by the teacher, you can submit a new one</strong>} />;
             case "accepted by teacher":
-                return <Badge status="success" text="3/3 - Accepted" />;
+                return <Badge status="success" text={<strong>3/3 - Accepted</strong>} />;
             default:
-                return <Badge status="error" text="Failed fetching/parsing information" />
+                return <Badge status="error" text={<strong>Failed fetching/parsing information</strong>} />
         }
     }
 
@@ -243,7 +253,7 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
                 key: '2',
                 label: 'Submitted on',
                 span: 1,
-                children: dayjs(activeThesisStartRequest.creation_date).format('lll'),
+                children: dayjs(activeThesisStartRequest.creation_date).format('LLL'),
             },
             {
                 key: '3',

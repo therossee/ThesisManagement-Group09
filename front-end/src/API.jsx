@@ -413,7 +413,7 @@ async function insertThesisStartRequest(request) {
 
 // GET Student active Thesis Start Request
 async function getStudentActiveThesisStartRequest() {
-    const response = await fetch(URL + '/student/thesis-start-requests/active', {
+    const response = await fetch(URL + '/student/thesis-start-requests/last', {
         method: 'GET',
         credentials: 'include',
     });
