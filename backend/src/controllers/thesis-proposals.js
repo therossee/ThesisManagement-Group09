@@ -7,6 +7,7 @@ const AppError = require("../errors/AppError");
 const AdvancedDate = require("../models/AdvancedDate");
 const {APPLICATION_STATUS} = require("../enums/application");
 const NotificationService = require("../services/NotificationService");
+const NoThesisProposalError = require("../errors/NoThesisProposalError");
 
 /**
  * @param {PopulatedRequest} req
@@ -194,12 +195,12 @@ async function updateThesisProposalById(req, res, next) {
 
         const id = await thesisProposalDao.updateThesisProposal(proposal_id, supervisor_id, thesis);
         if (!id) {
-            return res.status(404).json({ message: `Thesis proposal with id ${proposal_id} not found.` });
+            throw new NoThesisProposalError(proposal_id);
         }
 
         const proposal = await thesisProposalDao.getThesisProposalById(proposal_id);
         if (!proposal) {
-            return res.status(404).json({ message: `Thesis proposal with id ${proposal_id} not found.` });
+            throw new NoThesisProposalError(proposal_id);
         }
         const cds = await thesisProposalDao.getThesisProposalCds(proposal_id);
 
