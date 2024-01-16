@@ -166,7 +166,7 @@ exports.updateThesisStartRequestStatus = async (request_id, new_status) => {
  */
 exports.supervisorReviewThesisStartRequest = async (supervisorId, tsrId, review) => {
     /** @type {string} */
-    let query = `UPDATE thesisStartRequest SET status = ?, changes_requested = ? WHERE id = ? AND supervisor_id = ? AND STATUS IN (?, ?);`;
+    const query = `UPDATE thesisStartRequest SET status = ?, changes_requested = ? WHERE id = ? AND supervisor_id = ? AND STATUS IN (?, ?);`;
     /** @type {(string | null)[]} */
     const params = [];
     if (review.action === "request changes") {
