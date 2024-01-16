@@ -229,7 +229,7 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
             case "accepted by secretary clerk":
                 return <Badge status="processing" text={<strong>2/3 - Waiting for approval from the teacher</strong>} />;
             case "changes requested":
-                return <Badge status="warning" text={<strong>2/3 - Changes requested. Please, take action here</strong>} />;
+                return <Badge status="warning" text={<strong>2/3 - Changes requested</strong>} />;
             case "rejected by teacher":
                 return <Badge status="error" text={<strong>2/3 - Rejected by the teacher, you can submit a new one</strong>} />;
             case "accepted by teacher":
@@ -312,7 +312,7 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
                     {activeThesisStartRequest.status === "changes requested" &&
                         <Alert
                             message="The supervisor has requested changes to your submission."
-                            description="Teacher Message(strong): message"
+                            description={<><strong>Teacher Message:</strong> {activeThesisStartRequest.changes_requested}</>}
                             type="warning"
                             showIcon
                             closable
