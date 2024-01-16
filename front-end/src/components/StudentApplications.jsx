@@ -39,7 +39,8 @@ function StudentApplications() {
                 <MyBadge text={x.status} />
             </div>
         ),
-        color: (getColor(x.status))
+        color: getColor(x.status),
+        position: index === 0 ? "right" : undefined
     }));
 
     function getColor(x) {
