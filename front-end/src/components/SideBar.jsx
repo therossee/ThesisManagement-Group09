@@ -29,28 +29,31 @@ function SideBar({ collapsed, setCollapsed }) {
   };
 
   return (
-    <>
-      <Sider
-        breakpoint="lg"
-        collapsedWidth="0"
-        collapsed={collapsed}
-        onCollapse={toggleCollapsed}
-        trigger={null}
-        style={{ position: "sticky", left: "0", top: "0", height: "100vh", zIndex: "5", backgroundColor: 'white' }}
-      >
-        <div className='logo-style'>
-          <Image
-            src="https://upload.wikimedia.org/wikipedia/it/thumb/4/47/Logo_PoliTo_dal_2021_blu.png/1024px-Logo_PoliTo_dal_2021_blu.png"
-            alt="Polito Logo"
-            style={{ width: '90%', cursor: 'pointer', marginTop: '10px', marginLeft: '10px', marginRight: '10px' }}
-            onClick={() => navigate('/')}
-            preview={false}
-          />
-        </div>
-        <Menu mode="inline" className='menu-style' items={navigation} selectedKeys={[window.location.pathname]} onClick={handleMenuClick} />
-      </Sider>
-    </>
+    <Sider
+      breakpoint="lg"
+      collapsedWidth="0"
+      collapsed={collapsed}
+      onCollapse={toggleCollapsed}
+      trigger={null}
+      style={{ position: "sticky", left: "0", top: "0", height: "100vh", zIndex: "5", backgroundColor: 'white' }}
+    >
+      <div className='logo-style'>
+        <Image
+          src="https://upload.wikimedia.org/wikipedia/it/thumb/4/47/Logo_PoliTo_dal_2021_blu.png/1024px-Logo_PoliTo_dal_2021_blu.png"
+          alt="Polito Logo"
+          style={{ width: '90%', cursor: 'pointer', marginTop: '10px', marginLeft: '10px', marginRight: '10px' }}
+          onClick={() => navigate('/')}
+          preview={false}
+        />
+      </div>
+      <Menu mode="inline" className='menu-style' items={navigation} selectedKeys={[window.location.pathname]} onClick={handleMenuClick} />
+    </Sider>
   );
 }
+
+SideBar.propTypes = {
+  collapsed: PropTypes.bool.isRequired,
+  setCollapsed: PropTypes.func.isRequired,
+};
 
 export default SideBar;

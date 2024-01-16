@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { Layout, Avatar } from "antd";
 import { FileAddOutlined, UserOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
-import { useAuth } from '../components/authentication/useAuth';
+import { useAuth } from './authentication/useAuth';
 import LoginButton from './authentication/LoginButton';
 import LogoutButton from './authentication/LogoutButton';
+import PropTypes from 'prop-types';
 import '../css/style.css';
 
 const { Header } = Layout;
@@ -49,6 +50,11 @@ function TopBar({ collapsed, setCollapsed }) {
       </Header >
     </>
   )
+}
+
+TopBar.propTypes = {
+  collapsed: PropTypes.bool.isRequired,
+  setCollapsed: PropTypes.func.isRequired
 }
 
 export default TopBar;

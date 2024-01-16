@@ -3,6 +3,7 @@ import { Alert, Badge, Button, Descriptions, Col, Row, Typography, Form, Input, 
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
+import PropTypes from 'prop-types';
 import API from '../API';
 
 dayjs.extend(localizedFormat);
@@ -83,32 +84,6 @@ function AddThesisStartRequestForm({ setFormVisible }) {
         fetchData();
     }, []);
 
-    const SubmitButton = ({ form }) => {
-
-        // Validating required form fields
-        const [submittable, setSubmittable] = useState(false);
-
-        // Watch all values
-        const values = Form.useWatch([], form);
-
-        useEffect(() => {
-            form
-                .validateFields({
-                    validateOnly: true,
-                })
-                .then(
-                    () => { setSubmittable(true) },
-                    () => { setSubmittable(false) },
-                );
-        }, [values]);
-
-        return (
-            <Button type="primary" htmlType="submit" disabled={!submittable && loading} loading={buttonLoading}>
-                Submit
-            </Button>
-        );
-    };
-
     const onFinish = async (values) => {
         setButtonLoading(true);
         try {
@@ -179,7 +154,7 @@ function AddThesisStartRequestForm({ setFormVisible }) {
                         </Row>
                         <Form.Item>
                             <Space>
-                                <SubmitButton form={form} />
+                                <SubmitButton form={form} loading={loading} buttonLoading={buttonLoading} />
                                 <Button htmlType="reset">Reset Fields</Button>
                             </Space>
                         </Form.Item>
@@ -190,6 +165,33 @@ function AddThesisStartRequestForm({ setFormVisible }) {
         </div >
     )
 }
+
+
+function SubmitButton({ form, loading, buttonLoading }) {
+
+    // Validating required form fields
+    const [submittable, setSubmittable] = useState(false);
+
+    // Watch all values
+    const values = Form.useWatch([], form);
+
+    useEffect(() => {
+        form
+            .validateFields({
+                validateOnly: true,
+            })
+            .then(
+                () => { setSubmittable(true) },
+                () => { setSubmittable(false) },
+            );
+    }, [values]);
+
+    return (
+        <Button type="primary" htmlType="submit" disabled={!submittable && loading} loading={buttonLoading}>
+            Submit
+        </Button>
+    );
+};
 
 function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
 
@@ -337,5 +339,18 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
         )
     }
 }
+
+ViewThesisStartRequest.propTypes = {
+    trigger: PropTypes.bool.isRequired,
+    loading: PropTypes.bool.isRequired,
+    setLoading: PropTypes.func.isRequired,
+    setDisabled: PropTypes.func.isRequired,
+};
+
+SubmitButton.propTypes = {
+    form: PropTypes.object.isRequired,
+    loading: PropTypes.bool.isRequired,
+    buttonLoading: PropTypes.bool.isRequired,
+};
 
 export default StudentThesisStartRequest;
