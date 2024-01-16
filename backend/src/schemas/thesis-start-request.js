@@ -32,7 +32,7 @@ const APIThesisStartRequestSchema = z.object({
         if (!proposal_id) {
             return null;
         }
-        const proposal = await thesisProposalDao.getThesisProposalById(proposal_id);
+        const proposal = thesisProposalDao.getThesisProposalById(proposal_id);
         if (!proposal) {
             ctx.addIssue({ code: z.ZodIssueCode.invalid_arguments, message: `Thesis proposal with id ${proposal_id} not found.`, fatal: true});
             return z.NEVER;
@@ -41,16 +41,16 @@ const APIThesisStartRequestSchema = z.object({
             ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Thesis proposal with id ${proposal_id} is archived.`, fatal: true});
             return z.NEVER;
         }
-    
+
         const currentDate = new AdvancedDate();
         const expiration = new AdvancedDate(proposal.expiration);
         const creationDate = new AdvancedDate(proposal.creation_date);
-    
+
         if (expiration.isBefore(currentDate)) {
             ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Thesis proposal with id ${proposal_id} is expired.`, fatal: true});
             return z.NEVER;
         }
-    
+
         if (currentDate.isBefore(creationDate)) {
             ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Thesis proposal with id ${proposal_id} is not yet available.`, fatal: true});
             return z.NEVER;

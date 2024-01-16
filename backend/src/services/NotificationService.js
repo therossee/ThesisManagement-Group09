@@ -22,7 +22,7 @@ class NotificationService {
                 return;
             }
 
-            const thesis = await thesisProposalDao.getThesisProposalById(proposalId);
+            const thesis = thesisProposalDao.getThesisProposalById(proposalId);
             if (!thesis) {
                 console.error(`Thesis proposal with id "${proposalId}" not found, cannot notify application status change.`);
                 return;
@@ -71,7 +71,7 @@ class NotificationService {
                 return;
             }
 
-            const thesis = await thesisProposalDao.getThesisProposalById(proposalId);
+            const thesis = thesisProposalDao.getThesisProposalById(proposalId);
             if (!thesis) {
                 console.error(`Thesis proposal with id "${proposalId}" not found, cannot notify new application.`);
                 return;
