@@ -252,7 +252,6 @@ exports.deleteThesisProposalById = async (proposalId, supervisorId) => {
     if (res.changes === 0) {
       // Handle failure scenarios
       _handleFailure.call(this, proposalId, now, "delete");
-      return;
     }
 
     const cancelApplicationsQuery = `
@@ -298,7 +297,6 @@ exports.archiveThesisProposalById = async (proposalId, supervisorId) => {
     if (res.changes === 0) {
       // Handle failure scenarios
       _handleFailure.call(this, proposalId, now, "archive");
-      return;
     }
 
     const cancelApplicationsQuery = `
