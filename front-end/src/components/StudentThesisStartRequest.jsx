@@ -353,4 +353,8 @@ SubmitButton.propTypes = {
     buttonLoading: PropTypes.bool.isRequired,
 };
 
+AddThesisStartRequestForm.propTypes = {
+    setFormVisible: PropTypes.func.isRequired,
+};
+
 export default StudentThesisStartRequest;
