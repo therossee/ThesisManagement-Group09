@@ -242,3 +242,14 @@ This test case is related to the possibility for a professor to be notified when
 11. Re-open the Ehereal web page and refresh it
 12. You will be able to see that a message to the professor has been send, click on it to see all the details and check their correctness
 13. Go back on the thesis web application page and log out
+
+### [16] Proposal Expiration
+
+1. Go to the [home page](http://localhost:5173/)
+2. Log in as the teacher with id d279620
+3. Look at the thesis proposal and choose one of them. Look at the expiration date
+4. Click on 'tester settings' at the bottom of the left bar. It will appear the [virtual clock page](http://localhost:5173/admin/virtual-clock)
+5. Choose a date exactly one day after the expiration date previously seen. Click on 'save new clock'
+6. If you go again on [Thesis Proposals](http://localhost:5173/proposals) you will see that the proposal is not present anymore and that's because the proposal is now archived
+7. For the moment to actually check that it has been archived you can open the 'database.sqlite' file in the project after the modification and see that the field 'is_archived' is set to 1.
+8. Log out
