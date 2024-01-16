@@ -166,18 +166,19 @@ exports.updateThesisStartRequestStatus = async (request_id, new_status) => {
  */
 exports.supervisorReviewThesisStartRequest = async (supervisorId, tsrId, review) => {
     /** @type {string} */
-    let query;
-    /** @type {string[]} */
+    let query = `UPDATE thesisStartRequest SET status = ?, changes_requested = ? WHERE id = ? AND supervisor_id = ? AND STATUS IN (?, ?);`;
+    /** @type {(string | null)[]} */
     const params = [];
     if (review.action === "request changes") {
-        query = `UPDATE thesisStartRequest SET status = ?, changes_requested = ? WHERE id = ? AND supervisor_id = ?;`;
-        params.push(THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED, review.changes, tsrId, supervisorId);
+        params.push(THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED, review.changes);
     } else {
         const newStatus = review.action === "accept" ? THESIS_START_REQUEST_STATUS.ACCEPTED_BY_TEACHER : THESIS_START_REQUEST_STATUS.REJECTED_BY_TEACHER;
 
-        query = `UPDATE thesisStartRequest SET status = ? WHERE id = ? AND supervisor_id = ?;`;
-        params.push(newStatus, tsrId, supervisorId);
+        params.push(newStatus, null);
     }
+    params.push(tsrId);
+    params.push(supervisorId);
+    params.push(THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL, THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED);
 
     const res = db.prepare(query).run(...params);
     return res.changes !== 0;
