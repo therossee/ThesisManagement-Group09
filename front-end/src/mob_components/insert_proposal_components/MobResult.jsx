@@ -23,7 +23,6 @@ function MobResult(props) {
         <Result
           status="success"
           title="Proposal added succesfully!"
-          subTitle={`ID of the proposal: ${id}`}
           extra={
             <Button ghost type="primary" onClick={() => navigate("/")}>
               Back Home
