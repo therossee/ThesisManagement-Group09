@@ -129,7 +129,8 @@ describe('getStudentLastThesisStartRequest', () => {
         supervisor_id: 'd279620',
         creation_date: '2021-01-01T00:00:00.000Z',
         approval_date: null,
-        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL
+        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL,
+        changes_requested: null
       }
     );
 
@@ -151,7 +152,8 @@ describe('getStudentLastThesisStartRequest', () => {
         co_supervisors: ['d370335'],
         creation_date: '2021-01-01T00:00:00.000Z',
         approval_date: null,
-        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL
+        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL,
+        changes_requested: null
       }
     );
   });
@@ -184,7 +186,8 @@ describe('listThesisStartRequests', () => {
         supervisor_id: 'd279620',
         creationdate: '2021-01-01T00:00:00.000Z',
         approval_date: null,
-        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL
+        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL,
+        changes_requested: null
       }
     ]);
 
@@ -207,7 +210,8 @@ describe('listThesisStartRequests', () => {
         ],
         creationdate: '2021-01-01T00:00:00.000Z',
         approval_date: null,
-        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL
+        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL,
+        changes_requested: null
       }
     ]);
   });
@@ -226,6 +230,7 @@ describe('getThesisStartRequestById', () => {
       creation_date: '2021-01-01T00:00:00.000Z',
       approval_date: null,
       status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL,
+      changes_requested: null
     };
     const mockCoSupervisors = [{ cosupervisor_id: 'cosupervisor1' }, { cosupervisor_id: 'cosupervisor2' }];
 
@@ -257,6 +262,7 @@ describe('getThesisStartRequestById', () => {
       creation_date: '2021-01-01T00:00:00.000Z',
       approval_date: null,
       status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL,
+      changes_requested: null
     };
     const mockCoSupervisors = undefined;
 

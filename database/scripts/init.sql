@@ -172,10 +172,16 @@ CREATE TABLE thesisStartRequest (
     creation_date DATE NOT NULL,
     approval_date DATE,
     status TEXT DEFAULT 'waiting for approval',
+    changes_requested TEXT,
     FOREIGN KEY(student_id) REFERENCES student(id),
     FOREIGN KEY(application_id) REFERENCES thesisApplication(id),
     FOREIGN KEY(proposal_id) REFERENCES thesisProposal(proposal_id),
-    FOREIGN KEY(supervisor_id) REFERENCES teacher(id)
+    FOREIGN KEY(supervisor_id) REFERENCES teacher(id),
+    CHECK (
+        (status = 'changes requested' AND changes_requested IS NOT NULL)
+            OR
+        (status <> 'changes requested' AND changes_requested IS NULL)
+    )
 );
 
 -- Create the thesisStartCosupervisor table
@@ -601,7 +607,7 @@ VALUES
 -- Insert into thesisStartRequest
 INSERT INTO thesisStartRequest(student_id, title, description, supervisor_id, creation_date)
 VALUES
-    ('s319355', 'start request for a thesis to be defined', 'i''d like to start a thesis concerning numerical modelling and simulations with professor Ricci', 'd357587', '2023-11-30T23:59:59.999Z'); 
+    ('s319355', 'start request for a thesis to be defined', 'i''d like to start a thesis concerning numerical modelling and simulations with professor Ricci', 'd357587', '2023-11-30T23:59:59.999Z');
 
 -- Insert into thesisStartCosupervisor
 INSERT INTO thesisStartCosupervisor(start_request_id, cosupervisor_id)
@@ -610,7 +616,7 @@ VALUES
     (1, 'd226682'),
     (1, 'd392000');
 
-    
+
 -- Create a trigger that check that the proposal_id of the thesisApplication table is present in the thesisProposal table
 -- and that the proposal is not deleted or archived for the insertion and the update
 CREATE TRIGGER check_proposal_id_in_application

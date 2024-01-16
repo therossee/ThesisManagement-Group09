@@ -75,7 +75,7 @@ exports.createThesisStartRequest = async (student_id, title, description, superv
  * Return the last thesis start request of the student with the given id
  *
  * @param {string} student_id
- * @return {Promise<ThesisStartRequestRow | null>}
+ * @return {Promise<ThesisStartRequestRowExtended | null>}
  */
 exports.getStudentLastThesisStartRequest = async (student_id) => {
   const currentDate = new AdvancedDate().toISOString();
@@ -95,30 +95,35 @@ exports.getStudentLastThesisStartRequest = async (student_id) => {
 /**
  * Return all the thesis start requests
  *
- * @return {Promise<ThesisStartRequestRow[]>}
+ * @param {string} [supervisorId]
+ *
+ * @return {Promise<ThesisStartRequestRowExtended[]>}
  */
-exports.listThesisStartRequests = async () => {
-  const currentDate = new AdvancedDate().toISOString();
-  const queryTSR = `SELECT * FROM thesisStartRequest WHERE creation_date < ?`;
-  const tsrList = db.prepare(queryTSR).all(currentDate);
+exports.listThesisStartRequests = async (supervisorId) => {
+    let queryTSR = `SELECT * FROM thesisStartRequest WHERE creation_date < ?`;
+    const params = [new AdvancedDate().toISOString()];
+    if (supervisorId) {
+        queryTSR += " AND supervisor_id = ?";
+        params.push(supervisorId);
+    }
 
-  return tsrList.map( tsr => {
-    const queryCoSupervisors = `SELECT cosupervisor_id FROM thesisStartCosupervisor WHERE start_request_id=?`;
-    const co_supervisors = db.prepare(queryCoSupervisors).all(tsr.id).map(entry => entry.cosupervisor_id);
+    /** @type {ThesisStartRequestRow[]} */
+    const tsrList = db.prepare(queryTSR).all(...params);
 
-    // Add the coSupervisors attribute to the tsr object
-    return {
-      ...tsr,
-      co_supervisors,
-    };
-  })
+    return tsrList.map( tsr => {
+        const queryCoSupervisors = `SELECT cosupervisor_id FROM thesisStartCosupervisor WHERE start_request_id=?`;
+        const co_supervisors = db.prepare(queryCoSupervisors).all(tsr.id).map(entry => entry.cosupervisor_id);
+
+        // Add the coSupervisors attribute to the tsr object
+        return { ...tsr, co_supervisors };
+    })
 };
 
 /**
  * Return the thesis start request with the given id without performing any check
  *
  * @param {string} request_id
- * @return {Promise<ThesisStartRequestRow | null>}
+ * @return {Promise<ThesisStartRequestRowExtended | null>}
  */
 exports.getThesisStartRequestById = async (request_id) => {
   const query = `SELECT * FROM thesisStartRequest WHERE id = ? AND creation_date < ?`;
@@ -156,14 +161,19 @@ exports.updateThesisStartRequestStatus = async (request_id, new_status) => {
  *
  * @property {number} id
  * @property {string} student_id
- * @property {string} application_id
- * @property {string} proposal_id
+ * @property {string | null} application_id
+ * @property {string | null} proposal_id
  * @property {string} title
  * @property {string} description
  * @property {string} supervisor_id
  * @property {string} creation_date
- * @property {string} approval_date
- * @property {string[]} co_supervisors
+ * @property {string | null} approval_date
  * @property {string} status
+ * @property {string | null} changes_requested
+ */
+
+/**
+ * @typedef {ThesisStartRequestRow} ThesisStartRequestRowExtended
  *
+ * @property {string[]} co_supervisors
  */

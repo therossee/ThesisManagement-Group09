@@ -285,7 +285,7 @@ describe('POST /api/student/applications', () => {
     },10000);
 
     test('should create a new application without a file for a valid request and notify teacher', async () => {
-       
+
         const thesis_proposal_id = '2';
 
         const response = await agent
@@ -641,13 +641,13 @@ describe('POST /api/student/thesis-start-requests', () => {
           description: 'Description',
           internal_co_supervisors_ids: ['d370335'],
         };
-    
+
         const response = await agent
           .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
-    
+
         expect(response.status).toBe(400);
         expect(response.body).toEqual({
             errors: [
@@ -659,7 +659,7 @@ describe('POST /api/student/thesis-start-requests', () => {
     });
 
     test('should return 404 with error message for non-existing application', async () => {
-  
+
         const requestBody = {
           application_id: 100,
           proposal_id: 2,
@@ -668,21 +668,21 @@ describe('POST /api/student/thesis-start-requests', () => {
           supervisor_id: 'd279620',
           internal_co_supervisors_ids: ['d370335'],
         };
-    
+
         const response = await agent
           .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
-    
+
         expect(response.status).toBe(404);
         expect(response.body).toEqual({
           message: 'Application with id 100 not found.',
         });
     });
-    
+
     test('should return 404 with error message for non-existing proposal', async () => {
-  
+
         const requestBody = {
           application_id: 1,
           proposal_id: 100,
@@ -691,13 +691,13 @@ describe('POST /api/student/thesis-start-requests', () => {
           supervisor_id: 'd279620',
           internal_co_supervisors_ids: ['d370335'],
         };
-    
+
         const response = await agent
           .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
-    
+
         expect(response.status).toBe(404);
         expect(response.body).toEqual({
           message: 'Thesis proposal with id 100 not found.',
@@ -708,13 +708,13 @@ describe('POST /api/student/thesis-start-requests', () => {
 
         const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
           .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2020-10-10T10:45:50.121Z', '2032-11-10T23:59:59.999Z', 'LM', 1);
-        
+
         db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
           .run(proposal.lastInsertRowid, 'L-08');
 
         const application = db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
           .run('s318952', proposal.lastInsertRowid, new AdvancedDate().toISOString(), 'waiting for approval');
-       
+
         const requestBody = {
             application_id: application.lastInsertRowid,
             proposal_id: proposal.lastInsertRowid,
@@ -723,13 +723,13 @@ describe('POST /api/student/thesis-start-requests', () => {
             supervisor_id: 'd279620',
             internal_co_supervisors_ids: [],
         };
-    
+
         const response = await agent
           .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
-    
+
         expect(response.status).toBe(400);
         expect(response.body).toEqual({
           message: `Thesis proposal with id ${proposal.lastInsertRowid} is archived.`,
@@ -740,13 +740,13 @@ describe('POST /api/student/thesis-start-requests', () => {
 
         const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
           .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2020-10-10T10:45:50.121Z', '2022-11-10T23:59:59.999Z', 'LM', 0);
-        
+
         db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
           .run(proposal.lastInsertRowid, 'L-08');
 
         const application = db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
           .run('s318952', proposal.lastInsertRowid, new AdvancedDate().toISOString(), 'waiting for approval');
-       
+
         const requestBody = {
             application_id: application.lastInsertRowid,
             proposal_id: proposal.lastInsertRowid,
@@ -755,13 +755,13 @@ describe('POST /api/student/thesis-start-requests', () => {
             supervisor_id: 'd279620',
             internal_co_supervisors_ids: [],
         };
-    
+
         const response = await agent
           .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
-    
+
         expect(response.status).toBe(400);
         expect(response.body).toEqual({
           message: `Thesis proposal with id ${proposal.lastInsertRowid} is expired.`,
@@ -772,13 +772,13 @@ describe('POST /api/student/thesis-start-requests', () => {
 
         const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
           .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2030-10-10T10:45:50.121Z', '2032-11-10T23:59:59.999Z', 'LM', 0);
-        
+
         db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
           .run(proposal.lastInsertRowid, 'L-08');
 
         const application = db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
           .run('s318952', proposal.lastInsertRowid, new AdvancedDate().toISOString(), 'waiting for approval');
-       
+
         const requestBody = {
             application_id: application.lastInsertRowid,
             proposal_id: proposal.lastInsertRowid,
@@ -787,13 +787,13 @@ describe('POST /api/student/thesis-start-requests', () => {
             supervisor_id: 'd279620',
             internal_co_supervisors_ids: [],
         };
-    
+
         const response = await agent
           .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
-    
+
         expect(response.status).toBe(400);
         expect(response.body).toEqual({
           message: `Thesis proposal with id ${proposal.lastInsertRowid} is not yet available.`,
@@ -801,20 +801,20 @@ describe('POST /api/student/thesis-start-requests', () => {
     });
 
     test('should return 400 with error message for supervisor also as a co-supervisor', async () => {
-       
+
         const requestBody = {
             title: 'Title',
             description: 'Description',
             supervisor_id: 'd279620',
             internal_co_supervisors_ids: ['d279620'],
         };
-    
+
         const response = await agent
           .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
-    
+
         expect(response.status).toBe(400);
         expect(response.body).toEqual({
           message: `Supervisor cannot be also co-supervisor`,
@@ -822,41 +822,41 @@ describe('POST /api/student/thesis-start-requests', () => {
     });
 
     test('should return 404 with error message for non-existing supervisor', async () => {
-    
+
         const requestBody = {
           title: 'Title',
           description: 'Description',
           supervisor_id: 'nonexistent_id',
           internal_co_supervisors_ids: ['d370335'],
         };
-    
+
         const response = await agent
           .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
-    
+
         expect(response.status).toBe(404);
         expect(response.body).toEqual({
           message: 'Supervisor with id nonexistent_id not found.',
         });
     });
-    
+
     test('should return 404 with error message for non-existing internal co-supervisor', async () => {
-    
+
       const requestBody = {
         title: 'Title',
         description: 'Description',
         supervisor_id: 'd279620',
         internal_co_supervisors_ids: ['nonexistent_id'],
       };
-  
+
       const response = await agent
         .post('/api/student/thesis-start-requests')
         .set('Accept', 'application/json')
         .set('credentials', 'include')
         .send(requestBody);
-  
+
       expect(response.status).toBe(404);
       expect(response.body).toEqual({
         message: 'Internal co-supervisor with id nonexistent_id not found.',
@@ -866,20 +866,20 @@ describe('POST /api/student/thesis-start-requests', () => {
     test('should return 500 with error message if an error occur during the creation of the thesis start request', async () => {
 
         jest.spyOn(thesisStartRequestDao, 'createThesisStartRequest').mockRejectedValueOnce(new Error());
-        
+
         const requestBody = {
           title: 'Title',
           description: 'Description',
           supervisor_id: 'd279620',
           internal_co_supervisors_ids: [],
         };
-    
+
         const response = await agent
           .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
-    
+
         expect(response.status).toBe(500);
         expect(response.body).toEqual('Internal Server Error');
     });
@@ -887,20 +887,20 @@ describe('POST /api/student/thesis-start-requests', () => {
     test('should return 500 with error message if an error occur', async () => {
 
         jest.spyOn(usersDao, 'getTeacherById').mockRejectedValueOnce(new Error());
-        
+
         const requestBody = {
           title: 'Title',
           description: 'Description',
           supervisor_id: 'd279620',
           internal_co_supervisors_ids: [],
         };
-    
+
         const response = await agent
           .post('/api/student/thesis-start-requests')
           .set('Accept', 'application/json')
           .set('credentials', 'include')
           .send(requestBody);
-    
+
         expect(response.status).toBe(500);
         expect(response.body).toEqual('Internal Server Error');
     });
@@ -908,16 +908,16 @@ describe('POST /api/student/thesis-start-requests', () => {
     test('should return 403 if the user has other active thesis start requests', async () => {
         const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
           .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2020-10-10T10:45:50.121Z', '2032-11-10T23:59:59.999Z', 'LM', 0);
-      
+
         db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
           .run(proposal.lastInsertRowid, 'L-08');
-  
+
         const application = db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
         .run('s318952', proposal.lastInsertRowid, new AdvancedDate().toISOString(), 'waiting for approval');
-   
+
         db.prepare('INSERT INTO thesisStartRequest (student_id, application_id, proposal_id, title, description, supervisor_id, creation_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
           .run('s318952', application.lastInsertRowid, proposal.lastInsertRowid, 'Title', 'Description', 'd279620', new AdvancedDate().toISOString(),'waiting for approval');
-  
+
           const requestBody = {
               application_id: 2,
               proposal_id: 2,
@@ -926,20 +926,20 @@ describe('POST /api/student/thesis-start-requests', () => {
               supervisor_id: 'd279620',
               internal_co_supervisors_ids: [],
           };
-  
+
           const response = await agent
               .post('/api/student/thesis-start-requests')
               .set('Accept', 'application/json')
               .set('credentials', 'include')
               .send(requestBody);
-  
+
           expect(response.status).toBe(403);
           expect(response.body).toEqual({message: 'The student has already a thesis start request'});
-  
+
     });
 
     test('should return 403 if the proposal doesn\'t belong to the degree of the student', async () => {
-  
+
           const requestBody = {
               proposal_id: 3,
               title: 'PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API',
@@ -947,16 +947,16 @@ describe('POST /api/student/thesis-start-requests', () => {
               supervisor_id: 'd279620',
               internal_co_supervisors_ids: [],
           };
-  
+
           const response = await agent
               .post('/api/student/thesis-start-requests')
               .set('Accept', 'application/json')
               .set('credentials', 'include')
               .send(requestBody);
-  
+
           expect(response.status).toBe(403);
           expect(response.body).toEqual({message: 'The proposal doesn\'t belong to the student degree'});
-  
+
     });
 
     test('should create a new thesis start request not related to an application', async () => {
@@ -1007,17 +1007,18 @@ describe('POST /api/student/thesis-start-requests', () => {
               description: 'Description',
               creation_date: expect.stringContaining(new AdvancedDate().toISOString().substring(0, 10)),
               approval_date: null,
-              status: 'waiting for approval'
+              status: 'waiting for approval',
+              changes_requested: null
           }
       );
 
     });
 
     test('should create a new thesis start request related to an application', async () => {
-        
+
         db.prepare('INSERT INTO thesisApplication (proposal_id, student_id, creation_date, status) VALUES (?, ?, ?, ?)')
            .run( 2, 's318952', new AdvancedDate().toISOString(), 'waiting for approval');
-        
+
         const requestBody = {
             application_id: 2,
             proposal_id: 2,
@@ -1058,7 +1059,8 @@ describe('POST /api/student/thesis-start-requests', () => {
                 approval_date: null,
                 title: 'PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API',
                 description: 'This thesis focuses on the performance evaluation of Kafka clients using a reactive API. The research aims to assess and enhance the efficiency of Kafka clients by implementing a reactive programming approach. The study explores how a reactive API can improve responsiveness and scalability in real-time data streaming applications.',
-                status: 'waiting for approval'
+                status: 'waiting for approval',
+                changes_requested: null
             }
         );
 
@@ -1119,7 +1121,8 @@ describe('GET /api/student/thesis-start-requests/last', () => {
                 co_supervisors: [],
                 creation_date: '2024-01-06T18:00:00.058Z',
                 approval_date: null,
-                status: 'waiting for approval'
+                status: 'waiting for approval',
+                changes_requested: null
             }
         );
     });
@@ -1130,7 +1133,7 @@ describe('GET /api/student/thesis-start-requests/last', () => {
 
         const request = db.prepare('INSERT INTO thesisStartRequest (student_id, application_id, proposal_id, title, description, supervisor_id, creation_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
           .run('s318952', 1, 1, 'Title', 'Description', 'd279620','2024-01-06T18:00:00.058Z','waiting for approval');
-        
+
         db.prepare('INSERT INTO thesisStartCosupervisor(start_request_id, cosupervisor_id) VALUES (?, ?)')
         .run(request.lastInsertRowid, 'd370335');
 
@@ -1174,7 +1177,8 @@ describe('GET /api/student/thesis-start-requests/last', () => {
                 }],
                 creation_date: '2024-01-06T18:00:00.058Z',
                 approval_date: null,
-                status: 'waiting for approval'
+                status: 'waiting for approval',
+                changes_requested: null
             }
         );
     });
