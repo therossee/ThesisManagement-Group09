@@ -169,6 +169,7 @@ exports.updateThesisStartRequestStatus = async (request_id, new_status) => {
  * @property {string} creation_date
  * @property {string | null} approval_date
  * @property {string} status
+ * @property {string | null} changes_requested
  */
 
 /**

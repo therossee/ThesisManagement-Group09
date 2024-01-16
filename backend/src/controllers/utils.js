@@ -84,6 +84,7 @@ async function populateThesisStartRequest(thesisStartRequestData) {
         title: thesisStartRequestData.title,
         description: thesisStartRequestData.description,
         status: thesisStartRequestData.status,
+        changes_requested: thesisStartRequestData.changes_requested,
         creation_date: thesisStartRequestData.creation_date,
         approval_date: thesisStartRequestData.approval_date,
     };
@@ -109,6 +110,7 @@ module.exports = {
  * @property {string} title
  * @property {string} description
  * @property {string} status
+ * @property {string | null} changes_requested
  * @property {string} creation_date
  * @property {string | null} approval_date
  */
