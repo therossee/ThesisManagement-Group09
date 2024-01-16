@@ -120,14 +120,14 @@ async function newThesisStartRequest(req, res, next) {
  * @param {import('express').Response} res
  * @param {import('express').NextFunction} next
  */
-async function getStudentActiveThesisStartRequests(req, res, next) {
+async function getStudentLastThesisStartRequest(req, res, next) {
     try {
         const studentId = req.user.id;
-        const studentThesisStartRequest = await thesisStartRequestDao.getStudentActiveThesisStartRequests(studentId);
-        if(!studentThesisStartRequest) {
+        const studentLastThesisStartRequest = await thesisStartRequestDao.getStudentLastThesisStartRequest(studentId);
+        if (!studentLastThesisStartRequest) {
             res.status(200).json({});
         }
-        res.status(200).send(await utils.populateThesisStartRequest(studentThesisStartRequest));
+        res.status(200).send(await utils.populateThesisStartRequest(studentLastThesisStartRequest));
     } catch (e) {
         next(e);
     }
@@ -139,5 +139,5 @@ module.exports = {
     applyForProposal,
     getStudentApplicationDecision,
     newThesisStartRequest,
-    getStudentActiveThesisStartRequests
+    getStudentLastThesisStartRequest
 };

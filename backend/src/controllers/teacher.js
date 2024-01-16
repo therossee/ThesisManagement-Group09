@@ -38,7 +38,7 @@ async function acceptAnApplicationOnThesis(req, res, next) {
             return res.status(400).json({ message: 'Missing required fields.' });
         }
 
-        const thesis = await thesisProposalDao.getThesisProposalById(proposal_id);
+        const thesis = thesisProposalDao.getThesisProposalById(proposal_id);
         if (!thesis) {
             return res.status(404).json({ message: `Thesis proposal with id ${proposal_id} not found, cannot accept this application.` })
         }
@@ -80,7 +80,7 @@ async function rejectAnApplicationOnThesis(req, res, next) {
             return res.status(400).json({ message: 'Missing required fields.' });
         }
 
-        const thesis = await thesisProposalDao.getThesisProposalById(proposal_id);
+        const thesis = thesisProposalDao.getThesisProposalById(proposal_id);
         if (!thesis) {
             return res.status(404).json({ message: `Thesis proposal with id ${proposal_id} not found, cannot reject this application.` })
         }
