@@ -8,6 +8,7 @@ const AdvancedDate = require("../models/AdvancedDate");
 const {APPLICATION_STATUS} = require("../enums/application");
 const NotificationService = require("../services/NotificationService");
 const NoThesisProposalError = require("../errors/NoThesisProposalError");
+const listApplicationsForTeacherThesisProposal = require("../dao/thesis_application_dao").listApplicationsForTeacherThesisProposal;
 
 /**
  * @param {PopulatedRequest} req
@@ -195,12 +196,12 @@ async function updateThesisProposalById(req, res, next) {
 
         const id = await thesisProposalDao.updateThesisProposal(proposal_id, supervisor_id, thesis);
         if (!id) {
-            return res.status(404).json({ message: `Thesis proposal with id ${proposal_id} not found.` });
+            throw new NoThesisProposalError(proposal_id);
         }
 
-        const proposal = await thesisProposalDao.getThesisProposalById(proposal_id);
+        const proposal = thesisProposalDao.getThesisProposalById(proposal_id);
         if (!proposal) {
-            return res.status(404).json({ message: `Thesis proposal with id ${proposal_id} not found.` });
+            throw new NoThesisProposalError(proposal_id);
         }
         const cds = await thesisProposalDao.getThesisProposalCds(proposal_id);
 
@@ -308,27 +309,23 @@ async function unarchiveThesisProposalById(req, res, next) {
  */
 async function listArchivedThesisProposals(req, res, next) {
     try {
-        if (req.user.roles.includes(USER_ROLES.TEACHER)) {
-            const thesisProposals = await thesisProposalDao.listArchivedThesisProposalsTeacher(req.user.id);
-            const proposalsPopulated = await Promise.all(
-                thesisProposals.map(async proposal => {
-                    const cds = await thesisProposalDao.getThesisProposalCds(proposal.proposal_id);
-                    return await _populateProposal(proposal, cds);
-                })
-            );
+        const thesisProposals = await thesisProposalDao.listArchivedThesisProposalsTeacher(req.user.id);
+        const proposalsPopulated = await Promise.all(
+            thesisProposals.map(async proposal => {
+                const cds = await thesisProposalDao.getThesisProposalCds(proposal.proposal_id);
+                return await _populateProposal(proposal, cds);
+            })
+        );
 
-            // Not used right now, but it's here for potential future use
-            const metadata = {
-                index: 0,
-                count: thesisProposals.length,
-                total: thesisProposals.length,
-                currentPage: 1
-            };
-            res.json({ $metadata: metadata, items: proposalsPopulated });
-        } else {
-            // Handle unauthorized case if neither student nor teacher
-            res.status(403).json('Unauthorized');
-        }
+        // Not used right now, but it's here for potential future use
+        const metadata = {
+            index: 0,
+            count: thesisProposals.length,
+            total: thesisProposals.length,
+            currentPage: 1
+        };
+        res.json({ $metadata: metadata, items: proposalsPopulated });
+        
     } catch (e) {
         console.log(e)
         next(e);
@@ -359,7 +356,7 @@ async function _populateProposal(proposalData, cds) {
     return {
         id: proposalData.proposal_id,
         title: proposalData.title,
-        status: _getProposalStatus(proposalData),
+        status: await _getProposalStatus(proposalData),
         supervisor: await thesisProposalDao.getSupervisorOfProposal(proposalData.proposal_id)
             .then(_serializeTeacher),
         coSupervisors: {
@@ -378,7 +375,7 @@ async function _populateProposal(proposalData, cds) {
         level: proposalData.level,
         cds: cds,
         keywords: await thesisProposalDao.getKeywordsOfProposal(proposalData.proposal_id),
-        groups: await thesisProposalDao.getProposalGroups(proposalData.proposal_id)
+        groups: await thesisProposalDao.getProposalGroups(proposalData.proposal_id),
     };
 }
 
@@ -386,16 +383,25 @@ async function _populateProposal(proposalData, cds) {
  * Return the status of a proposal
  *
  * @param proposalData
- * @return {'EXPIRED' | 'ACTIVE'}
+ * @return {Promise<string>}
  * @private
  */
-function _getProposalStatus(proposalData) {
+async function _getProposalStatus(proposalData) {
     const now = new AdvancedDate();
     const expirationDate = new AdvancedDate(proposalData.expiration);
 
     if (expirationDate.isBefore(now)) {
         return 'EXPIRED';
     }
+
+    // Check if the proposal has already beed assigned
+    const applications = await listApplicationsForTeacherThesisProposal(proposalData.proposal_id, proposalData.supervisor_id);
+    if (applications.some(application => application.status === APPLICATION_STATUS.ACCEPTED)) {
+        return 'ASSIGNED';
+    }
+
+    if(proposalData.is_archived==1)
+        return 'ARCHIVED';
 
     return 'ACTIVE';
 }
