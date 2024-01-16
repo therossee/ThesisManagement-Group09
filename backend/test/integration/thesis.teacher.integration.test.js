@@ -366,7 +366,7 @@ describe('GET /api/thesis-proposals (teacher)', () => {
     });
 
     test('should return an array of thesis proposals for a teacher with aN expired one', async () => {
-        
+
         jest.spyOn(thesisProposalDao, 'listThesisProposalsTeacher').mockResolvedValueOnce(
             [
                 {
@@ -587,7 +587,7 @@ describe('PUT /api/thesis-proposals/:id', () => {
 
         // Assert the response
         expect(response.status).toBe(404);
-        expect(response.body).toEqual({message: `Thesis proposal with id 32 not found.`});
+        expect(response.body).toEqual({message: `No thesis proposal with id 32 found`});
     });
 
     test('should return error 400 if some properties are missing', async () => {
@@ -728,7 +728,7 @@ describe('PUT /api/thesis-proposals/:id', () => {
             .send(updatedBody);
 
         expect(response.status).toBe(404);
-        expect(response.body).toEqual({message: `Thesis proposal with id 1 not found.`});
+        expect(response.body).toEqual({message: `No thesis proposal with id 1 found`});
     });
 
     test('should return 500 error', async () => {
