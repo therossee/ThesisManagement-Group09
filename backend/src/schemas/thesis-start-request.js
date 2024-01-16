@@ -69,6 +69,31 @@ const APIThesisStartRequestSchema = z.object({
     })
 });
 
+const APIReviewThesisStartRequestSchema = z.union([
+    z.object({ action: z.enum(['accept', 'reject']) }),
+    z.object({
+        action: z.literal('request changes'),
+        changes: z.string().min(1)
+    })
+]);
+
 module.exports = {
-    APIThesisStartRequestSchema
+    APIThesisStartRequestSchema,
+    APIReviewThesisStartRequestSchema
 };
+
+/**
+ * @typedef {ThesisStartRequestAcceptOrReject | ThesisStartRequestRequestChanges} ThesisStartRequestReview
+ */
+
+/**
+ * @typedef {Object} ThesisStartRequestAcceptOrReject
+ *
+ * @property {'accept' | 'reject'} action
+ */
+/**
+ * @typedef {Object} ThesisStartRequestRequestChanges
+ *
+ * @property {'request changes'} action
+ * @property {string} changes
+ */
