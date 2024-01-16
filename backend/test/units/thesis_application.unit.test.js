@@ -175,12 +175,13 @@ describe('applyForProposal', () => {
         };
         fs.existsSync.mockReturnValue(true); // Simulate file existence
         fs.mkdirSync.mockReturnValue(null);
+        const errToThrow = new Error('Error');
         fs.writeFileSync.mockImplementation(() => {
-            throw new Error();
+            throw errToThrow;
         });
 
         // Call the function
-        await expect(thesisApplication.applyForProposal(proposal_id, student_id, file)).rejects.toEqual(new Error('Error'));
+        await expect(thesisApplication.applyForProposal(proposal_id, student_id, file)).rejects.toEqual(errToThrow);
 
     });
     test('handle properly db errors', async () => {
@@ -202,12 +203,12 @@ describe('applyForProposal', () => {
             expiration: '2023-12-31',
             level: 'Test Level'
         });
-        db.prepare().get.mockReturnValueOnce();
-        db.prepare().run.mockReturnValueOnce();
+        db.prepare().get.mockReturnValueOnce(null);
+        const errToThrow = new Error('Error');
         db.prepare().run.mockImplementationOnce(() => {
-            throw new Error();
+            throw errToThrow;
         });
-        
+
 
         // Mock the file-related functions
         const file = {
@@ -221,7 +222,7 @@ describe('applyForProposal', () => {
         });
 
         // Call the function
-        await expect(thesisApplication.applyForProposal(proposal_id, student_id, file)).rejects.toEqual(new Error('Error'));
+        await expect(thesisApplication.applyForProposal(proposal_id, student_id, file)).rejects.toEqual(errToThrow);
 
     });
     test('applies for a proposal not belonging to his cds', async () => {
@@ -282,7 +283,7 @@ describe('listApplicationsForTeacherThesisProposal', () => {
 
         // Call the function
         const result = await thesisApplication.listApplicationsForTeacherThesisProposal(1, 'd1');
-        const expectedQuery = 
+        const expectedQuery =
         `SELECT s.name, s.surname, ta.status, s.id, ta.id AS application_id, ta.creation_date
       FROM thesisApplication ta, thesisProposal tp, student s
       WHERE ta.proposal_id = tp.proposal_id 
@@ -426,9 +427,9 @@ describe('cancelOtherApplications', () => {
 });
 
 describe('cancelWaitingApplicationsOnExpiredThesis', () => {
-    
+
     test('should cancel waiting applications on expired thesis proposals', async () => {
-  
+
       // Mock the result of the query
       const mockResult = [
         { /* Application data for the first row */ },
@@ -436,19 +437,19 @@ describe('cancelWaitingApplicationsOnExpiredThesis', () => {
         // Add more rows as needed
       ];
       db.prepare().all.mockReturnValueOnce(mockResult);
-  
+
       // Call the function
       const result = await thesisApplication.cancelWaitingApplicationsOnExpiredThesis();
-  
+
       // Assertions
       expect(result).toEqual(mockResult);
-  
+
       // Verify the prepared SQL query
       const expectedQuery = `UPDATE thesisApplication
       SET status=?
       WHERE status=? AND proposal_id IN (SELECT proposal_id FROM thesisProposal WHERE expiration < ?)
       RETURNING *;`;
-  
+
       expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
       expect(db.prepare().all).toHaveBeenCalledWith(
         APPLICATION_STATUS.CANCELLED,

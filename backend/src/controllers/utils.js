@@ -63,11 +63,11 @@ async function listDegrees(req, res, next) {
 /**
  * Serialize and populate a thesis start request object in order to have all the data needed by the API
  *
- * @param {ThesisStartRequestRow} thesisStartRequestData
- * @return {Promise<object>}
- * @private
+ * @param {ThesisStartRequestRowExtended} thesisStartRequestData
+ *
+ * @return {Promise<ThesisStartRequestPopulated>}
  */
-async function _populateThesisStartRequest(thesisStartRequestData) {
+async function populateThesisStartRequest(thesisStartRequestData) {
     const coSupervisorsPromises = thesisStartRequestData.co_supervisors.map(async (id) => {
         return await usersDao.getTeacherById(id);
     });
@@ -84,32 +84,33 @@ async function _populateThesisStartRequest(thesisStartRequestData) {
         title: thesisStartRequestData.title,
         description: thesisStartRequestData.description,
         status: thesisStartRequestData.status,
+        changes_requested: thesisStartRequestData.changes_requested,
         creation_date: thesisStartRequestData.creation_date,
         approval_date: thesisStartRequestData.approval_date,
     };
 }
-
-/**
- * @typedef {Object} ThesisStartRequestRow
- *
- * @property {string} id
- * @property {string} proposal_id
- * @property {string} application_id
- * @property {string} student_id
- * @property {string} supervisor_id
- * @property {Array<string>} co_supervisors
- * @property {string} title
- * @property {string} description
- * @property {string} creation_date
- * @property {string} approval_date
- * @property {string} status
- * 
- */
 
 module.exports = {
     listTeachers,
     listExternalCoSupervisors,
     listKeywords,
     listDegrees,
-    _populateThesisStartRequest
+    populateThesisStartRequest
 };
+
+/**
+ * @typedef {Object} ThesisStartRequestPopulated
+ *
+ * @property {number} id
+ * @property {string | null} proposal_id
+ * @property {string | null} application_id
+ * @property {StudentPartialRow} student
+ * @property {TeacherRow} supervisor
+ * @property {TeacherRow[]} co_supervisors
+ * @property {string} title
+ * @property {string} description
+ * @property {string} status
+ * @property {string | null} changes_requested
+ * @property {string} creation_date
+ * @property {string | null} approval_date
+ */
