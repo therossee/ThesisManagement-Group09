@@ -201,7 +201,7 @@ describe('updateThesisProposal', () => {
             expiration: '2027-12-31',
             level: 'Test Level'
         };
-        db.prepare().run.mockReturnValueOnce({changes: 0});
+        db.prepare().run.mockReturnValueOnce({ changes: 0 });
         // Call the function and assert the result
         const result = await thesis_proposal.updateThesisProposal(proposalId, supervisorId, thesisData);
         expect(result).toBeNull();

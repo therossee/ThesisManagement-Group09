@@ -33,9 +33,9 @@ afterEach(() => {
 
 describe('createThesisStartRequest', () => {
     test('handles unauthorized action error if student already has a request', async () => {
-      
-      db.prepare().get.mockReturnValueOnce({ proposal_id: 3, cod_degree: 'LM-31'}); 
-      
+
+      db.prepare().get.mockReturnValueOnce({ proposal_id: 3, cod_degree: 'LM-31'});
+
       // Assertions for rejected promise with UnauthorizedActionError
       await expect(
         thesis_start_request.createThesisStartRequest(
@@ -48,16 +48,16 @@ describe('createThesisStartRequest', () => {
             ['']
         )
       ).rejects.toThrowError(new UnauthorizedActionError('The student has already a thesis start request'));
-  
+
       // Assertions for database interactions
       expect(db.transaction).not.toHaveBeenCalled();
     });
 
     test('handles unauthorized action error if proposal doesn\'t belong to the same cds of the student', async () => {
-      
-        db.prepare().get.mockReturnValueOnce(); 
+
         db.prepare().get.mockReturnValueOnce();
-        
+        db.prepare().get.mockReturnValueOnce();
+
         // Assertions for rejected promise with UnauthorizedActionError
         await expect(
           thesis_start_request.createThesisStartRequest(
@@ -70,17 +70,17 @@ describe('createThesisStartRequest', () => {
               ['']
           )
         ).rejects.toThrowError(new UnauthorizedActionError('The proposal doesn\'t belong to the student degree'));
-    
+
         // Assertions for database interactions
         expect(db.transaction).not.toHaveBeenCalled();
     });
 
     test('creates a thesis start request not related to an application', async () => {
-      
-        db.prepare().get.mockReturnValueOnce(); 
+
+        db.prepare().get.mockReturnValueOnce();
         db.prepare().run.mockReturnValueOnce({lastInsertRowid: 1});
         db.prepare().run.mockReturnValueOnce({});
-        
+
         const requestId = await thesis_start_request.createThesisStartRequest(
           's318952',
           'title',
@@ -88,19 +88,19 @@ describe('createThesisStartRequest', () => {
           'd279620',
           ['']
         );
-    
+
         expect(requestId).toBe(1);
-        expect(db.transaction).toHaveBeenCalled(); 
-    
+        expect(db.transaction).toHaveBeenCalled();
+
     });
 
     test('creates a thesis start request with all parameters', async () => {
-      
-        db.prepare().get.mockReturnValueOnce(); 
-        db.prepare().get.mockReturnValueOnce({ proposal_id: 2, cod_degree: 'LM-31'}); 
+
+        db.prepare().get.mockReturnValueOnce();
+        db.prepare().get.mockReturnValueOnce({ proposal_id: 2, cod_degree: 'LM-31'});
         db.prepare().run.mockReturnValueOnce({lastInsertRowid: 1});
         db.prepare().run.mockReturnValueOnce({});
-  
+
         const requestId = await thesis_start_request.createThesisStartRequest(
           's318952',
           1,
@@ -110,28 +110,29 @@ describe('createThesisStartRequest', () => {
           'd279620',
           ['d370335']
         );
-    
-        expect(requestId).toBe(1); 
+
+        expect(requestId).toBe(1);
         expect(db.transaction).toHaveBeenCalled();
-    });  
+    });
 });
 
 describe('getStudentLastThesisStartRequest', () => {
 
   test('returns the last thesis start request for the student', async () => {
-   
+
     db.prepare().get.mockReturnValueOnce(
-      { 
-        id: 1, 
-        title: 'Title 1', 
+      {
+        id: 1,
+        title: 'Title 1',
         student_id: 's318952',
-        description: 'Description 1', 
+        description: 'Description 1',
         supervisor_id: 'd279620',
         creation_date: '2021-01-01T00:00:00.000Z',
         approval_date: null,
-        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL 
+        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL,
+        changes_requested: null
       }
-    ); 
+    );
 
     db.prepare().all.mockReturnValueOnce([{ cosupervisor_id: 'd370335' }]);
 
@@ -140,33 +141,34 @@ describe('getStudentLastThesisStartRequest', () => {
 
     const expectedQuery = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? ORDER BY creation_date DESC LIMIT 1;`;
     expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
-   
+
     expect(result).toEqual(
-      { 
-        id: 1, 
-        title: 'Title 1', 
+      {
+        id: 1,
+        title: 'Title 1',
         student_id: 's318952',
-        description: 'Description 1', 
+        description: 'Description 1',
         supervisor_id: 'd279620',
         co_supervisors: ['d370335'],
         creation_date: '2021-01-01T00:00:00.000Z',
         approval_date: null,
-        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL 
+        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL,
+        changes_requested: null
       }
     );
   });
 
   test('returns no thesis start requests for the student', async () => {
-   
-    db.prepare().get.mockReturnValueOnce(undefined); 
+
+    db.prepare().get.mockReturnValueOnce(undefined);
 
     const studentId = 's318952';
     const result = await thesis_start_request.getStudentLastThesisStartRequest(studentId);
 
     const expectedQuery = `SELECT * FROM thesisStartRequest WHERE student_id=? AND creation_date < ? ORDER BY creation_date DESC LIMIT 1;`;
     expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
-   
-    expect(result).toEqual();
+
+    expect(result).toEqual(null);
   });
 
 });
@@ -174,20 +176,21 @@ describe('getStudentLastThesisStartRequest', () => {
 describe('listThesisStartRequests', () => {
 
   test('returns all thesis start requests', async () => {
-   
+
     db.prepare().all.mockReturnValueOnce([
-      { 
-        id: 1, 
-        title: 'Title 1', 
+      {
+        id: 1,
+        title: 'Title 1',
         student_id: 's318952',
-        description: 'Description 1', 
+        description: 'Description 1',
         supervisor_id: 'd279620',
         creationdate: '2021-01-01T00:00:00.000Z',
         approval_date: null,
-        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL 
+        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL,
+        changes_requested: null
       }
     ]);
-    
+
     db.prepare().all.mockReturnValueOnce([{ cosupervisor_id: 'd370335' }])
 
     const result = await thesis_start_request.listThesisStartRequests();
@@ -196,18 +199,19 @@ describe('listThesisStartRequests', () => {
     expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
 
     expect(result).toEqual([
-      { 
-        id: 1, 
-        title: 'Title 1', 
+      {
+        id: 1,
+        title: 'Title 1',
         student_id: 's318952',
-        description: 'Description 1', 
+        description: 'Description 1',
         supervisor_id: 'd279620',
         co_supervisors: [
-          'd370335' 
+          'd370335'
         ],
         creationdate: '2021-01-01T00:00:00.000Z',
         approval_date: null,
-        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL 
+        status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL,
+        changes_requested: null
       }
     ]);
   });
@@ -224,8 +228,9 @@ describe('getThesisStartRequestById', () => {
       title: 'Title 1',
       description: 'Description 1',
       creation_date: '2021-01-01T00:00:00.000Z',
-      approval_date: null,  
+      approval_date: null,
       status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL,
+      changes_requested: null
     };
     const mockCoSupervisors = [{ cosupervisor_id: 'cosupervisor1' }, { cosupervisor_id: 'cosupervisor2' }];
 
@@ -255,8 +260,9 @@ describe('getThesisStartRequestById', () => {
       title: 'Title 1',
       description: 'Description 1',
       creation_date: '2021-01-01T00:00:00.000Z',
-      approval_date: null,  
+      approval_date: null,
       status: THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL,
+      changes_requested: null
     };
     const mockCoSupervisors = undefined;
 
@@ -301,11 +307,7 @@ describe('updateThesisStartRequestStatus', () => {
     const result = await thesis_start_request.updateThesisStartRequestStatus(request_id, new_status);
 
     // Verify that the query was prepared with the correct parameters
-    const expectedQuery = `
-      UPDATE thesisStartRequest
-      SET status = ?
-      WHERE id = ?;
-    `;
+    const expectedQuery = `UPDATE thesisStartRequest SET status = ? WHERE id = ?;`;
     expect(db.prepare).toHaveBeenCalledWith(expectedQuery);
     expect(db.prepare().run).toHaveBeenCalledWith(new_status, request_id);
 
@@ -321,7 +323,7 @@ describe('updateThesisStartRequestStatus', () => {
 
     const result = await thesis_start_request.updateThesisStartRequestStatus(request_id, new_status);
 
-    expect(result).toBe(false); 
+    expect(result).toBe(false);
   });
 });
 

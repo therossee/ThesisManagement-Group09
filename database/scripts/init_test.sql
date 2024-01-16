@@ -172,10 +172,16 @@ CREATE TABLE thesisStartRequest (
     creation_date DATE NOT NULL,
     approval_date DATE,
     status TEXT DEFAULT 'waiting for approval',
+    changes_requested TEXT,
     FOREIGN KEY(student_id) REFERENCES student(id),
     FOREIGN KEY(application_id) REFERENCES thesisApplication(id),
     FOREIGN KEY(proposal_id) REFERENCES thesisProposal(proposal_id),
-    FOREIGN KEY(supervisor_id) REFERENCES teacher(id)
+    FOREIGN KEY(supervisor_id) REFERENCES teacher(id),
+    CHECK (
+        (status = 'changes requested' AND changes_requested IS NOT NULL)
+            OR
+        (status <> 'changes requested' AND changes_requested IS NULL)
+    )
 );
 
 -- Create the thesisStartCosupervisor table
