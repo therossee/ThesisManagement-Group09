@@ -16,9 +16,6 @@ import SideBar from './components/SideBar';
 import TopBar from './components/TopBar';
 import Archive from './routes/Archive.jsx';
 import './css/style.css';
-import Applications from './routes/Applications';
-
-const { Content, Footer } = Layout;
 
 function MainLayout() {
 
