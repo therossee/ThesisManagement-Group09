@@ -60,10 +60,12 @@ function MobTeacherArchive() {
     const modalContent = (proposal) => {
         const expDayjs = dayjs(proposal.expiration);
         const selectedDate = expDayjs.isSameOrBefore(date) ? date : expDayjs;
+        const expired = proposal.status === "EXPIRED" || (proposal.status === "ARCHIVED" && expDayjs.isBefore(date));
         handleExpChange(expDayjs);
         return (<div>
             <p>Are you sure you want to publish this proposal?</p>
-            <p>If so, select a new expiration date</p>
+            {expired && <p>If so, select a new expiration date</p>}
+            {!expired && <p>You can leave the expiration date unchanged, or change it with another one.</p>}
             <DatePicker
                 onChange={handleExpChange}
                 placeholder="Select new expiration date"
@@ -145,8 +147,6 @@ function MobTeacherArchive() {
                                     <Button onClick={() => navigate(`/view-proposal/${x.id}`)}><EyeOutlined/>View</Button>
                                     <Button onClick={() => navigate(`/edit-proposal/${x.id}`)}><EditOutlined/>Edit</Button>
                                     {(x.status === 'ARCHIVED' || x.status === 'EXPIRED') && <Button onClick={() => {
-                                        console.log(x.expiration);
-                                        console.log(date);
                                         Modal.confirm({
                                             title: 'Publish proposal',
                                             content: modalContent(x),
@@ -154,7 +154,7 @@ function MobTeacherArchive() {
                                             cancelText: 'Cancel',
                                             confirmButtonProps: {type: 'danger', disabled: newExp === null},
                                             onConfirm: () => {
-                                                if (newExp === null) {
+                                                if (newExp === null && dayjs(x.expiration).isBefore(date)) {
                                                     message.error("Please select a new expiration date");
                                                 } else {
                                                     publishFromArchive(x, newExp);
