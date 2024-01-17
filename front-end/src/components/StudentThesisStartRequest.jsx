@@ -166,6 +166,31 @@ function AddThesisStartRequestForm({ setFormVisible }) {
     )
 }
 
+function getStatus(status) {
+    switch (status) {
+        case "waiting for approval":
+            return <Badge status="processing" text={<strong>1/3 - Waiting for approval from the secretary</strong>} />;
+        case "rejected by secretary":
+            return <Badge status="error" text={<strong>1/3 - Rejected by the secretary, you can submit a new one</strong>} />;
+        case "accepted by secretary":
+            return <Badge status="processing" text={<strong>2/3 - Waiting for approval from the teacher</strong>} />;
+        case "changes requested":
+            return <Badge status="warning" text={<strong>2/3 - Changes requested</strong>} />;
+        case "rejected by teacher":
+            return <Badge status="error" text={<strong>2/3 - Rejected by the teacher, you can submit a new one</strong>} />;
+        case "accepted by teacher":
+            return <Badge status="success" text={<strong>3/3 - Accepted</strong>} />;
+        default:
+            return <Badge status="error" text={<strong>Failed fetching/parsing information</strong>} />
+    }
+}
+
+// Function to render supervisor and co-supervisor information with a colored tag
+function renderTeacherInfo(name, surname) {
+    return (
+        <Tag color="#1677ff"> {name} {surname} </Tag>
+    );
+}
 
 function SubmitButton({ form, loading, buttonLoading }) {
 
@@ -222,32 +247,6 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
         return false; // Enable the button to add a new TSR
     }
 
-    function getStatus(status) {
-        switch (status) {
-            case "waiting for approval":
-                return <Badge status="processing" text={<strong>1/3 - Waiting for approval from the secretary</strong>} />;
-            case "rejected by secretary":
-                return <Badge status="error" text={<strong>1/3 - Rejected by the secretary, you can submit a new one</strong>} />;
-            case "accepted by secretary":
-                return <Badge status="processing" text={<strong>2/3 - Waiting for approval from the teacher</strong>} />;
-            case "changes requested":
-                return <Badge status="warning" text={<strong>2/3 - Changes requested</strong>} />;
-            case "rejected by teacher":
-                return <Badge status="error" text={<strong>2/3 - Rejected by the teacher, you can submit a new one</strong>} />;
-            case "accepted by teacher":
-                return <Badge status="success" text={<strong>3/3 - Accepted</strong>} />;
-            default:
-                return <Badge status="error" text={<strong>Failed fetching/parsing information</strong>} />
-        }
-    }
-
-    // Function to render supervisor and co-supervisor information with a colored tag
-    function renderTeacherInfo(name, surname) {
-        return (
-            <Tag color="#1677ff"> {name} {surname} </Tag>
-        );
-    }
-
     if (Object.keys(activeThesisStartRequest).length > 0) {
 
         // Items of the Table
@@ -286,7 +285,7 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
                 key: '6',
                 label: 'Approval Date',
                 span: 1,
-                children: activeThesisStartRequest.approval_date ? dayjs(activeThesisStartRequest.approval_date).format('lll') : "Not yet approved",
+                children: activeThesisStartRequest.approval_date ? dayjs(activeThesisStartRequest.approval_date).format('LLL') : "Not yet approved",
             },
             {
                 key: '7',
@@ -364,4 +363,4 @@ AddThesisStartRequestForm.propTypes = {
     setFormVisible: PropTypes.func.isRequired,
 };
 
-export default StudentThesisStartRequest;
+export { renderTeacherInfo, StudentThesisStartRequest };

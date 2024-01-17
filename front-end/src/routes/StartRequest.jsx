@@ -1,5 +1,5 @@
 import Errors from "./Errors";
-import StudentThesisStartRequest from "../components/StudentThesisStartRequest";
+import { StudentThesisStartRequest } from "../components/StudentThesisStartRequest";
 import TeacherThesisStartRequest from "../components/TeacherThesisStartRequest";
 import { useAuth } from '../components/authentication/useAuth';
 

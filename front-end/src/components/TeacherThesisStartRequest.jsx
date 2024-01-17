@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Alert, Avatar, Button, Row, Col, Tabs, Divider, Typography, List, Modal, Flex, Tooltip, Input, message } from 'antd';
+import { Alert, Avatar, Button, Row, Col, Tabs, Divider, Typography, List, Modal, Flex, Tooltip, Input, message, Descriptions } from 'antd';
 import { CheckOutlined, CloseOutlined, HistoryOutlined, CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, InfoCircleOutlined, ExclamationCircleFilled } from '@ant-design/icons';
+import dayjs from 'dayjs';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+import { renderTeacherInfo } from './StudentThesisStartRequest';
 import API from '../API';
+
+dayjs.extend(localizedFormat);
 
 function TeacherThesisStartRequest() {
 
@@ -13,13 +18,22 @@ function TeacherThesisStartRequest() {
 
     const [isModalVisible, setIsModalVisible] = useState(false);
 
-    const [requestedChanges, setRequestedChanges] = useState("")
+    const [requestedChanges, setRequestedChanges] = useState("");
 
-    const reviewTsr = async (tsrId, student) => {
+    const [selectedTsr, setSelectedTsr] = useState(null);
+
+    // Host the TSR object we have to show
+    const [showInfo, setShowInfo] = useState(null);
+
+    const reviewTsr = async () => {
         try {
-            await API.reviewThesisStartRequest(tsrId, requestedChanges);
-            message.success("Successfully requested changes for " + student.surname + " " + student.name + "'s request");
+            await API.reviewThesisStartRequest(selectedTsr.id, requestedChanges);
+            message.success("Successfully requested changes for " + selectedTsr.student.surname + " " + selectedTsr.student.name + "'s request");
             setDirty(true);
+            setIsModalVisible(false);
+            setRequestedChanges("");
+            setSelectedTsr(null);
+            setShowInfo(null);
         } catch (err) {
             message.error(err.message ? err.message : err);
         }
@@ -47,8 +61,8 @@ function TeacherThesisStartRequest() {
     return (<>
         <Modal title="Request Changes"
             open={isModalVisible}
-            onOk={() => reviewTsr(tsr.id, tsr.student, requestedChanges)}
-            onCancel={() => { setIsModalVisible(false); setRequestedChanges("") }}
+            onOk={() => reviewTsr()}
+            onCancel={() => { setIsModalVisible(false); setRequestedChanges(""); setSelectedTsr(null) }}
             okText="Request Changes"
             okType="danger"
         >
@@ -66,12 +80,12 @@ function TeacherThesisStartRequest() {
                             key: '1',
                             label: <span><CheckOutlined />Pending Thesis Start Request</span>,
                             children: <PendingThesisStartRequest tsr={tsr} isLoading={isLoading} setDirty={setDirty}
-                                isModalVisible={isModalVisible} setIsModalVisible={setIsModalVisible} />,
+                                setIsModalVisible={setIsModalVisible} setSelectedTsr={setSelectedTsr} setShowInfo={setShowInfo} />,
                         },
                         {
                             key: '2',
                             label: <span><HistoryOutlined />Decisions History</span>,
-                            children: <HistoryThesisStartRequest tsr={tsr} isLoading={isLoading} />,
+                            children: <HistoryThesisStartRequest tsr={tsr} isLoading={isLoading} setShowInfo={setShowInfo} />,
                         },
                     ]}
                 />
@@ -79,12 +93,15 @@ function TeacherThesisStartRequest() {
             <Col span={1} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 <Divider type="vertical" style={{ height: '100%' }} />
             </Col>
+            <Col span={10} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <ShowTsrInfo showInfo={showInfo} />
+            </Col>
         </Row>
     </>
     )
 }
 
-function PendingThesisStartRequest({ tsr, isLoading, setDirty, setIsModalVisible }) {
+function PendingThesisStartRequest({ tsr, isLoading, setDirty, setIsModalVisible, setSelectedTsr, setShowInfo }) {
 
     const { Paragraph, Text } = Typography
 
@@ -93,6 +110,7 @@ function PendingThesisStartRequest({ tsr, isLoading, setDirty, setIsModalVisible
             await API.acceptThesisStartRequest(tsrId);
             message.success("Successfully accepted the request of student " + student.surname + " " + student.name);
             setDirty(true);
+            setShowInfo(null);
         } catch (err) {
             message.error(err.message ? err.message : err);
         }
@@ -103,6 +121,7 @@ function PendingThesisStartRequest({ tsr, isLoading, setDirty, setIsModalVisible
             await API.rejectThesisStartRequest(tsrId);
             message.success("Successfully rejected the request of student " + student.surname + " " + student.name);
             setDirty(true);
+            setShowInfo(null);
         } catch (err) {
             message.error(err.message ? err.message : err);
         }
@@ -134,10 +153,10 @@ function PendingThesisStartRequest({ tsr, isLoading, setDirty, setIsModalVisible
                                 <Tooltip title="Thesis Start Request info">
                                     <Button type="dashed"
                                         icon={<InfoCircleOutlined />}
-                                        onClick={() => { <></> }}
+                                        onClick={() => setShowInfo(tsr)}
                                     />
                                 </Tooltip>
-                                <Button type="dashed" onClick={() => setIsModalVisible(true)}>
+                                <Button type="dashed" onClick={() => { setSelectedTsr(tsr); setIsModalVisible(true) }}>
                                     Request Changes
                                 </Button>
                                 <Tooltip title="Accept Thesis Start Request">
@@ -200,7 +219,7 @@ function PendingThesisStartRequest({ tsr, isLoading, setDirty, setIsModalVisible
         return <Alert message="Good job, it seems like there is no peding request!" type="info" showIcon closable />
 }
 
-function HistoryThesisStartRequest({ tsr, isLoading }) {
+function HistoryThesisStartRequest({ tsr, isLoading, setShowInfo }) {
 
     if (tsr.some(tsr => tsr.status === 'accepted by teacher' || tsr.status === 'rejected by teacher')) {
         return (
@@ -228,7 +247,7 @@ function HistoryThesisStartRequest({ tsr, isLoading }) {
                                 <Tooltip title="Thesis Start Request info">
                                     <Button type="dashed"
                                         icon={<InfoCircleOutlined />}
-                                        onClick={() => { <></> }}
+                                        onClick={() => setShowInfo(tsr)}
                                     />
                                 </Tooltip>
                             </Flex>
@@ -241,6 +260,94 @@ function HistoryThesisStartRequest({ tsr, isLoading }) {
     }
     else
         return <Alert message="It seems like there is nothing to show here..." type="info" showIcon closable />
+}
+
+function ShowTsrInfo({ showInfo }) {
+    if (!showInfo)
+        return <Alert message={<span>Select the <InfoCircleOutlined /> icon on a Thesis Start Request to show its information!</span>} type="info" showIcon closable />
+    else {
+        const items = [
+            {
+                key: '1',
+                label: 'Thesis Start Request Title',
+                span: 2,
+                children: showInfo.title,
+            },
+            {
+                key: '2',
+                label: 'Submitted on',
+                span: 1,
+                children: dayjs(showInfo.creation_date).format('LLL'),
+            },
+            {
+                key: '3',
+                label: 'Supervisor',
+                span: 2,
+                children: renderTeacherInfo(showInfo.supervisor.name, showInfo.supervisor.surname),
+            },
+            {
+                key: '4',
+                label: 'Supervisor ID',
+                span: 1,
+                children: showInfo.supervisor.id,
+            },
+            {
+                key: '5',
+                label: 'Status',
+                span: 2,
+                children: getStatus(showInfo.status),
+            },
+            {
+                key: '6',
+                label: 'Approval Date',
+                span: 1,
+                children: showInfo.approval_date ? dayjs(showInfo.approval_date).format('LLL') : "Not approved",
+            },
+            {
+                key: '7',
+                label: 'Description',
+                span: 3,
+                children: showInfo.description,
+            },
+        ];
+
+        // Add co-supervisors to the items array
+        showInfo.co_supervisors.forEach((cosupervisor, index) => {
+            const cosupervisorItem = {
+                key: `co-supervisor-${index}`,
+                label: `Co-Supervisor #${index + 1}`,
+                span: 2,
+                children: renderTeacherInfo(cosupervisor.name, cosupervisor.surname),
+            };
+            const cosupervisorIdItem = {
+                key: `co-supervisor-id-${index}`,
+                label: `Co-Supervisor #${index + 1} ID`,
+                span: 1,
+                children: cosupervisor.id,
+            };
+            items.splice(4 + index * 2, 0, cosupervisorItem, cosupervisorIdItem);
+        });
+
+        return (
+            <>
+                {showInfo.status === 'changes requested' && <Alert
+                    message="You requested changes to this submission!"
+                    description={<><strong>Your Message:</strong> {showInfo.changes_requested}</>}
+                    type="warning"
+                    showIcon
+                    closable
+                />}
+                <Descriptions
+                    bordered
+                    layout="vertical"
+                    size="small"
+                    column={3}
+                    items={items}
+                    labelStyle={{ fontWeight: "bold" }}
+                    style={{ marginTop: "10px" }} />
+            </>
+        )
+    }
 }
 
 function getWrapper(status) {
@@ -261,11 +368,11 @@ function getColor(status) {
         case "accepted by teacher":
             return "rgb(0, 204, 0)";
         case "rejected by teacher":
-            return "rgb(255,77,79)";
+            return "rgb(255, 77, 79)";
         case "changes requested":
-            return "rgb(250,173,20)";
+            return "rgb(250, 173, 20)";
         default:
-            return "rgb(22,119,255)";
+            return "rgb(22, 119, 255)";
     }
 }
 
@@ -279,6 +386,21 @@ function getIcon(status) {
             return <ClockCircleOutlined />;
         default:
             return <InfoCircleOutlined />;
+    }
+}
+
+function getStatus(status) {
+    switch (status) {
+        case "accepted by secretary":
+            return <Badge status="processing" text={<strong>Waiting for your approval</strong>} />;
+        case "changes requested":
+            return <Badge status="warning" text={<strong>Changes requested</strong>} />;
+        case "rejected by teacher":
+            return <Badge status="error" text={<strong>Rejected by you</strong>} />;
+        case "accepted by teacher":
+            return <Badge status="success" text={<strong>Accepted by you</strong>} />;
+        default:
+            return <Badge status="error" text={<strong>Failed fetching/parsing information</strong>} />
     }
 }
 
