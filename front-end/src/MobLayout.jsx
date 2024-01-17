@@ -11,7 +11,7 @@ import MobTopBar from './mob_components/MobTopBar';
 import './css/style.css';
 import MobApplications from './mob_routes/MobApplications';
 import { Tabs } from './mob_components/Tabs'
-import MobArchive from "./mob_components/MobArchive.jsx";
+import MobArchive from "./mob_routes/MobArchive.jsx";
 
 const { Content, Footer } = Layout;
 

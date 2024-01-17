@@ -21,9 +21,6 @@ function Tabs() {
         if (location.pathname === '/proposals') {
             setSelectedTab('proposalsTab');
         }
-        if (location.pathname === '/admin/virtual-clock') {
-            setSelectedTab('vClockTab');
-        }
         if (selectedTab === 'logoutTab') {
             navigate('/');
         }
@@ -61,15 +58,6 @@ function Tabs() {
                 onPress={() => setSelectedTab('proposalsTab')}>
 
             </TabBar.Item>)}
-            {isTester && (
-            <TabBar.Item 
-                title="Virtual Clock"
-                key="/admin/virtual-clock" icon={<ClockCircleOutlined />} 
-                selectedIcon={<ClockCircleOutlined />}
-                selected={selectedTab === 'vClockTab'}
-                onPress={() => setSelectedTab('vClockTab')}/>
-
-            )}
             {isTeacher &&(
               <TabBar.Item 
               title="Insert Proposal"
