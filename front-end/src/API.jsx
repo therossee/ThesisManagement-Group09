@@ -420,11 +420,46 @@ async function getPDF(student_id, applicationId) {
     }
 }
 
+// Accept Student Start Request 
+async function acceptStartRequest(startReqId) {
+    const response = await fetch(URL + `/secretary-clerk/thesis-start-requests/accept/${startReqId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+    });
+    const res = await response.json();
+    if (response.ok) {
+        return res;
+    } else {
+        throw res;
+    }
+}
+
+// Reject Student Start Request 
+async function rejectStartRequest(startReqId) {
+    const response = await fetch(URL + `/secretary-clerk/thesis-start-requests/reject/${startReqId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+    });
+    const res = await response.json();
+    if (response.ok) {
+        return res;
+    } else {
+        throw res;
+    }
+}
+
 const API = {
     logOut, redirectToLogin,
     getUser,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById, getPDF, getSecretaryStartRequest
+    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById, getPDF, getSecretaryStartRequest,
+    acceptStartRequest, rejectStartRequest
 };
 export default API;
