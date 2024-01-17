@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { TabBar } from 'antd-mobile';
 import { useAuth } from '../components/authentication/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { HomeOutlined, FileTextOutlined, FileAddOutlined, ToTopOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { HomeOutlined, FileTextOutlined, FileAddOutlined, ToTopOutlined, ClockCircleOutlined, InboxOutlined } from '@ant-design/icons';
 
 function Tabs() {
     const { isTester, isTeacher, isStudent } = useAuth();
@@ -79,6 +79,16 @@ function Tabs() {
               selected={selectedTab === 'insertTab'}
               onPress={() => setSelectedTab('insertTab')}
             />
+            )}
+            {isTeacher &&(
+                <TabBar.Item
+                    title="Archive"
+                    key="/archive"
+                    icon={<InboxOutlined />}
+                    selectedIcon={<InboxOutlined />}
+                    selected={selectedTab === 'archive'}
+                    onPress={() => setSelectedTab('archive')}
+                />
             )}
             {(isStudent || isTeacher) && (
             <TabBar.Item 
