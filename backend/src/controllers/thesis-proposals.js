@@ -390,18 +390,19 @@ async function _getProposalStatus(proposalData) {
     const now = new AdvancedDate();
     const expirationDate = new AdvancedDate(proposalData.expiration);
 
-    if (expirationDate.isBefore(now)) {
-        return 'EXPIRED';
-    }
-
     // Check if the proposal has already beed assigned
     const applications = await listApplicationsForTeacherThesisProposal(proposalData.proposal_id, proposalData.supervisor_id);
     if (applications.some(application => application.status === APPLICATION_STATUS.ACCEPTED)) {
         return 'ASSIGNED';
     }
 
-    if(proposalData.is_archived==1)
+    if(proposalData.is_archived==1){
         return 'ARCHIVED';
+    }
+
+    if (expirationDate.isBefore(now)) {
+        return 'EXPIRED';
+    }
 
     return 'ACTIVE';
 }
