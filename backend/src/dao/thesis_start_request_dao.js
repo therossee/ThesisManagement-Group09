@@ -167,15 +167,15 @@ exports.updateThesisStartRequestStatus = async (request_id, new_status) => {
  */
 exports.supervisorReviewThesisStartRequest = async (supervisorId, tsrId, review) => {
     /** @type {string} */
-    const query = `UPDATE thesisStartRequest SET status = ?, changes_requested = ? WHERE id = ? AND supervisor_id = ? AND STATUS IN (?, ?);`;
+    const query = `UPDATE thesisStartRequest SET status = ?, changes_requested = ?, approval_date = ? WHERE id = ? AND supervisor_id = ? AND STATUS IN (?, ?);`;
     /** @type {(string | null)[]} */
     const params = [];
     if (review.action === "request changes") {
-        params.push(THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED, review.changes);
+        params.push(THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED, review.changes, null);
     } else {
         const newStatus = review.action === "accept" ? THESIS_START_REQUEST_STATUS.ACCEPTED_BY_TEACHER : THESIS_START_REQUEST_STATUS.REJECTED_BY_TEACHER;
-
-        params.push(newStatus, null);
+        const approval_date = review.action === "accept" ? new AdvancedDate().toISOString() : null;
+        params.push(newStatus, null, approval_date);
     }
     params.push(tsrId);
     params.push(supervisorId);
