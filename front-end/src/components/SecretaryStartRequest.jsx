@@ -5,7 +5,7 @@ import { CheckOutlined, CloseOutlined, ExclamationCircleFilled, UserOutlined } f
 import API from "../API";
 import StudentCV from "./StudentCV";
 
-function TeacherApplications() {
+function Secretary() {
 
     // List of objects for storing thesis info and applications
     const [data, setData] = useState([]);
@@ -59,7 +59,7 @@ function TeacherApplications() {
         });
     };
 
-    const acceptApplication = async (proposalId, student) => {
+    const acceptStartRequest = async (proposalId, student) => {
         setButtonsLoading(true);
         try {
             await API.acceptThesisApplications(proposalId, student.id);
@@ -73,7 +73,7 @@ function TeacherApplications() {
     };
 
 
-    const rejectApplication = async (proposalId, student) => {
+    const rejectStartRequest = async (proposalId, student) => {
         setButtonsLoading(true);
         try {
             await API.rejectThesisApplications(proposalId, student.id);
@@ -86,36 +86,98 @@ function TeacherApplications() {
         }
     };
 
-    function ApplicationsList() {
-        let ApplicationList = data.map((x) => (
-            <div key={x.id} >
-                
-                <Skeleton loading={isLoading} active title={false}>
-                     
-                    <Divider orientation="center">
-                    {x.proposal_id?
-                        <div style={{ whiteSpace: "normal" }}>
-                            <Link to={`/view-proposal/${x.id}`}>
-                                <Title level={4} style={{ margin: "0" }} >
-                                    {x.title}
-                                </Title>
-                            </Link>
-                        </div>
-                        :
-                        <div style={{ whiteSpace: "normal" }}>
-                            <Title level={4} style={{ margin: "0" }} >
-                                OTHER REQUESTS
-                            </Title> 
-                    </div>
-                        }
-                    </Divider> 
-                </Skeleton>
-                <div style={{ marginRight: "18%", marginLeft: "18%" }}>
-                
+    function StartRequestsList() {
+        console.log(data);
+        return (
+            <>
+             <div style={{ marginRight: "18%", marginLeft: "18%" }}>
+                    <List
+                        loading={isLoading}
+                        itemLayout="horizontal"
+                        dataSource={data}
+                        renderItem={(request) => (
+                            <List.Item key={request.id}>
+                                <button className="wrapper-enlight" onClick={() => { setStudentInfo(request.student); setApplicationId(request.application_id); setIsOpen(true) }} onKeyDown={() => { }}>
+                                    <List.Item.Meta
+                                        avatar={<Avatar style={{ backgroundColor: '#1677ff' }} icon={<UserOutlined />} size="large" />}
+                                        style={{ padding: ".5%" }}
+                                        title={request.student.surname + " " + request.student.name+ " (" + request.student.id+") "}
+                                        description={
+                                            <div style={{
+                                                textAlign: "left",
+                                                marginTop: "-5px",
+                                                color: request.status === "approved" ? "green" : (request.status === "rejected" ? "red" : "inherit")
+                                            }}>
+                                                {request.status}
+                                            </div>
+                                        }
+                                    />
+                                </button>
+                                <strong>{"Applied for: "}</strong>{request.title}
+                                <br />
+                                <strong>{"With description: "}</strong>{request.description}
+                                <Flex wrap="wrap" gap="small" style={{ padding: ".5%", alignItems: 'center' }}>
+                                        <Tooltip title="Accept Start Request">
+                                            <Button ghost type="primary"
+                                                loading={buttonsLoading}
+                                                disabled={buttonsLoading || request.status !== "waiting for approval"}
+                                                icon={<CheckOutlined />}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    showModal(
+                                                        <div>
+                                                            <Paragraph>
+                                                                <Text strong>
+                                                                    Are you sure you want to accept this start request?
+                                                                </Text>
+                                                            </Paragraph>
+                                                            <Paragraph>
+                                                                <Text strong>Thesis title: </Text><Text>{request.title}</Text>
+                                                                <br />
+                                                                <Text strong>Student: </Text><Text>{request.student.name + " " + request.student.surname}</Text>
+                                                            </Paragraph>
+                                                        </div>,
+                                                        () => acceptStartRequest(x.id, student),
+                                                        "Yes, accept the start request",
+                                                        "Cancel"
+                                                    )
+                                                }}
+                                            />
+                                        </Tooltip>
+                                        <Tooltip title="Reject Start Request">
+                                            <Button ghost danger
+                                                loading={buttonsLoading}
+                                                disabled={buttonsLoading || request.status !== "waiting for approval"}
+                                                icon={<CloseOutlined />}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    showModal(
+                                                        <div>
+                                                            <Paragraph>
+                                                                <Text strong>
+                                                                    Are you sure you want to reject this start request?
+                                                                </Text>
+                                                            </Paragraph>
+                                                            <Paragraph>
+                                                                <Text strong>Thesis title: </Text><Text>{request.title}</Text>
+                                                                <br />
+                                                                <Text strong>Student: </Text><Text>{request.student.name + " " + request.student.surname}</Text>
+                                                            </Paragraph>
+                                                        </div>,
+                                                        () => rejectStartRequest(x.id, student),
+                                                        "Yes, reject the start request",
+                                                        "Cancel"
+                                                    )
+                                                }}
+                                            />
+                                        </Tooltip>
+                                    </Flex>
+                            </List.Item>
+                        )}
+                    />
                 </div>
-            </div >
-        ))
-        return ApplicationList;
+            </>
+        )
     }
 
     return (
@@ -123,7 +185,7 @@ function TeacherApplications() {
             <>
                 <Alert message="To view a specific applicant's CV and eventually the file uploaded within the application, simply click anywhere in the corresponding row. Also, to view the Thesis Proposal just click on its title." type="info" showIcon closable />
                 {isOpen && <StudentCV isOpen={isOpen} setIsOpen={setIsOpen} studentInfo={studentInfo} applicationId={applicationId} />}
-                <ApplicationsList />
+                <StartRequestsList />
             </>
             :
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -132,4 +194,4 @@ function TeacherApplications() {
     )
 }
 
-export default TeacherApplications;
+export default Secretary;
