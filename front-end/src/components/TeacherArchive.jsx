@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { message, Space, Table, Tag, Tooltip } from 'antd';
-import { EditOutlined, EyeOutlined, DeleteOutlined, SelectOutlined } from '@ant-design/icons';
+import { message, Space, Table, Tooltip, Modal, Typography, DatePicker } from 'antd';
+import { EditOutlined, EyeOutlined, SelectOutlined, ExclamationCircleFilled } from '@ant-design/icons';
+import dayjs from 'dayjs';
+import { generateCommonColumns } from './utils';
 import API from '../API';
 
-
 function TeacherArchive() {
+
+    const navigate = useNavigate();
 
     // Array of objs for storing table data
     const [data, setData] = useState([])
@@ -13,67 +16,22 @@ function TeacherArchive() {
     // Loading table data fetching
     const [isLoadingTable, setIsLoadingTable] = useState(true);
 
-    const navigate = useNavigate();
-
     const [dirty, setDirty] = useState(true);
+
+    // Set virtual clock date to prevent filtering for a date before virtual clock one
+    const [date, setDate] = useState(dayjs());
+
+    const { Paragraph, Text } = Typography;
+
+    const [newExpiration, setNewExpiration] = useState(null);
 
     // Columns of the table
     const columns = [
+        ...generateCommonColumns(),
         {
-            title: 'Title',
-            dataIndex: 'title',
-            fixed: 'left',
-        },
-        {
-            title: 'Level',
-            dataIndex: 'level',
-            sorter: (a, b) => a.level.localeCompare(b.level),
-        },
-        {
-            title: 'Co-Supervisors',
-            dataIndex: 'coSupervisors',
-            render: (_, x) => x.coSupervisors.map((cosupervisor, i) => (
-                <Tag color="blue" key={i}>
-                    {cosupervisor.name + " " + cosupervisor.surname}
-                </Tag>
-            )),
-        },
-        {
-            title: 'Keywords',
-            dataIndex: 'keywords',
-            render: (_, x) => x.keywords.map((keyword, i) => (
-                <Tag color="blue" key={i}>
-                    {keyword}
-                </Tag>
-            )),
-        },
-        {
-            title: 'Type',
-            dataIndex: 'type',
-            sorter: (a, b) => a.type.localeCompare(b.type),
-        },
-        {
-            title: 'Groups',
-            dataIndex: 'groups',
-            render: (_, x) => x.groups.map((group, i) => (
-                <Tag color="blue" key={i}>
-                    {group}
-                </Tag>
-            )),
-        },
-        {
-            title: 'CdS',
-            dataIndex: 'CdS',
-            render: (_, x) => x.cds.map((cds, i) => (
-                <Tag color="blue" key={i}>
-                    {cds.title_degree}
-                </Tag>
-            )),
-        },
-        {
-            title: 'Expiration',
-            dataIndex: 'expiration',
-            sorter: (a, b) => new Date(a.expiration) - new Date(b.expiration),
+            title: 'Status',
+            dataIndex: 'status',
+            sorter: (a, b) => a.status.localeCompare(b.status),
         },
         {
             title: 'Actions',
@@ -82,18 +40,84 @@ function TeacherArchive() {
             render: (record) => (
                 <Space size="middle">
                     <Tooltip title="View Proposal">
-                        <EyeOutlined style={{ fontSize: '20px' }} onClick={() => navigate(`/view-proposal/${record.id}`)} />
+                        <EyeOutlined style={{ fontSize: '20px' }} onClick={() => navigate(`/view-proposal/${record.id}`, { state: { prevRoute: 'archive' } })} />
                     </Tooltip>
                     <Tooltip title="Edit Proposal">
-                        <EditOutlined style={{ fontSize: '20px' }} onClick={() => navigate(`/edit-proposal/${record.id}`)} />
+                        <EditOutlined 
+                            style = {{
+                                fontSize: '20px',
+                                color: record.status === 'ASSIGNED' ? 'rgba(0, 0, 0, 0.25)' : 'inherit',
+                                cursor: record.status === 'ASSIGNED' ? 'not-allowed' : 'pointer' }}
+                            onClick={() => { 
+                                if(record.status!=='ASSIGNED') 
+                                    navigate(`/edit-proposal/${record.id}`)
+                            }} 
+                        />
                     </Tooltip>
-                    <Tooltip title="Delete Proposal">
-                        <DeleteOutlined style={{ fontSize: '20px' }} onClick={()=> deleteProposalById(record.id)} />
+                    <Tooltip title="Publish Proposal" disabled={record.status === 'ASSIGNED'}>
+                        <SelectOutlined  
+                            style = {{
+                                fontSize: '20px',
+                                color: record.status === 'ASSIGNED' ? 'rgba(0, 0, 0, 0.25)' : 'inherit',
+                                cursor: record.status === 'ASSIGNED' ? 'not-allowed' : 'pointer' }}
+                            onClick={async() => {
+                                const expiration = new Date(record.expiration); 
+                                const now = (await API.getClock()).date;
+                                if(expiration > now) {
+                                    showModal(
+                                        "Confirm action",
+                                        <div>
+                                            <Paragraph>
+                                                <Text strong>
+                                                    Are you sure you want to re-publish this thesis proposal?
+                                                </Text>
+                                            </Paragraph>
+                                            <Paragraph>
+                                                <Text strong>Thesis title: </Text><Text>{record.title}</Text>
+                                            </Paragraph>
+                                        </div>,
+                                        () => publishProposalById(record),
+                                        "Yes, publish it",
+                                        "No, keep it in the archive",
+                                    )
+                                }
+                                else {
+                                    showModal(
+                                        "Set a new expiration date and publish",
+                                        <div>
+                                            <Paragraph>
+                                                <Text>
+                                                   Since this thesis proposal is expired, before re-publishing it, please select a new expiration date.
+                                                </Text>
+                                            </Paragraph>
+                                            <Paragraph>
+                                                <DatePicker 
+                                                    onChange={handleDatePickerChange} 
+                                                    placeholder="Select new expiration date"  
+                                                    disabledDate={disabledDate}
+                                                    customDate={date} 
+                                                    defaultValue={null}
+                                                    defaultPickerValue={date}
+                                                    style={{ width: "70%" }}
+                                                >
+                                                    Select a new expiration date
+                                                </DatePicker>
+                                            </Paragraph>
+                                        </div>,
+                                        () => {
+                                            // Using the callback to ensure that newExpiration is updated before calling publishProposalById
+                                            setNewExpiration(date => {
+                                                publishProposalById(record, date);
+                                                return date;
+                                            });
+                                        },
+                                        "Ok, publish it",
+                                        "Cancel",
+                                    )
+                                }
+                            }}
+                            disabled={record.status === 'ASSIGNED'}/>
                     </Tooltip>
-                    <Tooltip title="Publish Proposal">
-                        <SelectOutlined  style={{ fontSize: '20px' }} onClick={()=> publishProposalById(record.id)} />
-                    </Tooltip>
-                    
                 </Space>
             ),
         },
@@ -120,6 +144,11 @@ function TeacherArchive() {
                     setIsLoadingTable(false);
                     setDirty(false);
                 });
+            API.getClock()
+                .then((clock) => {
+                    setDate(dayjs().add(clock.offset, 'ms'));
+                })
+                .catch((err) => { message.error(err.message ? err.message : err) });
         }
     }, [dirty]);
 
@@ -135,11 +164,38 @@ function TeacherArchive() {
         return formattedData;
     }
 
-    async function deleteProposalById(id) {
+    const showModal = (title, content, action, okText, cancelText) => {
+        Modal.confirm({
+            title: title,
+            icon: <ExclamationCircleFilled />,
+            content: content,
+            onOk: action,
+            okText: okText,
+            okType: "danger",
+            cancelText: cancelText,
+        });
+    };
+
+    const handleDatePickerChange = (date) => {
+        const isoFormattedDate = date?.toISOString();
+        setNewExpiration(isoFormattedDate); 
+    };
+
+    function disabledDate(current) {
+        return current && current.valueOf() <= date;
+    }
+
+    async function publishProposalById(record, newExpiration) {
         try {
-            await API.deleteProposalById(id);
-            message.success("Thesis proposal deleted successfully");
-            setDirty(true);
+            if(record.status === "ARCHIVED" || record.status === "EXPIRED"){
+                await API.publishProposalById(record.id, newExpiration);
+                message.success("The proposal has been re-published successfully");
+                setDirty(true);
+            }
+            else{
+                message.error("The proposal is already assigned, you cannot re-publish it")
+            }
+            
         } catch (err) {
             message.error(err.message ? err.message : err);
             setIsLoadingTable(false);

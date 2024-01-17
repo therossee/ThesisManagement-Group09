@@ -29,7 +29,6 @@ async function getUser() {
     }
 }
 
-
 /****** End APIs for auth ******/
 
 async function getClock() {
@@ -47,6 +46,7 @@ async function getClock() {
             }
         });
 }
+
 async function updateClock(date) {
     return fetch(URL + '/system/virtual-clock', {
         method: 'POST',
@@ -72,37 +72,18 @@ async function updateClock(date) {
 
 // GET Thesis Proposals
 async function getThesisProposals() {
-    const response = await fetch(URL + '/thesis-proposals', {
-        method: 'GET',
-        credentials: 'include',
-    });
-    const proposals = await response.json();
-    if (response.ok) {
-        return proposals.items.map((x) => ({
-            id: x.id,
-            key: x.id,
-            title: x.title,
-            supervisor: x.supervisor,
-            internalCoSupervisors: x.coSupervisors.internal ?? [],
-            externalCoSupervisors: x.coSupervisors.external ?? [],
-            type: x.type,
-            description: x.description,
-            requiredKnowledge: x.requiredKnowledge ?? "",
-            notes: x.notes ?? "",
-            expiration: x.expiration.substring(0, 10),
-            level: x.level,
-            groups: x.groups,
-            keywords: x.keywords,
-            cds: x.cds
-        }))
-    } else {
-        throw proposals;
-    }
+    return fetchThesisProposals('/thesis-proposals');
 }
 
 // GET Archived Thesis Proposals
 async function getArchivedThesisProposals() {
-    const response = await fetch(URL + '/archived-thesis-proposals/', {
+    return fetchThesisProposals('/thesis-proposals/archived');
+}
+
+// Generic function that handles the common logic and then use it in both 
+// getThesisProposals and getArchivedThesisProposals
+async function fetchThesisProposals(endpoint) {
+    const response = await fetch(URL + endpoint, {
         method: 'GET',
         credentials: 'include',
     });
@@ -123,14 +104,13 @@ async function getArchivedThesisProposals() {
             level: x.level,
             groups: x.groups,
             keywords: x.keywords,
-            cds: x.cds
+            cds: x.cds,
+            status: x.status
         }))
     } else {
         throw proposals;
     }
 }
-
-
 
 // GET Thesis Proposals by given id
 async function getThesisProposalbyId(id) {
@@ -287,8 +267,6 @@ async function getAllDegrees() {
     }
 }
 
-
-
 // Accept Student Applications on a Thesis Proposal 
 async function acceptThesisApplications(proposalId, studentId) {
     const response = await fetch(URL + `/teacher/applications/accept/${proposalId}`, {
@@ -359,9 +337,10 @@ async function archiveProposalById(id) {
     }
 }
 
-async function publishProposalById(id) {
-    const response = await fetch(URL + `/thesis-proposals/publish/${id} `, {
-        method: 'PATCH',
+async function publishProposalById(id, expiration) {
+    const queryParams = expiration ? `?expiration=${encodeURIComponent(expiration)}` : '';
+    const response = await fetch(URL + `/thesis-proposals/${id}/archive${queryParams}`, {
+        method: 'DELETE',
         credentials: 'include'
     });
     if (response.ok) {
@@ -470,11 +449,15 @@ async function getStudentActiveThesisStartRequest() {
 }
 
 const API = {
-    logOut, redirectToLogin,
-    getUser,
+    logOut, redirectToLogin, getUser,
     getClock, updateClock,
-    insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById, getPDF,
-    insertThesisStartRequest, getStudentActiveThesisStartRequest, getArchivedThesisProposals, publishProposalById
+    insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, 
+    getThesisProposals, getThesisProposalbyId, 
+    getTeacherThesisApplications, applyForProposal, getStudentActiveApplication, 
+    acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, 
+    deleteProposalById, updateProposal, archiveProposalById, 
+    getStudentCVById, getPDF,
+    insertThesisStartRequest, getStudentActiveThesisStartRequest, 
+    getArchivedThesisProposals, publishProposalById
 };
 export default API;
