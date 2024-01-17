@@ -128,15 +128,15 @@ function MobTeacherArchive() {
                                         </Tag>
                                     ))}</p>
                                 )}
-                                <p>Keywords: {x.keywords.map((keyword) => (
-                                    <Tag color="blue" key={keyword}>
-                                        {keyword}
+                                <p>Keywords: {x.keywords.map((kw) => (
+                                    <Tag color="blue" key={kw}>
+                                        {kw}
                                     </Tag>
                                 ))}</p>
                                 <p>Type: {x.type}</p>
-                                <p>Groups: {x.groups.map((group) => (
-                                    <Tag color="blue" key={group}>
-                                        {group}
+                                <p>Groups: {x.groups.map((gp) => (
+                                    <Tag color="blue" key={gp}>
+                                        {gp}
                                     </Tag>
                                 ))}</p>
                                 <p>Expiration: {x.expiration}</p>
