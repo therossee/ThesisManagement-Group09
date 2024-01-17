@@ -6,11 +6,11 @@ import { useAuth } from './components/authentication/useAuth';
 import Applications from './routes/Applications'
 import Home from './routes/Home';
 import Errors from './routes/Errors';
-import VirtualClock from "./routes/VirtualClock.jsx";
+import VirtualClock from "./routes/VirtualClock";
 import InsertProposal from './routes/InsertProposal';
-import EditProposal from './routes/EditProposal.jsx';
+import EditProposal from './routes/EditProposal';
 import Proposals from './routes/Proposals';
-import StartRequest from './routes/StartRequest.jsx';
+import StartRequest from './routes/StartRequest';
 import ViewProposal from './routes/ViewProposal';
 import SideBar from './components/SideBar';
 import TopBar from './components/TopBar';

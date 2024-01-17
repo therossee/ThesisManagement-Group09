@@ -461,6 +461,7 @@ const API = {
     getTeacherThesisApplications, applyForProposal, getStudentActiveApplication, 
     acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, 
     deleteProposalById, updateProposal, archiveProposalById, getStudentCVById, getPDF,
+    insertThesisStartRequest, getStudentActiveThesisStartRequest,
     insertThesisStartRequest, getStudentActiveThesisStartRequest, getSecretaryStartRequest
 };
 export default API;
