@@ -439,12 +439,73 @@ async function getTeacherThesisStartRequest() {
     }
 }
 
+// Accept Student Thesis Start Request
+async function acceptThesisStartRequest(tsrId) {
+    const response = await fetch(URL + `/teacher/thesis-start-requests/${tsrId}/review`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            action: "accept",
+        }),
+    });
+    const tsr = await response.json();
+    if (response.ok) {
+        return tsr;
+    } else {
+        throw tsr;
+    }
+}
+
+// Reject Student Thesis Start Request
+async function rejectThesisStartRequest(tsrId) {
+    const response = await fetch(URL + `/teacher/thesis-start-requests/${tsrId}/review`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            action: "reject",
+        }),
+    });
+    const tsr = await response.json();
+    if (response.ok) {
+        return tsr;
+    } else {
+        throw tsr;
+    }
+}
+
+// Request Changes on a Student Thesis Start Request
+async function reviewThesisStartRequest(tsrId, requestedChanges) {
+    const response = await fetch(URL + `/teacher/thesis-start-requests/${tsrId}/review`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            action: "request changes",
+            changes: requestedChanges,
+        }),
+    });
+    const tsr = await response.json();
+    if (response.ok) {
+        return tsr;
+    } else {
+        throw tsr;
+    }
+}
+
 const API = {
     logOut, redirectToLogin,
     getUser,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
     applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById, getPDF,
-    insertThesisStartRequest, getStudentLastThesisStartRequest, getTeacherThesisStartRequest
+    insertThesisStartRequest, getStudentLastThesisStartRequest, getTeacherThesisStartRequest, acceptThesisStartRequest, rejectThesisStartRequest, reviewThesisStartRequest
 };
 export default API;
