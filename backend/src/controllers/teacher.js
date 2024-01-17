@@ -186,7 +186,7 @@ async function reviewThesisStartRequest(req, res, next) {
             throw new NoThesisStartRequestError(tsrId);
         }
 
-        res.status(204).end();
+        res.status(201).json({ message: 'Thesis start request reviewed successfully' });
     } catch (error) {
         next(error);
     }
