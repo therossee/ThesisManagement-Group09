@@ -523,17 +523,9 @@ exports.getThesisProposalCds = async (proposalId) => {
 exports.getThesisProposalTeacher = (proposalId, teacherId) => {
   const currentDate = new AdvancedDate().toISOString();
 
-  // Check is the proposal is not already assigned
-  const checkProposalAssigned = `SELECT * FROM thesisApplication WHERE proposal_id=? AND status=?`;
-  const proposal_assigned = db.prepare(checkProposalAssigned).get(proposalId, APPLICATION_STATUS.ACCEPTED);
-
-  if (proposal_assigned){
-    return null
-  }
-
   const query = `SELECT * FROM thesisProposal WHERE proposal_id = ? AND supervisor_id = ? 
-                   AND expiration > ? AND creation_date < ? AND is_deleted = 0 AND is_archived = 0;`;
-  return db.prepare(query).get(proposalId, teacherId, currentDate, currentDate) ?? null;
+                 AND creation_date < ? AND is_deleted = 0;`;
+  return db.prepare(query).get(proposalId, teacherId, currentDate) ?? null;
 };
 
 
