@@ -203,7 +203,7 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const activeTSR = await API.getStudentActiveThesisStartRequest();
+                const activeTSR = await API.getStudentLastThesisStartRequest();
                 setDisabled(checkDisabled(activeTSR));
                 setActiveThesisStartRequest(activeTSR);
                 setLoading(false);
@@ -225,9 +225,9 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
     function getStatus(status) {
         switch (status) {
             case "waiting for approval":
-                return <Badge status="processing" text={<strong>1/3 - Waiting for approval from the secretariat</strong>} />;
+                return <Badge status="processing" text={<strong>1/3 - Waiting for approval from the secretary</strong>} />;
             case "rejected by secretary clerk":
-                return <Badge status="error" text={<strong>1/3 - Rejected by the secretariat, you can submit a new one</strong>} />;
+                return <Badge status="error" text={<strong>1/3 - Rejected by the secretary, you can submit a new one</strong>} />;
             case "accepted by secretary clerk":
                 return <Badge status="processing" text={<strong>2/3 - Waiting for approval from the teacher</strong>} />;
             case "changes requested":

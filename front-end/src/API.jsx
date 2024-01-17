@@ -411,9 +411,23 @@ async function insertThesisStartRequest(request) {
     }
 }
 
-// GET Student active Thesis Start Request
-async function getStudentActiveThesisStartRequest() {
+// GET Student's last Thesis Start Request
+async function getStudentLastThesisStartRequest() {
     const response = await fetch(URL + '/student/thesis-start-requests/last', {
+        method: 'GET',
+        credentials: 'include',
+    });
+    const tsr = await response.json();
+    if (response.ok) {
+        return tsr;
+    } else {
+        throw tsr;
+    }
+}
+
+// GET Teacher's active Thesis Start Request
+async function getTeacherActiveThesisStartRequest() {
+    const response = await fetch(URL + '/teacher/thesis-start-requests', {
         method: 'GET',
         credentials: 'include',
     });
@@ -431,6 +445,6 @@ const API = {
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
     applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById, getPDF,
-    insertThesisStartRequest, getStudentActiveThesisStartRequest
+    insertThesisStartRequest, getStudentLastThesisStartRequest, getTeacherActiveThesisStartRequest
 };
 export default API;
