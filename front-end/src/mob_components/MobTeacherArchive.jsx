@@ -8,8 +8,6 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import API from '../API';
 import { useAuth } from '../components/authentication/useAuth';
 import { EditOutlined, EyeOutlined, SelectOutlined } from '@ant-design/icons';
-import 'flatpickr/dist/themes/material_blue.css';
-import proposals from "../routes/Proposals.jsx";
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);

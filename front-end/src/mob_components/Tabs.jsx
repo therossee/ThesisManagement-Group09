@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { TabBar } from 'antd-mobile';
 import { useAuth } from '../components/authentication/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { HomeOutlined, FileTextOutlined, FileAddOutlined, ToTopOutlined, ClockCircleOutlined, InboxOutlined } from '@ant-design/icons';
+import { HomeOutlined, FileTextOutlined, FileAddOutlined, ToTopOutlined, InboxOutlined } from '@ant-design/icons';
 
 function Tabs() {
-    const { isTester, isTeacher, isStudent } = useAuth();
+    const { isTeacher, isStudent } = useAuth();
     const [selectedTab, setSelectedTab] = useState('homeTab');
     const navigate = useNavigate();
     const location = useLocation();
