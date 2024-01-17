@@ -103,8 +103,9 @@ exports.listThesisStartRequests = async (supervisorId) => {
     let queryTSR = `SELECT * FROM thesisStartRequest WHERE creation_date < ?`;
     const params = [new AdvancedDate().toISOString()];
     if (supervisorId) {
-        queryTSR += " AND supervisor_id = ?";
+        queryTSR += " AND supervisor_id = ? AND status NOT IN (?, ?)";
         params.push(supervisorId);
+        params.push(THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL, THESIS_START_REQUEST_STATUS.REJECTED_BY_SECRETARY);
     }
 
     /** @type {ThesisStartRequestRow[]} */
@@ -178,7 +179,7 @@ exports.supervisorReviewThesisStartRequest = async (supervisorId, tsrId, review)
     }
     params.push(tsrId);
     params.push(supervisorId);
-    params.push(THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL, THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED);
+    params.push(THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY, THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED);
 
     const res = db.prepare(query).run(...params);
     return res.changes !== 0;
