@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Alert, Badge, Button, Descriptions, Col, Row, Typography, Form, Input, Select, Space, message, Skeleton } from 'antd';
+import { Alert, Badge, Button, Descriptions, Col, Row, Typography, Form, Input, Select, Space, message, Skeleton, Tag } from 'antd';
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
@@ -241,6 +241,13 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
         }
     }
 
+    // Function to render supervisor and co-supervisor information with a colored tag
+    function renderTeacherInfo(name, surname) {
+        return (
+            <Tag color="#1677ff"> {name} {surname} </Tag>
+        );
+    }
+
     if (Object.keys(activeThesisStartRequest).length > 0) {
 
         // Items of the Table
@@ -261,7 +268,7 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
                 key: '3',
                 label: 'Supervisor',
                 span: 3,
-                children: activeThesisStartRequest.supervisor.name + " " + activeThesisStartRequest.supervisor.surname,
+                children: renderTeacherInfo(activeThesisStartRequest.supervisor.name, activeThesisStartRequest.supervisor.surname),
             },
             {
                 key: '4',
@@ -295,7 +302,7 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
                 key: `co-supervisor-${index}`,
                 label: `Co-Supervisor #${index + 1}`,
                 span: 3,
-                children: cosupervisor.name + " " + cosupervisor.surname,
+                children: renderTeacherInfo(cosupervisor.name, cosupervisor.surname),
             };
             const cosupervisorIdItem = {
                 key: `co-supervisor-id-${index}`,
@@ -323,11 +330,11 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
                     }
                     <Descriptions
                         bordered
-                        layout="vertical"
-                        size="middle"
+                        size="small"
                         column={4}
                         items={items}
-                        style={{ marginTop: "15px" }} />
+                        labelStyle={{ fontWeight: "bold" }}
+                        style={{ marginTop: "20px" }} />
                 </>
         )
     }
