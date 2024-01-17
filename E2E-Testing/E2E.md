@@ -223,3 +223,34 @@ This test case is related to copy a proposal: we want to create a new thesis pro
 11. Click on ['Thesis Proposal'](http://localhost:5173/proposals) again and check your proposal is correctly shown
 12. Log out
     - You should be again on the [home page](http://localhost:5173/)
+
+### [15] Insert Student Start Request
+This test case validates the possibility for a student to insert a thesis start request.
+
+1. Go to the [home page](http://localhost:5173/)
+2. Log in as a student
+3. In the left bar click on [Thesis Start Request](http://localhost:5173/start-request)
+4. Click on the button 'Add New Thesis Start Request'
+5. Complete all the necessary fields
+6. Click on 'Submit'
+7. A page with the details of your just created thesis start request will appear and you can consult it now whenever you click on [Thesis Start Request](http://localhost:5173/start-request)
+8. Log out
+
+### [16] Notify Application
+This test case is related to the possibility for a professor to be notified when a new application is sent. To check that we use Ethereal.
+
+1. Open [Ethereal site](https://ethereal.email/login)
+2. Log in with this credentials:
+    - username: clemmie.reynolds@ethereal.email
+    - password: RSHSTmvXCs9WFZnRmt
+3. Click on [Messages](https://ethereal.email/messages)
+4. Go to the [home page](http://localhost:5173/)
+5. Log in as a professor
+6. Click on 'Thesis Applications' in the left bar. You are now in [Thesis Applicaitons page](http://localhost:5173/applications) and you can see all the applications for the thesis
+7. Reject an application
+8. Log out
+9. Log in as the student whose application has been rejected
+10. Now for sure you can apply for another application, send the application for a thesis
+11. Re-open the Ehereal web page and refresh it
+12. You will be able to see that a message to the professor has been send, click on it to see all the details and check their correctness
+13. Go back on the thesis web application page and log out

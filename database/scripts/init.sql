@@ -172,10 +172,16 @@ CREATE TABLE thesisStartRequest (
     creation_date DATE NOT NULL,
     approval_date DATE,
     status TEXT DEFAULT 'waiting for approval',
+    changes_requested TEXT,
     FOREIGN KEY(student_id) REFERENCES student(id),
     FOREIGN KEY(application_id) REFERENCES thesisApplication(id),
     FOREIGN KEY(proposal_id) REFERENCES thesisProposal(proposal_id),
-    FOREIGN KEY(supervisor_id) REFERENCES teacher(id)
+    FOREIGN KEY(supervisor_id) REFERENCES teacher(id),
+    CHECK (
+        (status = 'changes requested' AND changes_requested IS NOT NULL)
+            OR
+        (status <> 'changes requested' AND changes_requested IS NULL)
+    )
 );
 
 -- Create the thesisStartCosupervisor table
@@ -310,111 +316,111 @@ VALUES
 -- Insert data into the thesisProposal table
 INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)
 VALUES
-    ('AI-GUIDED WEB CRAWLER FOR AUTOMATIC DETECTION OF MALICIOUS SITES', 'd279620', 'research project',
+    ('AI-GUIDED WEB CRAWLER FOR AUTOMATIC DETECTION OF MALICIOUS SITES', 'd279620', 'Research project',
     'This thesis focuses on developing an AI-guided web crawler for the automatic detection of malicious sites. The research aims to leverage artificial intelligence to enhance the efficiency and accuracy of web crawling in identifying and cataloging potentially harmful websites.',
-    'web development, cybersecurity, and machine learning',
+    'The thesis demands a broad skill set encompassing web development, cybersecurity, machine learning, natural language processing, data mining, and network security. These proficiencies are essential for creating an AI-guided web crawler focused on automatically identifying and cataloging malicious sites, enhancing web crawling efficiency through advanced technologies.',
     'The project involves implementing machine learning algorithms for pattern recognition, collaborating with cybersecurity experts, and optimizing web crawling algorithms for real-time detection',
     '2023-10-10T10:45:50.121Z', '2024-11-10T23:59:59.999Z', 'LM'),
 
-    ('PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API', 'd370335', 'research project',
+    ('PERFORMANCE EVALUATION OF KAFKA CLIENTS USING A REACTIVE API', 'd370335', 'Research project',
     'This thesis focuses on the performance evaluation of Kafka clients using a reactive API. The research aims to assess and enhance the efficiency of Kafka clients by implementing a reactive programming approach. The study explores how a reactive API can improve responsiveness and scalability in real-time data streaming applications.',
-    'networking protocols, congestion control algorithms, and familiarity with QUIC',
+    'This thesis demands proficiency in networking protocols, congestion control algorithms, and familiarity with QUIC for the performance evaluation of Kafka clients using a reactive API. The study explores how a reactive approach enhances Kafka client efficiency in real-time data streaming applications.',
     'The study involves simulations, performance evaluations, and an in-depth analysis of the effectiveness of different congestion control schemes in QUIC',
     '2023-08-22T13:43:56.236Z', '2025-12-24T23:59:59.999Z', 'LM'),
 
-    ('A STUDY OF CONGESTION CONTROL SCHEMES ON QUIC', 'd350985', 'research project',
+    ('A STUDY OF CONGESTION CONTROL SCHEMES ON QUIC', 'd350985', 'Research project',
     'This research paper delves into a comprehensive study of congestion control schemes on QUIC (Quick UDP Internet Connections). The investigation aims to analyze and compare various congestion control strategies within the QUIC protocol, shedding light on their impact on network performance and efficiency.',
-    'Strong understanding of web development principles, Proficiency in cybersecurity concepts and best practices, Familiarity with machine learning algorithms and pattern recognition, Knowledge of data structures and algorithms for efficient web crawling.',
+    'This study on congestion control schemes in QUIC requires expertise in web development, proficiency in cybersecurity, familiarity with machine learning algorithms, and knowledge of data structures. The project involves implementing advanced machine learning for accurate malicious site detection and optimizing web crawling algorithms for real-time efficiency.',
     'The project involves implementing cutting-edge machine learning algorithms to enhance the accuracy of malicious site detection. Collaboration with cybersecurity experts is essential to ensure the crawlers effectiveness against evolving threats. Optimization of web crawling algorithms for real-time detection requires a deep understanding of both web technologies and performance optimization techniques.',
     '2023-09-17T21:37:01.176Z', '2026-04-01T23:59:59.999Z', 'LM'),
 
-    ('ULTRA-LOW-POWER ACOUSTIC SENSOR FRONTEND A DIGITAL TRANSCONDUCTANCE AMPLIFIER APPROACH', 'd255269', 'dissertation',
+    ('ULTRA-LOW-POWER ACOUSTIC SENSOR FRONTEND A DIGITAL TRANSCONDUCTANCE AMPLIFIER APPROACH', 'd255269', 'Dissertation',
     'This dissertation focuses on the design and implementation of an ultra-low-power acoustic sensor frontend using a digital transconductance amplifier approach. The research aims to explore novel methods in signal processing and circuit design to achieve highly efficient and low-power acoustic sensing capabilities.',
-    'analog and digital circuit design, signal processing, and low-power electronics',
+    'This dissertation on an ultra-low-power acoustic sensor frontend, utilizing a digital transconductance amplifier approach, requires expertise in analog and digital circuit design, signal processing, and low-power electronics. The project involves developing the digital transconductance amplifier, integrating it with the acoustic sensor frontend, and extensive testing for ultra-low-power performance.',
     'The project involves the development of a digital transconductance amplifier, integration with an acoustic sensor frontend, and extensive testing for ultra-low-power performance',
     '2023-11-01T23:59:32.155Z', '2027-09-29T23:59:59.999Z', 'LM'),
 
-    ('PRELIMINARY DESIGN OF AN ARCJET IN THE 1KW CLASS FOR SPACE APPLICATION', 'd357587', 'engineering project',
+    ('PRELIMINARY DESIGN OF AN ARCJET IN THE 1KW CLASS FOR SPACE APPLICATION', 'd357587', 'Engineering project',
     'This engineering project involves the preliminary design of an arcjet in the 1kW class for space applications. The research aims to conceptualize and outline the key parameters, components, and specifications required for the development of a high-powered arcjet propulsion system suitable for space missions.',
     'propulsion systems, plasma physics, and aerospace engineering',
     'The project includes conceptual design, performance modeling, and consideration of thermal management aspects for the arcjet propulsion system.',
     '2023-11-15T22:44:51.199Z', '2025-03-23T23:59:59.999Z', 'LM'),
 
-    ('OPTIMIZATION OF CHECK-IN PROCESSES IN AMAZON LOGISTICS', 'd292715', 'electronic pubblication',
+    ('OPTIMIZATION OF CHECK-IN PROCESSES IN AMAZON LOGISTICS', 'd292715', 'Electronic pubblication',
     'This thesis analyzes and proposes solutions for optimizing check-in processes in Amazon''s logistics, focusing on RFID technology. It compares the proposed solution with Amazon''s development, emphasizing efficiency and cost considerations.',
-    'logistics, RFID technology, process optimization',
+    'This thesis on optimizing check-in processes in Amazon Logistics, with a focus on RFID technology, demands expertise in logistics, RFID technology, and process optimization. The project explores RFID''s efficiency for check-in, considering costs and benefits, and compares it with Amazon''s parallel development, emphasizing economic and operational differences.',
     'The project explores the use of RFID for check-in efficiency, considering costs and benefits. Amazon''s parallel development is discussed, highlighting economic and operational contrasts.',
     '2023-11-27T22:44:51.199Z', '2026-05-29T23:59:59.999Z', 'L'),
 
-    ('PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFORMANCE OPTIMIZATION', 'd292715', 'electronic pubblication',
+    ('PREDICTIVE MODELING FOR INFOTAINMENT SYSTEM PERFORMANCE OPTIMIZATION', 'd292715', 'Electronic pubblication',
     'This thesis addresses the challenge of sizing a system to meet specified requirements at the lowest possible cost, focusing on infotainment systems in automotive settings. The proposed predictive model, based on a novel formulation of performance improvement, factors in Voluntary and Unvoluntary Context Switches, providing insights into computational resource allocation and system cost optimization.',
-    'system sizing, predictive modeling, automotive systems, statistical analysis',
+    'This thesis focuses on sizing infotainment systems in automotive settings, using predictive modeling to meet specified requirements at the lowest cost. The model incorporates Voluntary and Unvoluntary Context Switches, providing insights into computational resource allocation and system cost optimization. The study introduces a statistical approach to analyze thread behavior within infotainment suites, proposing a method for generating "RUN-WAIT" sequences. Results indicate the feasibility of statistically modeling thread behavior, encouraging the application of this method to assess the impact of introducing computational capacity increments in infotainment systems.',
     'The study introduces a statistical approach to gather insights into thread behavior within infotainment suites, proposing a method for generating "RUN-WAIT" sequences. Results indicate the feasibility of statistically modeling thread behavior, encouraging the application of this method to assess the impact of introducing computational capacity increments in infotainment systems.',
     '2023-11-27T22:44:51.199Z', '2026-05-29T23:59:59.999Z', 'L'),
 
-    ('DESIGN AND IMPLEMENTATION OF ENTERPRISE SOFTWARE DEFINED DATACENTER NETWORKS', 'd292715', 'electronic pubblication',
+    ('DESIGN AND IMPLEMENTATION OF ENTERPRISE SOFTWARE DEFINED DATACENTER NETWORKS', 'd292715', 'Electronic pubblication',
     'This work describes the high-level and domain-specific requirements for an Enterprise Software Defined Datacenter network. Then the practical design principles and technical solutions are introduced providing a high-level description of all the common features and tools that should be implemented in a modern Enterprise datacenter network. Finally, a service delivery model for the Enterprise DCN and three different designs implementing the requirements using the previously described technologies are presented and compared.',
-    'Enterprise networking, Software Defined Datacenter, network design, service delivery models',
+    'This work details the requirements for an Enterprise Software Defined Datacenter network, introducing practical design principles, technical solutions, and a service delivery model. It explores network design, software-defined technologies, and datacenter architecture, requiring expertise in these areas.',
     'The study explores the design and implementation of an Enterprise Software Defined Datacenter network, emphasizing practical solutions and comparing different designs. It requires knowledge in networking, software-defined technologies, and datacenter architecture.',
     '2023-11-27T22:44:51.199Z', '2026-05-29T23:59:59.999Z', 'L'),
 
-    ('ROLE OF TECHNOLOGY IN ADVANCING E-COMMERCE SUPPLY CHAIN', 'd392000', 'research project',
+    ('ROLE OF TECHNOLOGY IN ADVANCING E-COMMERCE SUPPLY CHAIN', 'd392000', 'Research project',
     'Over the last 30 years, the supply chain has played a pivotal role in various sectors, with increasing emphasis on operational processes driven by IT advancements. E-commerce platforms, where the supply chain is strategic, particularly impact customer experience, revenue generation, and cost reduction. This thesis explores the evolving expectations of customers, focusing on delivery speed, cost efficiency, and the crucial role of technology in supporting supply chain operations. Leading companies invest significantly in efficient and precise systems, and the challenges of sustainability and waste reduction are addressed. The study anticipates a growing use of e-commerce platforms, requiring the supply chain to adapt to increasing volumes. Artificial Intelligence is identified as a key enabler, enhancing flexibility and speed in the supply chain by automating daily operational decisions, optimizing supply procurement, network deployment, and reducing costs and consumption.',
-    'supply chain management, e-commerce, technology impact, sustainability, Artificial Intelligence',
+    'This research project explores the integral role of technology in advancing e-commerce supply chains over the last 30 years. Focusing on customer expectations, delivery speed, cost efficiency, and sustainability, the study emphasizes the impact of Artificial Intelligence (AI) in automating operational decisions, optimizing supply procurement, and reducing costs. Leading companies invest significantly in efficient systems, addressing challenges of sustainability and waste reduction. Anticipating the growing use of e-commerce platforms, the supply chain must adapt to increasing volumes, making AI a key enabler for flexibility and speed. The research requires knowledge in supply chain management, e-commerce, and technology for a comprehensive understanding and analysis of proposed solutions.',
     'The research delves into the transformative role of technology in e-commerce supply chains, addressing operational challenges and the integration of Artificial Intelligence. Knowledge in supply chain management, e-commerce, and technology is essential for understanding and analyzing the proposed solutions.',
     '2023-11-27T22:44:51.199Z', '2029-11-27T23:59:59.999Z', 'LM'),
 
-    ('CONTROL AND REINFORCEMENT LEARNING FOR INVERTED PENDULUM SYSTEMS', 'd392000', 'research project',
+    ('CONTROL AND REINFORCEMENT LEARNING FOR INVERTED PENDULUM SYSTEMS', 'd392000', 'Research project',
     'The inverted pendulum system poses a classic control challenge, involving stabilizing a pendulum on a movable base. This thesis project addresses the problem from multiple angles. Firstly, an OpenAI Gym environment will be created, utilizing Proximal Policy Optimization (PPO) reinforcement learning to control the pendulum''s balance. Secondly, a MATLAB/Simulink mathematical model of the cartpole system will be developed using Lagrangian mechanics, enabling the design and implementation of control strategies such as PID and LQR. Thirdly, these control strategies will be tested on a real model with a dedicated HW/SW system using the PYNQ-Z1 FPGA board, integrating hardware and software components for real-time control. The project contributes to understanding control strategies and reinforcement learning applications in inverted pendulum systems, enhancing practical implementation knowledge.',
-    'control systems, reinforcement learning, MATLAB/Simulink, PID, LQR, FPGA programming',
+    'This research project tackles the classic control challenge of the inverted pendulum system, employing Proximal Policy Optimization (PPO) reinforcement learning and traditional control strategies (PID and LQR). It involves creating an OpenAI Gym environment, developing a MATLAB/Simulink mathematical model, and implementing these strategies on a real model using the PYNQ-Z1 FPGA board. The project contributes to understanding control strategies and reinforcement learning applications in inverted pendulum systems, requiring expertise in control systems, reinforcement learning, MATLAB/Simulink, PID, LQR, and FPGA programming. The integration of hardware and software components demonstrates practical implementation skills.',
     'This research requires knowledge in control systems, reinforcement learning, MATLAB/Simulink, and FPGA programming. The integration of hardware and software components showcases practical implementation skills.',
     '2023-11-27T22:44:51.199Z', '2025-12-20T23:59:59.999Z', 'LM'),
 
-    ('SEMANTIC EXTRACTION AND INDEXING OF ETHEREUM DATA WITH DGRAPH', 'd237188', 'company-based thesis',
+    ('SEMANTIC EXTRACTION AND INDEXING OF ETHEREUM DATA WITH DGRAPH', 'd237188', 'Company-based thesis',
     'Blockchain technology, notably Ethereum, has gained prominence with decentralized applications and smart contracts. This thesis focuses on extracting and semantically indexing Ethereum data using Dgraph, an open-source distributed graph database. A custom Rust-based tool, eth2dgraph, was developed to optimize the extraction process, including smart contract ABI indexing. The project addresses the challenge of open and efficient analysis of blockchain data, providing an alternative solution. The open-source nature encourages collaborative development, and insights gained from analyzing indexed data highlight the need for distributed approaches in handling the growing volume of Ethereum blockchain data.',
-    'blockchain technology, Ethereum, smart contracts, Dgraph, Rust programming, data analysis',
+    'This company-based thesis focuses on semantically extracting and indexing Ethereum data using Dgraph, a distributed graph database. The custom Rust-based tool, eth2dgraph, optimizes the extraction process, including smart contract ABI indexing. Addressing the challenge of efficient blockchain data analysis, the project provides an alternative solution. The open-source nature encourages collaborative development, emphasizing the need for distributed approaches in handling the growing volume of Ethereum blockchain data. The research requires expertise in blockchain technology, Ethereum, smart contracts, Dgraph, Rust programming, and data analysis, with the project fostering ongoing collaboration and development.',
     'This research requires knowledge in blockchain technology, Ethereum, smart contracts, Dgraph, Rust programming, and data analysis. The project''s open-source nature allows for further collaboration and development.',
     '2023-11-27T22:44:51.199Z', '2025-01-20T23:59:59.999Z', 'LM'),
 
-    ('VIRTUAL REALITY SIMULATION FOR CBRN OPERATOR TRAINING', 'd237188', 'research project',
+    ('VIRTUAL REALITY SIMULATION FOR CBRN OPERATOR TRAINING', 'd237188', 'Research project',
     'Virtual Reality (VR) is increasingly utilized for education and training, overcoming physical, economic, and safety limitations in traditional exercises. This thesis project aims to develop an immersive simulation replicating the RECCE (Reconnaissance) procedure used by the Italian Air Force Third Wing in Villafranca di Verona for Chemical, Biological, Radiological, and Nuclear (CBRN) risk management. The simulation provides realistic training and serves as a cost-effective, practical, and repeatable evaluation tool. The RECCE procedure involves preparation, agent detection, and contaminated area delimitation for creating a safe corridor for subsequent qualified operators. The project covers all phases from operator preparation to radiological hotspot containment, focusing on decision-making and activities in contaminated areas. The simulation, accessible in single-player and multi-player modes, offers five roles with varying tasks. Developed in the XR Lab at the LINKS Foundation with supervision from the VR@POLITO lab at Politecnico di Torino, the simulation replaces a previous version, emphasizing design, graphics, procedures, interactivity, and choice variety to align with Air Force requirements and become an official training tool.',
-    'Virtual Reality (VR), CBRN training, simulation development, XR Lab, VR@POLITO, procedural design, interaction design',
+    'This research project focuses on developing a Virtual Reality (VR) simulation for Chemical, Biological, Radiological, and Nuclear (CBRN) operator training. The immersive simulation replicates the RECCE (Reconnaissance) procedure used by the Italian Air Force Third Wing, offering realistic training and a cost-effective evaluation tool. The project covers all phases of the RECCE procedure, emphasizing decision-making and activities in contaminated areas. Accessible in single-player and multi-player modes, the simulation provides five roles with varying tasks. Developed at the XR Lab in the LINKS Foundation with supervision from the VR@POLITO lab at Politecnico di Torino, it replaces a previous version, aligning with Air Force requirements to become an official training tool. The research requires expertise in Virtual Reality, CBRN training procedures, simulation development, XR Lab technologies, VR@POLITO methodologies, procedural and interaction design, with an emphasis on alignment with Air Force requirements for official training recognition.',
     'This research requires knowledge in Virtual Reality, CBRN training procedures, simulation development, XR Lab technologies, VR@POLITO methodologies, procedural and interaction design. The project emphasizes alignment with Air Force requirements for official training recognition.',
     '2023-11-27T22:44:51.199Z', '2025-02-25T23:59:59.999Z', 'LM'),
 
-    ('INTEGRATION OF LEAN, SIX SIGMA, AND INDUSTRY 4.0 IN MANUFACTURING', 'd258761', 'company-based thesis',
+    ('INTEGRATION OF LEAN, SIX SIGMA, AND INDUSTRY 4.0 IN MANUFACTURING', 'd258761', 'Company-based thesis',
     'This research project explores the integration of Lean Manufacturing, Six Sigma, and Industry 4.0 in the manufacturing sector. Industry 4.0, the fourth industrial revolution, leverages cyber-physical systems and IoT for smart production lines and intelligent devices. The study examines how the combination of Lean and Industry 4.0, known as Lean Industry 4.0, can enhance production processes, addressing the challenges posed by increasing operational complexity. Successful implementation of Lean Industry 4.0 is shown to potentially improve conversion costs by approximately 40% in five to ten years. Additionally, the study explores the application of Six Sigma, a statistical quality improvement approach, to handle big data generated by Industry 4.0. The goal is to maximize efficiency, process improvement, and quality orientation within the context of future manufacturing excellence.',
-    'Lean Manufacturing, Six Sigma, Industry 4.0, smart production, IoT, data analysis, DMAIC, process improvement',
+    'This comprehensive and intricate study mandates a profound and diverse knowledge base encompassing Lean Manufacturing methodologies, adept proficiency in Six Sigma principles, a nuanced understanding of Industry 4.0 technologies, honed skills in data analysis, and a strategic grasp of process improvement strategies. The intricate integration of Lean, Six Sigma, and Industry 4.0 aspires not merely to fortify manufacturing processes but to imbue them with resilience, quality orientation, and a robust capacity to navigate the challenges that the future manufacturing landscape is poised to present.',
     'This study requires knowledge in Lean Manufacturing, Six Sigma methodology, Industry 4.0 technologies, data analysis, and process improvement. The integration of Lean, Six Sigma, and Industry 4.0 aims to make manufacturing processes more robust, quality-oriented, and capable of addressing future challenges.',
     '2023-11-27T22:44:51.199Z', '2025-02-25T23:59:59.999Z', 'LM'),
 
-    ('METALLOGRAPHIC ASSESSMENT OF LIQUID METAL EMBRITTLEMENT IN RESISTANCE SPOT WELDING OF ADVANCED HIGH STRENGTH STEELS', 'd284435', 'research project',
+    ('METALLOGRAPHIC ASSESSMENT OF LIQUID METAL EMBRITTLEMENT IN RESISTANCE SPOT WELDING OF ADVANCED HIGH STRENGTH STEELS', 'd284435', 'Research project',
     'This research project focuses on the metallographic assessment of Liquid Metal Embrittlement (LME) in Resistance Spot Welding (RSW) joints of Advanced High Strength Steels (AHSS). Car manufacturers aim to reduce vehicle weight for improved fuel efficiency and lower carbon dioxide emissions while ensuring occupant safety. AHSS, known for its high strength and crash attributes, is commonly used in vehicle manufacturing. However, during RSW of zinc-coated AHSS, especially in dissimilar joining, the LME phenomenon occurs, leading to AHSS cracking and failure. The investigation aims to replicate LME in a laboratory environment, develop metallographic assessment methods for resulting cracks, illustrate cracking morphology, and identify vulnerable weld microstructures, considering various welding parameters.',
-    'Material science, metallurgy, welding technology, metallography, advanced high strength steels, liquid metal embrittlement, resistance spot welding',
+    'This study demands expertise in material science, metallurgy, welding technology, and metallography. Investigating Liquid Metal Embrittlement in Resistance Spot Welding of Advanced High Strength Steels, it aims to enhance lightweight material development for vehicle manufacturing, contributing to industry advancements.',
     'This study requires knowledge in material science, metallurgy, welding technology, and metallography. The investigation aims to enhance understanding of the processes behind LME in RSW joints, contributing to advancements in lightweight material development for vehicle manufacturing.',
     '2023-11-27T22:44:51.199Z', '2025-02-25T23:59:59.999Z', 'LM'),
 
-    ('IMPACT OF AIRBNB ON THE LOCAL REAL ESTATE MARKET: A CASE STUDY OF TURIN', 'd320694', 'research project',
+    ('IMPACT OF AIRBNB ON THE LOCAL REAL ESTATE MARKET: A CASE STUDY OF TURIN', 'd320694', 'Research project',
     'This research project focuses on investigating the impact of Airbnb on the local real estate market in Turin. It begins with an introduction to the sharing economy, shifting to Airbnb, covering its business model, relationship with the hotel industry, and regulatory issues. The study then delves into the Italian real estate market, exploring homeownership habits, market trends, transactions, and prices. Literature review on the relationship between Airbnb and real estate markets sets the context. Data from AirDNA, Idealista, and OMI are used for analysis. Key statistics, findings, and econometric analyses are presented, examining factors influencing listing profitability and the impact on rent and sale prices in different neighborhoods. The final chapter summarizes main findings and conclusions.',
-    'Economics, real estate, econometrics, statistical analysis, data analysis, sharing economy, Airbnb, Turin real estate market',
+    'This research necessitates expertise in economics, real estate, econometrics, statistical analysis, and data analysis. The study delves into the intricate relationship between Airbnb and the Turin real estate market, aiming to provide valuable insights for policymakers and stakeholders.',
     'This study requires knowledge in economics, real estate, econometrics, statistical analysis, and data analysis. The research aims to contribute insights into the impact of Airbnb on the local real estate market in Turin, providing valuable information for policymakers and stakeholders.',
     '2023-11-27T22:44:51.199Z', '2025-02-25T23:59:59.999Z', 'LM'),
 
-    ('EVALUATION OF E-ADVISOR IMPACT ON MRF REQUEST MANAGEMENT AT LORO PIANA & C. SPA', 'd258293', 'research project',
+    ('EVALUATION OF E-ADVISOR IMPACT ON MRF REQUEST MANAGEMENT AT LORO PIANA & C. SPA', 'd258293', 'Research project',
     'This thesis focuses on the impact evaluation of Loro Piana & C. Spa\''s "E-advisor" project, which aims to provide online consultation services by a real salesperson. The specific case under consideration is the management of MRF (Material Request Form) requests. The study delves into how the introduction of the new service has modified the management processes, outlining the entire process structure. The primary objectives are to assess if the service, as designed, is adequately sized to meet the demand of incoming requests and to evaluate the performance of the new process. A performance measurement system has been designed for monitoring activities, utilizing the Balanced Scorecard as a conceptual model. This involves perspectives such as financial, customer, internal processes, and learning and growth. The study identifies 30 performance indicators, synthesizing them to 12 key indicators, of which only 8 are currently monitored by the company. Results obtained over a 6-month period from the project''s initiation are presented and discussed. The analysis and direct management of the process at the company have revealed limitations in the current method, particularly in terms of data tracking, leading to proposed improvement solutions for the near future.',
-    'Business process management, performance measurement, Balanced Scorecard, data analysis, project management, customer service',
+    'This comprehensive research necessitates expertise in business process management, performance measurement methodologies, Balanced Scorecard, data analysis techniques, project management, and customer service. The study meticulously assesses the impact and performance of Loro Piana & C. Spa''s "E-advisor" project, aiming to provide valuable insights for informed decision-making.',
     'This research requires knowledge in business process management, performance measurement methodologies, Balanced Scorecard, data analysis techniques, project management, and customer service. The study aims to provide insights into the impact and performance of the "E-advisor" project at Loro Piana & C. Spa.',
     '2023-11-27T22:44:51.199Z', '2025-05-27T23:59:59.999Z', 'LM'),
 
-    ('ANALYSIS OF RETURNABLE PACKAGING FOR OVERSEAS TRANSPORT IN THE AUTOMOTIVE SUPPLY CHAIN', 'd226682', 'electronic publication',
+    ('ANALYSIS OF RETURNABLE PACKAGING FOR OVERSEAS TRANSPORT IN THE AUTOMOTIVE SUPPLY CHAIN', 'd226682', 'Electronic publication',
     'This research project, conducted at the FCA company, focuses on analyzing the usage of returnable packaging (metal or plastic) for overseas transport, as a substitute for disposable packaging (wooden and cardboard). The study covers both standard dimension packaging and specific item packaging. The primary objective is to assess the advantages and challenges associated with implementing returnable packaging, particularly for overseas customers with long distances and lead times.',
-    'Supply chain management, packaging processes, returnable packaging, overseas transport logistics',
+    'This research project demands expertise in supply chain management, packaging processes, and logistics related to overseas transport. Conducted at the FCA company, the study explores the advantages and challenges of implementing returnable packaging (metal or plastic) for overseas transport in the automotive supply chain, specifically addressing international shipments. A comprehensive understanding of these aspects is crucial for providing valuable insights into the feasibility and implications of adopting returnable packaging solutions.',
     'The study requires a solid understanding of supply chain management, packaging processes, and logistics related to overseas transport. It provides insights into the feasibility and implications of adopting returnable packaging in the automotive supply chain for international shipments.',
     '2023-11-27T22:44:51.199Z', '2026-12-31T23:59:59.999Z', 'LM'),
 
-    ('ENHANCING COCHLEAR IMPLANTATION OUTCOMES: A COMPREHENSIVE SOLUTION THROUGH INTERNATIONAL COLLABORATION', 'd370392', 'research project',
+    ('ENHANCING COCHLEAR IMPLANTATION OUTCOMES: A COMPREHENSIVE SOLUTION THROUGH INTERNATIONAL COLLABORATION', 'd370392', 'Research project',
     'This thesis project focuses on Cochlear Implants (CI) and their pivotal role in restoring hearing function for individuals who are profoundly deaf or severely hard of hearing. The project aims to provide a comprehensive overview of human hearing, covering the structural anatomy of the normal hearing system, the challenges in a deaf ear, and the Cochlear Implantation process. The primary objective is to assess existing complications and propose a comprehensive solution, including the establishment of an international agency for professionals, a telemedicine platform for continuity assistance, and a network of training and experiential exchanges to unify rehabilitation protocols.',
-    'Audiology, Cochlear Implants, Telemedicine, Rehabilitation Protocols, Human Hearing Anatomy',
+    'This research on Cochlear Implants demands expertise in audiology, cochlear implants, telemedicine, and rehabilitation protocols. Assessing complications, the study proposes a comprehensive solution, including international collaboration, a telemedicine platform, and unified rehabilitation protocols, addressing success determinants in cochlear implantation.',
     'The study requires a background in audiology, cochlear implants, telemedicine, and an understanding of rehabilitation protocols. It aims to address the determinants of success in cochlear implantation, considering factors such as patients’ hearing history, post-lingual or pre-lingual status, age, learning ability, health and cochlear structure, and intelligence. The proposed solutions aim to enhance the rehabilitation process after CI surgery and address the lack of public information on this matter worldwide.',
     '2023-11-27T22:44:51.199Z', '2024-06-30T23:59:59.999Z', 'LM');
 
@@ -601,7 +607,7 @@ VALUES
 -- Insert into thesisStartRequest
 INSERT INTO thesisStartRequest(student_id, title, description, supervisor_id, creation_date)
 VALUES
-    ('s319355', 'start request for a thesis to be defined', 'i''d like to start a thesis concerning numerical modelling and simulations with professor Ricci', 'd357587', '2023-11-30T23:59:59.999Z'); 
+    ('s319355', 'start request for a thesis to be defined', 'i''d like to start a thesis concerning numerical modelling and simulations with professor Ricci', 'd357587', '2023-11-30T23:59:59.999Z');
 
 -- Insert into thesisStartCosupervisor
 INSERT INTO thesisStartCosupervisor(start_request_id, cosupervisor_id)
@@ -610,7 +616,7 @@ VALUES
     (1, 'd226682'),
     (1, 'd392000');
 
-    
+
 -- Create a trigger that check that the proposal_id of the thesisApplication table is present in the thesisProposal table
 -- and that the proposal is not deleted or archived for the insertion and the update
 CREATE TRIGGER check_proposal_id_in_application

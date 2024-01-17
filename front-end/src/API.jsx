@@ -436,6 +436,23 @@ async function acceptStartRequest(startReqId) {
         throw res;
     }
 }
+// Insert Thesis Start Request
+async function insertThesisStartRequest(request) {
+    let response = await fetch(URL + '/student/thesis-start-requests', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(request),
+    });
+    const res = await response.json();
+    if (response.ok) {
+        return res;
+    } else {
+        throw res;
+    }
+}
 
 // Reject Student Start Request 
 async function rejectStartRequest(startReqId) {
@@ -451,6 +468,19 @@ async function rejectStartRequest(startReqId) {
         return res;
     } else {
         throw res;
+    }
+}
+// GET Student active Thesis Start Request
+async function getStudentActiveThesisStartRequest() {
+    const response = await fetch(URL + '/student/thesis-start-requests/last', {
+        method: 'GET',
+        credentials: 'include',
+    });
+    const tsr = await response.json();
+    if (response.ok) {
+        return tsr;
+    } else {
+        throw tsr;
     }
 }
 

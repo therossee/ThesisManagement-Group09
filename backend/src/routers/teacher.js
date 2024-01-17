@@ -11,5 +11,7 @@ router.patch('/applications/reject/:proposal_id', authorization.isLoggedIn, auth
 
 router.get('/uploads/:stud_id/:app_id', authorization.isLoggedIn, authorization.isTeacher, controller.getApplicationUploads);
 
+router.get('/thesis-start-requests', authorization.isLoggedIn, authorization.isTeacher, controller.listThesisStartRequests);
+router.post('/thesis-start-requests/:id/review', authorization.isLoggedIn, authorization.isTeacher, controller.reviewThesisStartRequest);
 
 module.exports = router;

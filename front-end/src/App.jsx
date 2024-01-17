@@ -6,12 +6,12 @@ import './css/App.css'
 function App() {
   return (
     <>
-    <BrowserView>
-    <MainLayout />
-    </BrowserView>
-    <MobileView>
-      <MobLayout/>
-    </MobileView>
+      <BrowserView>
+        <MainLayout />
+      </BrowserView>
+      <MobileView>
+        <MobLayout />
+      </MobileView>
     </>
   )
 }
