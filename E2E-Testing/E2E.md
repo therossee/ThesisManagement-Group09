@@ -224,7 +224,19 @@ This test case is related to copy a proposal: we want to create a new thesis pro
 12. Log out
     - You should be again on the [home page](http://localhost:5173/)
 
-### [15] Notify Application
+### [15] Insert Student Start Request
+This test case validates the possibility for a student to insert a thesis start request.
+
+1. Go to the [home page](http://localhost:5173/)
+2. Log in as a student
+3. In the left bar click on [Thesis Start Request](http://localhost:5173/start-request)
+4. Click on the button 'Add New Thesis Start Request'
+5. Complete all the necessary fields
+6. Click on 'Submit'
+7. A page with the details of your just created thesis start request will appear and you can consult it now whenever you click on [Thesis Start Request](http://localhost:5173/start-request)
+8. Log out
+
+### [16] Notify Application
 This test case is related to the possibility for a professor to be notified when a new application is sent. To check that we use Ethereal.
 
 1. Open [Ethereal site](https://ethereal.email/login)
