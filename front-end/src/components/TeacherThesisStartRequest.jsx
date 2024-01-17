@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Alert, Avatar, Button, Row, Col, Tabs, Divider, Typography, List, Modal, Flex, Tooltip, Input, message } from 'antd';
-import { CheckOutlined, CloseOutlined, HistoryOutlined, CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, InfoCircleOutlined, UserOutlined, ExclamationCircleFilled } from '@ant-design/icons';
+import { CheckOutlined, CloseOutlined, HistoryOutlined, CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, InfoCircleOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import API from '../API';
 
 function TeacherThesisStartRequest() {
@@ -131,18 +131,15 @@ function PendingThesisStartRequest({ tsr, isLoading, setDirty, setIsModalVisible
                                 description={<div style={{ textAlign: "left", marginTop: "-5px" }}>{tsr.student.surname + " " + tsr.student.name + " - " + tsr.student.id}</div>}
                             />
                             <Flex wrap="wrap" gap="small" style={{ paddingRight: "1%", alignItems: 'center' }}>
-                                <Tooltip title="Student info">
-                                    <Button type="dashed"
-                                        icon={<UserOutlined />}
-                                        onClick={() => { <></> }}
-                                    />
-                                </Tooltip>
                                 <Tooltip title="Thesis Start Request info">
                                     <Button type="dashed"
                                         icon={<InfoCircleOutlined />}
                                         onClick={() => { <></> }}
                                     />
                                 </Tooltip>
+                                <Button type="dashed" onClick={() => setIsModalVisible(true)}>
+                                    Request Changes
+                                </Button>
                                 <Tooltip title="Accept Thesis Start Request">
                                     <Button type="dashed"
                                         icon={<CheckOutlined />}
@@ -191,9 +188,6 @@ function PendingThesisStartRequest({ tsr, isLoading, setDirty, setIsModalVisible
                                         }}
                                     />
                                 </Tooltip>
-                                <Button type="dashed" onClick={() => setIsModalVisible(true)}>
-                                    Request Changes
-                                </Button>
                             </Flex>
                         </div>
                     </List.Item>
@@ -231,12 +225,6 @@ function HistoryThesisStartRequest({ tsr, isLoading }) {
                                 description={<div style={{ textAlign: "left", marginTop: "-5px" }}>{tsr.student.surname + " " + tsr.student.name + " - " + tsr.student.id}</div>}
                             />
                             <Flex wrap="wrap" gap="small" style={{ paddingRight: "1%", alignItems: 'center' }}>
-                                <Tooltip title="Student info">
-                                    <Button type="dashed"
-                                        icon={<UserOutlined />}
-                                        onClick={() => { <></> }}
-                                    />
-                                </Tooltip>
                                 <Tooltip title="Thesis Start Request info">
                                     <Button type="dashed"
                                         icon={<InfoCircleOutlined />}
