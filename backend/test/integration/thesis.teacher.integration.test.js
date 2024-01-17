@@ -16,7 +16,7 @@ const fs = require('fs');
 const fse = require('fs-extra');
 const CronTasksService = require("../../src/services/CronTasksService");
 const AdvancedDate = require('../../src/models/AdvancedDate');
-const {APPLICATION_STATUS} = require('../../src/enums/application');
+const {THESIS_START_REQUEST_STATUS} = require('../../src/enums/thesisStartRequest');
 
 let marcoRossiAgent;
 beforeAll(async () => {

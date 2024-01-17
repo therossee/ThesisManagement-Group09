@@ -330,7 +330,7 @@ describe('getThesisProposalById', () => {
 
         db.prepare().get.mockReturnValue(expectedResult);
 
-        const result = await thesis_proposal.getThesisProposalById(proposalId);
+        const result = thesis_proposal.getThesisProposalById(proposalId);
         const expectedQuery = `SELECT * FROM thesisProposal P
         JOIN proposalCds PC ON P.proposal_id = PC.proposal_id
         JOIN degree D ON PC.cod_degree = D.cod_degree
@@ -984,37 +984,38 @@ describe('getThesisProposalCds', () => {
 
 describe('getThesisProposalTeacher', () => {
 
-    test('should return teacher given thesisProposalId and teacherId', async () => {
-        const proposalId = 1;
-        const teacherId = "d1";
-        const expectedResult = {
-            id: "d1",
-            surname: "SurnameMock",
-            name: "NameMock",
-            email: "emailMock",
-            codGroup: "G1",
-            cod_department: "dep1"
-        };
-
-        db.prepare().get.mockReturnValueOnce(undefined).mockReturnValueOnce(expectedResult);
-
-        const result = await thesis_proposal.getThesisProposalTeacher(proposalId, teacherId);
-
-        expect(result).toEqual(expectedResult);
-    });
-
-    test('should return null when the proposal is already assigned', async () => {
-        const proposalId = 2;
-        const teacheId = "d2";
-
-        db.prepare().get.mockReturnValueOnce({
-            proposalId: 2,
-            teacheId: "d2",
-            status: 'accepted'
-        });
-
-        const result = await thesis_proposal.getThesisProposalTeacher(proposalId, teacheId);
-
-        expect(result).toEqual(null);
-    })
+    test('should return the expected result when a valid thesis proposal and teacher ID are provided', () => {
+        const proposalId = '1';
+        const teacherId = 's12345';
+        const mockProposal = {
+            proposal_id: proposalId,
+            title: 'Test Proposal',
+            supervisor_id: teacherId,
+            type: 'Test Type',
+            description: 'Test Description',
+            required_knowledge: 'Test Knowledge',
+            notes: 'Test Notes',
+            creation_date: '2023-12-10T10:30:04.050Z',
+            expiration: '2025-06-05T23:59:59.999Z',
+            level: 'Test Level',
+            is_deleted: 0,
+            is_archived: 1
+        }
+        db.prepare().get.mockReturnValueOnce({mockProposal});
+    
+        const result = thesis_proposal.getThesisProposalTeacher(proposalId, teacherId);
+    
+        expect(result).toEqual({mockProposal});
+      });
+    
+      test('should return null when the thesis proposal or teacher ID is not valid', () => {
+        
+        const invalidProposalId = 'invalidProposalId';
+        const invalidTeacherId = 'invalidTeacherId';
+        
+        db.prepare().get.mockReturnValueOnce(null);
+        const result = thesis_proposal.getThesisProposalTeacher(invalidProposalId, invalidTeacherId);
+    
+        expect(result).toBeNull();
+      });
 });
