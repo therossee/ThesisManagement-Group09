@@ -52,36 +52,6 @@ function TopBar({ collapsed, setCollapsed }) {
   )
 }
 
-function IsLoggedInForm() {
-
-  const { isTeacher, userData } = useAuth();
-  const navigate = useNavigate();
-
-  return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        <Avatar size="large" style={{ backgroundColor: '#1677ff', marginRight: "10px" }} icon={<UserOutlined />} />
-        <span>{userData.name}</span>
-      </div>
-      <div>
-        {isTeacher && (
-          <>
-          <FileAddOutlined
-            style={{ fontSize: '22px', verticalAlign: 'middle', marginRight: '20px' }}
-            onClick={() => navigate('/insert-proposal')}
-          />
-          <InboxOutlined style={{ fontSize: '22px', verticalAlign: 'middle', marginRight: "20px" }} onClick={() => navigate("/archive")}/>
-          </>
-        )}
-        <Badge count={1} style={{ marginRight: '22px' }}>
-          <BellOutlined style={{ fontSize: '22px', marginRight: '22px', verticalAlign: 'middle' }} />
-        </Badge>
-        <LogoutButton />
-      </div>
-    </div>
-  );  
-
-}
 TopBar.propTypes = {
   collapsed: PropTypes.bool.isRequired,
   setCollapsed: PropTypes.func.isRequired

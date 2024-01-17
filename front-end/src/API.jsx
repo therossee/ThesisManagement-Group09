@@ -475,6 +475,6 @@ const API = {
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
     applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById, getPDF,
-    insertThesisStartRequest, getStudentActiveThesisStartRequest
+    insertThesisStartRequest, getStudentActiveThesisStartRequest, getArchivedThesisProposals, publishProposalById
 };
 export default API;

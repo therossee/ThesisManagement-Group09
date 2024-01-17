@@ -905,6 +905,52 @@ describe('listThesisProposalsTeacher', () => {
     });
 });
 
+describe('listArchivedThesisProposalsTeacher', () => {
+    const mockTeacherId = 'd12345';
+    const mockArchivedProposals = [
+        { 
+            proposal_id: 1, 
+            title: 'Test Proposal', 
+            supervisor_id: mockTeacherId, 
+            type: 'Test Type',
+            description: 'Test Description',
+            required_knowledge: 'Test Knowledge',
+            notes: 'Test Notes',
+            creation_date: '2023-12-10T10:30:04.050Z',
+            expiration: '2025-06-05T23:59:59.999Z',
+            level: 'Test Level',
+            is_deleted: 0,
+            is_archived: 1
+        },
+        {
+            proposal_id: 2, 
+            title: 'Test Proposal', 
+            supervisor_id: mockTeacherId, 
+            type: 'Test Type',
+            description: 'Test Description',
+            required_knowledge: 'Test Knowledge',
+            notes: 'Test Notes',
+            creation_date: '2022-12-10T10:30:04.050Z',
+            expiration: '2023-06-05T23:59:59.999Z',
+            level: 'Test Level',
+            is_deleted: 0,
+            is_archived: 0
+        }
+    ];
+    
+    test('should return the list of archived thesis proposals for the teacher', async () => {
+        db.prepare().all.mockReturnValueOnce(mockArchivedProposals);
+        const result = await thesis_proposal.listArchivedThesisProposalsTeacher(mockTeacherId);
+        expect(result).toEqual(mockArchivedProposals);
+    });
+  
+    test('should return an empty array if no archived proposals are found', async () => {
+        db.prepare().all.mockReturnValueOnce([]);
+        const result = await thesis_proposal.listArchivedThesisProposalsTeacher(mockTeacherId);
+        expect(result).toEqual([]);
+    });
+});
+
 describe('getThesisProposalCds', () => {
 
     test('should return thesis proposal cds', async () => {

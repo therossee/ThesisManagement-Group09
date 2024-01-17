@@ -21,6 +21,7 @@ beforeAll(async () => {
 
 afterAll(() => {
     CronTasksService.stop();
+    resetTestDatabase();
 });
 
 describe('[INTEGRATION] Virtual Clock APIs', () => {
