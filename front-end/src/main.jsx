@@ -13,7 +13,9 @@ import Timezone from "dayjs/plugin/timezone";
 dayjs.extend(Timezone);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-      <AuthProvider>
-        <App />
-      </AuthProvider>,
+  <React.StrictMode>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </React.StrictMode>,
 );

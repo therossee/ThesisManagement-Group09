@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const {APIReviewThesisStartRequestSchema} = require("../schemas/thesis-start-request");
 const usersDao = require("../dao/users_dao");
 const thesisProposalDao = require("../dao/thesis_proposal_dao");
 const thesisApplicationDao = require("../dao/thesis_application_dao");
@@ -7,6 +8,7 @@ const thesisStartRequestDao = require("../dao/thesis_start_request_dao");
 const NotificationService = require("../services/NotificationService");
 const { APPLICATION_STATUS } = require("../enums");
 const utils = require("./utils");
+const NoThesisStartRequestError = require("../errors/NoThesisStartRequestError");
 
 /**
  * @param {PopulatedRequest} req
@@ -164,10 +166,37 @@ async function listThesisStartRequests(req, res, next) {
     }
 }
 
+/**
+ * Add a review to a thesis start request
+ *
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+async function reviewThesisStartRequest(req, res, next) {
+    try {
+        const teacherId = req.user.id;
+        const tsrId = req.params.id;
+
+        /** @type {ThesisStartRequestReview} */
+        const review = APIReviewThesisStartRequestSchema.parse(req.body);
+
+        const success = await thesisStartRequestDao.supervisorReviewThesisStartRequest(teacherId, tsrId, review);
+        if (!success) {
+            throw new NoThesisStartRequestError(tsrId);
+        }
+
+        res.status(201).json({ message: 'Thesis start request reviewed successfully' });
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
     getApplicationsForTeacherThesisProposal,
     acceptAnApplicationOnThesis,
     rejectAnApplicationOnThesis,
     getApplicationUploads,
-    listThesisStartRequests
+    listThesisStartRequests,
+    reviewThesisStartRequest
 };

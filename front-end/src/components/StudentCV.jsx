@@ -132,7 +132,7 @@ StudentCV.propTypes = {
         name: PropTypes.string.isRequired,
         surname: PropTypes.string.isRequired,
         id: PropTypes.string.isRequired,
-        creationDate: PropTypes.string.isRequired,
+        creationDate: PropTypes.string,
     }),
 }
 

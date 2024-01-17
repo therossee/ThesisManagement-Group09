@@ -5,7 +5,7 @@
 const db = require('../services/db');
 const AdvancedDate = require('../models/AdvancedDate');
 const UnauthorizedActionError = require("../errors/UnauthorizedActionError");
-const {THESIS_START_REQUEST_STATUS} = require("../enums/thesisStartRequest");
+const { THESIS_START_REQUEST_STATUS } = require("../enums");
 
 /**
  * Create a new thesis start request
@@ -103,8 +103,9 @@ exports.listThesisStartRequests = async (supervisorId) => {
     let queryTSR = `SELECT * FROM thesisStartRequest WHERE creation_date < ?`;
     const params = [new AdvancedDate().toISOString()];
     if (supervisorId) {
-        queryTSR += " AND supervisor_id = ?";
+        queryTSR += " AND supervisor_id = ? AND status NOT IN (?, ?)";
         params.push(supervisorId);
+        params.push(THESIS_START_REQUEST_STATUS.WAITING_FOR_APPROVAL, THESIS_START_REQUEST_STATUS.REJECTED_BY_SECRETARY);
     }
 
     /** @type {ThesisStartRequestRow[]} */
@@ -149,10 +150,39 @@ exports.getThesisStartRequestById = async (request_id) => {
  * @return {Promise<boolean>}
  */
 exports.updateThesisStartRequestStatus = async (request_id, new_status) => {
-  const query = `UPDATE thesisStartRequest SET status = ? WHERE id = ?;`;
+    const query = `UPDATE thesisStartRequest SET status = ? WHERE id = ?;`;
 
-  const res = db.prepare(query).run(new_status, request_id);
-  return res.changes !== 0;
+    const res = db.prepare(query).run(new_status, request_id);
+    return res.changes !== 0;
+};
+
+/**
+ * Update the status of a thesis start request by the supervisor
+ *
+ * @param {string} supervisorId
+ * @param {string} tsrId
+ * @param {ThesisStartRequestReview} review
+ *
+ * @return {Promise<boolean>}
+ */
+exports.supervisorReviewThesisStartRequest = async (supervisorId, tsrId, review) => {
+    /** @type {string} */
+    const query = `UPDATE thesisStartRequest SET status = ?, changes_requested = ?, approval_date = ? WHERE id = ? AND supervisor_id = ? AND STATUS IN (?, ?);`;
+    /** @type {(string | null)[]} */
+    const params = [];
+    if (review.action === "request changes") {
+        params.push(THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED, review.changes, null);
+    } else {
+        const newStatus = review.action === "accept" ? THESIS_START_REQUEST_STATUS.ACCEPTED_BY_TEACHER : THESIS_START_REQUEST_STATUS.REJECTED_BY_TEACHER;
+        const approval_date = review.action === "accept" ? new AdvancedDate().toISOString() : null;
+        params.push(newStatus, null, approval_date);
+    }
+    params.push(tsrId);
+    params.push(supervisorId);
+    params.push(THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY, THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED);
+
+    const res = db.prepare(query).run(...params);
+    return res.changes !== 0;
 };
 
 
