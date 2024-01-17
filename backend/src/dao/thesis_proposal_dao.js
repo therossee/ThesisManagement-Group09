@@ -478,6 +478,31 @@ exports.listThesisProposalsTeacher = async (teacherId) => {
 };
 
 /**
+ * Return the list of archived thesis proposals of a teacher
+ * @param {string} teacherId 
+ * @returns {Promise<ThesisProposalRow[]>} 
+ */
+exports.listArchivedThesisProposalsTeacher = async(teacherId) => {
+  const currentDate = new AdvancedDate().toISOString();
+  const getProposals = `SELECT * 
+    FROM thesisProposal P
+    WHERE P.supervisor_id=?
+    AND ( 
+      EXISTS (
+        SELECT 1
+        FROM thesisApplication A
+        WHERE A.proposal_id = P.proposal_id
+        AND A.status = ? 
+      )
+      OR P.expiration < ?
+      OR is_archived = 1 
+    )
+    AND creation_date < ?
+    AND is_deleted = 0;`;
+  return db.prepare(getProposals).all(teacherId, APPLICATION_STATUS.ACCEPTED, currentDate, currentDate);
+};
+
+/**
  * Return the list of course of studies of a thesis proposal
  *
  * @param {string | number} proposalId
@@ -498,17 +523,9 @@ exports.getThesisProposalCds = async (proposalId) => {
 exports.getThesisProposalTeacher = (proposalId, teacherId) => {
   const currentDate = new AdvancedDate().toISOString();
 
-  // Check is the proposal is not already assigned
-  const checkProposalAssigned = `SELECT * FROM thesisApplication WHERE proposal_id=? AND status=?`;
-  const proposal_assigned = db.prepare(checkProposalAssigned).get(proposalId, APPLICATION_STATUS.ACCEPTED);
-
-  if (proposal_assigned){
-    return null
-  }
-
   const query = `SELECT * FROM thesisProposal WHERE proposal_id = ? AND supervisor_id = ? 
-                   AND expiration > ? AND creation_date < ? AND is_deleted = 0 AND is_archived = 0;`;
-  return db.prepare(query).get(proposalId, teacherId, currentDate, currentDate) ?? null;
+                 AND creation_date < ? AND is_deleted = 0;`;
+  return db.prepare(query).get(proposalId, teacherId, currentDate) ?? null;
 };
 
 
@@ -534,7 +551,6 @@ function _handleFailure(proposalId, now, operation) {
       throw new UnauthorizedActionError('You are not the supervisor of this thesis');
     }
 }
-
 
 /**
  * @typedef {Object} ThesisApplicationRow
