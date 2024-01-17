@@ -7,6 +7,7 @@ const {app} = require("../../src/app");
 const utils = require("../utils");
 const thesisProposalDao = require('../../src/dao/thesis_proposal_dao');
 const thesisApplicationDao = require('../../src/dao/thesis_application_dao');
+const thesisStartRequestDao = require('../../src/dao/thesis_start_request_dao');
 const utilsDao = require('../../src/dao/utils_dao');
 const usersDao = require('../../src/dao/users_dao');
 const db = require('../../src/services/db');
@@ -15,6 +16,7 @@ const fs = require('fs');
 const fse = require('fs-extra');
 const CronTasksService = require("../../src/services/CronTasksService");
 const AdvancedDate = require('../../src/models/AdvancedDate');
+const { THESIS_START_REQUEST_STATUS } = require('../../src/enums');
 
 let marcoRossiAgent;
 beforeAll(async () => {
@@ -1652,5 +1654,183 @@ describe('DELETE /api/thesis-proposals/:id/archive', () => {
         // Assertions
         expect(response.status).toBe(500);
         expect(response.body).toEqual('Internal Server Error');
+    });
+});
+
+describe('GET /api/teacher/thesis-start-requests', () => {
+    test('should return an empty list of thesis start requests for the teacher', async () => {
+        
+        // Make a request to the API endpoint
+        const response = await marcoRossiAgent
+          .get('/api/teacher/thesis-start-requests')
+          .set('credentials', 'include');
+    
+        // Assertions
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('$metadata');
+        expect(response.body).toHaveProperty('items');
+        expect(response.body.items).toEqual([]);
+    });
+
+    test('should return a list of thesis start requests for the teacher', async () => {
+      
+      const tsr = db.prepare('INSERT INTO thesisStartRequest (student_id, title, description, supervisor_id, creation_date, status) VALUES (?, ?, ?, ?, ?, ?)')
+          .run('s318952', 'Title', 'Description', 'd279620','2021-10-10T10:45:50.121Z', THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY);
+      db.prepare('INSERT INTO thesisStartCoSupervisor (start_request_id, cosupervisor_id) VALUES (?, ?)')
+            .run(tsr.lastInsertRowid, 'd370335');
+      
+      // Make a request to the API endpoint
+      const response = await marcoRossiAgent
+        .get('/api/teacher/thesis-start-requests')
+        .set('credentials', 'include');
+  
+      // Assertions
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('$metadata');
+      expect(response.body).toHaveProperty('items');
+      expect(response.body.items).toEqual([{
+          id: tsr.lastInsertRowid,
+          student: {
+              id: 's318952',
+              name: 'Sylvie',
+              surname: 'Molinatto',
+              email: 's318952@studenti.polito.it',
+          },
+          application_id: null,
+          proposal_id: null,
+          title: 'Title',
+          description: 'Description',
+          supervisor: {
+              id: 'd279620',
+              name: 'Marco',
+              surname: 'Rossi',
+              email: 'd279620@polito.it',
+              cod_group: 'Group1',
+              cod_department: 'Dep1',
+          },
+          co_supervisors: [
+            {
+                id: 'd370335',
+                name: 'Luca',
+                surname: 'Bianchi',
+                email: 'd370335@polito.it',
+                cod_group: 'Group2',
+                cod_department: 'Dep2',
+            }
+          ],
+          creation_date: '2021-10-10T10:45:50.121Z',
+          approval_date: null,
+          status: THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY,  
+          changes_requested: null,
+      }]);
+    });
+    
+    test('should handle errors and call the next middleware', async () => {
+      // Mock the function in your thesisStartRequestDao module to throw an error
+      jest.spyOn(thesisStartRequestDao, 'listThesisStartRequests').mockRejectedValue(new Error('Test error'));
+  
+      // Make a request to the API endpoint
+      const response = await marcoRossiAgent
+        .get('/api/teacher/thesis-start-requests')
+        .set('credentials', 'include');
+  
+      // Assertions
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual('Internal Server Error');
+    });
+    
+})
+
+describe('POST /api/teacher/thesis-start-requests/:id/review', () => {
+    test('should successfully accept a thesis start request', async () => {
+      
+      const tsr = db.prepare('INSERT INTO thesisStartRequest (student_id, title, description, supervisor_id, creation_date, status) VALUES (?, ?, ?, ?, ?, ?)')
+        .run('s318952', 'Title', 'Description', 'd279620','2021-10-10T10:45:50.121Z', THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY);
+      db.prepare('INSERT INTO thesisStartCoSupervisor (start_request_id, cosupervisor_id) VALUES (?, ?)')
+          .run(tsr.lastInsertRowid, 'd370335');
+      const review = {
+        action: 'accept',
+      }
+      // Make a request to the API endpoint
+      const response = await marcoRossiAgent
+        .post(`/api/teacher/thesis-start-requests/${tsr.lastInsertRowid}/review`)
+        .set('credentials', 'include')
+        .send(review)
+        .expect(204);
+  
+    });
+
+    test('should successfully request changes for thesis start request', async () => {
+      
+        const tsr = db.prepare('INSERT INTO thesisStartRequest (student_id, title, description, supervisor_id, creation_date, status) VALUES (?, ?, ?, ?, ?, ?)')
+          .run('s318952', 'Title', 'Description', 'd279620','2021-10-10T10:45:50.121Z', THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY);
+        db.prepare('INSERT INTO thesisStartCoSupervisor (start_request_id, cosupervisor_id) VALUES (?, ?)')
+            .run(tsr.lastInsertRowid, 'd370335');
+        const review = {
+          action: 'request changes',
+          changes: 'Changes',
+        }
+        // Make a request to the API endpoint
+        const response = await marcoRossiAgent
+          .post(`/api/teacher/thesis-start-requests/${tsr.lastInsertRowid}/review`)
+          .set('credentials', 'include')
+          .send(review)
+          .expect(204);
+    
+    });
+
+    test('should successfully reject a thesis start request', async () => {
+      
+        const tsr = db.prepare('INSERT INTO thesisStartRequest (student_id, title, description, supervisor_id, creation_date, status) VALUES (?, ?, ?, ?, ?, ?)')
+          .run('s318952', 'Title', 'Description', 'd279620','2021-10-10T10:45:50.121Z', THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY);
+        db.prepare('INSERT INTO thesisStartCoSupervisor (start_request_id, cosupervisor_id) VALUES (?, ?)')
+            .run(tsr.lastInsertRowid, 'd370335');
+        const review = {
+          action: 'reject',
+        }
+        // Make a request to the API endpoint
+        const response = await marcoRossiAgent
+          .post(`/api/teacher/thesis-start-requests/${tsr.lastInsertRowid}/review`)
+          .set('credentials', 'include')
+          .send(review)
+          .expect(204);
+    });
+
+    test('should throw an error if the thesis start request doesn\'t exist', async () => {
+      
+        const review = {
+          action: 'accept',
+        }
+        // Make a request to the API endpoint
+        const response = await marcoRossiAgent
+          .post(`/api/teacher/thesis-start-requests/1000/review`)
+          .set('credentials', 'include')
+          .send(review)
+          .expect(404);
+
+        expect(response.body).toEqual({message: 'No thesis start request with id 1000 found or you are not authorized to access it.'});
+    
+    });
+  
+    test('should handle errors and call the next middleware', async () => {
+      
+      const tsr = db.prepare('INSERT INTO thesisStartRequest (student_id, title, description, supervisor_id, creation_date, status) VALUES (?, ?, ?, ?, ?, ?)')
+        .run('s318952', 'Title', 'Description', 'd279620','2021-10-10T10:45:50.121Z', THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY);
+      db.prepare('INSERT INTO thesisStartCoSupervisor (start_request_id, cosupervisor_id) VALUES (?, ?)')
+          .run(tsr.lastInsertRowid, 'd370335');
+      
+      // Mock the function in your thesisStartRequestDao module to throw an error
+      jest.spyOn(thesisStartRequestDao, 'supervisorReviewThesisStartRequest').mockRejectedValue(new Error('Test error'));
+      const review = {
+        action: 'accept',
+      }
+      // Make a request to the API endpoint
+      const response = await marcoRossiAgent
+        .post(`/api/teacher/thesis-start-requests/${tsr.lastInsertRowid}/review`)
+        .set('credentials', 'include')
+        .send(review)
+        .expect(500);
+  
+      expect(response.body).toEqual('Internal Server Error');
     });
 });
