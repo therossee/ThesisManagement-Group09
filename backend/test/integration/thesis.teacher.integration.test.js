@@ -1495,7 +1495,7 @@ describe('DELETE /api/thesis-proposals/:id/archive', () => {
         expect(response.body).toEqual({message: 'You can\'t un-archive a thesis that has already been assigned'});
     });
 
-    test('should return 400 error if the proposal is expired and it\s not specified a new expiration date', async () => {
+    test('should return 400 error if the proposal is expired and it\'s not specified a new expiration date', async () => {
         
         const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
             .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2022-10-10T10:45:50.121Z', '2023-11-10T23:59:59.999Z', 'LM', 1);
@@ -1752,7 +1752,7 @@ describe('POST /api/teacher/thesis-start-requests/:id/review', () => {
         action: 'accept',
       }
       // Make a request to the API endpoint
-      const response = await marcoRossiAgent
+      await marcoRossiAgent
         .post(`/api/teacher/thesis-start-requests/${tsr.lastInsertRowid}/review`)
         .set('credentials', 'include')
         .send(review)
@@ -1771,7 +1771,7 @@ describe('POST /api/teacher/thesis-start-requests/:id/review', () => {
           changes: 'Changes',
         }
         // Make a request to the API endpoint
-        const response = await marcoRossiAgent
+        await marcoRossiAgent
           .post(`/api/teacher/thesis-start-requests/${tsr.lastInsertRowid}/review`)
           .set('credentials', 'include')
           .send(review)
@@ -1789,7 +1789,7 @@ describe('POST /api/teacher/thesis-start-requests/:id/review', () => {
           action: 'reject',
         }
         // Make a request to the API endpoint
-        const response = await marcoRossiAgent
+        await marcoRossiAgent
           .post(`/api/teacher/thesis-start-requests/${tsr.lastInsertRowid}/review`)
           .set('credentials', 'include')
           .send(review)
