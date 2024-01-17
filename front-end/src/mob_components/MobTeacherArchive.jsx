@@ -122,9 +122,9 @@ function MobTeacherArchive() {
                                 <p>Level: {x.level}</p>
                                 <p>Supervisor: {x.supervisor.name + " " + x.supervisor.surname}</p>
                                 {x.coSupervisors && (
-                                    <p>Co-supervisors: {x.coSupervisors.map((cosupervisor) => (
-                                        <Tag color="blue" key={cosupervisor.id}>
-                                            {cosupervisor.name + " " + cosupervisor.surname}
+                                    <p>Co-supervisors: {x.coSupervisors.map((cSp) => (
+                                        <Tag color="blue" key={cSp.id}>
+                                            {cSp.name + " " + cSp.surname}
                                         </Tag>
                                     ))}</p>
                                 )}
