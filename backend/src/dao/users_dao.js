@@ -10,17 +10,15 @@ const db = require('../services/db');
  * @param {string} id
  * @return {Promise<DegreePartialRow | null>}
  */
-exports.getStudentDegree = (id) => {
-    return new Promise((resolve) => {
-        const sql = 'SELECT * FROM student s, degree d WHERE s.id = ? AND s.cod_degree = d.cod_degree';
-        const row = db.prepare(sql).get(id);
-        if (row) {
-            let degree = { cod_degree: row.cod_degree, title_degree: row.title_degree };
-            resolve(degree);
-        } else {
-            resolve(null);
-        }
-    });
+exports.getStudentDegree = async (id) => {
+    const sql = 'SELECT * FROM student s, degree d WHERE s.id = ? AND s.cod_degree = d.cod_degree';
+
+    const row = db.prepare(sql).get(id);
+    if (row) {
+        return { cod_degree: row.cod_degree, title_degree: row.title_degree };
+    } else {
+        return null;
+    }
 };
 
 /**
@@ -29,15 +27,15 @@ exports.getStudentDegree = (id) => {
  * @param {string} id
  * @return {Promise<StudentPartialRow | null>}
  */
-exports.getStudentById = (id) => {
-    return new Promise( resolve => {
-        const sql = 'SELECT id, surname, name, email FROM student WHERE id = ?';
-        const row = db.prepare(sql).get(id);
-        if (!row) {
-            resolve(null);
-        }
-        resolve({ id: row.id, surname: row.surname, name: row.name, email: row.email });
-    })
+exports.getStudentById = async (id) => {
+    const query = `SELECT id, surname, name, email FROM student WHERE id = ?;`;
+
+    const row = db.prepare(query).get(id);
+    if (row) {
+        return { id: row.id, surname: row.surname, name: row.name, email: row.email };
+    } else {
+        return null;
+    }
 };
 
 /**
@@ -46,12 +44,10 @@ exports.getStudentById = (id) => {
  * @param {string} id
  * @return {Promise<Exams[]>}
  */
-exports.getStudentCareer = (id) => {
-    return new Promise((resolve) => {
-        const sql = 'SELECT cod_course, title_course, cfu, grade, date FROM career WHERE id = ?';
-        const rows = db.prepare(sql).all(id);
-        resolve(rows);
-    });
+exports.getStudentCareer = async (id) => {
+    const query = `SELECT cod_course, title_course, cfu, grade, date FROM career WHERE id = ?;`;
+
+    return db.prepare(query).all(id);
 };
 
 /**
@@ -60,15 +56,28 @@ exports.getStudentCareer = (id) => {
  * @param {string} id
  * @return {Promise<TeacherRow | null>}
  */
-exports.getTeacherById = (id) => {
-    return new Promise( resolve => {
-        const sql = 'SELECT * FROM teacher WHERE id = ?';
-        const row = db.prepare(sql).get(id);
-        if (!row) {
-            resolve(null);
-        }
-        resolve(row);
-    })
+exports.getTeacherById = async (id) => {
+    const query = `SELECT * FROM teacher WHERE id = ?;`;
+
+    const row = db.prepare(query).get(id);
+    if (row) {
+        return row;
+    } else {
+        return null;
+    }
+};
+
+/**
+ * Return the group of the teacher with the given id
+ *
+ * @param {string} teacherId
+ * @returns {Promise<string>}
+ */
+exports.getGroup = async (teacherId) => {
+    const query = `SELECT cod_group FROM teacher WHERE id=? `;
+
+    const res = db.prepare(query).get(teacherId);
+    return res.cod_group;
 };
 
 
