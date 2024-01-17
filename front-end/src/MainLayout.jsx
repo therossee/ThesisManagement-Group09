@@ -14,7 +14,7 @@ import ViewProposal from './routes/ViewProposal';
 import StartRequest from './routes/StartRequest';
 import SideBar from './components/SideBar';
 import TopBar from './components/TopBar';
-import './css/style.css';;
+import './css/style.css';
 
 function MainLayout() {
 

@@ -217,7 +217,7 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
 
     function checkDisabled(activeTSR) {
         if ((Object.keys(activeTSR).length > 0))
-            if (activeTSR.status != "rejected by secretary clerk" && activeTSR.status != "rejected by teacher")
+            if (activeTSR.status != "rejected by secretary" && activeTSR.status != "rejected by teacher")
                 return true; // Disable the button to add a new TSR
         return false; // Enable the button to add a new TSR
     }
@@ -226,9 +226,9 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
         switch (status) {
             case "waiting for approval":
                 return <Badge status="processing" text={<strong>1/3 - Waiting for approval from the secretary</strong>} />;
-            case "rejected by secretary clerk":
+            case "rejected by secretary":
                 return <Badge status="error" text={<strong>1/3 - Rejected by the secretary, you can submit a new one</strong>} />;
-            case "accepted by secretary clerk":
+            case "accepted by secretary":
                 return <Badge status="processing" text={<strong>2/3 - Waiting for approval from the teacher</strong>} />;
             case "changes requested":
                 return <Badge status="warning" text={<strong>2/3 - Changes requested</strong>} />;

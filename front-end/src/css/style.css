@@ -1,7 +1,9 @@
 .ant-layout {
   background-color: white;
 }
-
+.ant-list .ant-list-item{
+  padding: 8px;
+}
 .content-style {
   margin: 14px 24px 14px 24px;
   background-color: white;
@@ -9,6 +11,46 @@
 
 .menu-style {
   height: calc(100vh - 110px);
+}
+
+.wrapper-pending {
+  display: flex;
+  width: 100%;
+  padding: 0;
+  justify-content: space-between;
+  border: none;
+  border-radius: 15px;
+  background: rgba(22, 119, 255, 0.2);
+}
+
+.wrapper-changes-requested{
+  display: flex;
+  width: 100%;
+  padding: 0;
+  justify-content: space-between;
+  border: none;
+  border-radius: 15px;
+  background: rgba(250,173,20, 0.2);
+}
+
+.wrapper-accepted {
+  display: flex;
+  width: 100%;
+  padding: 0;
+  justify-content: space-between;
+  border: none;
+  border-radius: 15px;
+  background: rgba(0, 204, 0, 0.2);
+}
+
+.wrapper-rejected {
+  display: flex;
+  width: 100%;
+  padding: 0;
+  justify-content: space-between;
+  border: none;
+  border-radius: 15px;
+  background: rgba(255,77,79, 0.2);
 }
 
 .wrapper-enlight{
@@ -20,9 +62,11 @@
   border-radius: 15px;
   background: transparent;
 }
+
 .wrapper-enlight:hover {
   background-color: rgb(22, 119, 255, 0.05);
 }
+
 .wrapper-enlight .ant-list-item-meta-title {
   text-align: left;
 }
