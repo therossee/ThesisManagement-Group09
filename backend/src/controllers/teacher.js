@@ -1,9 +1,14 @@
-const thesisDao = require("../dao/thesis_dao");
-const NotificationService = require("../services/NotificationService");
-const usersDao = require("../dao/users_dao");
-const path = require("path");
 const fs = require("fs");
+const path = require("path");
+const {APIReviewThesisStartRequestSchema} = require("../schemas/thesis-start-request");
+const usersDao = require("../dao/users_dao");
+const thesisProposalDao = require("../dao/thesis_proposal_dao");
+const thesisApplicationDao = require("../dao/thesis_application_dao");
+const thesisStartRequestDao = require("../dao/thesis_start_request_dao");
+const NotificationService = require("../services/NotificationService");
 const { APPLICATION_STATUS } = require("../enums");
+const utils = require("./utils");
+const NoThesisStartRequestError = require("../errors/NoThesisStartRequestError");
 
 /**
  * @param {PopulatedRequest} req
@@ -14,7 +19,7 @@ async function getApplicationsForTeacherThesisProposal(req, res, next) {
     try {
         const teacherId = req.user.id;
         const proposal_id = req.params.proposal_id;
-        const applications = await thesisDao.listApplicationsForTeacherThesisProposal(proposal_id, teacherId);
+        const applications = await thesisApplicationDao.listApplicationsForTeacherThesisProposal(proposal_id, teacherId);
         res.json(applications);
     } catch (e) {
         next(e);
@@ -35,20 +40,20 @@ async function acceptAnApplicationOnThesis(req, res, next) {
             return res.status(400).json({ message: 'Missing required fields.' });
         }
 
-        const thesis = await thesisDao.getThesisProposalById(proposal_id);
+        const thesis = thesisProposalDao.getThesisProposalById(proposal_id);
         if (!thesis) {
             return res.status(404).json({ message: `Thesis proposal with id ${proposal_id} not found, cannot accept this application.` })
         }
 
 
         const status = APPLICATION_STATUS.ACCEPTED;
-        const success = await thesisDao.updateApplicationStatus(student_id, proposal_id, status);
+        const success = await thesisApplicationDao.updateApplicationStatus(student_id, proposal_id, status);
         if (!success) {
             return res.status(404).json({ message: `No application with the status "waiting for approval" found for this proposal.` });
         }
         NotificationService.emitThesisApplicationStatusChange(student_id, proposal_id, status);
 
-        const applicationsCancelled = await thesisDao.cancelOtherApplications(student_id, proposal_id);
+        const applicationsCancelled = await thesisApplicationDao.cancelOtherApplications(student_id, proposal_id);
         setImmediate(() => {
             const reason = 'Another student has been accepted for this thesis proposal.';
             for (const application of applicationsCancelled) {
@@ -77,13 +82,13 @@ async function rejectAnApplicationOnThesis(req, res, next) {
             return res.status(400).json({ message: 'Missing required fields.' });
         }
 
-        const thesis = await thesisDao.getThesisProposalById(proposal_id);
+        const thesis = thesisProposalDao.getThesisProposalById(proposal_id);
         if (!thesis) {
             return res.status(404).json({ message: `Thesis proposal with id ${proposal_id} not found, cannot reject this application.` })
         }
 
         const status = APPLICATION_STATUS.REJECTED;
-        const success = await thesisDao.updateApplicationStatus(student_id, proposal_id, status);
+        const success = await thesisApplicationDao.updateApplicationStatus(student_id, proposal_id, status);
         if (!success) {
             return res.status(404).json({ message: `No application with the status "waiting for approval" found for this proposal.` });
         }
@@ -110,7 +115,7 @@ async function getApplicationUploads(req, res, next) {
             return res.status(404).json({ message: `Student with id ${student_id} not found.` });
         }
 
-        const application = await thesisDao.getApplicationById(application_id);
+        const application = await thesisApplicationDao.getApplicationById(application_id);
         if (!application || application.student_id !== student_id){
             return res.status(404).json({ message: `Application with id ${application_id} not found.` });
         }
@@ -132,9 +137,66 @@ async function getApplicationUploads(req, res, next) {
     }
 }
 
+/**
+ * List all thesis start requests
+ *
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+async function listThesisStartRequests(req, res, next) {
+    try {
+        const teacherId = req.user.id;
+
+        const requests = await thesisStartRequestDao.listThesisStartRequests(teacherId);
+
+        // Not used right now, but it's here for potential future use
+        const metadata = {
+            index: 0,
+            count: requests.length,
+            total: requests.length,
+            currentPage: 1
+        };
+
+        const requestsPopulated = await Promise.all( requests.map( utils.populateThesisStartRequest ));
+
+        res.json({ $metadata: metadata, items: requestsPopulated });
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
+ * Add a review to a thesis start request
+ *
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+async function reviewThesisStartRequest(req, res, next) {
+    try {
+        const teacherId = req.user.id;
+        const tsrId = req.params.id;
+
+        /** @type {ThesisStartRequestReview} */
+        const review = APIReviewThesisStartRequestSchema.parse(req.body);
+
+        const success = await thesisStartRequestDao.supervisorReviewThesisStartRequest(teacherId, tsrId, review);
+        if (!success) {
+            throw new NoThesisStartRequestError(tsrId);
+        }
+
+        res.status(201).json({ message: 'Thesis start request reviewed successfully' });
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
     getApplicationsForTeacherThesisProposal,
     acceptAnApplicationOnThesis,
     rejectAnApplicationOnThesis,
-    getApplicationUploads
+    getApplicationUploads,
+    listThesisStartRequests,
+    reviewThesisStartRequest
 };

@@ -4,7 +4,7 @@ const { resetTestDatabase, initImapClient, closeImapClient, searchEmails} = requ
 const request = require("supertest");
 const {app} = require("../../src/app");
 const utils = require("../utils");
-const thesisDao = require('../../src/dao/thesis_dao');
+const thesisStartRequestDao = require('../../src/dao/thesis_start_request_dao');
 const db = require('../../src/services/db');
 const AdvancedDate = require('../../src/models/AdvancedDate');
 const CronTasksService = require("../../src/services/CronTasksService");
@@ -61,13 +61,14 @@ describe('GET /api/secretary-clerk/thesis-start-requests', () => {
             "creation_date": "2023-12-12T23:59:59.999Z",
             "approval_date": null,
             "status": "waiting for approval",
+            "changes_requested": null
         }]);
     });
 
     test('should return a list of thesis start requests', async () => {
         const tsr = db.prepare(`INSERT INTO thesisStartRequest (student_id, supervisor_id, title, description, creation_date) VALUES (?,?,?,?,?)`)
                       .run("s318952", "d279620", "title", "description", new AdvancedDate().toISOString());
-        
+
         db.prepare(`INSERT INTO thesisStartCosupervisor (start_request_id, cosupervisor_id) VALUES (?,?)`)
             .run(tsr.lastInsertRowid, "d370335");
 
@@ -103,6 +104,7 @@ describe('GET /api/secretary-clerk/thesis-start-requests', () => {
                 "creation_date": "2023-12-12T23:59:59.999Z",
                 "approval_date": null,
                 "status": "waiting for approval",
+                "changes_requested": null
             },
             {
                 "id": 2,
@@ -137,12 +139,13 @@ describe('GET /api/secretary-clerk/thesis-start-requests', () => {
                 "creation_date": expect.stringContaining(new AdvancedDate().toISOString().substring(0, 10)),
                 "approval_date": null,
                 "status": "waiting for approval",
+                "changes_requested": null
             },
         ]);
     });
 
     test('should handle errors', async () => {
-        jest.spyOn(thesisDao, 'listThesisStartRequests').mockImplementation(() => {
+        jest.spyOn(thesisStartRequestDao, 'listThesisStartRequests').mockImplementation(() => {
             throw new Error();
         });
         const res = await agent
@@ -181,7 +184,7 @@ describe('PATCH /api/secretary-clerk/thesis-start-requests/accept/:request_id', 
     test('should return 400 if the thesis start request has already been accepted or rejected', async () => {
         db.prepare(`UPDATE thesisStartRequest SET status = ? WHERE id = ?`)
           .run("accepted by secretary", 1);
-        
+
         const res = await agent
             .patch('/api/secretary-clerk/thesis-start-requests/accept/1')
             .set('credentials', 'include')
@@ -193,7 +196,7 @@ describe('PATCH /api/secretary-clerk/thesis-start-requests/accept/:request_id', 
     });
 
     test('should handle errors', async () => {
-        jest.spyOn(thesisDao, 'updateThesisStartRequestStatus').mockImplementation(() => {
+        jest.spyOn(thesisStartRequestDao, 'updateThesisStartRequestStatus').mockImplementation(() => {
             throw new Error();
         });
         const res = await agent
@@ -233,7 +236,7 @@ describe('PATCH /api/secretary-clerk/thesis-start-requests/reject/:request_id', 
     test('should return 400 if the thesis start request has already been accepted or rejected', async () => {
         db.prepare(`UPDATE thesisStartRequest SET status = ? WHERE id = ?`)
           .run("rejected by secretary", 1);
-        
+
         const res = await agent
             .patch('/api/secretary-clerk/thesis-start-requests/reject/1')
             .set('credentials', 'include')
@@ -245,7 +248,7 @@ describe('PATCH /api/secretary-clerk/thesis-start-requests/reject/:request_id', 
     });
 
     test('should handle errors', async () => {
-        jest.spyOn(thesisDao, 'updateThesisStartRequestStatus').mockImplementation(() => {
+        jest.spyOn(thesisStartRequestDao, 'updateThesisStartRequestStatus').mockImplementation(() => {
             throw new Error();
         });
         const res = await agent

@@ -1,7 +1,8 @@
 const dayjs = require('dayjs');
 dayjs.extend(require('dayjs/plugin/localizedFormat'));
 const usersDao = require("../dao/users_dao");
-const thesisDao = require("../dao/thesis_dao");
+const thesisProposalDao = require("../dao/thesis_proposal_dao");
+const thesisApplicationDao = require("../dao/thesis_application_dao");
 const { sendEmail } = require("./emails");
 
 class NotificationService {
@@ -21,7 +22,7 @@ class NotificationService {
                 return;
             }
 
-            const thesis = await thesisDao.getThesisProposalById(proposalId);
+            const thesis = thesisProposalDao.getThesisProposalById(proposalId);
             if (!thesis) {
                 console.error(`Thesis proposal with id "${proposalId}" not found, cannot notify application status change.`);
                 return;
@@ -57,7 +58,7 @@ class NotificationService {
      */
     static async emitNewApplicationCreated(applicationId, studentId, proposalId) {
         try {
-            const application = await thesisDao.getThesisApplicationById(applicationId);
+            const application = await thesisApplicationDao.getApplicationById(applicationId);
             if (!application) {
                 console.error(`Application with id "${applicationId}" not found, cannot notify new application.`);
                 return;
@@ -70,7 +71,7 @@ class NotificationService {
                 return;
             }
 
-            const thesis = await thesisDao.getThesisProposalById(proposalId);
+            const thesis = thesisProposalDao.getThesisProposalById(proposalId);
             if (!thesis) {
                 console.error(`Thesis proposal with id "${proposalId}" not found, cannot notify new application.`);
                 return;
