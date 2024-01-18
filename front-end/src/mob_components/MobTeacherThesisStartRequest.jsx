@@ -12,19 +12,18 @@ dayjs.extend(localizedFormat);
 
 function TeacherThesisStartRequest() {
 
-    const [dirty, setDirty] = useState(true);
+    const [refresh, setRefresh] = useState(true);
 
-    const [isLoading, setIsLoading] = useState(false);
+    const [loadData, setLoadData] = useState(false);
 
-    const [tsr, setTsr] = useState([]);
+    const [requestsArray, setRequestsArray] = useState([]);
 
 
-    const reviewTsr = (selected, requestedChanges) => {
+    const reviewRequest = (selected, requestedChanges) => {
         try {
             API.reviewThesisStartRequest(selected.id, requestedChanges);
             message.success("Successfully requested changes for " + selected.student.surname + " " + selected.student.name + "'s request");
-            setDirty(true);
-            setRequestedChanges("");
+            setRefresh(true);
         } catch (err) {
             message.error(err.message ? err.message : err);
         }
@@ -33,21 +32,21 @@ function TeacherThesisStartRequest() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                if (dirty) {
-                    setIsLoading(true);
+                if (refresh) {
+                    setLoadData(true);
                     const tsr = await API.getTeacherThesisStartRequest();
-                    setTsr(tsr);
+                    setRequestsArray(tsr);
                 }
             } catch (err) {
                 message.error(err.message ? err.message : err);
             }
             finally {
-                setIsLoading(false);
-                setDirty(false);
+                setLoadData(false);
+                setRefresh(false);
             }
         };
         fetchData();
-    }, [dirty]);
+    }, [refresh]);
 
 
 
@@ -58,19 +57,19 @@ function TeacherThesisStartRequest() {
                 <Tabs
                     defaultActiveKey="1"
                     centered
-                    onChange={() => setDirty(true)}
+                    onChange={() => setRefresh(true)}
                     style={{ height: '100%' }}
                     items={[
                         {
                             key: '1',
                             label: <span><CheckOutlined />Pending Request</span>,
-                            children: <PendingThesisStartRequest tsr={tsr} isLoading={isLoading} setDirty={setDirty}
-                            reviewTsr={reviewTsr}/>,
+                            children: <PendingRequests tsr={requestsArray} isLoading={loadData} setDirty={setRefresh}
+                            reviewTsr={reviewRequest}/>,
                         },
                         {
                             key: '2',
                             label: <span><HistoryOutlined />Decisions History</span>,
-                            children: <HistoryThesisStartRequest tsr={tsr} isLoading={isLoading} />,
+                            children: <HistoryRequests tsr={requestsArray} isLoading={loadData} />,
                         },
                     ]}
                 />
@@ -96,7 +95,7 @@ const coSupComponents = (tsr) => {
     }
 }
 
-function PendingThesisStartRequest({ tsr, setDirty }) {
+function PendingRequests({ tsr, setDirty }) {
 
     const [requestedChanges, setRequestedChanges] = useState('');
 
@@ -177,7 +176,7 @@ function PendingThesisStartRequest({ tsr, setDirty }) {
         return <Alert message="Good job, it seems like there is no pending request!" type="info" showIcon closable />
 }
 
-function HistoryThesisStartRequest({ tsr }) {
+function HistoryRequests({ tsr }) {
 
     if (tsr.some(tsr => tsr.status === 'accepted by teacher' || tsr.status === 'rejected by teacher')) {
         return (
@@ -243,14 +242,14 @@ const showModalAccRej = (content, action, okText, cancelText) => {
 };
 
 
-PendingThesisStartRequest.propTypes = {
+PendingRequests.propTypes = {
     tsr: PropTypes.array.isRequired,
     isLoading: PropTypes.bool.isRequired,
     setDirty: PropTypes.func.isRequired,
     reviewTsr: PropTypes.func.isRequired,
 };
 
-HistoryThesisStartRequest.propTypes = {
+HistoryRequests.propTypes = {
     tsr: PropTypes.array.isRequired,
 };
 
