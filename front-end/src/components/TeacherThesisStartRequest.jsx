@@ -440,6 +440,8 @@ ThesisRequestItem.propTypes = {
     acceptTsr: PropTypes.func,
     rejectTsr: PropTypes.func,
     isPending: PropTypes.bool.isRequired,
+    setSelectedTsr: PropTypes.func.isRequired,
+    setIsModalVisible: PropTypes.func.isRequired,
 };
 
 ShowTsrInfo.propTypes = {
