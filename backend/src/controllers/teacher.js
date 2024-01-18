@@ -178,7 +178,7 @@ async function reviewThesisStartRequest(req, res, next) {
         const teacherId = req.user.id;
         const tsrId = req.params.id;
 
-        /** @type {ThesisStartRequestReview} */
+        /** @type {import("../schemas/thesis-start-request").ThesisStartRequestReview} */
         const review = APIReviewThesisStartRequestSchema.parse(req.body);
 
         const success = await thesisStartRequestDao.supervisorReviewThesisStartRequest(teacherId, tsrId, review);

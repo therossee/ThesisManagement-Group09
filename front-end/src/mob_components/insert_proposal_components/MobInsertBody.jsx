@@ -178,7 +178,7 @@ function MobInsertBody(props) {
           options={{
             dateFormat: 'm/d/Y',
           }}
-          disabled={disabledDate}
+          disable={disabledDate}
           defaultDate={date}
           onChange={(date) => {form.setFieldValue('expirationDate', new Date(date[0]))}}
         />

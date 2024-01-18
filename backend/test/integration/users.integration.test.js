@@ -19,6 +19,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
     CronTasksService.stop();
+    resetTestDatabase();
 });
 
 describe('GET /users', () => {
