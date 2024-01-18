@@ -169,7 +169,7 @@ function MobTeacherArchive() {
                                     </Tag>
                                 ))}</p>
                                 <p>Expiration: {x.expiration}</p>
-                                <p>Status: {x.status}</p>
+                                <p>Status: <Tag color='blue'>{x.status}</Tag> </p>
                                 <>
                                     <Button onClick={() => navigate(`/view-proposal/${x.id}`)}><EyeOutlined/>View</Button>
                                     <Button onClick={() => { editProposal(x); }}><EditOutlined/>Edit</Button>
