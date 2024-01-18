@@ -224,7 +224,19 @@ This test case is related to copy a proposal: we want to create a new thesis pro
 12. Log out
     - You should be again on the [home page](http://localhost:5173/)
 
-### [15] Notify Application
+### [15] Insert Student Start Request
+This test case validates the possibility for a student to insert a thesis start request.
+
+1. Go to the [home page](http://localhost:5173/)
+2. Log in as a student
+3. In the left bar click on [Thesis Start Request](http://localhost:5173/start-request)
+4. Click on the button 'Add New Thesis Start Request'
+5. Complete all the necessary fields
+6. Click on 'Submit'
+7. A page with the details of your just created thesis start request will appear and you can consult it now whenever you click on [Thesis Start Request](http://localhost:5173/start-request)
+8. Log out
+
+### [16] Notify Application
 This test case is related to the possibility for a professor to be notified when a new application is sent. To check that we use Ethereal.
 
 1. Open [Ethereal site](https://ethereal.email/login)
@@ -242,3 +254,26 @@ This test case is related to the possibility for a professor to be notified when
 11. Re-open the Ehereal web page and refresh it
 12. You will be able to see that a message to the professor has been send, click on it to see all the details and check their correctness
 13. Go back on the thesis web application page and log out
+
+### [17] Proposal Expiration & Search Archive
+In this test case we will show the correct behaviour of the application when a thesis proposal expires: it automatically becomes archived, and with this excuse we also show how the archive can be consulted.
+
+1. Go to the [home page](http://localhost:5173/)
+2. Log in as the teacher with id d279620 (important because he has also the admin role -> we will need to use the virtual clock)
+3. The teacher we logged as have only one proposal: let's archive it (see: [Archive Proposal e2e Test](#12-archive-proposal)) 
+4. On the left bar under 'Thesis Start Request' there is another button: with this we access the [Archive](http://localhost:5173/archive) -> we will see there the archived proposal with the status 'ARCHIVED'
+5. In the archive we can operate on the proposal, in the actions column there three buttons:
+    - [view proposal](http://localhost:5173/view-proposal/1) -> click on it -> we will see all the details of the proposal -> click then to the button 'back to archive'
+    - [edit proposal](http://localhost:5173/edit-proposal/1) -> click on it -> let's modify some fields -> click on 'submit' and then 'next' in the changes review page -> in the 'proposal updated succesfully' page instead of clicking on the 'back home' button, click again on [Archive](http://localhost:5173/archive) in the left bar -> seeing the proposal again we will see that the changes have been correctly applied
+    - publish proposal -> a pop-up will appear to confirm the action -> click on 'Yes, publish it'-> you will see now that the archive in this case is empty
+6. Click now on 'tester settings' at the bottom of the left bar. It will appear the [virtual clock page](http://localhost:5173/admin/virtual-clock)
+7. Choose a date exactly one day after or in general after the expiration date previously seen. Click on 'save new clock'
+8. If you go again on [Thesis Proposals](http://localhost:5173/proposals) we will see that the proposal is not present anymore
+9. Otherwise, if we go again on the [Archive](http://localhost:5173/archive) we will see that the proposal is there, this time with the status 'EXPIRED'
+10. Let's add now a new thesis proposal (see [Create Proposal e2e test](#3-thesis-proposal-creation))
+11. Let's go on [Thesis Proposals](http://localhost:5173/proposals) and archive it
+12. Go on [Archive](http://localhost:5173/archive)
+13. We now have two archived proposal with 2 different status (ARCHIVED AND EXPIRED). We want to test the filtering options are perfectly working. Clicking on 'Expiration' in the columns name we will see that effectively the archived proposals are sorted by expiration date. Clicking again we will have the same result, but in reversed order.
+14. Try the filtering also with the other fields and we will see that it is correctly working.
+10. Now we can log out
+    - You should be again on the [home page](http://localhost:5173/)

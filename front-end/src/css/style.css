@@ -1,14 +1,56 @@
 .ant-layout {
   background-color: white;
 }
-
+.ant-list .ant-list-item{
+  padding: 8px;
+}
 .content-style {
   margin: 14px 24px 14px 24px;
   background-color: white;
 }
 
 .menu-style {
-  height: calc(100vh - 100px);
+  height: calc(100vh - 110px);
+}
+
+.wrapper-pending {
+  display: flex;
+  width: 100%;
+  padding: 0;
+  justify-content: space-between;
+  border: none;
+  border-radius: 15px;
+  background: rgba(22, 119, 255, 0.2);
+}
+
+.wrapper-changes-requested{
+  display: flex;
+  width: 100%;
+  padding: 0;
+  justify-content: space-between;
+  border: none;
+  border-radius: 15px;
+  background: rgba(250,173,20, 0.2);
+}
+
+.wrapper-accepted {
+  display: flex;
+  width: 100%;
+  padding: 0;
+  justify-content: space-between;
+  border: none;
+  border-radius: 15px;
+  background: rgba(0, 204, 0, 0.2);
+}
+
+.wrapper-rejected {
+  display: flex;
+  width: 100%;
+  padding: 0;
+  justify-content: space-between;
+  border: none;
+  border-radius: 15px;
+  background: rgba(255,77,79, 0.2);
 }
 
 .wrapper-enlight{
@@ -16,32 +58,37 @@
   width: 100%;
   padding: 0;
   justify-content: space-between;
-
   border: none;
   border-radius: 15px;
-
   background: transparent;
 }
+
 .wrapper-enlight:hover {
   background-color: rgb(22, 119, 255, 0.05);
 }
+
 .wrapper-enlight .ant-list-item-meta-title {
   text-align: left;
 }
 
-.footer-style {
-  position: relative;
-  width: 100%;
-  text-align: center;
-  background-color: white;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, .25);
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+.footer-wrapper{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 70px;
 }
 
-.home-title {
-  margin-left: 2%;
+.footer-style {
+  display: flex;
+  align-items: center;
+  position: relative;
+  height: 30px;
+  width: 220px;
+  text-align: center;
+  justify-content: center;
   background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, .20);
+  border-radius: 10px;
 }
 
 .header-style {
@@ -55,16 +102,14 @@
   backdrop-filter: blur(7px);
   -webkit-backdrop-filter: blur(7px);
   overflow: hidden;
-  /*Not amazing from mobile*/
-  /*Becomes scrollable when logged in on PC*/
 }
 
 .logo-style {
   background-color: white;
   display: flex;
   justify-content: center;
-  border-right: 1px solid #f0f0f0;
   height: 100px;
+  margin-bottom: 10px;
 }
 
 .cover-style {
@@ -82,6 +127,10 @@
 
 .ant-layout .ant-layout-sider-zero-width-trigger {
   top: 90px;
+}
+
+.ant-menu-light.ant-menu-root.ant-menu-inline {
+  border-inline-end: 0px;
 }
 
 .App {
@@ -127,4 +176,12 @@
   height: 200px;
   width: 30px;
   margin: 5px;
+}
+
+.card-tsr{
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.card-tsr:hover{
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }

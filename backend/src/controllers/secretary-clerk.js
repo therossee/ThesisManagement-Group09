@@ -13,7 +13,7 @@ async function listThesisStartRequests(req, res, next) {
         const thesisStartRequests = await thesisStartRequestDao.listThesisStartRequests();
         const requestsPopulated = await Promise.all(
             thesisStartRequests.map(async request => {
-                return await utils._populateThesisStartRequest(request);
+                return await utils.populateThesisStartRequest(request);
             })
         );
 
@@ -44,7 +44,7 @@ async function acceptThesisStartRequest(req, res, next) {
         await thesisStartRequestDao.updateThesisStartRequestStatus(requestId, THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY)
                 .then(async () => {
                     res.status(200).json({ message: "Thesis start request accepted successfully" });
-                });     
+                });
     } catch (e) {
         next(e);
     }
@@ -78,4 +78,4 @@ module.exports = {
     listThesisStartRequests,
     acceptThesisStartRequest,
     rejectThesisStartRequest
-}
+};

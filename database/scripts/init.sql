@@ -172,10 +172,16 @@ CREATE TABLE thesisStartRequest (
     creation_date DATE NOT NULL,
     approval_date DATE,
     status TEXT DEFAULT 'waiting for approval',
+    changes_requested TEXT,
     FOREIGN KEY(student_id) REFERENCES student(id),
     FOREIGN KEY(application_id) REFERENCES thesisApplication(id),
     FOREIGN KEY(proposal_id) REFERENCES thesisProposal(proposal_id),
-    FOREIGN KEY(supervisor_id) REFERENCES teacher(id)
+    FOREIGN KEY(supervisor_id) REFERENCES teacher(id),
+    CHECK (
+        (status = 'changes requested' AND changes_requested IS NOT NULL)
+            OR
+        (status <> 'changes requested' AND changes_requested IS NULL)
+    )
 );
 
 -- Create the thesisStartCosupervisor table
@@ -593,24 +599,36 @@ VALUES
     (18, 's319355', '2023-11-28T16:30:00.171Z');
 
 -- Insert into thesisStartRequest
-INSERT INTO thesisStartRequest(student_id, application_id, proposal_id, title, description, supervisor_id, creation_date)
-VALUES
-    ('s320213', 1, 1, 'AI-GUIDED WEB CRAWLER FOR AUTOMATIC DETECTION OF MALICIOUS SITES', 'This thesis focuses on developing an AI-guided web crawler for the automatic detection of malicious sites. The research aims to leverage artificial intelligence to enhance the efficiency and accuracy of web crawling in identifying and cataloging potentially harmful websites.', 'd279620', '2023-12-12T23:59:59.999Z'),
-    ('s321607', 2, 6, 'OPTIMIZATION OF CHECK-IN PROCESSES IN AMAZON LOGISTICS', 'This thesis analyzes and proposes solutions for optimizing check-in processes in Amazon''s logistics, focusing on RFID technology. It compares the proposed solution with Amazon''s development, emphasizing efficiency and cost considerations', 'd292715', '2023-11-30T23:59:59.999Z');
-
--- Insert into thesisStartRequest
 INSERT INTO thesisStartRequest(student_id, title, description, supervisor_id, creation_date)
 VALUES
-    ('s319355', 'start request for a thesis to be defined', 'i''d like to start a thesis concerning numerical modelling and simulations with professor Ricci', 'd357587', '2023-11-30T23:59:59.999Z'); 
+   ('s319355', 'Secure Data Management in Cloud Computing: A Holistic Approach to Enhancing Data Privacy', 
+    'In the context of the growing reliance on cloud computing services, there is an increasing need to address the challenges surrounding data privacy and security. This proposed thesis seeks to investigate and implement advanced techniques to ensure robust data privacy within cloud computing environments. I am eager to embark on this research journey under your mentorship, and I welcome any insights or adjustments you may suggest to refine the proposed thesis. Thank you for considering my request, and I look forward to the opportunity to discuss this potential research project further.', 
+    'd279620', '2023-11-30T10:20:59.999Z'
+   ),
+   ('s318952', 'Securing IoT Devices Through Edge Computing: A Comprehensive Analysis and Implementation', 
+    'As the proliferation of IoT devices continues, so does the concern for their security vulnerabilities. This proposed thesis aims to investigate and implement solutions that leverage edge computing to enhance the security posture of IoT devices. I am enthusiastic about the potential of this research and would be honored to undertake this thesis under your guidance. I am open to any suggestions or modifications you may have regarding the proposed topic.Thank you for considering my request, and I look forward to the opportunity to discuss this potential research project further.',
+    'd279620', '2023-11-30T14:35:40.999Z'
+   ),
+   ('s321529', 'Enhancing Cybersecurity Through Machine Learning: An In-depth Analysis and Implementation', 
+    'In recent years, the escalating frequency and sophistication of cyber threats have underscored the need for robust and adaptive cybersecurity measures. This proposed thesis aims to delve into the intersection of informatic engineering and machine learning to develop innovative solutions for cybersecurity challenges. I am enthusiastic about the prospect of exploring this topic under your mentorship, and I believe that the intersection of informatic engineering and machine learning offers a rich field for meaningful contributions. I am open to any suggestions or modifications you may have regarding the proposed topic. Thank you for considering my request, and I look forward to the opportunity to discuss this potential thesis further.', 
+    'd279620', '2024-01-10T23:40:59.999Z'
+   ),
+   ('s319355', 'Exploring Artificial Intelligence in Healthcare: Applications and Challenges', 
+    'Artificial Intelligence (AI) has shown great potential in transforming various industries, including healthcare. This proposed thesis aims to explore the applications of AI in healthcare settings, analyze its impact on patient care, and address the challenges associated with implementing AI solutions in the medical field. I am enthusiastic about delving into this research topic under your guidance and welcome any feedback or modifications to enhance the thesis proposal. Thank you for considering my request, and I am eager to discuss the potential research project further.', 
+    'd279620', '2023-12-15T21:00:50.999Z'
+   );
 
 -- Insert into thesisStartCosupervisor
 INSERT INTO thesisStartCosupervisor(start_request_id, cosupervisor_id)
 VALUES
     (1, 'd277137'),
     (1, 'd226682'),
-    (1, 'd392000');
+    (1, 'd392000'),
+    (3, 'd370335'),
+    (4, 'd370335'),
+    (4, 'd292715');
 
-    
+
 -- Create a trigger that check that the proposal_id of the thesisApplication table is present in the thesisProposal table
 -- and that the proposal is not deleted or archived for the insertion and the update
 CREATE TRIGGER check_proposal_id_in_application

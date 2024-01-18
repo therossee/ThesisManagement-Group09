@@ -97,7 +97,7 @@ async function getStudentApplicationDecision(req, res, next) {
 async function newThesisStartRequest(req, res, next) {
     try {
         const studentId = req.user.id;
-        
+
         const thesisRequest = await schemas.APIThesisStartRequestSchema.parseAsync(req.body);
 
         if(thesisRequest.internal_co_supervisors_ids.includes(thesisRequest.supervisor_id)) {
@@ -107,9 +107,9 @@ async function newThesisStartRequest(req, res, next) {
         const thesis_start_request_id = await thesisStartRequestDao.createThesisStartRequest(studentId, thesisRequest.title, thesisRequest.description, thesisRequest.supervisor_id, thesisRequest.internal_co_supervisors_ids, thesisRequest.application_id, thesisRequest.proposal_id )
 
         const thesisStartRequest = await thesisStartRequestDao.getThesisStartRequestById(thesis_start_request_id);
-        
-        res.status(201).send(await utils._populateThesisStartRequest(thesisStartRequest));
-        
+
+        res.status(201).send(await utils.populateThesisStartRequest(thesisStartRequest));
+
     } catch (error) {
         next(error);
     }
@@ -120,14 +120,14 @@ async function newThesisStartRequest(req, res, next) {
  * @param {import('express').Response} res
  * @param {import('express').NextFunction} next
  */
-async function getStudentActiveThesisStartRequests(req, res, next) {  
+async function getStudentLastThesisStartRequest(req, res, next) {
     try {
         const studentId = req.user.id;
-        const studentThesisStartRequest = await thesisStartRequestDao.getStudentActiveThesisStartRequests(studentId);
-        if(!studentThesisStartRequest) {
+        const studentLastThesisStartRequest = await thesisStartRequestDao.getStudentLastThesisStartRequest(studentId);
+        if (!studentLastThesisStartRequest) {
             res.status(200).json({});
         }
-        res.status(200).send(await utils._populateThesisStartRequest(studentThesisStartRequest));
+        res.status(200).send(await utils.populateThesisStartRequest(studentLastThesisStartRequest));
     } catch (e) {
         next(e);
     }
@@ -139,5 +139,5 @@ module.exports = {
     applyForProposal,
     getStudentApplicationDecision,
     newThesisStartRequest,
-    getStudentActiveThesisStartRequests
+    getStudentLastThesisStartRequest
 };
