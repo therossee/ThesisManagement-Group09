@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { HomeOutlined, FileTextOutlined, HistoryOutlined, AuditOutlined, FileDoneOutlined, QuestionOutlined} from '@ant-design/icons';
+import { HomeOutlined, FileTextOutlined, HistoryOutlined, AuditOutlined, FileDoneOutlined } from '@ant-design/icons';
 import { Layout, Menu, Image } from 'antd';
 import { useAuth } from './authentication/useAuth';
 import PropTypes from 'prop-types';
@@ -17,8 +17,7 @@ function SideBar({ collapsed, setCollapsed }) {
     { label: "Home", key: "/", icon: <HomeOutlined /> },
     (isTeacher === true || isStudent === true) && { label: "Thesis Proposals", key: "/proposals", icon: <FileTextOutlined /> },
     (isTeacher === true || isStudent === true) && { label: isTeacher ? "Thesis Applications" : "Applications History", key: "/applications", icon: isTeacher ? <AuditOutlined /> : <HistoryOutlined /> },
-    (isTeacher === true || isStudent === true) && { label: "Thesis Start Request", key: "/start-request", icon: <FileDoneOutlined /> },
-    isSecretaryClerk && { label: "Thesis Start Request" , key: "/start-request", icon: isSecretaryClerk && <QuestionOutlined /> }
+    (isTeacher === true || isStudent === true || isSecretaryClerk) && { label: "Thesis Start Request", key: "/start-request", icon: <FileDoneOutlined /> },
   ];
 
   // Handle menu item clicks
