@@ -4,9 +4,10 @@ import MobLogin from './MobLogin';
 import MobLogout from './MobLogout';
 import '../css/style.css';
 import MobVirtualClock from '../mob_routes/MobVirtualClock';
+import MobInsert from '../mob_routes/MobInsert';
 
 function MobTopBar() {
-    const { isAuthenticated, isTester } = useAuth();
+    const { isAuthenticated, isTester, isTeacher } = useAuth();
 
     return (
         <NavBar
@@ -20,6 +21,12 @@ function MobTopBar() {
                     <IsLoggedInForm />
                     :
                     <MobLogin />
+                }
+                {
+                    isTeacher ? 
+                    <MobInsert/>
+                    :
+                    null
                 }
                 {
                     isTester ?
