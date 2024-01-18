@@ -82,7 +82,7 @@ const coSupComponents = (tsr) => {
     if (tsr.co_supervisors.length > 0) {
         return tsr.co_supervisors.map((cSv, index) => {
             return (
-                <div key={index}>
+                <div key={cSv.id}>
                     <h3>Co-Supervisor #{index + 1}: </h3>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         {renderTeacherInfo(cSv.name, cSv.surname)}
@@ -244,7 +244,6 @@ const showModalAccRej = (content, action, okText, cancelText) => {
 
 PendingRequests.propTypes = {
     tsr: PropTypes.array.isRequired,
-    isLoading: PropTypes.bool.isRequired,
     setDirty: PropTypes.func.isRequired,
     reviewTsr: PropTypes.func.isRequired,
 };

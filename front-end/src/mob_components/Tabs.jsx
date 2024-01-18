@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { TabBar } from 'antd-mobile';
 import { useAuth } from '../components/authentication/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { HomeOutlined, FileTextOutlined, FileAddOutlined, ToTopOutlined, InboxOutlined, FileDoneOutlined } from '@ant-design/icons';
+import { HomeOutlined, FileTextOutlined, ToTopOutlined, InboxOutlined, FileDoneOutlined } from '@ant-design/icons';
 
 function Tabs() {
     const { isTeacher, isStudent } = useAuth();
