@@ -23,7 +23,7 @@ function StudentApplications() {
                     setDirty(false);
                 }
             } catch (err) {
-                message.error(err.message ? err.message : err);
+                message.error(err.message ?? err);
                 setIsLoading(false);
                 setDirty(false);
             }

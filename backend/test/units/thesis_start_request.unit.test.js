@@ -8,7 +8,9 @@ const db = require('../../src/services/db');
 const thesis_start_request = require('../../src/dao/thesis_start_request_dao');
 const {THESIS_START_REQUEST_STATUS} = require("../../src/enums/thesisStartRequest");
 const UnauthorizedActionError = require('../../src/errors/UnauthorizedActionError');
+const NoThesisStartRequestError = require('../../src/errors/NoThesisStartRequestError');
 const AdvancedDate = require('../../src/models/AdvancedDate');
+const AppError = require('../../src/errors/AppError');
 
 // Mocking the database
 jest.mock('../../src/services/db', () => ({
@@ -491,6 +493,27 @@ describe('supervisorReviewThesisStartRequest', () => {
       THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY,
       THESIS_START_REQUEST_STATUS.CHANGES_REQUESTED
     );
+  });
+});
+
+describe('NoThesisStartRequestError', () => {
+  test('should be an instance of AppError', () => {
+    const error = new NoThesisStartRequestError(123);
+    expect(error).toBeInstanceOf(Error);
+    expect(error).toBeInstanceOf(AppError);
+  });
+
+  test('should have the correct message and status code', () => {
+    const id = 456;
+    const error = new NoThesisStartRequestError(id);
+    expect(error.message).toBe(`No thesis start request with id ${id} found or you are not authorized to access it.`);
+  });
+
+  test('should stringify to the correct format', () => {
+    const id = 'abc';
+    const error = new NoThesisStartRequestError(id);
+    const expectedString = `Error: No thesis start request with id ${id} found or you are not authorized to access it.`;
+    expect(error.toString()).toBe(expectedString);
   });
 });
 

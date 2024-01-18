@@ -52,7 +52,7 @@ function MobStudentThesisProposals() {
                 setFilteredData(handleReceivedData(x));
                 setIsLoading(false);
             })
-            .catch((err) => { message.error(err.message ? err.message : err) });
+            .catch((err) => { message.error(err.message ?? err) });
     }, []);
 
 
