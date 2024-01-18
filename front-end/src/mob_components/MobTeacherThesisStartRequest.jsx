@@ -79,31 +79,20 @@ const coSupComponents = (tsr) => {
 function PendingRequests({ tsr, setDirty }) {
 
     const [requestedChanges, setRequestedChanges] = useState('');
+    const [isForm, setIsForm] = useState(false);
+    const [selected, setSelected] = useState(null);
+
 
     const reviewRequest = (selected, requestedChanges) => {
         try {
+            if (requestedChanges === ''){
+                throw new Error("Please insert a description of the requested changes");
+            }
             API.reviewThesisStartRequest(selected.id, requestedChanges);
             message.success("Successfully requested changes for " + selected.student.surname + " " + selected.student.name + "'s request");
         } catch (err) {
             message.error(err.message ? err.message : err);
         }
-    };
-
-    const showModal = (content, action, okText, cancelText) => {
-        Modal.confirm({
-            title: "Confirm action",
-            icon: <ExclamationCircleFilled />,
-            content: (
-                <div>
-                    {content}
-                    <h3>Requested changes: </h3>
-                        <Input.TextArea rows={4} value={requestedChanges} onChange={(e) => setRequestedChanges(e.target.value)} />
-                </div>
-            ),
-            onConfirm: action,
-            confirmText: okText,
-            cancelText: cancelText,
-        });
     };
 
     const acceptTsr = async (tsrId, student) => {
@@ -126,8 +115,14 @@ function PendingRequests({ tsr, setDirty }) {
         }
     };
 
+    const viewForm = (tsr) => {
+        setSelected(tsr);
+        setIsForm(true);
+    }
+
     if (tsr.some(tsr => tsr.status === 'accepted by secretary' || tsr.status === 'changes requested')) {
         return (
+            (isForm === true ? <RequestChangesForm tsr={selected} setRequestedChanges={setRequestedChanges} requestedChanges={requestedChanges} reviewRequest={reviewRequest} setIsForm={setIsForm}/> :
             <Collapse accordion>
                 {tsr.map((startRq) => ((startRq.status === 'accepted by secretary' || startRq.status === 'changes requested') &&
                     <Collapse.Panel key={startRq.id} title={startRq.title}>
@@ -154,21 +149,47 @@ function PendingRequests({ tsr, setDirty }) {
                             {startRq.description}
                         </div>
                         {startRq.co_supervisors.length > 0 ? coSupComponents(startRq) : <></>}
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <Button onClick={() => showModal("Are you sure you want to request changes?", () => reviewRequest(startRq, requestedChanges), "Confirm", "Cancel")}>Request changes</Button>
-                        <div>
-                            <Button onClick={() => showModalAccRej("Are you sure you want to accept this request?", () => acceptTsr(startRq.id, startRq.student.id), "Confirm action", "Cancel")}>Accept</Button>
-                            <Button onClick={() => showModalAccRej("Are you sure you want to reject this request?", () => rejectTsr(startRq.id, startRq.student.id), "Confirm action", "Cancel")}>Reject</Button>
-                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', paddingTop: '10px' }}>
+                            <Button onClick={() => viewForm(startRq)}>Request changes</Button>
+                            <div style={{display: 'flex', alignItems: 'center'}}>
+                                <Button onClick={() => showModalAccRej("Are you sure you want to accept this request?", () => acceptTsr(startRq.id, startRq.student.id), "Confirm action", "Cancel")}>Accept</Button>
+                                <Button onClick={() => showModalAccRej("Are you sure you want to reject this request?", () => rejectTsr(startRq.id, startRq.student.id), "Confirm action", "Cancel")}>Reject</Button>
+                            </div>
                         </div>
                         </Collapse.Panel>
 
                 ))}
-            </Collapse>
+            </Collapse>)
         );
     }
     else
         return <Alert message="Good job, it seems like there is no pending request!" type="info" showIcon closable />
+}
+
+
+function RequestChangesForm({tsr, requestedChanges, setRequestedChanges, reviewRequest, setIsForm}) {
+    const handleOk = () => {
+        reviewRequest(tsr, requestedChanges);
+        setIsForm(false);
+    }
+
+    const handleGoBack = () => {
+        setIsForm(false);
+        setRequestedChanges('');
+    }
+
+    return (
+        <>
+            <h3>Requested changes for : </h3>
+            <div>
+                <Input.TextArea rows={4} value={requestedChanges} onChange={(e) => setRequestedChanges(e.target.value)} />
+            </div>
+            <div style={{display: 'flex', alignItems: 'center', paddingTop: '10px'}}>
+                <Button onClick={() => handleOk()} style={{marginRight: '5px'}}>Request changes</Button>
+                <Button onClick={() => handleGoBack()} style={{marginRight: '5px'}}>Go back</Button>
+            </div>
+            </>
+    );
 }
 
 function HistoryRequests({ tsr }) {
@@ -246,5 +267,12 @@ HistoryRequests.propTypes = {
     tsr: PropTypes.array.isRequired,
 };
 
+RequestChangesForm.propTypes = {
+    tsr: PropTypes.object.isRequired,
+    requestedChanges: PropTypes.string.isRequired,
+    setRequestedChanges: PropTypes.func.isRequired,
+    reviewRequest: PropTypes.func.isRequired,
+    setIsForm: PropTypes.func.isRequired,
+}
 
 export default TeacherThesisStartRequest;
