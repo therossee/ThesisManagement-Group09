@@ -188,7 +188,7 @@ function getStatus(status) {
 // Function to render supervisor and co-supervisor information with a colored tag
 function renderTeacherInfo(name, surname) {
     return (
-        <Tag color="#1677ff"> {name} {surname} </Tag>
+        <Tag color="blue"> {name} {surname} </Tag>
     );
 }
 
