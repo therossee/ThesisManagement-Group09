@@ -100,7 +100,7 @@ describe('GET /api/externalCoSupervisors', () => {
 });
 
 describe('POST /api/teacher/thesis_proposals', () => {
-    test('should create a new thesis proposal', async () => {
+    test('should create a new thesis proposal with cosupervisors', async () => {
         const requestBody = {
             title: 'Test Thesis',
             internal_co_supervisors_id: ['d370335'], // Rossi Marco
@@ -140,11 +140,11 @@ describe('POST /api/teacher/thesis_proposals', () => {
         });
     });
 
-    test('should create a new thesis proposal', async () => {
+    test('should create a new thesis proposal without cosupervisors', async () => {
         const requestBody = {
             title: 'Test Thesis',
             internal_co_supervisors_id: [],
-            external_co_supervisors_id: [1],
+            external_co_supervisors_id: [],
             type: 'Bachelor',
             description: 'Test description',
             required_knowledge: 'Test knowledge',
@@ -178,6 +178,31 @@ describe('POST /api/teacher/thesis_proposals', () => {
             groups: ["Group1"],
             keywords: requestBody.keywords
         });
+    });
+
+    test('should return error if the expiration is passed', async () => {
+        const requestBody = {
+            title: 'Test Thesis',
+            internal_co_supervisors_id: [],
+            external_co_supervisors_id: [1],
+            type: 'Bachelor',
+            description: 'Test description',
+            required_knowledge: 'Test knowledge',
+            notes: 'Test notes',
+            expiration: '2023-12-31',
+            level: 'Bachelor',
+            cds: ['L-08'],
+            keywords: ['test', 'keywords'],
+        };
+
+        const response = await marcoRossiAgent
+            .post('/api/teacher/thesis_proposals')
+            .set('Accept', 'application/json')
+            .set('credentials', 'include')
+            .send(requestBody);
+
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Failed to create thesis proposal. The expiration date must be after the creation date');
     });
 
     test('should return error 400 if some required field is missing', async () => {
@@ -284,6 +309,7 @@ describe('POST /api/teacher/thesis_proposals', () => {
         expect(response.status).toBe(500);
         expect(response.body).toEqual("Failed to create thesis proposal. Error");
     });
+
 });
 
 describe('GET /api/keywords', () => {
