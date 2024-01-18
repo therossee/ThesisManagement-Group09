@@ -14,15 +14,12 @@ function TeacherThesisStartRequest() {
 
     const [refresh, setRefresh] = useState(true);
 
-    const [loadData, setLoadData] = useState(false);
-
     const [requestsArray, setRequestsArray] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 if (refresh) {
-                    setLoadData(true);
                     const tsr = await API.getTeacherThesisStartRequest();
                     setRequestsArray(tsr);
                 }
@@ -30,7 +27,6 @@ function TeacherThesisStartRequest() {
                 message.error(err.message ? err.message : err);
             }
             finally {
-                setLoadData(false);
                 setRefresh(false);
             }
         };
@@ -88,7 +84,6 @@ function PendingRequests({ tsr, setDirty }) {
         try {
             API.reviewThesisStartRequest(selected.id, requestedChanges);
             message.success("Successfully requested changes for " + selected.student.surname + " " + selected.student.name + "'s request");
-            setRefresh(true);
         } catch (err) {
             message.error(err.message ? err.message : err);
         }
@@ -102,7 +97,7 @@ function PendingRequests({ tsr, setDirty }) {
                 <div>
                     {content}
                     <h3>Requested changes: </h3>
-                    <Input.TextArea rows={4} value={requestedChanges} onChange={(e) => setRequestedChanges(e.target.value)} />
+                        <Input.TextArea rows={4} value={requestedChanges} onChange={(e) => setRequestedChanges(e.target.value)} />
                 </div>
             ),
             onConfirm: action,
@@ -159,10 +154,15 @@ function PendingRequests({ tsr, setDirty }) {
                             {startRq.description}
                         </div>
                         {startRq.co_supervisors.length > 0 ? coSupComponents(startRq) : <></>}
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
                         <Button onClick={() => showModal("Are you sure you want to request changes?", () => reviewRequest(startRq, requestedChanges), "Confirm", "Cancel")}>Request changes</Button>
-                        <Button onClick={() => showModalAccRej("Are you sure you want to accept this request?", () => acceptTsr(startRq.id, startRq.student.id), "Confirm action", "Cancel")}>Accept</Button>
-                        <Button onClick={() => showModalAccRej("Are you sure you want to reject this request?", () => rejectTsr(startRq.id, startRq.student.id), "Confirm action", "Cancel")}>Reject</Button>
-                    </Collapse.Panel>
+                        <div>
+                            <Button onClick={() => showModalAccRej("Are you sure you want to accept this request?", () => acceptTsr(startRq.id, startRq.student.id), "Confirm action", "Cancel")}>Accept</Button>
+                            <Button onClick={() => showModalAccRej("Are you sure you want to reject this request?", () => rejectTsr(startRq.id, startRq.student.id), "Confirm action", "Cancel")}>Reject</Button>
+                        </div>
+                        </div>
+                        </Collapse.Panel>
+
                 ))}
             </Collapse>
         );
