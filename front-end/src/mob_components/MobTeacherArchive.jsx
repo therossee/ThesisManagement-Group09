@@ -58,13 +58,13 @@ function MobTeacherArchive() {
     const modalContent = (proposal) => {
         const expDayjs = dayjs(proposal.expiration);
         const selectedDate = expDayjs.isSameOrBefore(date) ? date : expDayjs;
-        const expired = proposal.status === "EXPIRED" || (proposal.status === "ARCHIVED" && expDayjs.isBefore(date));
+        const expired = proposal.status === "EXPIRED";
         handleExpChange(expDayjs);
         return (<div>
             <p>Are you sure you want to publish this proposal?</p>
-            {expired && <p>If so, select a new expiration date</p>}
-            {!expired && <p>You can leave the expiration date unchanged, or change it with another one.</p>}
-            <DatePicker
+            {expired && (<>
+                <p>If so, select a new expiration date</p>
+                <DatePicker
                 onChange={handleExpChange}
                 placeholder="Select new expiration date"
                 disabledDate={disabledDate}
@@ -74,6 +74,7 @@ function MobTeacherArchive() {
             >
                 Select a new expiration date
             </DatePicker>
+                </>)}
         </div>)
     };
 
