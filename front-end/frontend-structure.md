@@ -16,16 +16,11 @@ Welcome to the frontend of our project! hosts the user interface and client-side
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
   - [Usage](#usage)
-  - [Test](#test)
-- [Backend Project Structure](#backend-project-structure)
-  - [src directory](#src-directory)
-  - [test tirectory](#test-directory)
-- [Middlewares](#middlewares)
-- [API Endpoints](#api-endpoints)
-- [Test](#test)
-  - [Testing Overview](#testing-overview)
-  - [Running Tests](#running-tests)
-  - [Test Coverage Report](#test-coverage-report)
+- [Frontend Project Structure](#frontend-project-structure)
+  - [React Routes](#react-routes)
+  - [UI Components](#ui-components)
+  - [Routes Folder](#routes-folder)
+- [APIs](#apis)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -118,7 +113,7 @@ The frontend project is structured for clarity and maintainability:
 - `mob_components`=> Contains components specifically designed for the mobile view.
 - `routes`=> Manages the application routing, considering authentication.
 
-## React Routes
+### React Routes
 Content within the MainLayout.jsx component:
 - Route `/`: display the home page
 - Route `/admin/virtual-clock`: reference page to change the virtual clock of the entire system
@@ -134,7 +129,7 @@ Content within the MainLayout.jsx component:
 - Route `/edit-proposal/:id`: Displays the form with the specific proposal to edit.
 - Route`/*`: Error page 
 
-## UI Components
+### UI Components
 - `Authentication` : Folder with three components: login button, logout button and usaAuth for the authentication provider
 - `InsertThesisProposal`: Form to insert new thesis proposal by a teacher or copy a proposal with a given id.
 It is divided in a 3 step form:
@@ -156,7 +151,7 @@ It is divided in a 3 step form:
 - `main.jsx` : root render for the App
 - `MainLayout.jsx` : Principal structure of the app, including the sidebar (SideBar), the top bar (TopBar), and the main content area.
 
-## Routes Folder
+### Routes Folder
 - `Applications.jsx` : React conditional component that dynamically filters its content based on the role of the logged-in user. Depending on the user's role, the component either renders the `TeacherApplications` or `StudentApplications`.
 - `EditProposal.jsx` : specifically designed for editing a Thesis Proposal. This component is accessible exclusively to professors, ensuring that only authorized users with the appropriate role can utilize its functionality.
 - `Errors.jsx` :  React component for displaying different error messages based on a provided error code:
