@@ -96,7 +96,7 @@
     <p>
       <code>npm start</code> - Start the server
     </p>
-    <p>⚠️ <em>If you don't have npm installed you can download it from here: <a href="https://www.npmjs.com/get-npm">npm</a>
+    <p>⚠️ <em>If you don't have npm installed you can download it from here: <a href="https://docs.npmjs.com/downloading-and-installing-node-js-and-npm">npm</a>
       </em>
     </p>
   </div>
@@ -118,7 +118,7 @@
     <p>
       <code>npm run preview</code> - Preview the production build
     </p>
-    <p>⚠️ <em>If you don't have npm installed you can download it from <a href="https://www.npmjs.com/get-npm">here</a>
+    <p>⚠️ <em>If you don't have npm installed you can download it from <a href="https://docs.npmjs.com/downloading-and-installing-node-js-and-npm">here</a>
       </em>
     </p>
   </div>
