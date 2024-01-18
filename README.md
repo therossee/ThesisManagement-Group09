@@ -150,7 +150,7 @@
   </div>
   <div id="database-documentation" align="center">
     <h2>Database Documentation</h2>
-    <p>For a more datailed documentation regarding the Backend, please <a href="https://github.com/therossee/ThesisManagement-Group09/tree/main/database/README.md">read here</a>
+    <p>For a more datailed documentation regarding the Database, please <a href="https://github.com/therossee/ThesisManagement-Group09/tree/main/database/README.md">read here</a>
     </p>
   </div>
   <div id="contributors" align="center">
