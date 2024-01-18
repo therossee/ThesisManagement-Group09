@@ -15,7 +15,6 @@ const redirectToLogin = () => {
     window.location.replace("http://localhost:3000/login");
 };
 
-
 async function getUser() {
     const response = await fetch(URL + '/user', {
         method: 'GET',
@@ -47,6 +46,7 @@ async function getClock() {
             }
         });
 }
+
 async function updateClock(date) {
     return fetch(URL + '/system/virtual-clock', {
         method: 'POST',
@@ -185,6 +185,33 @@ async function getTeacherThesisApplications(proposalId) {
     }
 }
 
+async function getSecretaryStartRequest() {
+    const response = await fetch(URL + `/secretary-clerk/thesis-start-requests`, {
+        method: 'GET',
+        credentials: 'include'
+    });
+
+    const startRequests = await response.json();
+
+    if (response.ok) {
+        return startRequests.map((x) => ({
+            id: x.id,
+            proposal_id: x.proposal_id,
+            application_id: x.application_id,
+            student: x.student,
+            supervisor: x.supervisor,
+            co_supervisors: x.co_supervisors,
+            title: x.title,
+            description: x.description,
+            status: x.status,
+            creation_date: x.creation_date,
+            approval_date: x.approval_date,
+        }));
+    } else {
+        throw startRequests;
+    }
+}
+
 async function insertProposal(proposal) {
     let response = await fetch(URL + '/teacher/thesis_proposals', {
         method: 'POST',
@@ -254,8 +281,6 @@ async function getAllDegrees() {
         throw degrees;
     }
 }
-
-
 
 // Accept Student Applications on a Thesis Proposal 
 async function acceptThesisApplications(proposalId, studentId) {
@@ -384,12 +409,46 @@ async function getPDF(student_id, applicationId) {
         credentials: 'include',
     });
     if (response.ok) {
-            const file = await response.blob();
-            if (file.type === "application/pdf")
-                return file;
-            return null;
+        const file = await response.blob();
+        if (file.type === "application/pdf")
+            return file;
+        return null;
     } else {
         throw response.json();
+    }
+}
+
+// Secretary accept student Start Request 
+async function secretaryAcceptStartRequest(startReqId) {
+    const response = await fetch(URL + `/secretary-clerk/thesis-start-requests/accept/${startReqId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+    });
+    const res = await response.json();
+    if (response.ok) {
+        return res;
+    } else {
+        throw res;
+    }
+}
+
+// Secretary reject Student Start Request 
+async function secretaryRejectStartRequest(startReqId) {
+    const response = await fetch(URL + `/secretary-clerk/thesis-start-requests/reject/${startReqId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+    });
+    const res = await response.json();
+    if (response.ok) {
+        return res;
+    } else {
+        throw res;
     }
 }
 
@@ -439,7 +498,7 @@ async function getTeacherThesisStartRequest() {
     }
 }
 
-// Accept Student Thesis Start Request
+// Teacher accept Student Thesis Start Request
 async function acceptThesisStartRequest(tsrId) {
     const response = await fetch(URL + `/teacher/thesis-start-requests/${tsrId}/review`, {
         method: 'POST',
@@ -459,7 +518,7 @@ async function acceptThesisStartRequest(tsrId) {
     }
 }
 
-// Reject Student Thesis Start Request
+// Teacher reject Student Thesis Start Request
 async function rejectThesisStartRequest(tsrId) {
     const response = await fetch(URL + `/teacher/thesis-start-requests/${tsrId}/review`, {
         method: 'POST',
@@ -479,7 +538,7 @@ async function rejectThesisStartRequest(tsrId) {
     }
 }
 
-// Request Changes on a Student Thesis Start Request
+// Teacher request Changes on a Student Thesis Start Request
 async function reviewThesisStartRequest(tsrId, requestedChanges) {
     const response = await fetch(URL + `/teacher/thesis-start-requests/${tsrId}/review`, {
         method: 'POST',
@@ -504,8 +563,14 @@ const API = {
     logOut, redirectToLogin,
     getUser,
     getClock, updateClock,
-    insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById, getPDF,
-    insertThesisStartRequest, getStudentLastThesisStartRequest, getTeacherThesisStartRequest, acceptThesisStartRequest, rejectThesisStartRequest, reviewThesisStartRequest
+    insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, 
+    getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
+    applyForProposal, getStudentActiveApplication, 
+    acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, 
+    deleteProposalById, updateProposal, archiveProposalById, 
+    getStudentCVById, getPDF,
+    insertThesisStartRequest, getStudentLastThesisStartRequest, getTeacherThesisStartRequest, getSecretaryStartRequest, 
+    secretaryAcceptStartRequest, secretaryRejectStartRequest, 
+    acceptThesisStartRequest, rejectThesisStartRequest, reviewThesisStartRequest
 };
 export default API;
