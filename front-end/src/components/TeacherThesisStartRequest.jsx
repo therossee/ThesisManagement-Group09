@@ -4,6 +4,7 @@ import { CheckOutlined, CloseOutlined, HistoryOutlined, CheckCircleOutlined, Clo
 import dayjs from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import { renderTeacherInfo } from './StudentThesisStartRequest';
+import PropTypes from 'prop-types';
 import API from '../API';
 
 dayjs.extend(localizedFormat);
@@ -415,5 +416,42 @@ const showModal = (content, action, okText, cancelText) => {
         cancelText: cancelText,
     });
 };
+
+PendingThesisStartRequest.propTypes = {
+    tsr: PropTypes.array.isRequired,
+    isLoading: PropTypes.bool.isRequired,
+    setDirty: PropTypes.func.isRequired,
+    setIsModalVisible: PropTypes.func.isRequired,
+    setSelectedTsr: PropTypes.func.isRequired,
+    setShowInfo: PropTypes.func.isRequired,
+};
+
+HistoryThesisStartRequest.propTypes = {
+    tsr: PropTypes.array.isRequired,
+    isLoading: PropTypes.bool.isRequired,
+    setShowInfo: PropTypes.func.isRequired,
+};
+
+ShowTsrInfo.propTypes = {
+    showInfo: PropTypes.shape({
+        title: PropTypes.string.isRequired,
+        creation_date: PropTypes.string.isRequired,
+        supervisor: PropTypes.shape({
+            name: PropTypes.string.isRequired,
+            surname: PropTypes.string.isRequired,
+            id: PropTypes.string.isRequired,
+        }).isRequired,
+        status: PropTypes.string.isRequired,
+        approval_date: PropTypes.string,
+        description: PropTypes.string.isRequired,
+        co_supervisors: PropTypes.arrayOf(PropTypes.shape({
+            name: PropTypes.string.isRequired,
+            surname: PropTypes.string.isRequired,
+            id: PropTypes.string.isRequired,
+        })),
+        changes_requested: PropTypes.string,
+    }),
+};
+
 
 export default TeacherThesisStartRequest;
