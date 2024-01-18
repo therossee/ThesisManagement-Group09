@@ -25,7 +25,13 @@ function TeacherArchive() {
 
     const [newExpiration, setNewExpiration] = useState(null);
 
-    const [modalVisible, setModalVisible] = useState(false);
+    const navigateToEdit = (record) => {
+        if (record.status !== 'ASSIGNED')
+            navigate(`/edit-proposal/${record.id}`);
+        else
+            message.error("Thesis already assigned, cannot edit!");
+    }
+
 
     // Columns of the table
     const columns = [
@@ -45,27 +51,28 @@ function TeacherArchive() {
                         <EyeOutlined style={{ fontSize: '20px' }} onClick={() => navigate(`/view-proposal/${record.id}`, { state: { prevRoute: 'archive' } })} />
                     </Tooltip>
                     <Tooltip title="Edit Proposal">
-                        <EditOutlined 
-                            style = {{
+                        <EditOutlined
+                            style={{
                                 fontSize: '20px',
                                 color: record.status === 'ASSIGNED' ? 'rgba(0, 0, 0, 0.25)' : 'inherit',
-                                cursor: record.status === 'ASSIGNED' ? 'not-allowed' : 'pointer' }}
-                            onClick={() => { 
-                                if(record.status!=='ASSIGNED') 
-                                    navigate(`/edit-proposal/${record.id}`)
-                            }} 
+                                cursor: record.status === 'ASSIGNED' ? 'not-allowed' : 'pointer'
+                            }}
+                            onClick={() => {
+                                navigateToEdit(record);
+                            }}
                         />
                     </Tooltip>
                     <Tooltip title="Publish Proposal" disabled={record.status === 'ASSIGNED'}>
-                        <SelectOutlined  
-                            style = {{
+                        <SelectOutlined
+                            style={{
                                 fontSize: '20px',
                                 color: record.status === 'ASSIGNED' ? 'rgba(0, 0, 0, 0.25)' : 'inherit',
-                                cursor: record.status === 'ASSIGNED' ? 'not-allowed' : 'pointer' }}
-                            onClick={async() => {
-                                const expiration = new Date(record.expiration); 
+                                cursor: record.status === 'ASSIGNED' ? 'not-allowed' : 'pointer'
+                            }}
+                            onClick={async () => {
+                                const expiration = new Date(record.expiration);
                                 const now = (await API.getClock()).date;
-                                if(expiration > now) {
+                                if (expiration > now) {
                                     showModal(
                                         "Confirm action",
                                         <div>
@@ -89,15 +96,15 @@ function TeacherArchive() {
                                         <div>
                                             <Paragraph>
                                                 <Text>
-                                                   Since this thesis proposal is expired, before re-publishing it, please select a new expiration date.
+                                                    Since this thesis proposal is expired, before re-publishing it, please select a new expiration date.
                                                 </Text>
                                             </Paragraph>
                                             <Paragraph>
-                                                <DatePicker 
-                                                    onChange={handleDatePickerChange} 
-                                                    placeholder="Select new expiration date"  
+                                                <DatePicker
+                                                    onChange={handleDatePickerChange}
+                                                    placeholder="Select new expiration date"
                                                     disabledDate={disabledDate}
-                                                    customDate={date} 
+                                                    customDate={date}
                                                     defaultValue={newExpiration === null ? null : dayjs(newExpiration)}
                                                     defaultPickerValue={date}
                                                     style={{ width: "70%" }}
@@ -107,11 +114,10 @@ function TeacherArchive() {
                                             </Paragraph>
                                         </div>,
                                         () => {
-                                            // Using the callback to ensure that newExpiration is updated before calling publishProposalById
                                             if (newExpiration !== null) {
                                                 publishProposalById(record, newExpiration);
                                                 setNewExpiration(null);
-                                            }else{
+                                            } else {
                                                 message.error("Please select a new expiration date");
                                             }
                                         },
@@ -120,7 +126,7 @@ function TeacherArchive() {
                                     )
                                 }
                             }}
-                            disabled={record.status === 'ASSIGNED'}/>
+                            disabled={record.status === 'ASSIGNED'} />
                     </Tooltip>
                 </Space>
             ),
@@ -169,9 +175,7 @@ function TeacherArchive() {
     }
 
     const showModal = (title, content, action, okText, cancelText) => {
-        setModalVisible(true);
         Modal.confirm({
-            visible: modalVisible,
             title: title,
             icon: <ExclamationCircleFilled />,
             content: content,
@@ -179,13 +183,12 @@ function TeacherArchive() {
             okText: okText,
             okType: "danger",
             cancelText: cancelText,
-            onCancel: setModalVisible(false)
         });
     };
 
     const handleDatePickerChange = (date) => {
         const isoFormattedDate = date?.toISOString();
-        setNewExpiration(isoFormattedDate); 
+        setNewExpiration(isoFormattedDate);
     };
 
     function disabledDate(current) {
@@ -194,15 +197,15 @@ function TeacherArchive() {
 
     async function publishProposalById(record, newExpiration) {
         try {
-            if(record.status === "ARCHIVED" || record.status === "EXPIRED"){
+            if (record.status === "ARCHIVED" || record.status === "EXPIRED") {
                 await API.publishProposalById(record.id, newExpiration);
                 message.success("The proposal has been re-published successfully");
                 setDirty(true);
             }
-            else{
+            else {
                 message.error("The proposal is already assigned, you cannot re-publish it")
             }
-            
+
         } catch (err) {
             message.error(err.message ? err.message : err);
             setIsLoadingTable(false);
