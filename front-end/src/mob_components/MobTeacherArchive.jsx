@@ -84,7 +84,6 @@ function MobTeacherArchive() {
 
     const modalContent = (proposal) => {
         const expDayjs = dayjs(proposal.expiration);
-        const selectedDate = expDayjs.isSameOrBefore(date) ? date : expDayjs;
         const expired = proposal.status === "EXPIRED" || (proposal.status === "ARCHIVED" && expDayjs.isBefore(date));
         handleExpChange(expDayjs);
         return (<div>
@@ -169,9 +168,9 @@ function MobTeacherArchive() {
                                     </Tag>
                                 ))}</p>
                                 <p>Expiration: {x.expiration}</p>
-                                <p>Status: {x.status}</p>
+                                <p>Status: <Tag color='blue'>{x.status}</Tag> </p>
                                 <>
-                                    <Button onClick={() => navigate(`/view-proposal/${x.id}`)}><EyeOutlined/>View</Button>
+                                    <Button onClick={() => navigate(`/view-proposal/${x.id}`,  { state: { prevRoute: 'archive' } })}><EyeOutlined/>View</Button>
                                     <Button onClick={() => { editProposal(x); }}><EditOutlined/>Edit</Button>
                                     {(x.status === 'ARCHIVED' || x.status === 'EXPIRED') && <Button onClick={() => {
                                         Modal.confirm({

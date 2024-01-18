@@ -32,7 +32,13 @@ function TopBar({ collapsed, setCollapsed }) {
             }
             {isAuthenticated && (
               <>
-                <Avatar size="large" style={{ backgroundColor: '#1677ff', marginRight: "10px" }} icon={<UserOutlined />} />
+                <Avatar size="large" style={{
+                  backgroundColor: '#1677ff',
+                  marginRight: "10px",
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }} icon={<UserOutlined />} />
                 <span>{userData.name}</span>
               </>
             )}

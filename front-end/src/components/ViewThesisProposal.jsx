@@ -176,7 +176,9 @@ function ViewThesisProposal() {
       </BrowserView>
       <MobileView>
         <MobModal setIsOpen={setIsOpen} setLoading={setLoading} setDisabled={setDisabled} isOpen={isOpen} loading={loading} />
-        <Button type="link" onClick={() => navigate("/proposals")}>&lt; Back to Thesis Proposals</Button>
+        <Button type="link" onClick={() => navigate(-1)}>
+          &lt;{location.state?.prevRoute === "archive" ? "Back to Archive" : "Back to Thesis Proposals"}
+        </Button>
         <div style={{paddingBottom: "60px"}}>
           <Descriptions title={data.title} layout="vertical" items={items} />
           {!isTeacher && <Button ghost type="primary" disabled={disabled} loading={loading} onClick={() => setIsOpen(true)}>Apply for proposal</Button>}

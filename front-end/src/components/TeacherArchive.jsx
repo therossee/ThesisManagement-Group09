@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { message, Space, Table, Tooltip, Modal, Typography, DatePicker } from 'antd';
+import { message, Space, Table, Tooltip, Modal, Typography, DatePicker, Tag } from 'antd';
 import { EditOutlined, EyeOutlined, SelectOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { generateCommonColumns } from './utils';
@@ -58,6 +58,11 @@ function TeacherArchive() {
             title: 'Status',
             dataIndex: 'status',
             sorter: (a, b) => a.status.localeCompare(b.status),
+            render: (status) => ( 
+                <Tag color='blue'>
+                    {status}
+                </Tag>
+            ),
         },
         {
             title: 'Actions',
