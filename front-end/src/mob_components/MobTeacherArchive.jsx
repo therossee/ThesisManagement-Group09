@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Collapse, Modal } from 'antd-mobile';
-import { message, Tag, Button, DatePicker } from 'antd';
+import { message, Tag, Button, DatePicker, Alert } from 'antd';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
@@ -28,6 +28,33 @@ function MobTeacherArchive() {
     const [date, setDate] = useState(dayjs());
 
     const [newExp, setNewExp] = useState(null);
+
+    const [pub, setPub] = useState(false);
+
+    const [proposal, setProposal] = useState(null);
+
+    const [showError, setShowError] = useState(false);
+
+    useEffect(() => {
+        if(pub === true){
+            if (newExp !== null && newExp !== undefined){
+                publishFromArchive(proposal, newExp);
+                setNewExp(null);
+            } else {
+                setShowError(true);
+            }
+            setPub(false);
+            setProposal(null);
+        }
+
+    }, [pub]);
+
+    const editProposal = (record) => {
+        if (record.status !== 'ASSIGNED')
+            navigate(`/edit-proposal/${record.id}`);
+        else
+            message.error("Thesis already assigned, cannot edit!");
+    }
 
     const handleExpChange = (date) => {
         const isoDate = date?.toISOString();
@@ -68,7 +95,7 @@ function MobTeacherArchive() {
                 onChange={handleExpChange}
                 placeholder="Select new expiration date"
                 disabledDate={disabledDate}
-                defaultValue={selectedDate}
+                defaultValue={newExp === null ? null : dayjs(newExp)}
                 defaultPickerValue={date}
                 style={{ width: "70%" }}
             >
@@ -84,7 +111,6 @@ function MobTeacherArchive() {
             setLoadArchive(true);
             API.getArchivedThesisProposals()
                 .then((x) => {
-                    console.log(x);
                     setArchiveData(handleReceivedArchive(x));
                     setLoadArchive(false);
                     setRefreshArchive(false)
@@ -114,6 +140,8 @@ function MobTeacherArchive() {
 
     return (<>
         {loadArchive ? (<p>loading</p>) : (
+            <>
+            {showError && <Alert message="Please select a new expiration date" type="error" showIcon />}
             <div style={{ paddingBottom: "60px", position: "relative" }}>
                 <p>{userData? userData.name : ""}, your archived proposals</p>
                 <div style={{ marginTop: "5px" }} key={archiveData}>
@@ -144,7 +172,7 @@ function MobTeacherArchive() {
                                 <p>Status: {x.status}</p>
                                 <>
                                     <Button onClick={() => navigate(`/view-proposal/${x.id}`)}><EyeOutlined/>View</Button>
-                                    <Button onClick={() => navigate(`/edit-proposal/${x.id}`)}><EditOutlined/>Edit</Button>
+                                    <Button onClick={() => { editProposal(x); }}><EditOutlined/>Edit</Button>
                                     {(x.status === 'ARCHIVED' || x.status === 'EXPIRED') && <Button onClick={() => {
                                         Modal.confirm({
                                             title: 'Publish proposal',
@@ -153,11 +181,8 @@ function MobTeacherArchive() {
                                             cancelText: 'Cancel',
                                             confirmButtonProps: {type: 'danger', disabled: newExp === null},
                                             onConfirm: () => {
-                                                if (newExp === null && dayjs(x.expiration).isBefore(date)) {
-                                                    message.error("Please select a new expiration date");
-                                                } else {
-                                                    publishFromArchive(x, newExp);
-                                                }
+                                                setProposal(x);
+                                                setPub(true);
                                             },
                                         }
                                     )}}><SelectOutlined/>Publish</Button>}
@@ -167,7 +192,8 @@ function MobTeacherArchive() {
                         ))}
                     </Collapse>
                 </div>
-            </div>)}</>);
+            </div>
+            </>)}</>);
 
 
 }

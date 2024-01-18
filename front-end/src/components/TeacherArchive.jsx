@@ -201,7 +201,6 @@ function TeacherArchive() {
     };
 
     const handleDatePickerChange = (date) => {
-        console.log(date);
         const isoFormattedDate = date?.toISOString();
         setNewExpiration(isoFormattedDate);
     };
