@@ -33,7 +33,7 @@ password_field.send_keys("d279620")
 print("Password inserted")
 
 driver.implicitly_wait(5)
-continue_button = driver.find_element(By.CSS_SELECTOR, ".cff0ff2c6")
+continue_button = driver.find_element(By.XPATH, "//button[normalize-space()='Continue']")
 continue_button.click();
 print("Continue clicked")
 print("Login successful as a TEACHER")
