@@ -15,6 +15,7 @@ const redirectToLogin = () => {
     window.location.replace("http://localhost:3000/login");
 };
 
+
 async function getUser() {
     const response = await fetch(URL + '/user', {
         method: 'GET',
@@ -27,7 +28,6 @@ async function getUser() {
         throw await response.json();
     }
 }
-
 
 /****** End APIs for auth ******/
 
@@ -72,7 +72,18 @@ async function updateClock(date) {
 
 // GET Thesis Proposals
 async function getThesisProposals() {
-    const response = await fetch(URL + '/thesis-proposals', {
+    return fetchThesisProposals('/thesis-proposals');
+}
+
+// GET Archived Thesis Proposals
+async function getArchivedThesisProposals() {
+    return fetchThesisProposals('/thesis-proposals/archived');
+}
+
+// Generic function that handles the common logic and then use it in both 
+// getThesisProposals and getArchivedThesisProposals
+async function fetchThesisProposals(endpoint) {
+    const response = await fetch(URL + endpoint, {
         method: 'GET',
         credentials: 'include',
     });
@@ -93,7 +104,8 @@ async function getThesisProposals() {
             level: x.level,
             groups: x.groups,
             keywords: x.keywords,
-            cds: x.cds
+            cds: x.cds,
+            status: x.status
         }))
     } else {
         throw proposals;
@@ -352,6 +364,19 @@ async function archiveProposalById(id) {
     }
 }
 
+async function publishProposalById(id, expiration) {
+    const queryParams = expiration ? `?expiration=${encodeURIComponent(expiration)}` : '';
+    const response = await fetch(URL + `/thesis-proposals/${id}/archive${queryParams}`, {
+        method: 'DELETE',
+        credentials: 'include'
+    });
+    if (response.ok) {
+        return response;
+    } else {
+        throw response;
+    }
+}
+
 async function deleteProposalById(id) {
     const response = await fetch(URL + `/thesis-proposals/${id} `, {
         method: 'DELETE',
@@ -560,7 +585,7 @@ async function reviewThesisStartRequest(tsrId, requestedChanges) {
 }
 
 const API = {
-    logOut, redirectToLogin,
+    logOut, redirectToLogin, 
     getUser,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, 
@@ -569,8 +594,9 @@ const API = {
     acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, 
     deleteProposalById, updateProposal, archiveProposalById, 
     getStudentCVById, getPDF,
-    insertThesisStartRequest, getStudentLastThesisStartRequest, getTeacherThesisStartRequest, getSecretaryStartRequest, 
-    secretaryAcceptStartRequest, secretaryRejectStartRequest, 
-    acceptThesisStartRequest, rejectThesisStartRequest, reviewThesisStartRequest
+    insertThesisStartRequest, getStudentLastThesisStartRequest, getTeacherThesisStartRequest, getSecretaryStartRequest,
+    secretaryAcceptStartRequest, secretaryRejectStartRequest,
+    acceptThesisStartRequest, rejectThesisStartRequest, reviewThesisStartRequest, 
+    getArchivedThesisProposals, publishProposalById, 
 };
 export default API;

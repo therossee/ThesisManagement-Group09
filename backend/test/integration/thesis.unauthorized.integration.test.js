@@ -18,6 +18,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
     CronTasksService.stop();
+    resetTestDatabase();
 });
 
 describe('Unauthorized user', () => {
