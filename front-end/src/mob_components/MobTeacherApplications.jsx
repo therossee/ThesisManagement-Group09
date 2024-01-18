@@ -48,7 +48,7 @@ function MobTeacherApplications() {
                     setRefresh(false);
                 }
             } catch (err) {
-                message.error(err.message ? err.message : err);
+                message.error(err.message ?? err);
             }
         };
 
@@ -63,7 +63,7 @@ function MobTeacherApplications() {
             setRefresh(true);
             setLoadButtons(false)
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
             setLoadButtons(false);
         }
     };
@@ -77,7 +77,7 @@ function MobTeacherApplications() {
             setRefresh(true);
             setLoadButtons(false);
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
             setLoadButtons(false);
         }
     };

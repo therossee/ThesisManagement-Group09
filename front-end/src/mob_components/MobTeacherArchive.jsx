@@ -77,7 +77,7 @@ function MobTeacherArchive() {
             }
 
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
             setLoadArchive(false);
         }
     }
@@ -115,7 +115,7 @@ function MobTeacherArchive() {
                     setRefreshArchive(false)
                 })
                 .catch((err) => {
-                    message.error(err.message ? err.message : err);
+                    message.error(err.message ?? err);
                     setRefreshArchive(false);
                     setLoadArchive(false);
                 });

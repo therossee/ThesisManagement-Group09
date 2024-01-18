@@ -111,7 +111,7 @@ function TeacherThesisProposals() {
                     setDirty(false);
                 })
                 .catch((err) => {
-                    message.error(err.message ? err.message : err);
+                    message.error(err.message ?? err);
                     setIsLoadingTable(false);
                     setDirty(false);
                 });
@@ -133,7 +133,7 @@ function TeacherThesisProposals() {
             message.success("Thesis proposal deleted successfully");
             setDirty(true);
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
             setIsLoadingTable(false);
         }
     }
@@ -145,7 +145,7 @@ function TeacherThesisProposals() {
             message.success("Proposal archived successfully");
             setDirty(true);
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
             setIsLoadingTable(false);
         }
     }

@@ -30,7 +30,7 @@ function StudentCV(props) {
                 const pdf = await API.getPDF(studentInfo.id, applicationId);
                 setFile(pdf);
             } catch (err) {
-                message.error(err.message ? err.message : err);
+                message.error(err.message ?? err);
             } finally {
                 setIsLoading(false);
             }

@@ -36,7 +36,7 @@ function TeacherThesisStartRequest() {
             setSelectedTsr(null);
             setShowInfo(null);
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
         }
     };
 
@@ -49,7 +49,7 @@ function TeacherThesisStartRequest() {
                     setTsr(tsr);
                 }
             } catch (err) {
-                message.error(err.message ? err.message : err);
+                message.error(err.message ?? err);
             }
             finally {
                 setIsLoading(false);
@@ -111,7 +111,7 @@ function PendingThesisStartRequest({ tsr, isLoading, setDirty, setIsModalVisible
             setDirty(true);
             setShowInfo(null);
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
         }
     };
 
@@ -122,7 +122,7 @@ function PendingThesisStartRequest({ tsr, isLoading, setDirty, setIsModalVisible
             setDirty(true);
             setShowInfo(null);
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
         }
     };
 

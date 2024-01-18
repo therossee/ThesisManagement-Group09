@@ -77,7 +77,7 @@ function AddThesisStartRequestForm({ setFormVisible }) {
                 setOptions(formattedTeachers);
                 setLoading(false);
             } catch (err) {
-                message.error(err.message ? err.message : err);
+                message.error(err.message ?? err);
                 setLoading(false);
             }
         };
@@ -92,7 +92,7 @@ function AddThesisStartRequestForm({ setFormVisible }) {
             setButtonLoading(false);
             setFormVisible(false);
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
             setButtonLoading(false);
         }
     };
@@ -233,7 +233,7 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
                 setActiveThesisStartRequest(activeTSR);
                 setLoading(false);
             } catch (err) {
-                message.error(err.message ? err.message : err);
+                message.error(err.message ?? err);
                 setLoading(false);
             }
         };

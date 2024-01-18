@@ -47,7 +47,7 @@ function MobInsertThesisProposal() {
             setFormData(proposalData);
           })
           .catch((err) => {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
           })
           .finally(() => {
             setTimeout(() => {
@@ -64,35 +64,35 @@ function MobInsertThesisProposal() {
         setIntCoSupervisors(obj.teachers);
       })
       .catch((err) => {
-        message.error("Failed to fetch teachers!" + err.message ? err.message : err);
+        message.error("Failed to fetch teachers!" + err.message ?? err);
       });
     API.getExtCoSupervisors()
       .then((obj) => {
         setExtCoSupervisors(obj.externalCoSupervisors);
       })
       .catch((err) => {
-        message.error("Failed to fetch external co-supervisors!" + err.message ? err.message : err);
+        message.error("Failed to fetch external co-supervisors!" + err.message ?? err);
       });
     API.getAllDegrees()
       .then((obj) => {
         setDegrees(obj);
       })
       .catch((err) => {
-        message.error("Failed to fetch degrees!" + err.message ? err.message : err);
+        message.error("Failed to fetch degrees!" + err.message ?? err);
       });
     API.getAllKeywords()
       .then((obj) => {
         setKeywords(obj.keywords);
       })
       .catch((err) => {
-        message.error("Failed to fetch keywords!" + err.message ? err.message : err);
+        message.error("Failed to fetch keywords!" + err.message ?? err);
       });
     API.getClock()
       .then((clock) => {
         setDate(dayjs().add(clock.offset, 'ms'));
       })
       .catch((err) => {
-        message.error("Failed to fetch virtual clock!" + err.message ? err.message : err);
+        message.error("Failed to fetch virtual clock!" + err.message ?? err);
       })
         .finally(() => {
           if(!copyId) {

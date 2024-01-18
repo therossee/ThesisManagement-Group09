@@ -40,9 +40,9 @@ function ViewThesisProposal() {
               setDisabled(true);
             }
           })
-          .catch((err) => { message.error(err.message ? err.message : err) });
+          .catch((err) => { message.error(err.message ?? err) });
       })
-      .catch((err) => { message.error(err.message ? err.message : err) })
+      .catch((err) => { message.error(err.message ?? err) })
   }, []);
 
   // Another Useffect needed because isTeacher needs time to be computed. It is initialized as undefined so we can actually see when it is computed by checking isTeacher===false and not !isTeacher.
@@ -55,7 +55,7 @@ function ViewThesisProposal() {
             // Disabled if there's already an application pending
             setDisabled(true);
         })
-        .catch((err) => { message.error(err.message ? err.message : err) });
+        .catch((err) => { message.error(err.message ?? err) });
     }
   }, [isTeacher]);
 
@@ -243,7 +243,7 @@ function MyModal(props) {
       setDisabled(true);
       setLoading(false);
     } catch (err) {
-      message.error(err.message ? err.message : err);
+      message.error(err.message ?? err);
       setUploadedFile(null);
       setDisabled(false);
       setLoading(false);

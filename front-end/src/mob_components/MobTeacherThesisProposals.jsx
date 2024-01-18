@@ -35,7 +35,7 @@ function MobTeacherThesisProposals() {
                     setRefresh(false)
                 })
                 .catch((err) => {
-                    message.error(err.message ? err.message : err);
+                    message.error(err.message ?? err);
                     setRefresh(false);
                     setLoadData(false);
                 });
@@ -59,7 +59,7 @@ function MobTeacherThesisProposals() {
             message.success("Thesis proposal deleted successfully");
             setRefresh(true);
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
             setLoadData(false);
         }
     }
@@ -71,7 +71,7 @@ function MobTeacherThesisProposals() {
             message.success("Proposal archived successfully");
             setRefresh(true);
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
             setLoadData(false);
         }
 
