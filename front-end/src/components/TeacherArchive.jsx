@@ -25,6 +25,8 @@ function TeacherArchive() {
 
     const [newExpiration, setNewExpiration] = useState(null);
 
+    const [modalVisible, setModalVisible] = useState(false);
+
     // Columns of the table
     const columns = [
         ...generateCommonColumns(),
@@ -96,7 +98,7 @@ function TeacherArchive() {
                                                     placeholder="Select new expiration date"  
                                                     disabledDate={disabledDate}
                                                     customDate={date} 
-                                                    defaultValue={null}
+                                                    defaultValue={newExpiration === null ? null : dayjs(newExpiration)}
                                                     defaultPickerValue={date}
                                                     style={{ width: "70%" }}
                                                 >
@@ -106,10 +108,12 @@ function TeacherArchive() {
                                         </div>,
                                         () => {
                                             // Using the callback to ensure that newExpiration is updated before calling publishProposalById
-                                            setNewExpiration(date => {
-                                                publishProposalById(record, date);
-                                                return date;
-                                            });
+                                            if (newExpiration !== null) {
+                                                publishProposalById(record, newExpiration);
+                                                setNewExpiration(null);
+                                            }else{
+                                                message.error("Please select a new expiration date");
+                                            }
                                         },
                                         "Ok, publish it",
                                         "Cancel",
@@ -165,7 +169,9 @@ function TeacherArchive() {
     }
 
     const showModal = (title, content, action, okText, cancelText) => {
+        setModalVisible(true);
         Modal.confirm({
+            visible: modalVisible,
             title: title,
             icon: <ExclamationCircleFilled />,
             content: content,
@@ -173,6 +179,7 @@ function TeacherArchive() {
             okText: okText,
             okType: "danger",
             cancelText: cancelText,
+            onCancel: setModalVisible(false)
         });
     };
 
