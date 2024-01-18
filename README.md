@@ -13,6 +13,7 @@
     <p>
       <a href="#overview">Overview</a>
       </li> | <a href="#how-to-run">How to run the project</a>
+      </li> | <a href="#credentials">Credentials</a>
       </li> | <a href="#frontend-documentation">Frontend Documentation</a>
       </li> | <a href="#backend-documentation">Backend Documentation</a>
       </li> | <a href="#database-documentation">Database Documentation</a>
@@ -65,7 +66,7 @@
       <img src="./images/9.png" alt="9" height="250">
     </p>
   </div>
-  <div id="how-to-run" align="center">
+  <div id="how-to-run" align="left">
     <h2>How to run the Project</h2>
     <p>
       <a href="#env-variables">Set up environmental variables</a>
@@ -144,22 +145,40 @@
       </em>
     </p>
   </div>
-  <div id="fontend-documentation" align="center">
+  <div id="credentials" align="left">
+    <h2>Credentials</h2>
+    <h4>Student</h4>
+    <p>
+      <a href="">s320213@studenti.polito.it</a>
+      </li> | <a href="">s320213</a>
+    </p>
+    <h4>Secretary Clerk</h4>
+    <p>
+      <a href="">abbondanzio.rossi@polito.it</a>
+      </li> | <a href="">sc12345</a>
+    </p>
+    <h4>Teacher (and tester)</h4>
+    <p>
+      <a href="">d279620@polito.it</a>
+      </li> | <a href="">d279620</a>
+    </p>
+  </div>
+  <div id="fontend-documentation" align="left">
     <h2>Frontend Documentation</h2>
     <p>For a more datailed documentation regarding the Frontend, please <a href="https://github.com/therossee/ThesisManagement-Group09/tree/main/front-end/README.md">read here</a>
     </p>
   </div>
-  <div id="backend-documentation" align="center">
+  <div id="backend-documentation" align="left">
     <h2>Backend Documentation</h2>
     <p>For a more datailed documentation regarding the Backend, please <a href="https://github.com/therossee/ThesisManagement-Group09/tree/main/backend/README.md">read here</a>
     </p>
   </div>
-  <div id="database-documentation" align="center">
+  <div id="database-documentation" align="left">
     <h2>Database Documentation</h2>
     <p>For a more datailed documentation regarding the Database, please <a href="https://github.com/therossee/ThesisManagement-Group09/tree/main/database/README.md">read here</a>
     </p>
   </div>
-  <div id="contributors" align="center">
+  <div id="contributors" align="left">
     <h2>Contributors</h2>
     <p>
       <a href="https://github.com/lucabubi">Barbato Luca (320213)</a>
