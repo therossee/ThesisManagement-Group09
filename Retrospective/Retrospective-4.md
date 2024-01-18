@@ -1,4 +1,4 @@
-TEMPLATE FOR RETROSPECTIVE (Team 09)
+RETROSPECTIVE (Team 09)
 =====================================
 
 ### Sections:
