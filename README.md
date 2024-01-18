@@ -4,7 +4,6 @@
       <img src="./images/cover.png" alt="Thesis Management System" height="350">
     </p>
     <p>
-      <img src="https://forthebadge.com/images/badges/made-with-javascript.svg" alt="Made with Javascript" height="30">
       <img src="https://forthebadge.com/images/badges/not-a-bug-a-feature.svg" alt="Not a Bug a Feature" height="30">
       <img src="https://forthebadge.com/images/featured/featured-built-with-love.svg" alt="Built with love" height="30">
     </p>
@@ -20,12 +19,21 @@
       </li> | <a href="#contributors">Contributors</a>
     </p>
     <p>
-      <img src="https://img.shields.io/github/contributors/therossee/ThesisManagement-Group09" alt="Contributors" height="20">
-      <img src="https://img.shields.io/tokei/lines/github/therossee/ThesisManagement-Group09" alt="Code Lines" height="20">
-      <img src="https://img.shields.io/github/issues-pr-closed/therossee/ThesisManagement-Group09" alt="Total PR Closed" height="20">
+      <img src="https://img.shields.io/github/contributors/therossee/ThesisManagement-Group09" alt="Contributors" height="22">
+      <img src="https://img.shields.io/tokei/lines/github/therossee/ThesisManagement-Group09" alt="Code Lines" height="22">
+      <img src="https://img.shields.io/github/issues-pr-closed/therossee/ThesisManagement-Group09" alt="Total PR Closed" height="22">
+      <img src="https://sonarcloud.io/api/project_badges/measure?project=therossee_ThesisManagement-Group09&metric=alert_status" alt="SonarCloud" height="22">
     </p>
     <p>
-      <img src="https://sonarcloud.io/api/project_badges/measure?project=therossee_ThesisManagement-Group09&metric=alert_status" alt="SonarCloud" height="20">
+      <img src="https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" height="22">
+      <img src="https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white" alt="Npm" height="22">
+      <img src="https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white" alt="NodeJS" height="22">
+      <img src="https://img.shields.io/badge/Express%20js-000000?style=for-the-badge&logo=express&logoColor=white" alt="ExpressJS" height="22">
+      <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="Javascript" height="22">
+      <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" height="22">
+      <img src="https://img.shields.io/badge/Ant%20Design-1890FF?style=for-the-badge&logo=antdesign&logoColor=white" alt="Antd" height="22">
+      <img src="https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue" alt="Python" height="22">
+      <img src="https://img.shields.io/badge/SonarLint-CB2029?style=for-the-badge&logo=sonarlint&logoColor=white" alt="SonarLint" height="22">
     </p>
   </div>
   <div id="overview" align="center">
@@ -138,17 +146,17 @@
   </div>
   <div id="fontend-documentation" align="center">
     <h2>Frontend Documentation</h2>
-    <p>For a more datailed documentation regarding the Frontend, please <a href="https://github.com/therossee/ThesisManagement-Group09/tree/main/front-end">read here</a>
+    <p>For a more datailed documentation regarding the Frontend, please <a href="https://github.com/therossee/ThesisManagement-Group09/tree/main/front-end/README.md">read here</a>
     </p>
   </div>
   <div id="backend-documentation" align="center">
     <h2>Backend Documentation</h2>
-    <p>For a more datailed documentation regarding the Backend, please <a href="https://github.com/therossee/ThesisManagement-Group09/tree/main/backend">read here</a>
+    <p>For a more datailed documentation regarding the Backend, please <a href="https://github.com/therossee/ThesisManagement-Group09/tree/main/backend/README.md">read here</a>
     </p>
   </div>
   <div id="database-documentation" align="center">
     <h2>Database Documentation</h2>
-    <p>For a more datailed documentation regarding the Backend, please <a href="https://github.com/therossee/ThesisManagement-Group09/tree/main/database">read here</a>
+    <p>For a more datailed documentation regarding the Backend, please <a href="https://github.com/therossee/ThesisManagement-Group09/tree/main/database/README.md">read here</a>
     </p>
   </div>
   <div id="contributors" align="center">
