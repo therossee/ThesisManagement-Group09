@@ -84,7 +84,6 @@ function MobTeacherArchive() {
 
     const modalContent = (proposal) => {
         const expDayjs = dayjs(proposal.expiration);
-        const selectedDate = expDayjs.isSameOrBefore(date) ? date : expDayjs;
         const expired = proposal.status === "EXPIRED" || (proposal.status === "ARCHIVED" && expDayjs.isBefore(date));
         handleExpChange(expDayjs);
         return (<div>
