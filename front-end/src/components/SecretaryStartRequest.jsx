@@ -53,11 +53,11 @@ function Secretary() {
     };
 
     const acceptStartRequest = (startReqId, student) => {
-        handleStartRequest(startReqId, student, API.acceptStartRequest, "Accepted the start request of");
+        handleStartRequest(startReqId, student, API.secretaryAcceptStartRequest, "Accepted the start request of");
     };
 
     const rejectStartRequest = (startReqId, student) => {
-        handleStartRequest(startReqId, student, API.rejectStartRequest, "Rejected the start request of");
+        handleStartRequest(startReqId, student, API.secretaryRejectStartRequest, "Rejected the start request of");
     };
 
     useEffect(() => {
