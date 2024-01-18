@@ -1,4 +1,4 @@
-RETROSPECTIVE (Team 09)
+# RETROSPECTIVE (Team 09)
 =====================================
 
 ### Sections:
@@ -45,7 +45,7 @@ RETROSPECTIVE (Team 09)
 - refactoring
 - learning
 
-</br>
+<br />
 
 - Hours per task average:
 
@@ -60,29 +60,56 @@ RETROSPECTIVE (Team 09)
 
 - Total task estimation error ratio: sum of total hours estimation / sum of total hours spent -1 = $\frac{6780}{6635} -1$ ~ **2%**
 
-  
-## QUALITY MEASURES 
 
-- Unit Testing:
-  - Total hours estimated
-  - Total hours spent
-  - Nr of automated unit test cases 
-  - Coverage (if available)
-- E2E testing:
-  - Total hours estimated
-  - Total hours spent
-- Code review 
-  - Total hours estimated 
-  - Total hours spent
-- Technical Debt management:
-  - Total hours estimated 
-  - Total hours spent
-  - Hours estimated for remediation by SonarQube
-  - Hours estimated for remediation by SonarQube only for the selected and planned issues 
-  - Hours spent on remediation 
-  - debt ratio (as reported by SonarQube under "Measures-Maintainability")
-  - rating for each quality characteristic reported in SonarQube under "Measures" (namely reliability, security, maintainability )
-  
+## QUALITY MEASURES
+
+- **All tests computed**
+
+  <img src="./Retrospective-4-all.png" alt="All tests coverage" width="70%" height="70%">
+
+- **Unit Testing**
+  - Total hours estimated: **4h 40m**
+  - Total hours spent: **4h 25m**
+  - Nr of automated unit test cases : **14 suites (154 total tests)**
+  - Coverage:
+
+  <img src="./Retrospective-4-unit.png" alt="Unit tests coverage" width="70%" height="70%">
+
+- **Integration Testing**
+  - Total hours estimated: **6h 10m**
+  - Total hours spent: **5h 40m**
+  - Nr of automated integration test cases : **7 suites (163 total tests)**
+  - Coverage:
+
+  <img src="./Retrospective-4-integration.png" alt="Integration tests coverage" width="70%" height="70%">
+
+- **E2E testing**
+  - Total hours estimated: **1d 5h 45m**
+  - Total hours spent: **1d 5h 35m**
+
+- **Code review**
+  - Total hours estimated: **4h**
+  - Total hours spent: **4h 05m**
+
+- **Technical Debt management**
+  - Total hours estimated: **1d 6h 25m**
+  - Total hours spent: **1d 5h 10m**
+  - Hours estimated for remediation by SonarQube: **1h 07m**
+  - Hours estimated for remediation by SonarQube only for the selected and planned issues: **1h 07m**
+  - Hours spent on remediation: **1h**
+  - Debt ratio (as reported by SonarQube under "Measures-Maintainability"): **0.00%**
+
+    <img src="./Retrospective-4-maintainability.png" alt="Debt ratio" width="30%" height="30%">
+
+  - Rating for each quality characteristic reported in SonarQube under "Measures" (namely reliability, security, maintainability )
+
+    **BEFORE THE SPRINT START**
+
+    <img src="./Retrospective-4-previous-measures.png" alt="Previous quality measures" width="70%" height="70%">
+
+    **AT THE END OF THE SPRINT**
+
+    <img src="./Retrospective-4-after-measures.png" alt="Sonar quality measures" width="70%" height="70%">
 
 
 ## ASSESSMENT
