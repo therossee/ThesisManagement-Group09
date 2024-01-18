@@ -117,6 +117,7 @@ The frontend project is structured for clarity and maintainability:
 Content within the MainLayout.jsx component:
 - Route `/`: display the home page
 - Route `/admin/virtual-clock`: reference page to change the virtual clock of the entire system
+- Route `/archive`: displays the archive where teacher can see, edit and publish all archived thesis.
 - Route `/proposals`: display the active thesis proposals relevant to the logged-in user. The behavior differs based on the user's role:
     - For a teacher, it shows the active thesis proposals where the teacher serves as a supervisor.
     - For a student, it presents the available thesis proposals that the student can apply to, ensuring they are not expired or archived.
@@ -127,7 +128,27 @@ Content within the MainLayout.jsx component:
 - Route `/insert-proposal/:id`: If an ID is present, the form fields for inserting a proposal are populated with the corresponding values. Otherwise, if no ID is provided, the insert proposal form remains blank, similar to the previous state
 - Route `/view-proposal/:id`: Displays the specific proposal to view.
 - Route `/edit-proposal/:id`: Displays the form with the specific proposal to edit.
+- Route `/start-request`: This route serves a different purpose based on the user's role:
+    - For teachers, it displays all start requests accepted by the secretary clerk.
+    - For students, it shows the start request submitted by the logged-in student, indicating the status of the request.
+    - For secretary clerks, it presents all start requests submitted by all students.
 - Route`/*`: Error page 
+
+### Routes Folder
+- `Applications.jsx` : React conditional component that dynamically filters its content based on the role of the logged-in user. Depending on the user's role, the component either renders the `TeacherApplications` or `StudentApplications`.
+- `EditProposal.jsx` : specifically designed for editing a Thesis Proposal. This component is accessible exclusively to professors, ensuring that only authorized users with the appropriate role can utilize its functionality.
+- `Errors.jsx` :  React component for displaying different error messages based on a provided error code:
+   - `403`: Not authorized to access the page
+   - `404`: Page doesn't exist
+   - `500`: Server error
+- `Home.jsx` : React component for the home page.
+- `InsertProposal.jsx` : React conditional component that dynamically filters its content based on the role of the logged-in user. Specifically, it allows teachers to access the InsertThesisProposal section, while displaying an error for other roles.
+- `Proposals.jsx` : React conditional component that dynamically adjusts its content based on the role of the logged-in user.Depending on the user's role, the component either renders the `TeacherThesisProposals` or `StudentThesisProposals`.
+- `ViewProposal.jsx` : React component for view a ThesisProposal. This component is designed to cater to both students and teachers.
+- `VirtualClock.jsx` :  React component for virtual clock management. Only for tester users.
+- `Archive.jsx` : React conditional component that dynamically filters its content based on the role of the logged-in user. Specifically, it allows teachers to access the TeacherArchivesection, while displaying an error for other roles.
+- `StartRequest.jsx` :  React conditional component that dynamically filters its content based on the role of the logged-in user.
+Specifically, it allows teachers to access the TeacherThesisStartRequest section; it allows students to access StudentThesisStartRequest component or Secretary Clerk to enter to SecretaryStartRequest.
 
 ### UI Components
 - `Authentication` : Folder with three components: login button, logout button and usaAuth for the authentication provider
@@ -143,26 +164,17 @@ It is divided in a 3 step form:
 - `StudentThesisProposals.jsx`: Allows students to view and filter available thesis proposals. It includes features for searching by title, applying advanced filters, and displaying each proposal in detail.
 - `TeacherApplications.jsx`: Allows faculty to view and manage thesis applications submitted by students. Provides functionality to accept or reject pending applications. 
 - `TeacherThesisProposals.jsx`: Allows teachers to view and manage thesis proposals. Provides a table with detailed information on thesis proposals, allowing quick access to the visualization and editing actions of each proposal.
+- `TeacherArchive.jsx`: Allows teachers to view and manage archived thesis proposals. t features a table that presents detailed information on each archived proposal, enabling quick access to visualization and editing actions. Additionally, teachers have the capability to republish archived proposals.
 - `TopBar.jsx` : Definition for the TopBar with:
   - `LoginForm` : Form for the login inserted in the topbar.
   - `IsLoggedInForm` : Form when the user has alredy logged in.
 - `ViewThesisProposal` : Allows users to view specific details of a thesis proposal. Provides a detailed view of the proposal, including title, level, type, expiration date, description, required knowledge, supervisor, co-supervisors, groups, notes, keywords and, if the user is a lecturer, also the course of study (CdS).
+- `StudentThesisStartRequest.jsx`: Allows students to view its start request state.
+- `TeacherThesisStartRequest.jsx`: Allows teacher to view and operate on accepted students' start requests.
+- `SecretaryStartRequest.jsx`: Allows secretary clerk to operate on students' start requests
 - `App.jsx` : Main component of the application. It manages user authentication, sets notifications for API errors during login, and defines the basic structure of the application.
 - `main.jsx` : root render for the App
 - `MainLayout.jsx` : Principal structure of the app, including the sidebar (SideBar), the top bar (TopBar), and the main content area.
-
-### Routes Folder
-- `Applications.jsx` : React conditional component that dynamically filters its content based on the role of the logged-in user. Depending on the user's role, the component either renders the `TeacherApplications` or `StudentApplications`.
-- `EditProposal.jsx` : specifically designed for editing a Thesis Proposal. This component is accessible exclusively to professors, ensuring that only authorized users with the appropriate role can utilize its functionality.
-- `Errors.jsx` :  React component for displaying different error messages based on a provided error code:
-   - `403`: Not authorized to access the page
-   - `404`: Page doesn't exist
-   - `500`: Server error
-- `Home.jsx` : React component for the home page.
-- `InsertProposal.jsx` : React conditional component that dynamically filters its content based on the role of the logged-in user. Specifically, it allows teachers to access the InsertThesisProposal section, while displaying an error for other roles.
-- `Proposals.jsx` : React conditional component that dynamically adjusts its content based on the role of the logged-in user.Depending on the user's role, the component either renders the `TeacherThesisProposals` or `StudentThesisProposals`.
-- `ViewProposal.jsx` : React component for view a ThesisProposal. This component is designed to cater to both students and teachers.
-- `VirtualClock.jsx` :  React component for virtual clock management. Only for tester users.
 
 ## APIs
 - `API.jsx` : Main API functions as:
@@ -178,7 +190,9 @@ It is divided in a 3 step form:
       - `getThesisProposalById`: Gets a specific thesis proposal with a given Id
       - `insertProposal`: function to insert a proposal in the database
       - `applyForProposal`: Function to apply to a proposal with a given Id and possibly upload a file.
+      - `getArchivedThesisProposals`: Retrieves all archived thesis proposals supervised by the specified teacher.
       - `archiveProposalById`: Function to archive a proposal with the given id
+      - `publishProposalById`: Fuction to publish a archived thesis proposal
       - `deleteProposalById`: Funcion to delete a proposal with a given id
       - `updateProposal`: Function to update an edited proposal with a given id
   - Applications APIs
@@ -187,6 +201,18 @@ It is divided in a 3 step form:
       - `acceptThesisApplications` : function to accept Student Applications on a Thesis Proposal and automatically reject all the other student applied.
       - `rejectThesisApplications` : function to reject Student Applications on a Thesis Proposal
       - `getStudentApplicationsHistory` : function to get all the applications with thesis infos done by the logged-in student
+- Thesis Start Request APIs 
+    - `getSecretaryStartRequest`: Gets all the students' thesis start request for the secretary clerk
+    - `secretaryAcceptStartRequest`: Function to accept a student's thesis tart request by a secreary clerk
+    - `secretaryRejectStartRequest`: Function to reject a student's  thesis start request by a secreary clerk
+    - `insertThesisStartRequest`: Function to insert a thesis start request by a student
+    - `getStudentLastThesisStartRequest`: Function to get its last thesis start request by a student
+    - `getTeacherThesisStartRequest`: Function to get active thesis start request by a student.
+    - `acceptThesisStartRequest`: Function to accept a student's active thesis tart request by a teacher
+    - `rejectThesisStartRequest`: Function to reject a student's active thesis start request by a teacher
+    - `reviewThesisStartRequest`: Function to request Changes on a Student Thesis Start Request by a teacher
+
+
   - Get APIs to retrieve others infos:
       - `getExtCoSupervisors`: Gets all the External CoSupervisors
       - `getTeachers` : Gets all the teachers 
