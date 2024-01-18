@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Alert, Badge, Button, Col, Row, Typography, Input, Select, message, Skeleton, Tag } from 'antd';
+import { Alert, Badge, Button, Row, Typography, Input, Select, message, Skeleton, Tag } from 'antd';
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Collapse, Space, Form } from "antd-mobile";
 import dayjs from 'dayjs';
@@ -11,19 +11,19 @@ dayjs.extend(localizedFormat);
 
 function MobStudentThesisStartRequest() {
     // Trigger TSR Addition Form Visibility
-    const [formVisible, setFormVisible] = useState(false);
+    const [viewForm, setViewForm] = useState(false);
 
     const [trigger, setTrigger] = useState(true);
 
-    const [loading, setLoading] = useState(false);
+    const [loadData, setLoadData] = useState(false);
 
     const [disabled, setDisabled] = useState(false);
 
     return (
         <div>
             <Row justify="start" align="middle" style={{ marginTop: "10px" }}>
-                {formVisible ?
-                    <Button ghost type="primary" onClick={() => setFormVisible(false)}>
+                {viewForm ?
+                    <Button ghost type="primary" onClick={() => setViewForm(false)}>
                         &lt; Back to Thesis Start Request
                     </Button>
                     :
@@ -32,17 +32,17 @@ function MobStudentThesisStartRequest() {
                             type="primary"
                             icon={<PlusOutlined />}
                             size="large"
-                            loading={loading}
+                            loading={loadData}
                             disabled={disabled}
-                            onClick={() => { setFormVisible(true) }}
+                            onClick={() => { setViewForm(true) }}
                         >
                             Add New Thesis Start Request
                         </Button>
-                        <Button type="link" icon={<ReloadOutlined />} loading={loading} onClick={() => (setTrigger(!trigger))}>Refresh</Button>
+                        <Button type="link" icon={<ReloadOutlined />} loading={loadData} onClick={() => (setTrigger(!trigger))}>Refresh</Button>
                     </>
                 }
             </Row>
-            {formVisible ? <AddTSRForm setFormVisible={setFormVisible} /> : <ViewTSR trigger={trigger} setDisabled={setDisabled} loading={loading} setLoading={setLoading} />}
+            {viewForm ? <AddTSRForm setFormVisible={setViewForm} /> : <ViewTSR trigger={trigger} setDisabled={setDisabled} loading={loadData} setLoading={setLoadData} />}
         </div>
     )
 }
@@ -51,22 +51,22 @@ function AddTSRForm({ setFormVisible }) {
 
     const { Title } = Typography;
 
-    const [form] = Form.useForm();
+    const [tsrForm] = Form.useForm();
 
     // Loading state for API calls to get teachers
-    const [loading, setLoading] = useState(true);
+    const [loadData, setLoadData] = useState(true);
 
     // Store list of supervisors and co-supervisors
     const [options, setOptions] = useState([]);
 
-    const [buttonLoading, setButtonLoading] = useState(false);
+    const [loadButton, setLoadButton] = useState(false);
 
     // Excluding X supervisor from the list of co-supervisors
-    const [selectedSupervisor, setSelectedSupervisor] = useState(null);
+    const [selSup, setSelSup] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
-            setLoading(true);
+            setLoadData(true);
             try {
                 const teachers = await API.getTeachers();
                 const sortedTeachers = teachers.teachers.sort((a, b) => a.surname.localeCompare(b.surname));
@@ -76,32 +76,32 @@ function AddTSRForm({ setFormVisible }) {
                     searchValue: `${x.id} ${x.name} ${x.surname}`,
                 }));
                 setOptions(formattedTeachers);
-                setLoading(false);
+                setLoadData(false);
             } catch (err) {
                 message.error(err.message ? err.message : err);
-                setLoading(false);
+                setLoadData(false);
             }
         };
         fetchData();
     }, []);
 
     const onFinish = async (values) => {
-        setButtonLoading(true);
+        setLoadButton(true);
         try {
             await API.insertThesisStartRequest(values);
             message.success("Thesis Start Request successfully sent!");
-            setButtonLoading(false);
+            setLoadButton(false);
             setFormVisible(false);
         } catch (err) {
             message.error(err.message ? err.message : err);
-            setButtonLoading(false);
+            setLoadButton(false);
         }
     };
 
     return (
         <div style={{marginBottom: '70px'}}>
                 <Title level={2}>Thesis Start Request</Title>
-                    <Form form={form} name="validateOnly" layout="vertical" onFinish={onFinish}>
+                    <Form form={tsrForm} name="validateOnly" layout="vertical" onFinish={onFinish}>
                         <Form.Item name="title" label="Title" rules={[{ required: true, message: "Title cannot be empty!" }]}>
                             <Input />
                         </Form.Item>
@@ -116,11 +116,11 @@ function AddTSRForm({ setFormVisible }) {
                                     <Select
                                         showSearch
                                         placeholder="Select the Supervisor"
-                                        loading={loading}
+                                        loading={loadData}
                                         options={options}
                                         onChange={(value) => {
-                                            setSelectedSupervisor(value);
-                                            form.resetFields(['internal_co_supervisors_ids'])
+                                            setSelSup(value);
+                                            tsrForm.resetFields(['internal_co_supervisors_ids'])
                                         }}
                                         filterOption={(input, option) =>
                                             option.searchValue.toLowerCase().includes(input.toLowerCase())
@@ -135,9 +135,9 @@ function AddTSRForm({ setFormVisible }) {
                                     <Select
                                         mode="multiple"
                                         placeholder="Select the internal co-Supervisors"
-                                        loading={loading}
-                                        options={options.map(option => option.value === selectedSupervisor ? { ...option, disabled: true } : option)}
-                                        disabled={!selectedSupervisor}
+                                        loading={loadData}
+                                        options={options.map(option => option.value === selSup ? { ...option, disabled: true } : option)}
+                                        disabled={!selSup}
                                         filterOption={(input, option) =>
                                             option.searchValue.toLowerCase().includes(input.toLowerCase())
                                         }
@@ -146,7 +146,7 @@ function AddTSRForm({ setFormVisible }) {
                                 </Form.Item>
                         <Form.Item>
                             <Space>
-                                <SubmitButton form={form} loading={loading} buttonLoading={buttonLoading} />
+                                <SubmitButton form={tsrForm} loading={loadData} buttonLoading={loadButton} />
                                 <Button htmlType="reset">Reset Fields</Button>
                             </Space>
                         </Form.Item>
@@ -246,7 +246,6 @@ function ViewTSR({ trigger, loading, setLoading, setDisabled }) {
             loading ?
                 <Skeleton active />
                 :
-                <>
                 <div style={{marginBottom: '70px', display: 'flex', alignItems: 'center'}}>
                     <Collapse accordion>
                         <Collapse.Panel key={activeThesisStartRequest.id} title={activeThesisStartRequest.title}>
@@ -288,7 +287,6 @@ function ViewTSR({ trigger, loading, setLoading, setDisabled }) {
                         </Collapse.Panel>
                     </Collapse>
                 </div>
-                </>
         )
     }
     else {
@@ -308,7 +306,6 @@ ViewTSR.propTypes = {
 };
 
 SubmitButton.propTypes = {
-    form: PropTypes.object.isRequired,
     loading: PropTypes.bool.isRequired,
     buttonLoading: PropTypes.bool.isRequired,
 };
