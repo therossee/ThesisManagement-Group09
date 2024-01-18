@@ -1,7 +1,7 @@
 <html>
   <div align="center">
     <p>
-      <img src="./images/cover.png" alt="Thesis Management System" height="400">
+      <img src="./images/cover.png" alt="Thesis Management System" height="350">
     </p>
     <p>
       <img src="https://forthebadge.com/images/badges/made-with-javascript.svg" alt="Made with Javascript" height="30">
@@ -34,19 +34,21 @@
     <p>We are Group 9, and we're excited to present our innovative software designed to simplify the lives of students and teachers!</p>
     <p>Our software offers a comprehensive suite of features, including the ability to create and manage thesis proposals, submit and handle student application, and generate and manage thesis start requests. It also comes with a stunning integrated email notification system and a visually appealing mobile interface for convenience and ease of use!</p>
     <p>
-      <img src="./images/1.png" alt="1" height="200">
-      <img src="./images/2.png" alt="2" height="200">
-      <img src="./images/3.png" alt="3" height="200">
+      <img src="./images/1.png" alt="1" height="250">
+      <img src="./images/2.png" alt="2" height="250">
     </p>
     <p>
-      <img src="./images/4.png" alt="4" height="200">
-      <img src="./images/5.png" alt="5" height="200">
-      <img src="./images/6.png" alt="6" height="200">
+      <img src="./images/3.png" alt="3" height="250">
+      <img src="./images/4.png" alt="4" height="250">
     </p>
     <p>
-      <img src="./images/7.png" alt="7" height="200">
-      <img src="./images/8.png" alt="8" height="200">
-      <img src="./images/9.png" alt="9" height="200">
+      <img src="./images/5.png" alt="5" height="250">
+      <img src="./images/6.png" alt="6" height="250">
+    </p>
+    <p>
+      <img src="./images/7.png" alt="7" height="250">
+      <img src="./images/8.png" alt="8" height="250">
+      <img src="./images/9.png" alt="9" height="250">
     </p>
   </div>
   <div id="how-to-run" align="center">
@@ -69,7 +71,7 @@
   - `TM_SMTP_PORT` = The port of the SMTP service to use (e.g. 587)
   - `TM_SMTP_SECURE` = Whether to use a secure connection to the SMTP service (e.g. "true")
 
-    ⚠️ _The service supports the use of dotenv-vault and therefore allows you to set only one environment variable: `TM_DOTENV_KEY`. This variable must contain the key to decrypt the environment variables stored in the dotenv-vault file._
+  ⚠️ _The service supports the use of dotenv-vault and therefore allows you to set only one environment variable: `TM_DOTENV_KEY`. This variable must contain the key to decrypt the environment variables stored in the dotenv-vault file._
   </div>
 
   ---
