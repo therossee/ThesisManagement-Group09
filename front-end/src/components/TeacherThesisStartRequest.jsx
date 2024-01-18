@@ -104,8 +104,6 @@ function TeacherThesisStartRequest() {
 
 function PendingThesisStartRequest({ tsr, isLoading, setDirty, setIsModalVisible, setSelectedTsr, setShowInfo }) {
 
-    const { Paragraph, Text } = Typography
-
     const acceptTsr = async (tsrId, student) => {
         try {
             await API.acceptThesisStartRequest(tsrId);
@@ -130,139 +128,140 @@ function PendingThesisStartRequest({ tsr, isLoading, setDirty, setIsModalVisible
 
     if (tsr.some(tsr => tsr.status === 'accepted by secretary' || tsr.status === 'changes requested')) {
         return (
-            <List
-                loading={isLoading}
-                itemLayout="horizontal"
-                pagination={{ position: "bottom", align: "center" }}
-                dataSource={tsr.filter(tsr => tsr.status === 'accepted by secretary' || tsr.status === 'changes requested')}
-                renderItem={(tsr) => (
-                    <List.Item key={tsr.id}>
-                        <div className={getWrapper(tsr.status)}>
-                            <List.Item.Meta
-                                avatar={<Avatar style={{
-                                    backgroundColor: "transparent",
-                                    color: getColor(tsr.status),
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center'
-                                }} icon={getIcon(tsr.status)} size="large" />}
-                                style={{ paddingLeft: ".75%", paddingRight: ".75%", paddingTop: ".5%", paddingBottom: ".5%" }}
-                                title={tsr.title}
-                                description={<div style={{ textAlign: "left", marginTop: "-5px" }}>{tsr.student.surname + " " + tsr.student.name + " - " + tsr.student.id}</div>}
-                            />
-                            <Flex wrap="wrap" gap="small" style={{ paddingRight: "1%", alignItems: 'center' }}>
-                                <Tooltip title="Thesis Start Request info">
-                                    <Button type="dashed"
-                                        icon={<InfoCircleOutlined />}
-                                        onClick={() => setShowInfo(tsr)}
-                                    />
-                                </Tooltip>
-                                <Button type="dashed" onClick={() => { setSelectedTsr(tsr); setIsModalVisible(true) }}>
-                                    Request Changes
-                                </Button>
-                                <Tooltip title="Accept Thesis Start Request">
-                                    <Button type="dashed"
-                                        icon={<CheckOutlined />}
-                                        onClick={() => {
-                                            showModal(
-                                                <div>
-                                                    <Paragraph>
-                                                        <Text strong>
-                                                            Are you sure you want to accept this thesis start request?
-                                                        </Text>
-                                                    </Paragraph>
-                                                    <Paragraph>
-                                                        <Text strong>Thesis Start Request title: </Text><Text>{tsr.title}</Text>
-                                                        <br />
-                                                        <Text strong>Student: </Text><Text>{tsr.student.name + " " + tsr.student.surname}</Text>
-                                                    </Paragraph>
-                                                </div>,
-                                                () => acceptTsr(tsr.id, tsr.student),
-                                                "Yes, accept the request",
-                                                "Cancel"
-                                            )
-                                        }}
-                                    />
-                                </Tooltip>
-                                <Tooltip title="Reject Thesis Start Request">
-                                    <Button danger type="dashed"
-                                        icon={<CloseOutlined />}
-                                        onClick={() => {
-                                            showModal(
-                                                <div>
-                                                    <Paragraph>
-                                                        <Text strong>
-                                                            Are you sure you want to reject this thesis start request?
-                                                        </Text>
-                                                    </Paragraph>
-                                                    <Paragraph>
-                                                        <Text strong>Thesis Start Request title: </Text><Text>{tsr.title}</Text>
-                                                        <br />
-                                                        <Text strong>Student: </Text><Text>{tsr.student.name + " " + tsr.student.surname}</Text>
-                                                    </Paragraph>
-                                                </div>,
-                                                () => rejectTsr(tsr.id, tsr.student),
-                                                "Yes, reject the request",
-                                                "Cancel"
-                                            )
-                                        }}
-                                    />
-                                </Tooltip>
-                            </Flex>
-                        </div>
-                    </List.Item>
-                )}
-            >
-            </List>
-        )
+          <List
+            loading={isLoading}
+            itemLayout="horizontal"
+            pagination={{ position: "bottom", align: "center" }}
+            dataSource={tsr.filter(tsr => tsr.status === 'accepted by secretary' || tsr.status === 'changes requested')}
+            renderItem={(tsr) => (
+              <ThesisRequestItem
+                tsr={tsr}
+                setShowInfo={setShowInfo}
+                showModal={showModal}
+                acceptTsr={acceptTsr}
+                rejectTsr={rejectTsr}
+                isPending={true} // Pass a prop to indicate it's a pending request
+              />
+            )}
+          >
+          </List>
+        );
+    } else {
+        return <Alert message="Good job, it seems like there is no pending request!" type="info" showIcon closable />;
     }
-    else
-        return <Alert message="Good job, it seems like there is no peding request!" type="info" showIcon closable />
 }
 
 function HistoryThesisStartRequest({ tsr, isLoading, setShowInfo }) {
 
     if (tsr.some(tsr => tsr.status === 'accepted by teacher' || tsr.status === 'rejected by teacher')) {
         return (
-            <List
-                loading={isLoading}
-                itemLayout="horizontal"
-                pagination={{ position: "bottom", align: "center" }}
-                dataSource={tsr.filter(tsr => tsr.status === 'accepted by teacher' || tsr.status === 'rejected by teacher')}
-                renderItem={(tsr) => (
-                    <List.Item key={tsr.id}>
-                        <div className={getWrapper(tsr.status)}>
-                            <List.Item.Meta
-                                avatar={<Avatar style={{
-                                    backgroundColor: "transparent",
-                                    color: getColor(tsr.status),
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center'
-                                }} icon={getIcon(tsr.status)} size="large" />}
-                                style={{ paddingLeft: ".75%", paddingRight: ".75%", paddingTop: ".5%", paddingBottom: ".5%" }}
-                                title={tsr.title}
-                                description={<div style={{ textAlign: "left", marginTop: "-5px" }}>{tsr.student.surname + " " + tsr.student.name + " - " + tsr.student.id}</div>}
-                            />
-                            <Flex wrap="wrap" gap="small" style={{ paddingRight: "1%", alignItems: 'center' }}>
-                                <Tooltip title="Thesis Start Request info">
-                                    <Button type="dashed"
-                                        icon={<InfoCircleOutlined />}
-                                        onClick={() => setShowInfo(tsr)}
-                                    />
-                                </Tooltip>
-                            </Flex>
-                        </div>
-                    </List.Item>
-                )}
-            >
-            </List>
-        )
+          <List
+            loading={isLoading}
+            itemLayout="horizontal"
+            pagination={{ position: "bottom", align: "center" }}
+            dataSource={tsr.filter(tsr => tsr.status === 'accepted by teacher' || tsr.status === 'rejected by teacher')}
+            renderItem={(tsr) => (
+              <ThesisRequestItem
+                tsr={tsr}
+                setShowInfo={setShowInfo}
+                showModal={showModal}
+                isPending={false} // Pass a prop to indicate it's not a pending request
+              />
+            )}
+          >
+          </List>
+        );
+    } else {
+        return <Alert message="It seems like there is nothing to show here..." type="info" showIcon closable />;
     }
-    else
-        return <Alert message="It seems like there is nothing to show here..." type="info" showIcon closable />
 }
 
+function ThesisRequestItem({ tsr, setShowInfo, showModal, acceptTsr, rejectTsr, isPending }) {
+    const { Paragraph, Text } = Typography;
+  
+    return (
+      <List.Item key={tsr.id}>
+        <div className={getWrapper(tsr.status)}>
+          <List.Item.Meta
+            avatar={<Avatar style={{
+              backgroundColor: "transparent",
+              color: getColor(tsr.status),
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }} icon={getIcon(tsr.status)} size="large" />}
+            style={{ paddingLeft: ".75%", paddingRight: ".75%", paddingTop: ".5%", paddingBottom: ".5%" }}
+            title={tsr.title}
+            description={<div style={{ textAlign: "left", marginTop: "-5px" }}>{tsr.student.surname + " " + tsr.student.name + " - " + tsr.student.id}</div>}
+          />
+          <Flex wrap="wrap" gap="small" style={{ paddingRight: "1%", alignItems: 'center' }}>
+            <Tooltip title="Thesis Start Request info">
+              <Button type="dashed"
+                icon={<InfoCircleOutlined />}
+                onClick={() => setShowInfo(tsr)}
+              />
+            </Tooltip>
+            {isPending && (
+              <>
+                <Button type="dashed" onClick={() => { /* Logic for pending request */ }}>
+                  Request Changes
+                </Button>
+                <Tooltip title="Accept Thesis Start Request">
+                  <Button type="dashed"
+                    icon={<CheckOutlined />}
+                    onClick={() => {
+                      showModal(
+                        <div>
+                          <Paragraph>
+                            <Text strong>
+                              Are you sure you want to accept this thesis start request?
+                            </Text>
+                          </Paragraph>
+                          <Paragraph>
+                            <Text strong>Thesis Start Request title: </Text><Text>{tsr.title}</Text>
+                            <br />
+                            <Text strong>Student: </Text><Text>{tsr.student.name + " " + tsr.student.surname}</Text>
+                          </Paragraph>
+                        </div>,
+                        () => acceptTsr(tsr.id, tsr.student),
+                        "Yes, accept the request",
+                        "Cancel"
+                      );
+                    }}
+                  />
+                </Tooltip>
+                <Tooltip title="Reject Thesis Start Request">
+                  <Button danger type="dashed"
+                    icon={<CloseOutlined />}
+                    onClick={() => {
+                      showModal(
+                        <div>
+                          <Paragraph>
+                            <Text strong>
+                              Are you sure you want to reject this thesis start request?
+                            </Text>
+                          </Paragraph>
+                          <Paragraph>
+                            <Text strong>Thesis Start Request title: </Text><Text>{tsr.title}</Text>
+                            <br />
+                            <Text strong>Student: </Text><Text>{tsr.student.name + " " + tsr.student.surname}</Text>
+                          </Paragraph>
+                        </div>,
+                        () => rejectTsr(tsr.id, tsr.student),
+                        "Yes, reject the request",
+                        "Cancel"
+                      );
+                    }}
+                  />
+                </Tooltip>
+              </>
+            )}
+          </Flex>
+        </div>
+      </List.Item>
+    );
+}
+  
 function ShowTsrInfo({ showInfo }) {
     if (!showInfo)
         return <Alert message={<span>Select the <InfoCircleOutlined /> icon on a Thesis Start Request to show its information!</span>} type="info" showIcon closable />
@@ -430,6 +429,15 @@ HistoryThesisStartRequest.propTypes = {
     tsr: PropTypes.array.isRequired,
     isLoading: PropTypes.bool.isRequired,
     setShowInfo: PropTypes.func.isRequired,
+};
+
+ThesisRequestItem.propTypes = {
+    tsr: PropTypes.array.isRequired,
+    setShowInfo: PropTypes.func.isRequired,
+    showModal: PropTypes.func.isRequired,
+    acceptTsr: PropTypes.func,
+    rejectTsr: PropTypes.func,
+    isPending: PropTypes.bool.isRequired,
 };
 
 ShowTsrInfo.propTypes = {
