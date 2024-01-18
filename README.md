@@ -20,9 +20,15 @@
     </p>
     <p>
       <img src="https://img.shields.io/github/contributors/therossee/ThesisManagement-Group09" alt="Contributors" height="22">
-      <img src="https://img.shields.io/tokei/lines/github/therossee/ThesisManagement-Group09" alt="Code Lines" height="22">
       <img src="https://img.shields.io/github/issues-pr-closed/therossee/ThesisManagement-Group09" alt="Total PR Closed" height="22">
-      <img src="https://sonarcloud.io/api/project_badges/measure?project=therossee_ThesisManagement-Group09&metric=alert_status" alt="SonarCloud" height="22">
+      <img src="https://sonarcloud.io/api/project_badges/measure?project=therossee_ThesisManagement-Group09&metric=ncloc" alt="Code Lines" height="22">
+    </p>
+    <p>
+      <img src="https://sonarcloud.io/api/project_badges/measure?project=therossee_ThesisManagement-Group09&metric=alert_status" alt="Sonar" height="22">
+      <img src="https://sonarcloud.io/api/project_badges/measure?project=therossee_ThesisManagement-Group09&metric=coverage" alt="Sonar Coverage" height="22">
+      <img src="https://sonarcloud.io/api/project_badges/measure?project=therossee_ThesisManagement-Group09&metric=bugs" alt="Sonar Bugs" height="22">
+      <img src="https://sonarcloud.io/api/project_badges/measure?project=therossee_ThesisManagement-Group09&metric=sqale_rating" alt="Sonar Rating" height="22">
+      <img src="https://sonarcloud.io/api/project_badges/measure?project=therossee_ThesisManagement-Group09&metric=security_rating" alt="Sonar Security Rating" height="22">
     </p>
     <p>
       <img src="https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" height="22">
