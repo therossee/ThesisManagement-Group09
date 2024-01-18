@@ -9,7 +9,7 @@ const { Sider } = Layout;
 
 function SideBar({ collapsed, setCollapsed }) {
 
-  const { isTeacher, isStudent } = useAuth();
+  const { isSecretaryClerk, isTeacher, isStudent } = useAuth();
   const navigate = useNavigate();
 
   // Define the menu items, using directly the route path as key

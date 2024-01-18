@@ -18,17 +18,6 @@ function TeacherThesisStartRequest() {
 
     const [requestsArray, setRequestsArray] = useState([]);
 
-
-    const reviewRequest = (selected, requestedChanges) => {
-        try {
-            API.reviewThesisStartRequest(selected.id, requestedChanges);
-            message.success("Successfully requested changes for " + selected.student.surname + " " + selected.student.name + "'s request");
-            setRefresh(true);
-        } catch (err) {
-            message.error(err.message ? err.message : err);
-        }
-    };
-
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -61,8 +50,7 @@ function TeacherThesisStartRequest() {
                         {
                             key: '1',
                             label: <span><CheckOutlined />Pending Request</span>,
-                            children: <PendingRequests tsr={requestsArray} setDirty={setRefresh}
-                            reviewTsr={reviewRequest}/>,
+                            children: <PendingRequests tsr={requestsArray} setDirty={setRefresh}/>,
                         },
                         {
                             key: '2',
@@ -95,6 +83,16 @@ const coSupComponents = (tsr) => {
 function PendingRequests({ tsr, setDirty }) {
 
     const [requestedChanges, setRequestedChanges] = useState('');
+
+    const reviewRequest = (selected, requestedChanges) => {
+        try {
+            API.reviewThesisStartRequest(selected.id, requestedChanges);
+            message.success("Successfully requested changes for " + selected.student.surname + " " + selected.student.name + "'s request");
+            setRefresh(true);
+        } catch (err) {
+            message.error(err.message ? err.message : err);
+        }
+    };
 
     const showModal = (content, action, okText, cancelText) => {
         Modal.confirm({
@@ -161,7 +159,7 @@ function PendingRequests({ tsr, setDirty }) {
                             {startRq.description}
                         </div>
                         {startRq.co_supervisors.length > 0 ? coSupComponents(startRq) : <></>}
-                        <Button onClick={() => showModal("Are you sure you want to request changes?", () => reviewTsr(startRq, requestedChanges), "Confirm", "Cancel")}>Request changes</Button>
+                        <Button onClick={() => showModal("Are you sure you want to request changes?", () => reviewRequest(startRq, requestedChanges), "Confirm", "Cancel")}>Request changes</Button>
                         <Button onClick={() => showModalAccRej("Are you sure you want to accept this request?", () => acceptTsr(startRq.id, startRq.student.id), "Confirm action", "Cancel")}>Accept</Button>
                         <Button onClick={() => showModalAccRej("Are you sure you want to reject this request?", () => rejectTsr(startRq.id, startRq.student.id), "Confirm action", "Cancel")}>Reject</Button>
                     </Collapse.Panel>
@@ -242,7 +240,6 @@ const showModalAccRej = (content, action, okText, cancelText) => {
 PendingRequests.propTypes = {
     tsr: PropTypes.array.isRequired,
     setDirty: PropTypes.func.isRequired,
-    reviewTsr: PropTypes.func.isRequired,
 };
 
 HistoryRequests.propTypes = {
