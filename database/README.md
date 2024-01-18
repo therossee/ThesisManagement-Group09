@@ -9,38 +9,42 @@ The 'scripts' folder contains the two SQL files responsible for generating the r
 
 ## Table of Contents
 
-- [Introduction](#✏️-introduction)
-- [Key Features](#🔑-key-features)
-- [Getting Started](#🚀-getting-started)
-  - [Prerequisites](#📍-prerequisites)
-  - [Installation](#🛠️-installation)
-- [Database Structure](#🗂️-database-structure)
-  - [Tables](#𝄜-tables)
-  - [Relationships](#🔗-relationships)
+- [Introduction](#introduction)
+- [Key Features](#key-features)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [Database Structure](#database-structure)
+  - [Tables](#tables)
+  - [Relationships](#relationships)
 
+<a id="introduction"></a>
 ## ✏️ Introduction
 
 The database is a **relational database**, which means that it stores data in tables with defined relationships between them. This structure makes it easy to query and manage data, and it is also well-suited for storing complex relationships between entities like students, thesis proposals, supervisors, and co-supervisors.
   
 It is **implemented using SQLite**, which is a lightweight, embedded SQL database engine that is often used for personal applications or for storing data within applications. It is a good choice for this project because it is easy to use and deploy, and it is also relatively efficient for the size of data that will be stored.
 
-## 🔑 Key Features
+<a id="key-features"></a>
+## 🗝️ Key Features
 - _Data integrity_: Foreign key constraints are used to ensure referential integrity between tables, maintaining consistency and preventing orphaned records. This means that for example when a student is deleted, their thesis proposals are also deleted, and when a thesis proposal is deleted, the associated applications and start requests are also deleted. This helps to maintain data consistency.
 - _Normalization_: The database is normalized to the third normal form, which means that it is well-organized and less likely to contain data anomalies. Redundancy and dependency issues in the data are minimized.
 - _Auto-incrementing IDs_: Certain tables use auto-incrementing primary key IDs, ensuring the automatic generation of unique identifiers for each record.
 - _Default values_: Default values are defined for certain columns, providing a fallback option if a value is not explicitly provided during record creation.
 
+<a id="getting-started"></a>
 ## 🚀 Getting Started
 
 In this section you will find instructions on how to set up, use and consult the database.
 
+<a id="prerequisites"></a>
 ### 📍 Prerequisites
 
   In order to be able to generate and use the database *_sqlite3_* must be installed. This can be done with the command:
   ```bash
   npm install sqlite3
   ```
-
+<a id="installation"></a>
 ### 🛠️ Installation
   To generate the database, run the 'init.sql' file located in the 'scripts' subfolder within the 'database' directory. Execute the following command from the current location:
   ```bash
@@ -55,6 +59,7 @@ In this section you will find instructions on how to set up, use and consult the
     
   Once the db has been generated, it can be counsulted by opening the 'database.sqlite' file (an appropriate vscode exention is necessary - for example 'SQLite Viewer').
 
+<a id="database-structure"></a>
 ## 🗂️ Database Structure
 In our database there are the following tables:
 
@@ -91,7 +96,7 @@ In our database there are the following tables:
   → this table allows to have multiple co-supervisors for the same thesis start request.
 
 
-
+<a id="tables"></a>
 ### 𝄜  Tables
 Here, a more detailed visualisation of the tables:
 
@@ -284,7 +289,7 @@ Here, a more detailed visualisation of the tables:
 | cosupervisor_id   | text   | **NOT NULL, FK** [teacher](#teacher)(**id**)            |
 | PRIMARY KEY       | start_request_id, cosupervisor_id                  |
 
-
+<a id="relationships"></a>
 ### 🔗 Relationships
 
 #### 🎓👨🏼‍🎓 Degree and Student:
