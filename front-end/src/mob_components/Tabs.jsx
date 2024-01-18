@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { TabBar } from 'antd-mobile';
 import { useAuth } from '../components/authentication/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { HomeOutlined, FileTextOutlined, FileAddOutlined, ToTopOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { HomeOutlined, FileTextOutlined, FileAddOutlined, ToTopOutlined, ClockCircleOutlined, FileDoneOutlined } from '@ant-design/icons';
 
 function Tabs() {
     const { isTester, isTeacher, isStudent } = useAuth();
@@ -23,6 +23,15 @@ function Tabs() {
         }
         if (location.pathname === '/admin/virtual-clock') {
             setSelectedTab('vClockTab');
+        }
+        if (location.pathname === '/start-request') {
+            setSelectedTab('tsrTab');
+        }
+        if (location.pathname === '/insert-proposal') {
+            setSelectedTab('insertTab');
+        }
+        if (location.pathname === '/applications') {
+            setSelectedTab('applicationsTab');
         }
         if (selectedTab === 'logoutTab') {
             navigate('/');
@@ -87,7 +96,15 @@ function Tabs() {
                 selectedIcon={<ToTopOutlined />}
                 selected={selectedTab === 'applicationsTab'}
                 onPress={() => setSelectedTab('applicationsTab')}/>
-            )}  
+            )}
+            {(isStudent || isTeacher) && (
+                <TabBar.Item
+                    title="Thesis Start Request"
+                    key="/start-request" icon={<FileDoneOutlined />}
+                    selectedIcon={<FileDoneOutlined />}
+                    selected={selectedTab === 'tsrTab'}
+                    onPress={() => setSelectedTab('tsrTab')}/>
+            )}
         </TabBar>
         </div>
     );

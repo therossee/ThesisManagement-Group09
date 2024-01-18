@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Form, Input, TextArea, Button, AutoCenter } from "antd-mobile";
-import { Select } from 'antd';
-import Flatpickr from "react-flatpickr";
+import { Select, DatePicker } from 'antd';
 import { Option } from "antd/lib/mentions";
 import PropTypes from "prop-types";
 
@@ -174,14 +173,7 @@ function MobInsertBody(props) {
         },
       ]}>
         <div style={{width: '100%'}}>
-        <Flatpickr
-          options={{
-            dateFormat: 'm/d/Y',
-          }}
-          disabled={disabledDate}
-          defaultDate={date}
-          onChange={(date) => {form.setFieldValue('expirationDate', new Date(date[0]))}}
-        />
+        <DatePicker customDate={date} defaultPickerValue={date} disabledDate={disabledDate} />
         </div>
       </Form.Item>
       <Form.Item
