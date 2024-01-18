@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Badge, Card, Avatar, Button, Tooltip, Flex, Typography, List, Tag } from 'antd';
 import { CheckOutlined, CloseOutlined, UserOutlined } from '@ant-design/icons';
@@ -6,7 +5,7 @@ import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
 
 const { Meta } = Card;
-const { Title, Paragraph, Text } = Typography;
+const { Paragraph, Text } = Typography;
 
 function StartRequestsList({ data, isLoading, buttonsLoading, acceptStartRequest, rejectStartRequest, showModal }) {
 
