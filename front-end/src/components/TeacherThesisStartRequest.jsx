@@ -140,6 +140,8 @@ function PendingThesisStartRequest({ tsr, isLoading, setDirty, setIsModalVisible
                 showModal={showModal}
                 acceptTsr={acceptTsr}
                 rejectTsr={rejectTsr}
+                setSelectedTsr={setSelectedTsr}
+                setIsModalVisible={setIsModalVisible}
                 isPending={true} // Pass a prop to indicate it's a pending request
               />
             )}
@@ -176,7 +178,7 @@ function HistoryThesisStartRequest({ tsr, isLoading, setShowInfo }) {
     }
 }
 
-function ThesisRequestItem({ tsr, setShowInfo, showModal, acceptTsr, rejectTsr, isPending }) {
+function ThesisRequestItem({ tsr, setShowInfo, showModal, acceptTsr, rejectTsr, isPending, setSelectedTsr, setIsModalVisible }) {
     const { Paragraph, Text } = Typography;
   
     return (
@@ -203,7 +205,7 @@ function ThesisRequestItem({ tsr, setShowInfo, showModal, acceptTsr, rejectTsr, 
             </Tooltip>
             {isPending && (
               <>
-                <Button type="dashed" onClick={() => { /* Logic for pending request */ }}>
+                <Button type="dashed" onClick={() => { setSelectedTsr(tsr); setIsModalVisible(true) }}>
                   Request Changes
                 </Button>
                 <Tooltip title="Accept Thesis Start Request">
