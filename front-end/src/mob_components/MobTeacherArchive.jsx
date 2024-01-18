@@ -171,7 +171,7 @@ function MobTeacherArchive() {
                                 <p>Expiration: {x.expiration}</p>
                                 <p>Status: <Tag color='blue'>{x.status}</Tag> </p>
                                 <>
-                                    <Button onClick={() => navigate(`/view-proposal/${x.id}`)}><EyeOutlined/>View</Button>
+                                    <Button onClick={() => navigate(`/view-proposal/${x.id}`,  { state: { prevRoute: 'archive' } })}><EyeOutlined/>View</Button>
                                     <Button onClick={() => { editProposal(x); }}><EditOutlined/>Edit</Button>
                                     {(x.status === 'ARCHIVED' || x.status === 'EXPIRED') && <Button onClick={() => {
                                         Modal.confirm({
