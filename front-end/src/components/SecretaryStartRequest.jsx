@@ -21,7 +21,7 @@ function Secretary() {
                 setDirty(false);
             }
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
         } finally {
             setIsLoading(false);
         }
@@ -46,7 +46,7 @@ function Secretary() {
             message.success(`${successMessage} ${student.surname} ${student.name}`);
             setDirty(true);
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
         } finally {
             setButtonsLoading(false);
         }

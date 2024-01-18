@@ -15,7 +15,7 @@ function MobModal(props) {
     // Handling file uplaoded
     const [uploadedFile, setUploadedFile] = useState(null);
 
-    const fileAdd = file => {
+    const fileAdd = (file) => {
         const isPDF = file.type === 'application/pdf';
         if (!isPDF) {
             message.error('You can only upload PDF files!');
@@ -61,7 +61,7 @@ function MobModal(props) {
             setDisabled(true);
             setLoading(false);
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
             setUploadedFile(null);
             setDisabled(false);
             setLoading(false);
