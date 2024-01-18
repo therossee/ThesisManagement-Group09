@@ -29,12 +29,8 @@ async function getUser() {
     }
 }
 
-<<<<<<< HEAD
 
 /****** Virtual Clock APIs ******/
-=======
-/****** End APIs for auth ******/
->>>>>>> e4bbe9f37d93dee7fd3ccb7bf6b954841643b3d9
 
 async function getClock() {
     return fetch(URL + '/system/virtual-clock')
