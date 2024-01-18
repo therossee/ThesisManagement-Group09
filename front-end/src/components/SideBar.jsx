@@ -17,7 +17,7 @@ function SideBar({ collapsed, setCollapsed }) {
     { label: "Home", key: "/", icon: <HomeOutlined /> },
     (isTeacher === true || isStudent === true) && { label: "Thesis Proposals", key: "/proposals", icon: <FileTextOutlined /> },
     (isTeacher === true || isStudent === true) && { label: isTeacher ? "Thesis Applications" : "Applications History", key: "/applications", icon: isTeacher ? <AuditOutlined /> : <HistoryOutlined /> },
-    isAuthenticated === true && { label: "Thesis Start Request", key: "/start-request", icon: <FileDoneOutlined /> }
+    isAuthenticated === true && { label: "Thesis Start Request", key: "/start-request", icon: <FileDoneOutlined /> },
     isTeacher === true && { label: "Archive", key: "/archive", icon: <InboxOutlined /> },
   ];
 
