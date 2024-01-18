@@ -112,22 +112,29 @@ The frontend project is structured for clarity and maintainability:
 - `components` => Houses the main and reusable UI components.
 - `mob_components`=> Contains components specifically designed for the mobile view.
 - `routes`=> Manages the application routing, considering authentication.
+- `mob_routes`=> Manages the application routing, considering authentication, for the mobile view.
 
 ### React Routes
 Content within the MainLayout.jsx component:
-- Route `/`: display the home page
+- Route `/`: display the home page providing a tailored experience based on the user's device:
+    - For desktop and larger screens, it displays the main home page component.
+    - For mobile and smaller screens, it redirects to the MobHome component, optimizing the view for a mobile experience.
 - Route `/admin/virtual-clock`: reference page to change the virtual clock of the entire system
 - Route `/archive`: displays the archive where teacher can see, edit and publish all archived thesis.
-- Route `/proposals`: display the active thesis proposals relevant to the logged-in user. The behavior differs based on the user's role:
+- Route `/proposals`: display the active thesis proposals relevant to the logged-in user.
+The behavior differs based on the user's role:
     - For a teacher, it shows the active thesis proposals where the teacher serves as a supervisor.
     - For a student, it presents the available thesis proposals that the student can apply to, ensuring they are not expired or archived.
+    - Additionally, the route adapts to the device view, redirecting to the appropriate component. For desktop and larger screens, it displays the main `Proposals` component. For mobile and smaller screens, it redirects to `MobProposals` for an optimized mobile view.
+
 - Route `/applications`: Displays all the applications of students based on the user's role:
     - For a teacher, it displays all applications from students for the theses supervised by the logged-in teacher.
     - For a student, it showcases the history of their submitted applications for various theses.
-- Route `/insert-proposal/`: Displays the proposal form for the teacher to insert a new thesis proposal.
+    - Additionally, the route adapts to the device view, redirecting to the appropriate component. For desktop and larger screens, it displays the main `Applications` component. For mobile and smaller screens, it redirects to `MobApplications` for an optimized mobile view
+- Route `/insert-proposal/`: Displays the proposal form for the teacher to insert a new thesis proposal. The route adapts to the device view, redirecting to the appropriate component. For desktop and larger screens, it displays the main `InsertProposal` component. For mobile and smaller screens, it redirects to `MobThesisProposal` for an optimized mobile view
 - Route `/insert-proposal/:id`: If an ID is present, the form fields for inserting a proposal are populated with the corresponding values. Otherwise, if no ID is provided, the insert proposal form remains blank, similar to the previous state
 - Route `/view-proposal/:id`: Displays the specific proposal to view.
-- Route `/edit-proposal/:id`: Displays the form with the specific proposal to edit.
+- Route `/edit-proposal/:id`: Displays the form with the specific proposal to edit. The route adapts to the device view, redirecting to the appropriate component. For desktop and larger screens, it displays the main `EditProposal` component. For mobile and smaller screens, it redirects to `MobEditProposal` for an optimized mobile view
 - Route `/start-request`: This route serves a different purpose based on the user's role:
     - For teachers, it displays all start requests accepted by the secretary clerk.
     - For students, it shows the start request submitted by the logged-in student, indicating the status of the request.
@@ -175,6 +182,22 @@ It is divided in a 3 step form:
 - `App.jsx` : Main component of the application. It manages user authentication, sets notifications for API errors during login, and defines the basic structure of the application.
 - `main.jsx` : root render for the App
 - `MainLayout.jsx` : Principal structure of the app, including the sidebar (SideBar), the top bar (TopBar), and the main content area.
+
+### Mobile UI Components
+- `MobInsertThesisProposal`: Adapted mobile-view form to insert new thesis proposal by a teacher or copy a proposal with a given id.
+It is divided in a 3 step form:
+   - `MobInsertBody.jsx` : Designed to handle the creation of data related to thesis proposals. Specifically designed for mobile view
+   - `MobReview.jsx` : Designed to view and review the data of a thesis proposal. Uses a table to show proposal details, including title, internal/external supervisors, keywords, type, description, and other associated fields. Specifically designed for mobile view
+   - `MobResult.jsx`: Designed to display a result message after attempting to upload a thesis proposal. Depending on the result (success or error), it shows an appropriate message along with a button to return to the main page.
+- `MobEditThesisProposal` : Allows the logged-in teacher to view the form to edit a specific thesis Proposal.
+- `MobCV` : Designed to display the curriculum vitae (CV) of a student. It provides an interface to view information about the student's exams, including the date, course code, teaching, mark, and credit units (CFU). The component also offers the ability to view an attached PDF document.
+- `MobStudentThesisProposals.jsx`: Allows students to view and filter available thesis proposals. It includes features for searching by title, applying advanced filters, and displaying each proposal in detail.
+- `MobTeacherApplications.jsx`: Allows faculty to view and manage thesis applications submitted by students. Provides functionality to accept or reject pending applications. 
+- `MobTeacherThesisProposals.jsx`: Allows teachers to view and manage thesis proposals. Provides a table with detailed information on thesis proposals, allowing quick access to the visualization and editing actions of each proposal.
+- `MobTopBar.jsx` : Definition for the TopBar with:
+  - `MobLogin` : Login form for the mobile view.
+  - `MobLogin` : Logout component for the mobile view.
+- `MobLayout.jsx` : Principal structure of the app, including the sidebar (SideBar), the top bar (TopBar), and the main content area.
 
 ## APIs
 - `API.jsx` : Main API functions as:
