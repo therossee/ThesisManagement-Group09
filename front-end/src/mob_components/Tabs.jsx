@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { TabBar } from 'antd-mobile';
 import { useAuth } from '../components/authentication/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { HomeOutlined, FileTextOutlined, FileAddOutlined, ToTopOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { HomeOutlined, FileTextOutlined, FileAddOutlined, ToTopOutlined, InboxOutlined } from '@ant-design/icons';
 
 function Tabs() {
-    const { isTester, isTeacher, isStudent } = useAuth();
+    const { isTeacher, isStudent } = useAuth();
     const [selectedTab, setSelectedTab] = useState('homeTab');
     const navigate = useNavigate();
     const location = useLocation();
@@ -20,9 +20,6 @@ function Tabs() {
         }
         if (location.pathname === '/proposals') {
             setSelectedTab('proposalsTab');
-        }
-        if (location.pathname === '/admin/virtual-clock') {
-            setSelectedTab('vClockTab');
         }
         if (selectedTab === 'logoutTab') {
             navigate('/');
@@ -61,15 +58,6 @@ function Tabs() {
                 onPress={() => setSelectedTab('proposalsTab')}>
 
             </TabBar.Item>)}
-            {isTester && (
-            <TabBar.Item 
-                title="Virtual Clock"
-                key="/admin/virtual-clock" icon={<ClockCircleOutlined />} 
-                selectedIcon={<ClockCircleOutlined />}
-                selected={selectedTab === 'vClockTab'}
-                onPress={() => setSelectedTab('vClockTab')}/>
-
-            )}
             {isTeacher &&(
               <TabBar.Item 
               title="Insert Proposal"
@@ -79,6 +67,16 @@ function Tabs() {
               selected={selectedTab === 'insertTab'}
               onPress={() => setSelectedTab('insertTab')}
             />
+            )}
+            {isTeacher &&(
+                <TabBar.Item
+                    title="Archive"
+                    key="/archive"
+                    icon={<InboxOutlined />}
+                    selectedIcon={<InboxOutlined />}
+                    selected={selectedTab === 'archive'}
+                    onPress={() => setSelectedTab('archive')}
+                />
             )}
             {(isStudent || isTeacher) && (
             <TabBar.Item 

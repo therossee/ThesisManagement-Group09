@@ -1,5 +1,5 @@
 import { React, useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { BrowserView, MobileView } from "react-device-detect";
 import { Alert, Button, Descriptions, Modal, Skeleton, Typography, Tag, message, Upload } from "antd";
 import MobModal from '../mob_components/MobModal'
@@ -17,6 +17,7 @@ function ViewThesisProposal() {
   const { id } = useParams();
   const { Text } = Typography;
   const navigate = useNavigate();
+  const location = useLocation();
   const [disabled, setDisabled] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -165,7 +166,9 @@ function ViewThesisProposal() {
     <>
       <BrowserView>
         <MyModal setIsOpen={setIsOpen} setLoading={setLoading} setDisabled={setDisabled} isOpen={isOpen} loading={loading} />
-        <Button type="link" onClick={() => navigate("/proposals")}>&lt; Back to Thesis Proposals</Button>
+        <Button type="link" onClick={() => navigate(-1)}>
+          &lt;{location.state?.prevRoute === "archive" ? "Back to Archive" : "Back to Thesis Proposals"}
+        </Button>
         <div style={{ paddingLeft: "2%", marginRight: "2%" }}>
           <Descriptions title={data.title} layout="vertical" items={items} />
           {!isTeacher && <Button ghost type="primary" disabled={disabled} loading={loading} onClick={() => setIsOpen(true)}>Apply for proposal</Button>}
@@ -173,7 +176,9 @@ function ViewThesisProposal() {
       </BrowserView>
       <MobileView>
         <MobModal setIsOpen={setIsOpen} setLoading={setLoading} setDisabled={setDisabled} isOpen={isOpen} loading={loading} />
-        <Button type="link" onClick={() => navigate("/proposals")}>&lt; Back to Thesis Proposals</Button>
+        <Button type="link" onClick={() => navigate(-1)}>
+          &lt;{location.state?.prevRoute === "archive" ? "Back to Archive" : "Back to Thesis Proposals"}
+        </Button>
         <div style={{paddingBottom: "60px"}}>
           <Descriptions title={data.title} layout="vertical" items={items} />
           {!isTeacher && <Button ghost type="primary" disabled={disabled} loading={loading} onClick={() => setIsOpen(true)}>Apply for proposal</Button>}

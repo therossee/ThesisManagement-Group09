@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Collapse } from 'antd-mobile';
+import { Collapse, Modal } from 'antd-mobile';
 import { message, Tag, Button } from 'antd';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
@@ -24,8 +24,6 @@ function MobTeacherThesisProposals() {
     const [thesisData, setThesisData] = useState([]);
 
     const [refresh, setRefresh] = useState(true);
-
-
 
     useEffect(() => {
         if(refresh) {
@@ -111,8 +109,22 @@ function MobTeacherThesisProposals() {
                                 <>
                                     <Button onClick={() => navigate(`/view-proposal/${x.id}`)}><EyeOutlined/>View</Button>
                                     <Button onClick={() => navigate(`/edit-proposal/${x.id}`)}><EditOutlined/>Edit</Button>
-                                    <Button onClick={() => deleteProposal(x.id)}><DeleteOutlined/>Delete</Button>
-                                    <Button onClick={() => archiveProposal(x.id)}><InboxOutlined/>Archive</Button>
+                                    <Button onClick={() => Modal.confirm(
+                                        {
+                                        title: `Are you sure you want to delete this proposal?`,
+                                        content: 'This action cannot be undone',
+                                        confirmText: 'Delete',
+                                        onConfirm: () => {deleteProposal(x.id)},
+                                        cancelText: 'Cancel'
+                                    })}><DeleteOutlined/>Delete</Button>
+                                    <Button onClick={() => Modal.confirm(
+                                        {
+                                            title: `Are you sure you want to archive this proposal?`,
+                                            content: 'You can re-publish it later in the archives tab',
+                                            confirmText: 'Archive',
+                                            onConfirm: () => {archiveProposal(x.id)},
+                                            cancelText: 'Cancel'
+                                        })}><InboxOutlined/>Archive</Button>
                                 </>
                                 <Button onClick={() => navigate(`/insert-proposal/${x.id}`)}><CopyOutlined/>Copy</Button>
 

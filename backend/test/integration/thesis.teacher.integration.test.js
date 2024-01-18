@@ -16,7 +16,7 @@ const fs = require('fs');
 const fse = require('fs-extra');
 const CronTasksService = require("../../src/services/CronTasksService");
 const AdvancedDate = require('../../src/models/AdvancedDate');
-const { THESIS_START_REQUEST_STATUS } = require('../../src/enums');
+const {THESIS_START_REQUEST_STATUS} = require('../../src/enums/thesisStartRequest');
 
 let marcoRossiAgent;
 beforeAll(async () => {
@@ -31,6 +31,7 @@ beforeEach(() => {
 
 afterAll(async () => {
     await closeImapClient();
+    resetTestDatabase();
     CronTasksService.stop();
 });
 
@@ -418,6 +419,135 @@ describe('GET /api/thesis-proposals (teacher)', () => {
         expect(response.body).toEqual('Internal Server Error');
     });
 });
+
+describe('GET /api/thesis-proposals/archived', () => {
+    test('should return a list of archived thesis proposals for the teacher', async () => {
+        // Add a manually archived thesis in the db
+        const archived = db.prepare('INSERT INTO thesisProposal (supervisor_id, title, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+             .run('d279620', 'Test Thesis', 'Bachelor', 'Test description', 'Test knowledge', 'Test notes', new AdvancedDate().toISOString(), '2030-12-31T23:59:59.999Z', 'Bachelor', 1);
+
+        // Add an expired thesis in the db
+        const expired = db.prepare('INSERT INTO thesisProposal (supervisor_id, title, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+            .run('d279620', 'Test Thesis', 'Bachelor', 'Test description', 'Test knowledge', 'Test notes', '2018-12-20T23:40:35.098Z', '2020-12-31T23:59:59.999Z', 'Bachelor', 0);
+        
+
+        // Make a request to the API endpoint
+        const response = await marcoRossiAgent
+          .get('/api/thesis-proposals/archived')
+          .set('credentials', 'include'); 
+    
+        // Assertions
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty('$metadata');
+        expect(response.body).toHaveProperty('items');
+        expect(response.body.items).toHaveLength(3);
+        expect(response.body.items).toEqual(
+            [
+                {
+                    id: 3,
+                    title: 'A STUDY OF CONGESTION CONTROL SCHEMES ON QUIC',
+                    status: 'ASSIGNED',
+                    supervisor: {
+                        id: 'd279620',
+                        name: 'Marco',
+                        surname: 'Rossi',
+                        email: 'd279620@polito.it',
+                        codGroup: 'Group1',
+                        codDepartment: 'Dep1',
+                    },
+                    coSupervisors: {
+                        internal: [],
+                        external: []
+                    },
+                    type: 'research project',
+                    description: 'This research paper delves into a comprehensive study of congestion control schemes on QUIC (Quick UDP Internet Connections). The investigation aims to analyze and compare various congestion control strategies within the QUIC protocol, shedding light on their impact on network performance and efficiency.',
+                    requiredKnowledge: 'Strong understanding of web development principles, Proficiency in cybersecurity concepts and best practices, Familiarity with machine learning algorithms and pattern recognition, Knowledge of data structures and algorithms for efficient web crawling.',
+                    notes: 'The project involves implementing cutting-edge machine learning algorithms to enhance the accuracy of malicious site detection. Collaboration with cybersecurity experts is essential to ensure the crawlers effectiveness against evolving threats. Optimization of web crawling algorithms for real-time detection requires a deep understanding of both web technologies and performance optimization techniques.',
+                    creation_date: '2023-09-17T21:37:01.176Z',
+                    expiration: '2026-04-01T23:59:59.999Z',
+                    level: 'LM',
+                    cds: [
+                        {
+                            cod_degree: 'LM-31',
+                            title_degree: 'Ingegneria dell\'Automazione'
+                        }
+                    ],
+                    keywords: ['QUIC'],
+                    groups: ['Group1']
+                },
+                {
+                    id: archived.lastInsertRowid,
+                    title: 'Test Thesis',
+                    status: 'ARCHIVED',
+                    supervisor: {
+                        id: 'd279620',
+                        name: 'Marco',
+                        surname: 'Rossi',
+                        email: 'd279620@polito.it',
+                        codGroup: 'Group1',
+                        codDepartment: 'Dep1',
+                    },
+                    coSupervisors: {
+                        internal: [],
+                        external: []
+                    },
+                    type: 'Bachelor',
+                    description: 'Test description',
+                    requiredKnowledge: 'Test knowledge',
+                    notes: 'Test notes',
+                    creation_date: expect.stringContaining(new AdvancedDate().toISOString().substring(0, 10)),
+                    expiration: '2030-12-31T23:59:59.999Z',
+                    level: 'Bachelor',
+                    cds: [],
+                    keywords: [],
+                    groups: []
+                },
+                {
+                    id: expired.lastInsertRowid,
+                    title: 'Test Thesis',
+                    status: 'EXPIRED',
+                    supervisor: {
+                        id: 'd279620',
+                        name: 'Marco',
+                        surname: 'Rossi',
+                        email: 'd279620@polito.it',
+                        codGroup: 'Group1',
+                        codDepartment: 'Dep1',
+                    },
+                    coSupervisors: {
+                        internal: [],
+                        external: []
+                    },
+                    type: 'Bachelor',
+                    description: 'Test description',
+                    requiredKnowledge: 'Test knowledge',
+                    notes: 'Test notes',
+                    creation_date: '2018-12-20T23:40:35.098Z',
+                    expiration: '2020-12-31T23:59:59.999Z',
+                    level: 'Bachelor',
+                    cds: [],
+                    keywords: [],
+                    groups: [] 
+                }
+            ]
+        )
+    });
+    
+    test('should handle errors and call the next middleware', async () => {
+        // Mock the function in your thesisProposalDao module to throw an error
+        jest.spyOn(thesisProposalDao, 'listArchivedThesisProposalsTeacher').mockRejectedValueOnce(new Error('Test error'));
+    
+        // Make a request to the API endpoint
+        const response = await marcoRossiAgent
+          .get('/api/thesis-proposals/archived')
+          .set('credentials', 'include');
+    
+        // Assertions
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual('Internal Server Error')
+    });
+    
+})
 
 describe('GET /api/thesis-proposals/:id (teacher)', () => {
     test('should return the thesis proposal', async () => {

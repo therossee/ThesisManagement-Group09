@@ -3,9 +3,10 @@ import { useAuth } from '../components/authentication/useAuth';
 import MobLogin from './MobLogin';
 import MobLogout from './MobLogout';
 import '../css/style.css';
+import MobVirtualClock from '../mob_routes/MobVirtualClock';
 
 function MobTopBar() {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, isTester } = useAuth();
 
     return (
         <NavBar
@@ -19,6 +20,12 @@ function MobTopBar() {
                     <IsLoggedInForm />
                     :
                     <MobLogin />
+                }
+                {
+                    isTester ?
+                        <MobVirtualClock/>
+                        :
+                        null // Placeholder expression
                 }
             </div>
         </NavBar>

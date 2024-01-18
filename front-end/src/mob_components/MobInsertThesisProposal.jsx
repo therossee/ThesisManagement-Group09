@@ -151,7 +151,9 @@ function MobInsertThesisProposal() {
     <>
       {loading ?
         <div style={{ marginLeft: "49%", marginRight: "25%", marginTop: "25%", marginBottom: "85px" }}>
-          <Spin tip="Loading" size="large" />
+          <Spin tip="Loading" size="large">
+            <p>Loading</p>
+          </Spin>
         </div>
         :
         <>

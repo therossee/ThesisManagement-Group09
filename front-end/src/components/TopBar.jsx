@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Layout, Avatar } from "antd";
+import { Layout, Avatar, Tooltip } from "antd";
 import { FileAddOutlined, UserOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { useAuth } from './authentication/useAuth';
 import LoginButton from './authentication/LoginButton';
@@ -45,10 +45,12 @@ function TopBar({ collapsed, setCollapsed }) {
           </div>
           <div>
             {isTeacher && (
-              <FileAddOutlined
-                style={{ fontSize: '26px', verticalAlign: 'middle', marginRight: '20px' }}
-                onClick={() => navigate('/insert-proposal')}
-              />
+              <Tooltip title="Insert proposal">
+                <FileAddOutlined
+                  style={{ fontSize: '26px', verticalAlign: 'middle', marginRight: '20px' }}
+                  onClick={() => navigate('/insert-proposal')}
+                />
+              </Tooltip>
             )}
             {isAuthenticated ? <LogoutButton /> : <LoginButton />}
           </div>
