@@ -1,6 +1,6 @@
 # DATABASE DOCUMENTATION
+![GitHub contributors](https://img.shields.io/github/contributors/therossee/ThesisManagement-Group09)
 
-![SQLite Badge](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)
 
 ## 📋 Database File
 
@@ -40,12 +40,22 @@ In this section you will find instructions on how to set up, use and consult the
 <a id="prerequisites"></a>
 ### 📍 Prerequisites
 
+<p>
+  <img src="https://img.shields.io/badge/SQLite-07405E?style=plastic&logo=sqlite&logoColor=white">
+  <img src="https://img.shields.io/badge/npm-CB3837?style=plastic&logo=npm&logoColor=white">
+</p>
+
   In order to be able to generate and use the database *_sqlite3_* must be installed. This can be done with the command:
   ```bash
   npm install sqlite3
   ```
 <a id="installation"></a>
 ### 🛠️ Installation
+  <p>
+    <img src="https://img.shields.io/badge/mac%20os-000000?style=plastic&logo=apple&logoColor=white" alt="Mac OS" height='30px'>
+    <img src="https://img.shields.io/badge/Windows-0078D6?style=plastic&logo=windows&logoColor=white" alt="Windows" height='30px'>
+    <img src="https://img.shields.io/badge/Linux-FCC624?style=plastic&logo=linux&logoColor=black"  alt="Linux" height='30px'>
+  </p>
   To generate the database, run the 'init.sql' file located in the 'scripts' subfolder within the 'database' directory. Execute the following command from the current location:
   ```bash
   cat init.sql | sqlite3 ..\database.sqlite
