@@ -1399,20 +1399,20 @@ describe('GET /api/teacher/uploads/:stud_id/:app_id', () => {
 
 describe('DELETE /api/thesis-proposals/:id/archive', () => {
     test('should unarchive thesis proposal and return the updated proposal', async () => {
-        
+
         const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
             .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2022-10-10T10:45:50.121Z', '2025-11-10T23:59:59.999Z', 'LM', 1);
         db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
             .run(proposal.lastInsertRowid, 'L-08');
         db.prepare('INSERT INTO proposalGroup (proposal_id, cod_group) VALUES (?, ?)')
             .run(proposal.lastInsertRowid, 'Group1');
-    
+
         // Make a request to the API endpoint
         const response = await marcoRossiAgent
           .delete(`/api/thesis-proposals/${proposal.lastInsertRowid}/archive`)
           .set('credentials', 'include')
           .query({ expiration: '2025-12-20T23:59:59.999Z' });
-    
+
         // Assertions
         expect(response.status).toBe(200);
         expect(response.body).toEqual({
@@ -1455,7 +1455,7 @@ describe('DELETE /api/thesis-proposals/:id/archive', () => {
           .delete(`/api/thesis-proposals/'1'/archive`)
           .set('credentials', 'include')
           .query({ expiration: '2025-12-20T23:59:59.999Z' });
-    
+
         // Assertions
         expect(response.status).toBe(404);
         expect(response.body).toEqual({message: 'No thesis proposal with id \'1\' found'});
@@ -1467,14 +1467,14 @@ describe('DELETE /api/thesis-proposals/:id/archive', () => {
           .delete(`/api/thesis-proposals/100/archive`)
           .set('credentials', 'include')
           .query({ expiration: '2025-12-20T23:59:59.999Z' });
-    
+
         // Assertions
         expect(response.status).toBe(404);
         expect(response.body).toEqual({message: 'No thesis proposal with id 100 found'});
     });
 
     test('should return 400 error if the proposal is already assigned', async () => {
-        
+
         const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
             .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2022-10-10T10:45:50.121Z', '2025-11-10T23:59:59.999Z', 'LM', 1);
         db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
@@ -1483,52 +1483,52 @@ describe('DELETE /api/thesis-proposals/:id/archive', () => {
             .run(proposal.lastInsertRowid, 'Group1');
         db.prepare('INSERT INTO thesisApplication (student_id, proposal_id, creation_date, status) VALUES (?, ?, ?, ?)')
             .run('s318952', proposal.lastInsertRowid, new Date().toISOString(), 'accepted');
-    
+
         // Make a request to the API endpoint
         const response = await marcoRossiAgent
           .delete(`/api/thesis-proposals/${proposal.lastInsertRowid}/archive`)
           .set('credentials', 'include')
           .query({ expiration: '2025-12-20T23:59:59.999Z' });
-    
+
         // Assertions
         expect(response.status).toBe(400);
         expect(response.body).toEqual({message: 'You can\'t un-archive a thesis that has already been assigned'});
     });
 
     test('should return 400 error if the proposal is expired and it\'s not specified a new expiration date', async () => {
-        
+
         const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
             .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2022-10-10T10:45:50.121Z', '2023-11-10T23:59:59.999Z', 'LM', 1);
         db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
             .run(proposal.lastInsertRowid, 'L-08');
         db.prepare('INSERT INTO proposalGroup (proposal_id, cod_group) VALUES (?, ?)')
             .run(proposal.lastInsertRowid, 'Group1');
-        
+
         // Make a request to the API endpoint
         const response = await marcoRossiAgent
           .delete(`/api/thesis-proposals/${proposal.lastInsertRowid}/archive`)
           .set('credentials', 'include');
-    
+
         // Assertions
         expect(response.status).toBe(400);
         expect(response.body).toEqual({message: 'The thesis proposal is expired and you must specify a new expiration date'});
     });
 
     test('should unarchive an expired proposal by giving a new valid expiration date', async () => {
-        
+
         const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
             .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2022-10-10T10:45:50.121Z', '2023-11-10T23:59:59.999Z', 'LM', 0);
         db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
             .run(proposal.lastInsertRowid, 'L-08');
         db.prepare('INSERT INTO proposalGroup (proposal_id, cod_group) VALUES (?, ?)')
             .run(proposal.lastInsertRowid, 'Group1');
-        
+
         // Make a request to the API endpoint
         const response = await marcoRossiAgent
           .delete(`/api/thesis-proposals/${proposal.lastInsertRowid}/archive`)
           .set('credentials', 'include')
           .query({ expiration: '2025-12-20T23:59:59.999Z' });
-    
+
         // Assertions
         expect(response.status).toBe(200);
         expect(response.body).toEqual({
@@ -1566,19 +1566,19 @@ describe('DELETE /api/thesis-proposals/:id/archive', () => {
     });
 
     test('should unarchive an archived proposal which is not expired', async () => {
-        
+
         const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
             .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2022-10-10T10:45:50.121Z', '2025-11-10T23:59:59.999Z', 'LM', 1);
         db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
             .run(proposal.lastInsertRowid, 'L-08');
         db.prepare('INSERT INTO proposalGroup (proposal_id, cod_group) VALUES (?, ?)')
             .run(proposal.lastInsertRowid, 'Group1');
-        
+
         // Make a request to the API endpoint
         const response = await marcoRossiAgent
           .delete(`/api/thesis-proposals/${proposal.lastInsertRowid}/archive`)
           .set('credentials', 'include');
-    
+
         // Assertions
         expect(response.status).toBe(200);
         expect(response.body).toEqual({
@@ -1616,24 +1616,24 @@ describe('DELETE /api/thesis-proposals/:id/archive', () => {
     });
 
     test('should return 400 error if the proposal is neither expired nor archived', async () => {
-        
+
         const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
             .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2022-10-10T10:45:50.121Z', '2025-11-10T23:59:59.999Z', 'LM', 0);
         db.prepare('INSERT INTO proposalCds (proposal_id, cod_degree) VALUES (?, ?)')
             .run(proposal.lastInsertRowid, 'L-08');
         db.prepare('INSERT INTO proposalGroup (proposal_id, cod_group) VALUES (?, ?)')
             .run(proposal.lastInsertRowid, 'Group1');
-        
+
         // Make a request to the API endpoint
         const response = await marcoRossiAgent
           .delete(`/api/thesis-proposals/${proposal.lastInsertRowid}/archive`)
           .set('credentials', 'include');
-    
+
         // Assertions
         expect(response.status).toBe(400);
         expect(response.body).toEqual({message: 'You can\'t un-archive a thesis that wasn\'t archived manually OR that is not expired'});
     });
-    
+
     test('should handle errors', async () => {
         const proposal = db.prepare('INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level, is_archived)  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
             .run('Title', 'd279620', 'research project', 'Description', 'Required knowledge', 'Notes', '2022-10-10T10:45:50.121Z', '2025-11-10T23:59:59.999Z', 'LM', 1);
@@ -1641,16 +1641,16 @@ describe('DELETE /api/thesis-proposals/:id/archive', () => {
             .run(proposal.lastInsertRowid, 'L-08');
         db.prepare('INSERT INTO proposalGroup (proposal_id, cod_group) VALUES (?, ?)')
             .run(proposal.lastInsertRowid, 'Group1');
-        
+
         // Mock the function in your thesisProposalDao module to throw an error
         jest.spyOn(thesisProposalDao, 'unarchiveThesisProposalById').mockRejectedValue(new Error('Test error'));
-  
+
         // Make a request to the API endpoint
         const response = await marcoRossiAgent
           .delete(`/api/thesis-proposals/${proposal.lastInsertRowid}/archive`)
           .set('credentials', 'include')
           .query({ expiration: '2025-12-20T23:59:59.999Z' });
-  
+
         // Assertions
         expect(response.status).toBe(500);
         expect(response.body).toEqual('Internal Server Error');
@@ -1659,12 +1659,12 @@ describe('DELETE /api/thesis-proposals/:id/archive', () => {
 
 describe('GET /api/teacher/thesis-start-requests', () => {
     test('should return an empty list of thesis start requests for the teacher', async () => {
-        
+
         // Make a request to the API endpoint
         const response = await marcoRossiAgent
           .get('/api/teacher/thesis-start-requests')
           .set('credentials', 'include');
-    
+
         // Assertions
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty('$metadata');
@@ -1673,17 +1673,17 @@ describe('GET /api/teacher/thesis-start-requests', () => {
     });
 
     test('should return a list of thesis start requests for the teacher', async () => {
-      
+
       const tsr = db.prepare('INSERT INTO thesisStartRequest (student_id, title, description, supervisor_id, creation_date, status) VALUES (?, ?, ?, ?, ?, ?)')
           .run('s318952', 'Title', 'Description', 'd279620','2021-10-10T10:45:50.121Z', THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY);
       db.prepare('INSERT INTO thesisStartCoSupervisor (start_request_id, cosupervisor_id) VALUES (?, ?)')
             .run(tsr.lastInsertRowid, 'd370335');
-      
+
       // Make a request to the API endpoint
       const response = await marcoRossiAgent
         .get('/api/teacher/thesis-start-requests')
         .set('credentials', 'include');
-  
+
       // Assertions
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('$metadata');
@@ -1720,30 +1720,30 @@ describe('GET /api/teacher/thesis-start-requests', () => {
           ],
           creation_date: '2021-10-10T10:45:50.121Z',
           approval_date: null,
-          status: THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY,  
+          status: THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY,
           changes_requested: null,
       }]);
     });
-    
+
     test('should handle errors and call the next middleware', async () => {
       // Mock the function in your thesisStartRequestDao module to throw an error
       jest.spyOn(thesisStartRequestDao, 'listThesisStartRequests').mockRejectedValue(new Error('Test error'));
-  
+
       // Make a request to the API endpoint
       const response = await marcoRossiAgent
         .get('/api/teacher/thesis-start-requests')
         .set('credentials', 'include');
-  
+
       // Assertions
       expect(response.status).toBe(500);
       expect(response.body).toEqual('Internal Server Error');
     });
-    
+
 })
 
 describe('POST /api/teacher/thesis-start-requests/:id/review', () => {
     test('should successfully accept a thesis start request', async () => {
-      
+
       const tsr = db.prepare('INSERT INTO thesisStartRequest (student_id, title, description, supervisor_id, creation_date, status) VALUES (?, ?, ?, ?, ?, ?)')
         .run('s318952', 'Title', 'Description', 'd279620','2021-10-10T10:45:50.121Z', THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY);
       db.prepare('INSERT INTO thesisStartCoSupervisor (start_request_id, cosupervisor_id) VALUES (?, ?)')
@@ -1756,12 +1756,12 @@ describe('POST /api/teacher/thesis-start-requests/:id/review', () => {
         .post(`/api/teacher/thesis-start-requests/${tsr.lastInsertRowid}/review`)
         .set('credentials', 'include')
         .send(review)
-        .expect(204);
-  
+        .expect(201);
+
     });
 
     test('should successfully request changes for thesis start request', async () => {
-      
+
         const tsr = db.prepare('INSERT INTO thesisStartRequest (student_id, title, description, supervisor_id, creation_date, status) VALUES (?, ?, ?, ?, ?, ?)')
           .run('s318952', 'Title', 'Description', 'd279620','2021-10-10T10:45:50.121Z', THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY);
         db.prepare('INSERT INTO thesisStartCoSupervisor (start_request_id, cosupervisor_id) VALUES (?, ?)')
@@ -1775,12 +1775,12 @@ describe('POST /api/teacher/thesis-start-requests/:id/review', () => {
           .post(`/api/teacher/thesis-start-requests/${tsr.lastInsertRowid}/review`)
           .set('credentials', 'include')
           .send(review)
-          .expect(204);
-    
+          .expect(201);
+
     });
 
     test('should successfully reject a thesis start request', async () => {
-      
+
         const tsr = db.prepare('INSERT INTO thesisStartRequest (student_id, title, description, supervisor_id, creation_date, status) VALUES (?, ?, ?, ?, ?, ?)')
           .run('s318952', 'Title', 'Description', 'd279620','2021-10-10T10:45:50.121Z', THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY);
         db.prepare('INSERT INTO thesisStartCoSupervisor (start_request_id, cosupervisor_id) VALUES (?, ?)')
@@ -1793,11 +1793,11 @@ describe('POST /api/teacher/thesis-start-requests/:id/review', () => {
           .post(`/api/teacher/thesis-start-requests/${tsr.lastInsertRowid}/review`)
           .set('credentials', 'include')
           .send(review)
-          .expect(204);
+          .expect(201);
     });
 
     test('should throw an error if the thesis start request doesn\'t exist', async () => {
-      
+
         const review = {
           action: 'accept',
         }
@@ -1809,16 +1809,16 @@ describe('POST /api/teacher/thesis-start-requests/:id/review', () => {
           .expect(404);
 
         expect(response.body).toEqual({message: 'No thesis start request with id 1000 found or you are not authorized to access it.'});
-    
+
     });
-  
+
     test('should handle errors and call the next middleware', async () => {
-      
+
       const tsr = db.prepare('INSERT INTO thesisStartRequest (student_id, title, description, supervisor_id, creation_date, status) VALUES (?, ?, ?, ?, ?, ?)')
         .run('s318952', 'Title', 'Description', 'd279620','2021-10-10T10:45:50.121Z', THESIS_START_REQUEST_STATUS.ACCEPTED_BY_SECRETARY);
       db.prepare('INSERT INTO thesisStartCoSupervisor (start_request_id, cosupervisor_id) VALUES (?, ?)')
           .run(tsr.lastInsertRowid, 'd370335');
-      
+
       // Mock the function in your thesisStartRequestDao module to throw an error
       jest.spyOn(thesisStartRequestDao, 'supervisorReviewThesisStartRequest').mockRejectedValue(new Error('Test error'));
       const review = {
@@ -1830,7 +1830,7 @@ describe('POST /api/teacher/thesis-start-requests/:id/review', () => {
         .set('credentials', 'include')
         .send(review)
         .expect(500);
-  
+
       expect(response.body).toEqual('Internal Server Error');
     });
 });
