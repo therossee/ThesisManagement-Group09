@@ -224,17 +224,17 @@ function ViewTSR({ trigger, loading, setLoading, setDisabled }) {
 
     if (Object.keys(activeThesisStartRequest).length > 0) {
 
-        const coSupComponents = () => {
+        const coSupBadge = () => {
             console.log(activeThesisStartRequest.co_supervisors);
             if(activeThesisStartRequest.co_supervisors.length > 0){
-              return activeThesisStartRequest.co_supervisors.map((cSv, index) => {
+              return activeThesisStartRequest.co_supervisors.map((coSupervisor, index) => {
                 return (
-                  <div key={index}>
+                  <div key={coSupervisor.id}>
                     <h3>Co-Supervisor #{index+1}: </h3>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                      {renderTeacherInfo(cSv.name, cSv.surname)}
+                      {renderTeacherInfo(coSupervisor.name, coSupervisor.surname)}
                       <span> - </span>
-                      <p style={{ margin: 5 }}>ID: {cSv.id}</p>
+                      <p style={{ margin: 5 }}>ID: {coSupervisor.id}</p>
                     </div>
                   </div>
                 );
@@ -282,7 +282,7 @@ function ViewTSR({ trigger, loading, setLoading, setDisabled }) {
                             <div style={{ display: 'flex', alignItems: 'center' }}>
                                 {activeThesisStartRequest.description}
                           </div>
-                          {activeThesisStartRequest.co_supervisors.length > 0 ? coSupComponents() : <></>}
+                          {activeThesisStartRequest.co_supervisors.length > 0 ? coSupBadge() : <></>}
                             </>
                         </Collapse.Panel>
                     </Collapse>

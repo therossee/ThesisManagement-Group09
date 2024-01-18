@@ -51,8 +51,6 @@ function TeacherThesisStartRequest() {
 
 
     return (
-
-        <>
             <div style={{ paddingBottom: '70px' }}>
                 <Tabs
                     defaultActiveKey="1"
@@ -63,18 +61,17 @@ function TeacherThesisStartRequest() {
                         {
                             key: '1',
                             label: <span><CheckOutlined />Pending Request</span>,
-                            children: <PendingRequests tsr={requestsArray} isLoading={loadData} setDirty={setRefresh}
+                            children: <PendingRequests tsr={requestsArray} setDirty={setRefresh}
                             reviewTsr={reviewRequest}/>,
                         },
                         {
                             key: '2',
                             label: <span><HistoryOutlined />Decisions History</span>,
-                            children: <HistoryRequests tsr={requestsArray} isLoading={loadData} />,
+                            children: <HistoryRequests tsr={requestsArray} />,
                         },
                     ]}
                 />
             </div>
-        </>
     )
 }
 
@@ -139,34 +136,34 @@ function PendingRequests({ tsr, setDirty }) {
     if (tsr.some(tsr => tsr.status === 'accepted by secretary' || tsr.status === 'changes requested')) {
         return (
             <Collapse accordion>
-                {tsr.map((x) => ((x.status === 'accepted by secretary' || x.status === 'changes requested') &&
-                    <Collapse.Panel key={x.id} title={x.title}>
+                {tsr.map((startRq) => ((startRq.status === 'accepted by secretary' || startRq.status === 'changes requested') &&
+                    <Collapse.Panel key={startRq.id} title={startRq.title}>
                         <h3>Submitted on: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {dayjs(x.creation_date).format('LLL')}
+                            {dayjs(startRq.creation_date).format('LLL')}
                         </div>
                         <h3>Student: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {renderTeacherInfo(x.student.name, x.student.surname)}
+                            {renderTeacherInfo(startRq.student.name, startRq.student.surname)}
                             <span> - </span>
-                            <p style={{ margin: 5 }}>ID: {x.student.id}</p>
+                            <p style={{ margin: 5 }}>ID: {startRq.student.id}</p>
                         </div>
                         <h3>Status: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {getStatus(x.status)}
+                            {getStatus(startRq.status)}
                         </div>
                         <h3>Approval date: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {x.approval_date ? dayjs(x.approval_date).format('LLL') : "Not yet approved"}
+                            {startRq.approval_date ? dayjs(startRq.approval_date).format('LLL') : "Not yet approved"}
                         </div>
                         <h3>Description: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {x.description}
+                            {startRq.description}
                         </div>
-                        {x.co_supervisors.length > 0 ? coSupComponents(x) : <></>}
-                        <Button onClick={() => showModal("Are you sure you want to request changes?", () => reviewTsr(x, requestedChanges), "Confirm", "Cancel")}>Request changes</Button>
-                        <Button onClick={() => showModalAccRej("Are you sure you want to accept this request?", () => acceptTsr(x.id, x.student.id), "Confirm action", "Cancel")}>Accept</Button>
-                        <Button onClick={() => showModalAccRej("Are you sure you want to reject this request?", () => rejectTsr(x.id, x.student.id), "Confirm action", "Cancel")}>Reject</Button>
+                        {startRq.co_supervisors.length > 0 ? coSupComponents(startRq) : <></>}
+                        <Button onClick={() => showModal("Are you sure you want to request changes?", () => reviewTsr(startRq, requestedChanges), "Confirm", "Cancel")}>Request changes</Button>
+                        <Button onClick={() => showModalAccRej("Are you sure you want to accept this request?", () => acceptTsr(startRq.id, startRq.student.id), "Confirm action", "Cancel")}>Accept</Button>
+                        <Button onClick={() => showModalAccRej("Are you sure you want to reject this request?", () => rejectTsr(startRq.id, startRq.student.id), "Confirm action", "Cancel")}>Reject</Button>
                     </Collapse.Panel>
                 ))}
             </Collapse>
@@ -181,31 +178,31 @@ function HistoryRequests({ tsr }) {
     if (tsr.some(tsr => tsr.status === 'accepted by teacher' || tsr.status === 'rejected by teacher')) {
         return (
             <Collapse accordion>
-                {tsr.map((x) => ((x.status === 'accepted by teacher' || x.status === 'rejected by teacher') &&
-                    <Collapse.Panel key={x.id} title={x.title}>
+                {tsr.map((thesisStartRequest) => ((thesisStartRequest.status === 'accepted by teacher' || thesisStartRequest.status === 'rejected by teacher') &&
+                    <Collapse.Panel key={thesisStartRequest.id} title={thesisStartRequest.title}>
                         <h3>Submitted on: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {dayjs(x.creation_date).format('LLL')}
+                            {dayjs(thesisStartRequest.creation_date).format('LLL')}
                         </div>
                         <h3>Student: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {renderTeacherInfo(x.student.name, x.student.surname)}
+                            {renderTeacherInfo(thesisStartRequest.student.name, thesisStartRequest.student.surname)}
                             <span> - </span>
-                            <p style={{ margin: 5 }}>ID: {x.student.id}</p>
+                            <p style={{ margin: 5 }}>ID: {thesisStartRequest.student.id}</p>
                         </div>
                         <h3>Status: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {getStatus(x.status)}
+                            {getStatus(thesisStartRequest.status)}
                         </div>
                         <h3>Approval date: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {x.approval_date ? dayjs(x.approval_date).format('LLL') : "Not yet approved"}
+                            {thesisStartRequest.approval_date ? dayjs(thesisStartRequest.approval_date).format('LLL') : "Not yet approved"}
                         </div>
                         <h3>Description: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {x.description}
+                            {thesisStartRequest.description}
                         </div>
-                        {x.co_supervisors.length > 0 ? coSupComponents(x) : <></>}
+                        {thesisStartRequest.co_supervisors.length > 0 ? coSupComponents(thesisStartRequest) : <></>}
                     </Collapse.Panel>
                 ))}
             </Collapse>
