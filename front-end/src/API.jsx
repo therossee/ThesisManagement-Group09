@@ -15,6 +15,7 @@ const redirectToLogin = () => {
     window.location.replace("http://localhost:3000/login");
 };
 
+
 async function getUser() {
     const response = await fetch(URL + '/user', {
         method: 'GET',
@@ -28,8 +29,12 @@ async function getUser() {
     }
 }
 
+<<<<<<< HEAD
 
 /****** Virtual Clock APIs ******/
+=======
+/****** End APIs for auth ******/
+>>>>>>> e4bbe9f37d93dee7fd3ccb7bf6b954841643b3d9
 
 async function getClock() {
     return fetch(URL + '/system/virtual-clock')
@@ -74,7 +79,18 @@ async function updateClock(date) {
 
 // GET Thesis Proposals
 async function getThesisProposals() {
-    const response = await fetch(URL + '/thesis-proposals', {
+    return fetchThesisProposals('/thesis-proposals');
+}
+
+// GET Archived Thesis Proposals
+async function getArchivedThesisProposals() {
+    return fetchThesisProposals('/thesis-proposals/archived');
+}
+
+// Generic function that handles the common logic and then use it in both 
+// getThesisProposals and getArchivedThesisProposals
+async function fetchThesisProposals(endpoint) {
+    const response = await fetch(URL + endpoint, {
         method: 'GET',
         credentials: 'include',
     });
@@ -95,7 +111,8 @@ async function getThesisProposals() {
             level: x.level,
             groups: x.groups,
             keywords: x.keywords,
-            cds: x.cds
+            cds: x.cds,
+            status: x.status
         }))
     } else {
         throw proposals;
@@ -343,6 +360,20 @@ async function getSecretaryStartRequest() {
     }
 }
 
+async function publishProposalById(id, expiration) {
+    const queryParams = expiration ? `?expiration=${encodeURIComponent(expiration)}` : '';
+    const response = await fetch(URL + `/thesis-proposals/${id}/archive${queryParams}`, {
+        method: 'DELETE',
+        credentials: 'include'
+    });
+    if (response.ok) {
+        return response;
+    } else {
+        throw response;
+    }
+}
+
+
 // Secretary accept student Start Request 
 async function secretaryAcceptStartRequest(startReqId) {
     const response = await fetch(URL + `/secretary-clerk/thesis-start-requests/accept/${startReqId}`, {
@@ -579,7 +610,7 @@ async function getPDF(student_id, applicationId) {
 }
 
 const API = {
-    logOut, redirectToLogin,
+    logOut, redirectToLogin, 
     getUser,
     getClock, updateClock,
     insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, 
@@ -588,8 +619,9 @@ const API = {
     acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, 
     deleteProposalById, updateProposal, archiveProposalById, 
     getStudentCVById, getPDF,
-    insertThesisStartRequest, getStudentLastThesisStartRequest, getTeacherThesisStartRequest, getSecretaryStartRequest, 
-    secretaryAcceptStartRequest, secretaryRejectStartRequest, 
-    acceptThesisStartRequest, rejectThesisStartRequest, reviewThesisStartRequest
+    insertThesisStartRequest, getStudentLastThesisStartRequest, getTeacherThesisStartRequest, getSecretaryStartRequest,
+    secretaryAcceptStartRequest, secretaryRejectStartRequest,
+    acceptThesisStartRequest, rejectThesisStartRequest, reviewThesisStartRequest, 
+    getArchivedThesisProposals, publishProposalById, 
 };
 export default API;

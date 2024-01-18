@@ -613,7 +613,7 @@ VALUES
     'In recent years, the escalating frequency and sophistication of cyber threats have underscored the need for robust and adaptive cybersecurity measures. This proposed thesis aims to delve into the intersection of informatic engineering and machine learning to develop innovative solutions for cybersecurity challenges. I am enthusiastic about the prospect of exploring this topic under your mentorship, and I believe that the intersection of informatic engineering and machine learning offers a rich field for meaningful contributions. I am open to any suggestions or modifications you may have regarding the proposed topic. Thank you for considering my request, and I look forward to the opportunity to discuss this potential thesis further.', 
     'd279620', '2024-01-10T23:40:59.999Z'
    ),
-   ('s319355', 'Exploring Artificial Intelligence in Healthcare: Applications and Challenges', 
+   ('s321607', 'Exploring Artificial Intelligence in Healthcare: Applications and Challenges', 
     'Artificial Intelligence (AI) has shown great potential in transforming various industries, including healthcare. This proposed thesis aims to explore the applications of AI in healthcare settings, analyze its impact on patient care, and address the challenges associated with implementing AI solutions in the medical field. I am enthusiastic about delving into this research topic under your guidance and welcome any feedback or modifications to enhance the thesis proposal. Thank you for considering my request, and I am eager to discuss the potential research project further.', 
     'd279620', '2023-12-15T21:00:50.999Z'
    );

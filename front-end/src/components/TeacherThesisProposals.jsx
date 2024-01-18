@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { message, Modal, Space, Table, Tag, Tooltip, Typography } from 'antd';
+import { message, Modal, Space, Table, Tooltip, Typography } from 'antd';
 import { CopyOutlined, DeleteOutlined, EditOutlined, EyeOutlined, ExclamationCircleFilled, InboxOutlined } from '@ant-design/icons';
+import { generateCommonColumns } from './utils';
 import API from '../API';
 
 function TeacherThesisProposals() {
@@ -20,62 +21,7 @@ function TeacherThesisProposals() {
 
     // Columns of the table
     const columns = [
-        {
-            title: 'Title',
-            dataIndex: 'title',
-            fixed: 'left',
-        },
-        {
-            title: 'Level',
-            dataIndex: 'level',
-            sorter: (a, b) => a.level.localeCompare(b.level),
-        },
-        {
-            title: 'Co-Supervisors',
-            dataIndex: 'coSupervisors',
-            render: (_, x) => x.coSupervisors.map(cosupervisor => (
-                <Tag color="blue" key={cosupervisor.name + " " + cosupervisor.surname}>
-                    {cosupervisor.name + " " + cosupervisor.surname}
-                </Tag>
-            )),
-        },
-        {
-            title: 'Keywords',
-            dataIndex: 'keywords',
-            render: (_, x) => x.keywords.map(keyword => (
-                <Tag color="blue" key={keyword}>
-                    {keyword}
-                </Tag>
-            )),
-        },
-        {
-            title: 'Type',
-            dataIndex: 'type',
-            sorter: (a, b) => a.type.localeCompare(b.type),
-        },
-        {
-            title: 'Groups',
-            dataIndex: 'groups',
-            render: (_, x) => x.groups.map(group => (
-                <Tag color="blue" key={group}>
-                    {group}
-                </Tag>
-            )),
-        },
-        {
-            title: 'CdS',
-            dataIndex: 'CdS',
-            render: (_, x) => x.cds.map(cds => (
-                <Tag color="blue" key={cds.title_degree}>
-                    {cds.title_degree}
-                </Tag>
-            )),
-        },
-        {
-            title: 'Expiration',
-            dataIndex: 'expiration',
-            sorter: (a, b) => new Date(a.expiration) - new Date(b.expiration),
-        },
+        ...generateCommonColumns(),
         {
             title: 'Actions',
             key: 'actions',
@@ -165,7 +111,7 @@ function TeacherThesisProposals() {
                     setDirty(false);
                 })
                 .catch((err) => {
-                    message.error(err.message ? err.message : err);
+                    message.error(err.message ?? err);
                     setIsLoadingTable(false);
                     setDirty(false);
                 });
@@ -187,7 +133,7 @@ function TeacherThesisProposals() {
             message.success("Thesis proposal deleted successfully");
             setDirty(true);
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
             setIsLoadingTable(false);
         }
     }
@@ -199,7 +145,7 @@ function TeacherThesisProposals() {
             message.success("Proposal archived successfully");
             setDirty(true);
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
             setIsLoadingTable(false);
         }
     }

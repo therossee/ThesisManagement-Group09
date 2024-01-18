@@ -8,6 +8,7 @@ const AdvancedDate = require("../models/AdvancedDate");
 const {APPLICATION_STATUS} = require("../enums/application");
 const NotificationService = require("../services/NotificationService");
 const NoThesisProposalError = require("../errors/NoThesisProposalError");
+const listApplicationsForTeacherThesisProposal = require("../dao/thesis_application_dao").listApplicationsForTeacherThesisProposal;
 
 /**
  * @param {PopulatedRequest} req
@@ -301,6 +302,36 @@ async function unarchiveThesisProposalById(req, res, next) {
     }
 }
 
+/**
+ * @param {PopulatedRequest} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+async function listArchivedThesisProposals(req, res, next) {
+    try {
+        const thesisProposals = await thesisProposalDao.listArchivedThesisProposalsTeacher(req.user.id);
+        const proposalsPopulated = await Promise.all(
+            thesisProposals.map(async proposal => {
+                const cds = await thesisProposalDao.getThesisProposalCds(proposal.proposal_id);
+                return await _populateProposal(proposal, cds);
+            })
+        );
+
+        // Not used right now, but it's here for potential future use
+        const metadata = {
+            index: 0,
+            count: thesisProposals.length,
+            total: thesisProposals.length,
+            currentPage: 1
+        };
+        res.json({ $metadata: metadata, items: proposalsPopulated });
+        
+    } catch (e) {
+        console.log(e)
+        next(e);
+    }
+}
+
 module.exports = {
     listThesisProposals,
     createThesisProposal,
@@ -308,7 +339,8 @@ module.exports = {
     updateThesisProposalById,
     deleteThesisProposalById,
     archiveThesisProposalById,
-    unarchiveThesisProposalById
+    unarchiveThesisProposalById,
+    listArchivedThesisProposals
 };
 
 
@@ -324,7 +356,7 @@ async function _populateProposal(proposalData, cds) {
     return {
         id: proposalData.proposal_id,
         title: proposalData.title,
-        status: _getProposalStatus(proposalData),
+        status: await _getProposalStatus(proposalData),
         supervisor: await thesisProposalDao.getSupervisorOfProposal(proposalData.proposal_id)
             .then(_serializeTeacher),
         coSupervisors: {
@@ -343,7 +375,7 @@ async function _populateProposal(proposalData, cds) {
         level: proposalData.level,
         cds: cds,
         keywords: await thesisProposalDao.getKeywordsOfProposal(proposalData.proposal_id),
-        groups: await thesisProposalDao.getProposalGroups(proposalData.proposal_id)
+        groups: await thesisProposalDao.getProposalGroups(proposalData.proposal_id),
     };
 }
 
@@ -351,12 +383,22 @@ async function _populateProposal(proposalData, cds) {
  * Return the status of a proposal
  *
  * @param proposalData
- * @return {'EXPIRED' | 'ACTIVE'}
+ * @return {Promise<string>}
  * @private
  */
-function _getProposalStatus(proposalData) {
+async function _getProposalStatus(proposalData) {
     const now = new AdvancedDate();
     const expirationDate = new AdvancedDate(proposalData.expiration);
+
+    // Check if the proposal has already beed assigned
+    const applications = await listApplicationsForTeacherThesisProposal(proposalData.proposal_id, proposalData.supervisor_id);
+    if (applications.some(application => application.status === APPLICATION_STATUS.ACCEPTED)) {
+        return 'ASSIGNED';
+    }
+
+    if(proposalData.is_archived==1){
+        return 'ARCHIVED';
+    }
 
     if (expirationDate.isBefore(now)) {
         return 'EXPIRED';
