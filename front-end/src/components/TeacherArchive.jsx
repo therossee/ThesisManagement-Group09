@@ -25,6 +25,24 @@ function TeacherArchive() {
 
     const [newExpiration, setNewExpiration] = useState(null);
 
+    const [publish, setPublish] = useState(false);
+    
+    const [record, setRecord] = useState(null);
+
+    useEffect(() => {
+        if(publish === true){
+            if (newExpiration !== null && newExpiration !== undefined){
+                publishProposalById(record, newExpiration);
+                setNewExpiration(null);
+            } else {
+                message.error("Please select a new expiration date");
+            }
+            setPublish(false);
+            setRecord(null);
+        }
+
+    }, [publish]);
+
     const navigateToEdit = (record) => {
         if (record.status !== 'ASSIGNED')
             navigate(`/edit-proposal/${record.id}`);
@@ -114,12 +132,8 @@ function TeacherArchive() {
                                             </Paragraph>
                                         </div>,
                                         () => {
-                                            if (newExpiration !== null) {
-                                                publishProposalById(record, newExpiration);
-                                                setNewExpiration(null);
-                                            } else {
-                                                message.error("Please select a new expiration date");
-                                            }
+                                            setRecord(record);
+                                            setPublish(true);
                                         },
                                         "Ok, publish it",
                                         "Cancel",
@@ -187,6 +201,7 @@ function TeacherArchive() {
     };
 
     const handleDatePickerChange = (date) => {
+        console.log(date);
         const isoFormattedDate = date?.toISOString();
         setNewExpiration(isoFormattedDate);
     };
