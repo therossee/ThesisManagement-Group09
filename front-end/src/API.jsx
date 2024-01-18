@@ -15,7 +15,6 @@ const redirectToLogin = () => {
     window.location.replace("http://localhost:3000/login");
 };
 
-
 async function getUser() {
     const response = await fetch(URL + '/user', {
         method: 'GET',
@@ -47,6 +46,7 @@ async function getClock() {
             }
         });
 }
+
 async function updateClock(date) {
     return fetch(URL + '/system/virtual-clock', {
         method: 'POST',
@@ -282,8 +282,6 @@ async function getAllDegrees() {
     }
 }
 
-
-
 // Accept Student Applications on a Thesis Proposal 
 async function acceptThesisApplications(proposalId, studentId) {
     const response = await fetch(URL + `/teacher/applications/accept/${proposalId}`, {
@@ -420,8 +418,8 @@ async function getPDF(student_id, applicationId) {
     }
 }
 
-// Accept Student Start Request 
-async function acceptStartRequest(startReqId) {
+// Secretary accept student Start Request 
+async function secretaryAcceptStartRequest(startReqId) {
     const response = await fetch(URL + `/secretary-clerk/thesis-start-requests/accept/${startReqId}`, {
         method: 'PATCH',
         headers: {
@@ -436,6 +434,24 @@ async function acceptStartRequest(startReqId) {
         throw res;
     }
 }
+
+// Secretary reject Student Start Request 
+async function secretaryRejectStartRequest(startReqId) {
+    const response = await fetch(URL + `/secretary-clerk/thesis-start-requests/reject/${startReqId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+    });
+    const res = await response.json();
+    if (response.ok) {
+        return res;
+    } else {
+        throw res;
+    }
+}
+
 // Insert Thesis Start Request
 async function insertThesisStartRequest(request) {
     let response = await fetch(URL + '/student/thesis-start-requests', {
@@ -454,27 +470,86 @@ async function insertThesisStartRequest(request) {
     }
 }
 
-// Reject Student Start Request 
-async function rejectStartRequest(startReqId) {
-    const response = await fetch(URL + `/secretary-clerk/thesis-start-requests/reject/${startReqId}`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        credentials: 'include'
-    });
-    const res = await response.json();
-    if (response.ok) {
-        return res;
-    } else {
-        throw res;
-    }
-}
-// GET Student active Thesis Start Request
-async function getStudentActiveThesisStartRequest() {
+// GET Student's last Thesis Start Request
+async function getStudentLastThesisStartRequest() {
     const response = await fetch(URL + '/student/thesis-start-requests/last', {
         method: 'GET',
         credentials: 'include',
+    });
+    const tsr = await response.json();
+    if (response.ok) {
+        return tsr;
+    } else {
+        throw tsr;
+    }
+}
+
+// GET Teacher's active Thesis Start Request
+async function getTeacherThesisStartRequest() {
+    const response = await fetch(URL + '/teacher/thesis-start-requests', {
+        method: 'GET',
+        credentials: 'include',
+    });
+    const tsr = await response.json();
+    if (response.ok) {
+        return tsr.items;
+    } else {
+        throw tsr;
+    }
+}
+
+// Teacher accept Student Thesis Start Request
+async function acceptThesisStartRequest(tsrId) {
+    const response = await fetch(URL + `/teacher/thesis-start-requests/${tsrId}/review`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            action: "accept",
+        }),
+    });
+    const tsr = await response.json();
+    if (response.ok) {
+        return tsr;
+    } else {
+        throw tsr;
+    }
+}
+
+// Teacher reject Student Thesis Start Request
+async function rejectThesisStartRequest(tsrId) {
+    const response = await fetch(URL + `/teacher/thesis-start-requests/${tsrId}/review`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            action: "reject",
+        }),
+    });
+    const tsr = await response.json();
+    if (response.ok) {
+        return tsr;
+    } else {
+        throw tsr;
+    }
+}
+
+// Teacher request Changes on a Student Thesis Start Request
+async function reviewThesisStartRequest(tsrId, requestedChanges) {
+    const response = await fetch(URL + `/teacher/thesis-start-requests/${tsrId}/review`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            action: "request changes",
+            changes: requestedChanges,
+        }),
     });
     const tsr = await response.json();
     if (response.ok) {
@@ -488,8 +563,14 @@ const API = {
     logOut, redirectToLogin,
     getUser,
     getClock, updateClock,
-    insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById, getPDF, getSecretaryStartRequest,
-    acceptStartRequest, rejectStartRequest
+    insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, 
+    getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
+    applyForProposal, getStudentActiveApplication, 
+    acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, 
+    deleteProposalById, updateProposal, archiveProposalById, 
+    getStudentCVById, getPDF,
+    insertThesisStartRequest, getStudentLastThesisStartRequest, getTeacherThesisStartRequest, getSecretaryStartRequest, 
+    secretaryAcceptStartRequest, secretaryRejectStartRequest, 
+    acceptThesisStartRequest, rejectThesisStartRequest, reviewThesisStartRequest
 };
 export default API;
