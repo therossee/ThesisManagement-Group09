@@ -134,12 +134,6 @@
     <p>
       <code>docker run -p 5173:5173 -p 3000:3000 --name thesis_management -e <...> apokalypt/09_thesis_management </code> - Run the container
     </p>
-    <p>
-      <code>npm run build</code> - Build the project for production
-    </p>
-    <p>
-      <code>npm run preview</code> - Preview the production build
-    </p>
     <p>⚠️ <em>A working image is available on <a href="https://hub.docker.com/r/apokalypt/09_thesis_management">Docker Hub</a>
       </em>
     </p>
