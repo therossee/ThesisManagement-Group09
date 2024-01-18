@@ -66,12 +66,17 @@
 - **All tests computed**
 
   <img src="./Retrospective-4-all.png" alt="All tests coverage" width="70%" height="70%">
+  <img src="./Retrospective-4-all-coverage.png" alt="All tests coverage" width="70%" height="70%">
 
 - **Unit Testing**
   - Total hours estimated: **4h 40m**
   - Total hours spent: **4h 25m**
   - Nr of automated unit test cases : **14 suites (154 total tests)**
-  - Coverage:
+  - Coverage: 
+    - 46.13% Statements (507/1099)
+    - 45.72% Branches (123/269)
+    - 54.43% Functions (92/169)
+    - 46.14% Lines (503/1090)
 
   <img src="./Retrospective-4-unit.png" alt="Unit tests coverage" width="70%" height="70%">
 
@@ -80,6 +85,10 @@
   - Total hours spent: **5h 40m**
   - Nr of automated integration test cases : **7 suites (163 total tests)**
   - Coverage:
+    - 95.9% Statements (1054/1099)
+    - 91.82% Branches (247/269)
+    - 94.67% Functions (160/169)
+    - 95.87% Lines (1045/1090)
 
   <img src="./Retrospective-4-integration.png" alt="Integration tests coverage" width="70%" height="70%">
 
