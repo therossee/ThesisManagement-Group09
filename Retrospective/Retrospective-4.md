@@ -1,11 +1,10 @@
 # RETROSPECTIVE (Team 09)
-=====================================
 
 ### Sections:
 
-- [process measures](#process-measures)
-- [quality measures](#quality-measures)
-- [general assessment](#assessment)
+- [Process measures](#process-measures)
+- [Quality measures](#quality-measures)
+- [General assessment](#assessment)
 
 ## PROCESS MEASURES 
 
@@ -17,7 +16,7 @@
 
 **Note #0:** We were unable to complete a particular story as we arrived late, leaving insufficient time for automated end-to-end (e2e) tests, although the manual tests were conducted. Additionally, the mobile view had not been finalized at that point.
 
-**Remember**  a story is done ONLY if it fits the Definition of Done:
+**Remember** a story is done ONLY if it fits the Definition of Done:
  
 - Unit Tests passing
 - Integration Tests passing
@@ -39,58 +38,54 @@
 | Total                                    |   77    |  35    | 14d 2h 30m |  13d 6h 35m  |
 
 **Note 1:** #0 contains the hours spent for all the agile processes (planning, retrospective, meetings, presentation preparation) and the hours spent for:
-- documentation
-- sonar issues management 
-- improving based on feedback
-- refactoring
-- learning
+- Documentation
+- Sonar issues management 
+- Improving based on feedback
+- Refactoring
+- Learning
 
-<br />
+</br>
 
 - Hours per task average:
-
-    - *average =* $\frac{6870}{77}$ = 89.22 minutes/task ~ 1.49 hours/task ~ **1h 29m /task**  (estimated)
-    - *average =* $\frac{6635}{77}$ = 86.17 minutes/task ~ 1.44 hours/task ~ **1h 26m /task**  (actual)
+  - *average =* $\frac{6870}{77}$ = 89.22 minutes/task ~ 1.49 hours/task ~ **1h 29m /task**  (estimated)
+  - *average =* $\frac{6635}{77}$ = 86.17 minutes/task ~ 1.44 hours/task ~ **1h 26m /task**  (actual)
 
 - Standard deviation:
-
   - *Standard deviation →*$\ sigma = \sqrt{\frac{\sum_{i=1}^{n}(x_i - \bar{x})^2}{n-1}}$ = 1.61 h ~ **1h 37m** (estimated)
-
   - *Standard deviation →*$\ sigma = \sqrt{\frac{\sum_{i=1}^{n}(x_i - \bar{x})^2}{n-1}}$ = 1.62 h ~ **1h 37m** (actual)
 
 - Total task estimation error ratio: sum of total hours estimation / sum of total hours spent -1 = $\frac{6780}{6635} -1$ ~ **2%**
-
 
 ## QUALITY MEASURES
 
 - **All tests computed**
 
-  <img src="./Retrospective-4-all.png" alt="All tests coverage" width="70%" height="70%">
-  <img src="./Retrospective-4-all-coverage.png" alt="All tests coverage" width="70%" height="70%">
+  <img src="images/Retrospective-4-all.png" alt="All tests coverage" width="70%" height="70%">
+  <img src="images/Retrospective-4-all-coverage.png" alt="All tests coverage" width="70%" height="70%">
 
 - **Unit Testing**
   - Total hours estimated: **4h 40m**
   - Total hours spent: **4h 25m**
   - Nr of automated unit test cases : **14 suites (154 total tests)**
   - Coverage: 
-    - 46.13% Statements (507/1099)
-    - 45.72% Branches (123/269)
-    - 54.43% Functions (92/169)
-    - 46.14% Lines (503/1090)
+    - **46.13% Statements** (507/1099)
+    - **45.72% Branches** (123/269)
+    - **54.43% Functions** (92/169)
+    - **46.14% Lines** (503/1090)
 
-  <img src="./Retrospective-4-unit.png" alt="Unit tests coverage" width="70%" height="70%">
+  <img src="images/Retrospective-4-unit.png" alt="Unit tests coverage" width="70%" height="70%">
 
 - **Integration Testing**
   - Total hours estimated: **6h 10m**
   - Total hours spent: **5h 40m**
   - Nr of automated integration test cases : **7 suites (163 total tests)**
   - Coverage:
-    - 95.9% Statements (1054/1099)
-    - 91.82% Branches (247/269)
-    - 94.67% Functions (160/169)
-    - 95.87% Lines (1045/1090)
+    - **95.9% Statements** (1054/1099)
+    - **91.82% Branches** (247/269)
+    - **94.67% Functions** (160/169)
+    - **95.87% Lines** (1045/1090)
 
-  <img src="./Retrospective-4-integration.png" alt="Integration tests coverage" width="70%" height="70%">
+  <img src="images/Retrospective-4-integration.png" alt="Integration tests coverage" width="70%" height="70%">
 
 - **E2E testing**
   - Total hours estimated: **1d 5h 45m**
@@ -108,17 +103,17 @@
   - Hours spent on remediation: **1h**
   - Debt ratio (as reported by SonarQube under "Measures-Maintainability"): **0.00%**
 
-    <img src="./Retrospective-4-maintainability.png" alt="Debt ratio" width="30%" height="30%">
+    <img src="images/Retrospective-4-maintainability.png" alt="Debt ratio" width="30%" height="30%">
 
   - Rating for each quality characteristic reported in SonarQube under "Measures" (namely reliability, security, maintainability )
 
     **BEFORE THE SPRINT START**
 
-    <img src="./Retrospective-4-previous-measures.png" alt="Previous quality measures" width="70%" height="70%">
+    <img src="images/Retrospective-4-previous-measures.png" alt="Previous quality measures" width="70%" height="70%">
 
     **AT THE END OF THE SPRINT**
 
-    <img src="./Retrospective-4-after-measures.png" alt="Sonar quality measures" width="70%" height="70%">
+    <img src="images/Retrospective-4-after-measures.png" alt="Sonar quality measures" width="70%" height="70%">
 
 
 ## ASSESSMENT
