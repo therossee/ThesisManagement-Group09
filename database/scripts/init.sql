@@ -232,7 +232,10 @@ VALUES
     ('s318771', 'Husanu', 'Diana', 'Female', 'Romanian', 's318771@studenti.polito.it', 'LM-33', 2020),
     ('s321529', 'Ladrat', 'Matteo', 'Male', 'French', 's321529@studenti.polito.it', 'L-08', 2020),
     ('s318952', 'Molinatto', 'Sylvie', 'Female', 'Italian', 's318952@studenti.polito.it', 'LM-34', 2020),
-    ('s319355', 'Schiavone', 'Michele', 'Male', 'Italian', 's319355@studenti.polito.it', 'LM-35', 2020);
+    ('s319355', 'Schiavone', 'Michele', 'Male', 'Italian', 's319355@studenti.polito.it', 'LM-35', 2020),
+    /* The following two students should be used to login in the teaser video */
+    ('s111111', 'Moss', 'Elmo', 'Male', 'English', 's111111@studenti.polito.it', 'LM-32', 2022),
+    ('s222222', 'Woods', 'Bryan', 'Male', 'English', 's222222@studenti.polito.it', 'LM-32', 2022);
 
 -- Insert data into the teacher table
 INSERT INTO teacher (id, surname, name, email, cod_group, cod_department)
@@ -251,11 +254,16 @@ VALUES
     ('d258761', 'Ferrara', 'Valentina', 'd258761@polito.it', 'Group5', 'Dep1'),
     ('d237188', 'Marini', 'Alessia', 'd237188@polito.it', 'Group6', 'Dep2'),
     ('d392000', 'Santoro', 'Chiara', 'd392000@polito.it', 'Group5', 'Dep3'),
-    ('d292715', 'Gatti', 'Isabella', 'd292715@polito.it', 'Group3', 'Dep4');
+    ('d292715', 'Gatti', 'Isabella', 'd292715@polito.it', 'Group3', 'Dep4'),
+    /* The following two teachers should be used to login in the teaser video */
+    ('d111111', 'Pauli', 'Juan Stefano', 'd111111@polito.it', 'Electronic Bioengineering', 'DET (Department of Electronics and Telecommunications)'),
+    ('d222222', 'Saracco', 'Giulia', 'd222222@polito.it', 'SIMTI - Materials Science and Engineering for Innovative Technologies', 'DISAT (Department of Applied Science and Technology)');
 
 -- Insert data into the secretaryClerk table
 INSERT INTO secretaryClerk (id, surname, name, email)
-VALUES ('sc12345', 'Rossi', 'Abbondanzio', 'abbondanzio.rossi@polito.it');
+VALUES ('sc12345', 'Rossi', 'Abbondanzio', 'abbondanzio.rossi@polito.it'),
+       /* The following secretary clerk should be used to login in the teaser video */
+       ('sc11111', ' Beesly', 'Pam', 'sc11111@polito.it');
 
 -- Insert data into the externalCoSupervisor table
 INSERT INTO externalCoSupervisor (surname, name, email)
@@ -311,7 +319,24 @@ VALUES
     ('s319355', '02ILSMZ', 'Metallurgical Plants', 6, 19, '13/01/2023'),
     ('s319355', '01NGFMZ', 'Materials Engineering', 10, 23, '10/02/2023'),
     ('s319355', '02CFUMZ', 'Science and Technology of Composite Materials', 10, 30, '16/02/2023'),
-    ('s319355', '02NGKMZ', 'Technology of Polymer Materials', 10, 27, '16/06/2023');
+    ('s319355', '02NGKMZ', 'Technology of Polymer Materials', 10, 27, '16/06/2023'),
+    /* The following are the careers of the two students for the teaser video */
+    ('s111111', '01DSHOV', 'Big data processing and analytics', 6, 30, '30/01/2023'),
+    ('s111111', '02LSEOV', 'Computer architectures', 10, 28, '03/02/2023'),
+    ('s111111', '01SQJOV', 'Data Science and Database Technology', 8, 29, '06/02/2023'),
+    ('s111111', '01OTWOV', 'Computer network technologies and services', 6, 27, '15/02/2023'),
+    ('s111111', '04GSPOV', 'Software engineering', 8, 30, '16/06/2023'),
+    ('s111111', '01TXYOV', 'Web Applications I', 6, 30, '20/06/2023'),
+    ('s111111', '01NYHOV', 'System and device programming', 10, 25, '25/06/2023'),
+    ('s111111', '01URTOV', 'Machine learning and pattern recognition', 6, 24, '29/06/2023'),
+    ('s222222', '01DSHOV', 'Big data processing and analytics', 6, 30, '30/01/2023'),
+    ('s222222', '02LSEOV', 'Computer architectures', 10, 26, '17/02/2023'),
+    ('s222222', '01SQJOV', 'Data Science and Database Technology', 8, 27, '06/02/2023'),
+    ('s222222', '01OTWOV', 'Computer network technologies and services', 6, 28, '15/02/2023'),
+    ('s222222', '04GSPOV', 'Software engineering', 8, 30, '16/06/2023'),
+    ('s222222', '01TXYOV', 'Web Applications I', 6, 30, '20/06/2023'),
+    ('s222222', '01NYHOV', 'System and device programming', 10, 19, '22/01/2023'),
+    ('s222222', '01URTOV', 'Machine learning and pattern recognition', 6, 24, '29/06/2023');
 
 -- Insert data into the thesisProposal table
 INSERT INTO thesisProposal (title, supervisor_id, type, description, required_knowledge, notes, creation_date, expiration, level)
