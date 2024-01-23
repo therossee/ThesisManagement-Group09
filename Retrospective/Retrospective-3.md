@@ -65,7 +65,7 @@ hours spent for:
 
 - **All tests computed**
 
-  <img src="./Retrospective-3-all.jpg" alt="All tests coverage" width="70%" height="70%">
+  <img src="images/Retrospective-3-all.jpg" alt="All tests coverage" width="70%" height="70%">
 
 - **Unit Testing**
   - Total hours estimated: **6h 30m**
@@ -73,7 +73,7 @@ hours spent for:
   - Nr of automated unit test cases : **5 suites (86 total tests)**
   - Coverage:
   
-  <img src="./Retrospective-3-unit.jpg" alt="Unit tests coverage" width="70%" height="70%">
+  <img src="images/Retrospective-3-unit.jpg" alt="Unit tests coverage" width="70%" height="70%">
 
 - **Integration Testing**
   - Total hours estimated: **12h**
@@ -81,7 +81,7 @@ hours spent for:
   - Nr of automated integration test cases : **5 suites (103 total tests)**
   - Coverage:
 
-    <img src="./Retrospective-3-integration.jpg" alt="Integration tests coverage" width="70%" height="70%">
+    <img src="images/Retrospective-3-integration.jpg" alt="Integration tests coverage" width="70%" height="70%">
 
 - **E2E testing**
   - Total hours estimated: **19h 55m**
@@ -99,17 +99,17 @@ hours spent for:
   - Hours spent on remediation: **3h**
   - Debt ratio (as reported by SonarQube under "Measures-Maintainability"): **0.00%**
 
-    <img src="./debt-ratio.png" alt="Debt ratio" width="30%" height="30%">
+    <img src="images/debt-ratio.png" alt="Debt ratio" width="30%" height="30%">
 
   - Rating for each quality characteristic reported in SonarQube under "Measures" (namely reliability, security, maintainability )
 
     **BEFORE THE SPRINT START**
 
-    <img src="./previous-quality-measures.png" alt="Previous quality measures" width="70%" height="70%">
+    <img src="images/previous-quality-measures.png" alt="Previous quality measures" width="70%" height="70%">
 
     **AT THE END OF THE SPRINT**
   
-    <img src="./sonar-quality-measures.png" alt="Sonar quality measures" width="70%" height="70%">
+    <img src="images/sonar-quality-measures.png" alt="Sonar quality measures" width="70%" height="70%">
 
 
 ## ASSESSMENT

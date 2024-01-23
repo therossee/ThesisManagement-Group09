@@ -61,7 +61,7 @@ function MobModal(props) {
             setDisabled(true);
             setLoading(false);
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
             setUploadedFile(null);
             setDisabled(false);
             setLoading(false);

@@ -169,7 +169,7 @@ function TeacherArchive() {
                     setDirty(false);
                 })
                 .catch((err) => {
-                    message.error(err.message ? err.message : err);
+                    message.error(err.message ?? err);
                     setIsLoadingTable(false);
                     setDirty(false);
                 });
@@ -177,7 +177,7 @@ function TeacherArchive() {
                 .then((clock) => {
                     setDate(dayjs().add(clock.offset, 'ms'));
                 })
-                .catch((err) => { message.error(err.message ? err.message : err) });
+                .catch((err) => { message.error(err.message ?? err) });
         }
     }, [dirty]);
 
@@ -226,7 +226,7 @@ function TeacherArchive() {
             }
 
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
             setIsLoadingTable(false);
         }
     }

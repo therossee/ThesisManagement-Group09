@@ -49,7 +49,7 @@ function TeacherApplications() {
                     setDirty(false);
                 }
             } catch (err) {
-                message.error(err.message ? err.message : err);
+                message.error(err.message ?? err);
             }
         };
         fetchData();
@@ -75,7 +75,7 @@ function TeacherApplications() {
             setDirty(true);
             setButtonsLoading(false)
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
             setButtonsLoading(false);
         }
     };
@@ -89,7 +89,7 @@ function TeacherApplications() {
             setDirty(true);
             setButtonsLoading(false);
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
             setButtonsLoading(false);
         }
     };

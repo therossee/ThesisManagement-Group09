@@ -4,7 +4,9 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys # for sending keys suchn as ENTER, RETURN...
 from selenium.webdriver.common.by import By
-
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+import requests
 
 options = Options()
 options.add_experimental_option("detach", True) # keep browser open after test
@@ -50,15 +52,37 @@ print("Archive button clicked")
 
 # Step 5: Confirm archiving
 driver.implicitly_wait(5)
-confirm_button = driver.find_element(By.XPATH, "//span[normalize-space()='Yes']")
+confirm_button = driver.find_element(By.XPATH, "//span[normalize-space()='Yes, archive it']")
 confirm_button.click()
 print("Confirm button clicked")
 
 # Step 6: Verify that the proposal is archived
 driver.implicitly_wait(5)
-try:
-    archive_button = driver.find_element(By.XPATH, "//tbody/tr[2]/td[9]/div[1]/div[5]")
-    archive_button.click()
-    print("Archive button clicked")
-except Exception as e:
-    print(f"Test passed, the proposal doesn't exist due, knowned by the error: {e}")
+driver.get("http://localhost:5173/archive")
+print("Archive page opened")
+
+driver.implicitly_wait(5)
+driver.get("http://localhost:5173/view-proposal/1")
+print("Proposal page opened")
+
+driver.implicitly_wait(5)
+driver.get("http://localhost:5173/edit-proposal/1")
+print("Edit page opened")
+
+driver.implicitly_wait(5)
+title_Field = driver.find_element(By.XPATH, "//input[@id='title']")
+title_Field.send_keys("Testing the edit and archived proposal")
+print("Title inserted")
+
+driver.implicitly_wait(5)
+submit_button = driver.find_element(By.XPATH, "//span[normalize-space()='Submit']")
+submit_button.click()
+print("Submit button clicked")
+
+driver.implicitly_wait(5)
+next_button = driver.find_element(By.XPATH, "//span[normalize-space()='Next']")
+next_button.click()
+print("Next button clicked")
+
+
+
