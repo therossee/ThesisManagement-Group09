@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { HomeOutlined, FileTextOutlined, ToTopOutlined, InboxOutlined, FileDoneOutlined } from '@ant-design/icons';
 
 function Tabs() {
-    const { isTeacher, isStudent } = useAuth();
+    const { isTeacher, isStudent, isSecretaryClerk } = useAuth();
     const [selectedTab, setSelectedTab] = useState('homeTab');
     const navigate = useNavigate();
     const location = useLocation();
@@ -52,7 +52,7 @@ function Tabs() {
                 onPress={() => setSelectedTab('homeTab')}
             >
             </TabBar.Item>
-            {(isStudent || isTeacher) && (
+            {(isStudent === true || isTeacher === true) && (
             <TabBar.Item 
                 title="Proposals"
                 key="/proposals" icon={<FileTextOutlined />} 
@@ -61,7 +61,7 @@ function Tabs() {
                 onPress={() => setSelectedTab('proposalsTab')}>
 
             </TabBar.Item>)}
-            {isTeacher &&(
+            {isTeacher === true &&(
                 <TabBar.Item
                     title="Archive"
                     key="/archive"
@@ -71,7 +71,7 @@ function Tabs() {
                     onPress={() => setSelectedTab('archive')}
                 />
             )}
-            {(isStudent || isTeacher) && (
+            {(isStudent === true || isTeacher === true ) && (
             <TabBar.Item 
                 title="Applications"
                 key="/applications" icon={<ToTopOutlined />}
@@ -79,7 +79,7 @@ function Tabs() {
                 selected={selectedTab === 'applicationsTab'}
                 onPress={() => setSelectedTab('applicationsTab')}/>
             )}
-            {(isStudent === true || isTeacher === true) && (
+            {(isStudent === true || isTeacher === true || isSecretaryClerk === true) && (
                 <TabBar.Item
                     title="Start Request"
                     key="/start-request" icon={<FileDoneOutlined />}
