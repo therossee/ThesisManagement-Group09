@@ -99,15 +99,17 @@ function MobCV(props) {
 
 function ColorLegenda() {
     return (
-        <AutoCenter>
-        <Row style={{ marginBottom: '10px', marginLeft: "3%", marginRight: "3%", marginTop: "3%" }}>
+        <>
+        <div style={{display: 'flex', alignItems: 'center', marginTop: '5px'}}>
             <Tag color="#f5222d">Less than 20</Tag>
             <Tag color="#fa8c16">20 to 21</Tag>
             <Tag color="#fadb14">22 to 23</Tag>
+            </div>
+            <div style={{display: 'flex', alignItems: 'center', marginTop: '5px', marginBottom: '10px'}}>
             <Tag color="#a0d911">24 to 26</Tag>
             <Tag color="#52c41a">27 and above</Tag>
-        </Row>
-            </AutoCenter>
+        </div>
+        </>
     )
 }
 

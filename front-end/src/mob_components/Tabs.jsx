@@ -39,7 +39,8 @@ function Tabs() {
             position: "fixed",
             bottom: 0,
             width: "100%",
-            backgroundColor: "#ffffff"
+            backgroundColor: "#ffffff",
+            borderTop: "1px solid #e5e5e5"
         }} onChange={value => setRouteActive(value)}
         defaultActiveKey={"/"}
         activeKey={location.pathname}>
