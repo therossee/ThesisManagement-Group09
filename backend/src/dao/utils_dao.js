@@ -11,7 +11,7 @@ const db = require('../services/db');
  * @returns {Promise<TeacherRow>}
  */
 exports.getTeacherListExcept = async (id) => {
-    const query = `SELECT * FROM teacher WHERE id <> ?; `;
+    const query = `SELECT * FROM teacher WHERE id <> ? ORDER BY name; `;
 
     return db.prepare(query).all(id);
 };
@@ -22,7 +22,7 @@ exports.getTeacherListExcept = async (id) => {
  * @returns {Promise<ExternalCoSupervisorRow>}
  */
 exports.getExternalCoSupervisorList = async () => {
-    const query = `SELECT * FROM externalCoSupervisor;`;
+    const query = `SELECT * FROM externalCoSupervisor ORDER BY name;`;
 
     return db.prepare(query).all();
 };
@@ -33,7 +33,7 @@ exports.getExternalCoSupervisorList = async () => {
  * @returns {Promise<string[]>}
  */
 exports.getAllKeywords = async () => {
-    const getKeywords = `SELECT DISTINCT(keyword) FROM proposalKeyword`;
+    const getKeywords = `SELECT DISTINCT(keyword) FROM proposalKeyword ORDER BY keyword;`;
     const res = db.prepare(getKeywords).all();
     // Extracting the keyword property from each row
     return res.map( row => row.keyword );
@@ -45,7 +45,7 @@ exports.getAllKeywords = async () => {
  * @returns {Promise<DegreeRow[]>}
  */
 exports.getDegrees = async () => {
-    const getDegrees = `SELECT * FROM degree`;
+    const getDegrees = `SELECT * FROM degree ORDER BY title_degree;`;
 
     return db.prepare(getDegrees).all();
 };
