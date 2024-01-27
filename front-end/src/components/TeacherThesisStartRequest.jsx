@@ -4,6 +4,7 @@ import { CheckOutlined, CloseOutlined, HistoryOutlined, CheckCircleOutlined, Clo
 import dayjs from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import { renderTeacherInfo } from './StudentThesisStartRequest';
+import { getStatus } from './utils.jsx';
 import PropTypes from 'prop-types';
 import API from '../API';
 
@@ -388,21 +389,6 @@ function getIcon(status) {
             return <ClockCircleOutlined />;
         default:
             return <InfoCircleOutlined />;
-    }
-}
-
-function getStatus(status) {
-    switch (status) {
-        case "accepted by secretary":
-            return <Badge status="processing" text={<strong>Waiting for your approval</strong>} />;
-        case "changes requested":
-            return <Badge status="warning" text={<strong>Changes requested</strong>} />;
-        case "rejected by teacher":
-            return <Badge status="error" text={<strong>Rejected by you</strong>} />;
-        case "accepted by teacher":
-            return <Badge status="success" text={<strong>Accepted by you</strong>} />;
-        default:
-            return <Badge status="error" text={<strong>Failed fetching/parsing information</strong>} />
     }
 }
 
