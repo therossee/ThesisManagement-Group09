@@ -68,9 +68,15 @@ function MobStartRequestsList({ data, acceptStartRequest, rejectStartRequest }) 
                             <Button onClick={() => handleView(request)}>View</Button>
                             {(!checkStatusButtons(request.status)) &&
                                 <>
-                                    <Button onClick={() => showModal("Are you sure you want to accept this Thesis Start Request?",
+                                    <Button onClick={() => showModal(<><h3>Are you sure you want to accept this Thesis Start Request?</h3>
+                                        <p>{request.title}</p>
+                                            <p>Student: {request.student.name} {request.student.surname} ({request.student.id})</p>
+                                        </>,
                                         handleAccept, "Yes, accept", "Discard action", request, acceptStartRequest)}><CheckOutlined/>    Accept</Button>
-                                    <Button onClick={() => showModal("Are you sure you want to accept this Thesis Start Request?",
+                                    <Button onClick={() => showModal(<><h3>Are you sure you want to reject this Thesis Start Request?</h3>
+                                            <p>{request.title}</p>
+                                            <p>Student: {request.student.name} {request.student.surname} ({request.student.id})</p>
+                                        </>,
                                         handleReject, "Yes, reject", "Discard action", request, rejectStartRequest)}><CloseOutlined/>    Reject</Button>
                                 </>
                             }
@@ -158,9 +164,15 @@ function ViewTSR({ tsr, setView, acceptStartRequest, rejectStartRequest }){
             }
             {(!checkStatusButtons(tsr.status)) &&
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <Button style={{marginRight: '3%'}} onClick={() => showModal("Are you sure you want to accept this Thesis Start Request?",
+                    <Button style={{marginRight: '3%'}} onClick={() => showModal(<><h3>Are you sure you want to accept this Thesis Start Request?</h3>
+                            <p>{tsr.title}</p>
+                            <p>Student: {tsr.student.name} {tsr.student.surname} ({tsr.student.id})</p>
+                        </>,
                     handleAccept, "Yes, accept", "Discard action", tsr, acceptStartRequest)}><CheckOutlined /> Accept</Button>
-                    <Button style={{marginLeft: '3%'}} onClick={() => showModal("Are you sure you want to accept this Thesis Start Request?",
+                    <Button style={{marginLeft: '3%'}} onClick={() => showModal(<><h3>Are you sure you want to reject this Thesis Start Request?</h3>
+                            <p>{tsr.title}</p>
+                            <p>Student: {tsr.student.name} {tsr.student.surname} ({tsr.student.id})</p>
+                        </>,
                         handleReject, "Yes, reject", "Discard action", tsr, rejectStartRequest)}><CloseOutlined /> Reject</Button>
                 </div>
 
