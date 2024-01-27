@@ -12,6 +12,7 @@ import './css/style.css';
 import MobApplications from './mob_routes/MobApplications';
 import { Tabs } from './mob_components/Tabs'
 import MobArchive from "./mob_routes/MobArchive.jsx";
+import MobStartRequest from './mob_routes/MobStartRequest.jsx';
 
 const { Content, Footer } = Layout;
 
@@ -31,6 +32,7 @@ function MobLayout() {
                             <Route path="/view-proposal/:id" element={<ViewProposal />} />
                             <Route path="/edit-proposal/:id" element={<MobEditProposal />} />
                             <Route path="/archive" element={<MobArchive />} />
+                            <Route path="/start-request" element={<MobStartRequest />} />
                             <Route path="/*" element={<Errors code="404"/>} />
                         </Routes>
                     </Content>

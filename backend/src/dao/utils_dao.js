@@ -11,7 +11,7 @@ const db = require('../services/db');
  * @returns {Promise<TeacherRow>}
  */
 exports.getTeacherListExcept = async (id) => {
-    const query = `SELECT * FROM teacher WHERE id <> ? ORDER BY name; `;
+    const query = `SELECT * FROM teacher WHERE id <> ? ORDER BY name, surname; `;
 
     return db.prepare(query).all(id);
 };
@@ -22,7 +22,7 @@ exports.getTeacherListExcept = async (id) => {
  * @returns {Promise<ExternalCoSupervisorRow>}
  */
 exports.getExternalCoSupervisorList = async () => {
-    const query = `SELECT * FROM externalCoSupervisor ORDER BY name;`;
+    const query = `SELECT * FROM externalCoSupervisor ORDER BY name, surname;`;
 
     return db.prepare(query).all();
 };

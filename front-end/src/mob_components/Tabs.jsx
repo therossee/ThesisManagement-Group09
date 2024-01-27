@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { TabBar } from 'antd-mobile';
 import { useAuth } from '../components/authentication/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { HomeOutlined, FileTextOutlined, FileAddOutlined, ToTopOutlined, InboxOutlined } from '@ant-design/icons';
+import { HomeOutlined, FileTextOutlined, ToTopOutlined, InboxOutlined, FileDoneOutlined } from '@ant-design/icons';
 
 function Tabs() {
-    const { isTeacher, isStudent } = useAuth();
+    const { isTeacher, isStudent, isSecretaryClerk } = useAuth();
     const [selectedTab, setSelectedTab] = useState('homeTab');
     const navigate = useNavigate();
     const location = useLocation();
@@ -24,6 +24,9 @@ function Tabs() {
         if (selectedTab === 'logoutTab') {
             navigate('/');
         }
+        if (location.pathname === '/start-request') {
+            setSelectedTab('tsrTab');
+        }
     }, [location])
 
     const setRouteActive = (value) => {
@@ -36,7 +39,8 @@ function Tabs() {
             position: "fixed",
             bottom: 0,
             width: "100%",
-            backgroundColor: "#ffffff"
+            backgroundColor: "#ffffff",
+            borderTop: "1px solid #e5e5e5"
         }} onChange={value => setRouteActive(value)}
         defaultActiveKey={"/"}
         activeKey={location.pathname}>
@@ -49,7 +53,7 @@ function Tabs() {
                 onPress={() => setSelectedTab('homeTab')}
             >
             </TabBar.Item>
-            {(isStudent || isTeacher) && (
+            {(isStudent === true || isTeacher === true) && (
             <TabBar.Item 
                 title="Proposals"
                 key="/proposals" icon={<FileTextOutlined />} 
@@ -58,17 +62,7 @@ function Tabs() {
                 onPress={() => setSelectedTab('proposalsTab')}>
 
             </TabBar.Item>)}
-            {isTeacher &&(
-              <TabBar.Item 
-              title="Insert Proposal"
-              key="/insert-proposal" 
-              icon={<FileAddOutlined />}
-              selectedIcon={<FileAddOutlined />}
-              selected={selectedTab === 'insertTab'}
-              onPress={() => setSelectedTab('insertTab')}
-            />
-            )}
-            {isTeacher &&(
+            {isTeacher === true &&(
                 <TabBar.Item
                     title="Archive"
                     key="/archive"
@@ -78,13 +72,21 @@ function Tabs() {
                     onPress={() => setSelectedTab('archive')}
                 />
             )}
-            {(isStudent || isTeacher) && (
+            {(isStudent === true || isTeacher === true ) && (
             <TabBar.Item 
                 title="Applications"
                 key="/applications" icon={<ToTopOutlined />}
                 selectedIcon={<ToTopOutlined />}
                 selected={selectedTab === 'applicationsTab'}
                 onPress={() => setSelectedTab('applicationsTab')}/>
+            )}
+            {(isStudent === true || isTeacher === true || isSecretaryClerk === true) && (
+                <TabBar.Item
+                    title="Start Request"
+                    key="/start-request" icon={<FileDoneOutlined />}
+                    selectedIcon={<FileDoneOutlined />}
+                    selected={selectedTab === 'tsrTab'}
+                    onPress={() => setSelectedTab('tsrTab')}/>
             )}  
         </TabBar>
         </div>

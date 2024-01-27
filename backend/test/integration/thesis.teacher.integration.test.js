@@ -322,7 +322,7 @@ describe('GET /api/keywords', () => {
 
         // Assertions
         expect(response.status).toBe(200);
-        expect(response.body).toEqual({keywords: ["AI", "web development", "research", "reactive API", "QUIC"]});
+        expect(response.body).toEqual({keywords: ["AI",  "QUIC", "reactive API", "research", "web development"]});
     });
 
     test('should handle errors and return 500', async () => {

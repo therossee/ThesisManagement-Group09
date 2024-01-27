@@ -1,4 +1,4 @@
-import { Tag } from 'antd';
+import { Tag, Badge } from 'antd';
 
 // Common function to generate columns
 export function generateCommonColumns() {
@@ -60,4 +60,19 @@ export function generateCommonColumns() {
             sorter: (a, b) => new Date(a.expiration) - new Date(b.expiration),
         },
     ];
+}
+
+export function getStatus(status) {
+    switch (status) {
+        case "accepted by secretary":
+            return <Badge status="processing" text={<strong>Waiting for your approval</strong>} />;
+        case "changes requested":
+            return <Badge status="warning" text={<strong>Changes requested</strong>} />;
+        case "rejected by teacher":
+            return <Badge status="error" text={<strong>Rejected by you</strong>} />;
+        case "accepted by teacher":
+            return <Badge status="success" text={<strong>Accepted by you</strong>} />;
+        default:
+            return <Badge status="error" text={<strong>Failed fetching/parsing information</strong>} />
+    }
 }

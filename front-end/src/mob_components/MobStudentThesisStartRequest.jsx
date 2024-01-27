@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Alert, Badge, Button, Descriptions, Col, Row, Typography, Form, Input, Select, Space, message, Skeleton, Tag } from 'antd';
+import { Alert, Badge, Button, Row, Typography, Input, Select, message, Skeleton, Tag } from 'antd';
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Collapse, Space, Form } from "antd-mobile";
 import dayjs from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import PropTypes from 'prop-types';
@@ -8,21 +9,21 @@ import API from '../API';
 
 dayjs.extend(localizedFormat);
 
-function StudentThesisStartRequest() {
+function MobStudentThesisStartRequest() {
     // Trigger TSR Addition Form Visibility
-    const [formVisible, setFormVisible] = useState(false);
+    const [viewForm, setViewForm] = useState(false);
 
     const [trigger, setTrigger] = useState(true);
 
-    const [loading, setLoading] = useState(false);
+    const [loadData, setLoadData] = useState(false);
 
     const [disabled, setDisabled] = useState(false);
 
     return (
         <div>
             <Row justify="start" align="middle" style={{ marginTop: "10px" }}>
-                {formVisible ?
-                    <Button ghost type="primary" onClick={() => setFormVisible(false)}>
+                {viewForm ?
+                    <Button ghost type="primary" onClick={() => setViewForm(false)}>
                         &lt; Back to Thesis Start Request
                     </Button>
                     :
@@ -31,89 +32,81 @@ function StudentThesisStartRequest() {
                             type="primary"
                             icon={<PlusOutlined />}
                             size="large"
-                            loading={loading}
+                            loading={loadData}
                             disabled={disabled}
-                            onClick={() => { setFormVisible(true) }}
+                            onClick={() => { setViewForm(true) }}
                         >
                             Add New Thesis Start Request
                         </Button>
-                        <Button type="link" icon={<ReloadOutlined />} loading={loading} onClick={() => (setTrigger(!trigger))}>Refresh</Button>
+                        <Button type="link" icon={<ReloadOutlined />} loading={loadData} onClick={() => (setTrigger(!trigger))}>Refresh</Button>
                     </>
                 }
             </Row>
-            {formVisible ? <AddThesisStartRequestForm setFormVisible={setFormVisible} /> : <ViewThesisStartRequest trigger={trigger} setDisabled={setDisabled} loading={loading} setLoading={setLoading} />}
+            {viewForm ? <AddTSRForm setFormVisible={setViewForm} /> : <ViewTSR trigger={trigger} setDisabled={setDisabled} loading={loadData} setLoading={setLoadData} />}
         </div>
     )
 }
 
-function AddThesisStartRequestForm({ setFormVisible }) {
+function AddTSRForm({ setFormVisible }) {
 
     const { Title } = Typography;
 
-    const [form] = Form.useForm();
+    const [tsrForm] = Form.useForm();
 
     // Loading state for API calls to get teachers
-    const [loading, setLoading] = useState(true);
+    const [loadData, setLoadData] = useState(true);
 
     // Store list of supervisors and co-supervisors
     const [options, setOptions] = useState([]);
 
-    const [buttonLoading, setButtonLoading] = useState(false);
+    const [loadButton, setLoadButton] = useState(false);
 
     // Excluding X supervisor from the list of co-supervisors
-    const [selectedSupervisor, setSelectedSupervisor] = useState(null);
+    const [selSup, setSelSup] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
-            setLoading(true);
+            setLoadData(true);
             try {
                 const teachers = await API.getTeachers();
-                
                 const formattedTeachers = teachers.teachers.map((x) => ({
                     value: x.id,
                     label: `${x.name} ${x.surname}`,
                     searchValue: `${x.id} ${x.name} ${x.surname}`,
                 }));
                 setOptions(formattedTeachers);
-                setLoading(false);
+                setLoadData(false);
             } catch (err) {
-                message.error(err.message ?? err);
-                setLoading(false);
+                message.error(err.message ? err.message : err);
+                setLoadData(false);
             }
         };
         fetchData();
     }, []);
 
     const onFinish = async (values) => {
-        setButtonLoading(true);
+        setLoadButton(true);
         try {
             await API.insertThesisStartRequest(values);
             message.success("Thesis Start Request successfully sent!");
-            setButtonLoading(false);
+            setLoadButton(false);
             setFormVisible(false);
         } catch (err) {
-            message.error(err.message ?? err);
-            setButtonLoading(false);
+            message.error(err.message ? err.message : err);
+            setLoadButton(false);
         }
     };
 
     return (
-        <div>
-            <Row justify="center">
+        <div style={{marginBottom: '70px'}}>
                 <Title level={2}>Thesis Start Request</Title>
-            </Row>
-            <Row>
-                <Col span={5} />
-                <Col span={14}>
-                    <Form form={form} name="validateOnly" layout="vertical" onFinish={onFinish}>
+                    <Form form={tsrForm} name="validateOnly" layout="vertical" onFinish={onFinish}>
                         <Form.Item name="title" label="Title" rules={[{ required: true, message: "Title cannot be empty!" }]}>
                             <Input />
                         </Form.Item>
                         <Form.Item name="description" label="Description" rules={[{ required: true, message: "Description cannot be empty!" }]}>
                             <Input.TextArea rows={7} />
                         </Form.Item>
-                        <Row gutter={16}>
-                            <Col span={6}>
                                 <Form.Item
                                     name="supervisor_id"
                                     label="Supervisor"
@@ -122,19 +115,18 @@ function AddThesisStartRequestForm({ setFormVisible }) {
                                     <Select
                                         showSearch
                                         placeholder="Select the Supervisor"
-                                        loading={loading}
+                                        loading={loadData}
                                         options={options}
                                         onChange={(value) => {
-                                            setSelectedSupervisor(value);
-                                            form.resetFields(['internal_co_supervisors_ids'])
+                                            setSelSup(value);
+                                            tsrForm.resetFields(['internal_co_supervisors_ids'])
                                         }}
                                         filterOption={(input, option) =>
                                             option.searchValue.toLowerCase().includes(input.toLowerCase())
                                         }
+                                        style={{width: '100%'}}
                                     />
                                 </Form.Item>
-                            </Col>
-                            <Col span={18}>
                                 <Form.Item
                                     name="internal_co_supervisors_ids"
                                     label="Internal co-Supervisors"
@@ -142,42 +134,38 @@ function AddThesisStartRequestForm({ setFormVisible }) {
                                     <Select
                                         mode="multiple"
                                         placeholder="Select the internal co-Supervisors"
-                                        loading={loading}
-                                        options={options.map(option => option.value === selectedSupervisor ? { ...option, disabled: true } : option)}
-                                        disabled={!selectedSupervisor}
+                                        loading={loadData}
+                                        options={options.map(option => option.value === selSup ? { ...option, disabled: true } : option)}
+                                        disabled={!selSup}
                                         filterOption={(input, option) =>
                                             option.searchValue.toLowerCase().includes(input.toLowerCase())
                                         }
+                                        style={{width: '100%'}}
                                     />
                                 </Form.Item>
-                            </Col>
-                        </Row>
                         <Form.Item>
                             <Space>
-                                <SubmitButton form={form} loading={loading} buttonLoading={buttonLoading} />
+                                <SubmitButton form={tsrForm} loading={loadData} buttonLoading={loadButton} />
                                 <Button htmlType="reset">Reset Fields</Button>
                             </Space>
                         </Form.Item>
                     </Form>
-                </Col>
-                <Col span={5} />
-            </Row>
-        </div >
+        </div>
     )
 }
 
 function getStatus(status) {
     switch (status) {
         case "waiting for approval":
-            return <Badge status="processing" text={<strong>1/3 - Waiting for approval from the secretary</strong>} />;
+            return <Badge status="processing" text={<strong>1/3 - Waiting for secretary approval</strong>} />;
         case "rejected by secretary":
-            return <Badge status="error" text={<strong>1/3 - Rejected by the secretary, you can submit a new one</strong>} />;
+            return <Badge status="error" text={<><strong>1/3 - Rejected by the secretary.</strong> <strong> you can submit a new one</strong></>} />;
         case "accepted by secretary":
             return <Badge status="processing" text={<strong>2/3 - Waiting for approval from the teacher</strong>} />;
         case "changes requested":
             return <Badge status="warning" text={<strong>2/3 - Changes requested</strong>} />;
         case "rejected by teacher":
-            return <Badge status="error" text={<strong>2/3 - Rejected by the teacher, you can submit a new one</strong>} />;
+            return <Badge status="error" text={<><strong>2/3 - Rejected by the teacher.</strong><strong> You can submit a new one</strong></>} />;
         case "accepted by teacher":
             return <Badge status="success" text={<strong>3/3 - Accepted</strong>} />;
         default:
@@ -192,33 +180,19 @@ function renderTeacherInfo(name, surname) {
     );
 }
 
-function SubmitButton({ form, loading, buttonLoading }) {
+function SubmitButton({ loading, buttonLoading }) {
 
     // Validating required form fields
-    const [submittable, setSubmittable] = useState(false);
 
-    // Watch all values
-    const values = Form.useWatch([], form);
-
-    useEffect(() => {
-        form
-            .validateFields({
-                validateOnly: true,
-            })
-            .then(
-                () => { setSubmittable(true) },
-                () => { setSubmittable(false) },
-            );
-    }, [values]);
 
     return (
-        <Button type="primary" htmlType="submit" disabled={!submittable && loading} loading={buttonLoading}>
+        <Button type="primary" htmlType="submit" disabled={loading} loading={buttonLoading}>
             Submit
         </Button>
     );
 };
 
-function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
+function ViewTSR({ trigger, loading, setLoading, setDisabled }) {
 
     const [activeThesisStartRequest, setActiveThesisStartRequest] = useState({});
 
@@ -233,7 +207,7 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
                 setActiveThesisStartRequest(activeTSR);
                 setLoading(false);
             } catch (err) {
-                message.error(err.message ?? err);
+                message.error(err.message ? err.message : err);
                 setLoading(false);
             }
         };
@@ -249,92 +223,69 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
 
     if (Object.keys(activeThesisStartRequest).length > 0) {
 
-        // Items of the Table
-        const items = [
-            {
-                key: '1',
-                label: 'Thesis Start Request Title',
-                span: 3,
-                children: activeThesisStartRequest.title,
-            },
-            {
-                key: '2',
-                label: 'Submitted on',
-                span: 1,
-                children: dayjs(activeThesisStartRequest.creation_date).format('LLL'),
-            },
-            {
-                key: '3',
-                label: 'Supervisor',
-                span: 3,
-                children: renderTeacherInfo(activeThesisStartRequest.supervisor.name, activeThesisStartRequest.supervisor.surname),
-            },
-            {
-                key: '4',
-                label: 'Supervisor ID',
-                span: 1,
-                children: activeThesisStartRequest.supervisor.id,
-            },
-            {
-                key: '5',
-                label: 'Status',
-                span: 3,
-                children: getStatus(activeThesisStartRequest.status),
-            },
-            {
-                key: '6',
-                label: 'Approval Date',
-                span: 1,
-                children: activeThesisStartRequest.approval_date ? dayjs(activeThesisStartRequest.approval_date).format('LLL') : "Not yet approved",
-            },
-            {
-                key: '7',
-                label: 'Description',
-                span: 4,
-                children: activeThesisStartRequest.description,
-            },
-        ];
-
-        // Add co-supervisors to the items array
-        activeThesisStartRequest.co_supervisors.forEach((cosupervisor, index) => {
-            const cosupervisorItem = {
-                key: `co-supervisor-${index}`,
-                label: `Co-Supervisor #${index + 1}`,
-                span: 3,
-                children: renderTeacherInfo(cosupervisor.name, cosupervisor.surname),
-            };
-            const cosupervisorIdItem = {
-                key: `co-supervisor-id-${index}`,
-                label: `Co-Supervisor #${index + 1} ID`,
-                span: 1,
-                children: cosupervisor.id,
-            };
-            items.splice(4 + index * 2, 0, cosupervisorItem, cosupervisorIdItem);
-        });
+        const coSupBadge = () => {
+            console.log(activeThesisStartRequest.co_supervisors);
+            if(activeThesisStartRequest.co_supervisors.length > 0){
+              return activeThesisStartRequest.co_supervisors.map((coSupervisor, index) => {
+                return (
+                  <div key={coSupervisor.id}>
+                    <h3>Co-Supervisor #{index+1}: </h3>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      {renderTeacherInfo(coSupervisor.name, coSupervisor.surname)}
+                      <span> - </span>
+                      <p style={{ margin: 5 }}>ID: {coSupervisor.id}</p>
+                    </div>
+                  </div>
+                );
+              });
+            }
+          } 
 
         return (
             loading ?
                 <Skeleton active />
                 :
-                <>
-                    {activeThesisStartRequest.status === "changes requested" &&
-                        <Alert
-                            message="The supervisor has requested changes to your submission."
-                            description={<><strong>Teacher Message:</strong> {activeThesisStartRequest.changes_requested}</>}
-                            type="warning"
-                            showIcon
-                            closable
-                            style={{ marginTop: "10px" }}
-                        />
-                    }
-                    <Descriptions
-                        bordered
-                        size="small"
-                        column={4}
-                        items={items}
-                        labelStyle={{ fontWeight: "bold" }}
-                        style={{ marginTop: "20px" }} />
-                </>
+                <div style={{marginBottom: '70px', display: 'flex', alignItems: 'center'}}>
+                    <Collapse accordion>
+                        <Collapse.Panel key={activeThesisStartRequest.id} title={activeThesisStartRequest.title}>
+                            {activeThesisStartRequest.status === "changes requested" &&
+                                <Alert
+                                    message="The supervisor has requested changes to your submission."
+                                    description={<><strong>Teacher Message:</strong> {activeThesisStartRequest.changes_requested}</>}
+                                    type="warning"
+                                    showIcon
+                                    closable
+                                    style={{ marginTop: "10px" }}
+                                />
+                            }
+                            <>
+                            <h3>Submitted on: </h3>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                            {dayjs(activeThesisStartRequest.creation_date).format('LLL')}
+                             </div>
+                            <h3>Supervisor: </h3>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                {renderTeacherInfo(activeThesisStartRequest.supervisor.name, activeThesisStartRequest.supervisor.surname)}
+                                <span> - </span>
+                             <p style={{ margin: 5 }}>ID: {activeThesisStartRequest.supervisor.id}</p>
+                          </div>
+                          <h3>Status: </h3>
+                            <div style={{ display: 'flex', alignItems: 'center'}}>
+                                {getStatus(activeThesisStartRequest.status)}
+                          </div>
+                          <h3>Approval date: </h3>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                {activeThesisStartRequest.approval_date ? dayjs(activeThesisStartRequest.approval_date).format('LLL') : "Not yet approved"}
+                          </div>
+                          <h3>Description: </h3>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                {activeThesisStartRequest.description}
+                          </div>
+                          {activeThesisStartRequest.co_supervisors.length > 0 ? coSupBadge() : <></>}
+                            </>
+                        </Collapse.Panel>
+                    </Collapse>
+                </div>
         )
     }
     else {
@@ -346,7 +297,7 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
     }
 }
 
-ViewThesisStartRequest.propTypes = {
+ViewTSR.propTypes = {
     trigger: PropTypes.bool.isRequired,
     loading: PropTypes.bool.isRequired,
     setLoading: PropTypes.func.isRequired,
@@ -354,13 +305,12 @@ ViewThesisStartRequest.propTypes = {
 };
 
 SubmitButton.propTypes = {
-    form: PropTypes.object.isRequired,
     loading: PropTypes.bool.isRequired,
     buttonLoading: PropTypes.bool.isRequired,
 };
 
-AddThesisStartRequestForm.propTypes = {
+AddTSRForm.propTypes = {
     setFormVisible: PropTypes.func.isRequired,
 };
 
-export { renderTeacherInfo, StudentThesisStartRequest };
+export { renderTeacherInfo, MobStudentThesisStartRequest };

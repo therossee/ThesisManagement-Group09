@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Alert, Avatar, Button, Badge, Row, Col, Tabs, Divider, Typography, List, Modal, Flex, Tooltip, Input, message, Descriptions } from 'antd';
+import { Alert, Avatar, Button, Row, Col, Tabs, Divider, Typography, List, Modal, Flex, Tooltip, Input, message, Descriptions } from 'antd';
 import { CheckOutlined, CloseOutlined, HistoryOutlined, CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, InfoCircleOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import { renderTeacherInfo } from './StudentThesisStartRequest';
+import { getStatus } from './utils.jsx';
 import PropTypes from 'prop-types';
 import API from '../API';
 
@@ -388,21 +389,6 @@ function getIcon(status) {
             return <ClockCircleOutlined />;
         default:
             return <InfoCircleOutlined />;
-    }
-}
-
-function getStatus(status) {
-    switch (status) {
-        case "accepted by secretary":
-            return <Badge status="processing" text={<strong>Waiting for your approval</strong>} />;
-        case "changes requested":
-            return <Badge status="warning" text={<strong>Changes requested</strong>} />;
-        case "rejected by teacher":
-            return <Badge status="error" text={<strong>Rejected by you</strong>} />;
-        case "accepted by teacher":
-            return <Badge status="success" text={<strong>Accepted by you</strong>} />;
-        default:
-            return <Badge status="error" text={<strong>Failed fetching/parsing information</strong>} />
     }
 }
 
