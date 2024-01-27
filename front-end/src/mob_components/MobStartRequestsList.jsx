@@ -42,7 +42,7 @@ function MobStartRequestsList({ data, acceptStartRequest, rejectStartRequest }) 
                                 {dayjs(request.creation_date).format('DD-MM-YYYY HH:mm')}
                             </div>
 
-                            {(request.approvation_date) && (
+                            {(request.approvation_date !== null) && (
                                 <div>
                                     <Text strong>{"Approvation Date: "}</Text>
                                     <div style={{ marginLeft: '5px', display: 'inline-block' }}>
@@ -142,7 +142,7 @@ function ViewTSR({ tsr, setView, acceptStartRequest, rejectStartRequest }){
             </div>
             <div style={{paddingTop: '3px'}}>
                 <Paragraph strong={true}>{"Supervisor: "}</Paragraph>
-                <Tag color='blue' style={{ display: 'inline-block', padding: '0', borderRadius: '4px', backgroundColor: '#f0f5ff', marginRight: '8px', marginBottom: '10px' }}>
+                <Tag color='blue' style={{ whiteSpace: 'pre-wrap', display: 'inline-block', padding: '0', borderRadius: '4px', backgroundColor: '#f0f5ff', marginRight: '8px', marginBottom: '10px' }}>
                     <Meta
                         style={{ padding: '8px', display: 'block'}}
                         title={<Text>{tsr.supervisor.surname + " " + tsr.supervisor.name + " (" + tsr.supervisor.id + ") "}</Text>}
@@ -153,7 +153,7 @@ function ViewTSR({ tsr, setView, acceptStartRequest, rejectStartRequest }){
                         }
                     />
                 </Tag>
-                </div>
+            </div>
             {tsr.co_supervisors.length === 0 ? null :
                 <div>
                     <Text strong={true}>{"Cosupervisors: "}</Text>
