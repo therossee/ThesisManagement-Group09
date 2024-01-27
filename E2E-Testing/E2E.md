@@ -224,17 +224,53 @@ This test case is related to copy a proposal: we want to create a new thesis pro
 12. Log out
     - You should be again on the [home page](http://localhost:5173/)
 
-### [15] Insert Student Start Request
-This test case validates the possibility for a student to insert a thesis start request.
+### [15] Insert Student Start Request - Secretary/Professor Approval
+This test case validates the possibility for a student to insert a thesis start request and as it is useful to show the approval by a secretary clerk and a professor we will show and test also this features 
 
 1. Go to the [home page](http://localhost:5173/)
-2. Log in as a student
+2. Log in as a student who has not still made a student start request (for example the one with id s318771)
 3. In the left bar click on [Thesis Start Request](http://localhost:5173/start-request)
 4. Click on the button 'Add New Thesis Start Request'
 5. Complete all the necessary fields
-6. Click on 'Submit'
-7. A page with the details of your just created thesis start request will appear and you can consult it now whenever you click on [Thesis Start Request](http://localhost:5173/start-request)
-8. Log out
+6. Click on 'Submit' -> in the [Thesis Start Request](http://localhost:5173/start-request) page you will now see all the details of your thesis start request and in particular the status is _1/3 - Waiting for approval from the secretary_. Please look and memorise the professor you choose as Supervisor (necessary for the next step).
+7. Log out
+8. Log in as the teacher you choose as Supervisor -> in the [Thesis Start Request](http://localhost:5173/start-request) section you won't see the thesis start request, because it is mandatory that the start request is firstly approved by a secretary clerk.
+9. Log out 
+10. Now log in as a secretary clerk (id: abbondanzio.rossi@polito.it, password: sc12345)
+11. In the left bar click on [Thesis Start Request](http://localhost:5173/start-request)
+12. Scroll the opened thesis start request. Please, note that it is clearly represented that is 'waiting for approval' -> click con 'Accept' -> then confirm action ('Yes, accept the start request') -> note that is now marked as 'accepted by secretary'
+13. Let's try to reject a thesis start request to see this other functionality. Choose another thesis start request and click on 'Reject' -> then on 'Yes, reject the start request'-> you can see that the thesis start request is marked as 'rejected by secretary'
+14. Let's open another tab (maybe in private mode or the opposite if already in private mode) to check that the student is informed about the rejection
+    1. Go to the [home page](http://localhost:5173/)
+    2. Log in as the student whose application has been rejected
+    3. Go on [Thesis Start Request](http://localhost:5173/start-request) -> you will see that the status is '1/3 - Rejected by the secretary, you can submit a new one'
+    4. Let's try if it is possible to start a new thesis start request -> click on the button 'Add New Thesis Start Request' and do the procedure explained before
+    5. Log out 
+    6. Log in as the supervisor teacher of the rejected application
+    7. Go in [Thesis Start Request](http://localhost:5173/start-request) page and see that effectively the start request is not shown.
+    8. Log out
+15. Log out
+16. Log in with the student account with which we firstly created a thesis start request
+17. Go to [Thesis Start Request](http://localhost:5173/start-request) -> you will see that the status of our start request has been correctly updated to '2/3 - Waiting for approval from the teacher'
+18. Open another tab as before -> go to the [home page](http://localhost:5173/). We will refer to this as the 'teacher tab' (and the other one 'student tab')
+19. Log in as the supervisor teacher of the thesis start request
+20. Go to [Thesis Start Request](http://localhost:5173/start-request) -> you will see that the thesis start request is now present and we can opeate on it
+21. There are four buttons. Let's click on the first one: 'info button' -> if we click on it on the right side will appear all the relevant information about the thesis start request
+22. Let's click on the second button: 'Request Changes' button -> if we click on we are request to specify the changes that we want for that thesis start request -> let's complete it with some random text just to see the behavior -> send the 'Request Change'
+23. Go on the student tab and refresh the thesis start request page -> you will see the request for changes(the status of the start request is now '2/3 - Changes requested')
+23. Go again on the teacher tab -> the third button is 'Accept Thesis Start Request' -> click on it -> confirm the action by clicking 'Yes, accept the request' -> you will be informed by a pop-up that the start request have been accepted
+24. Go to the student tab and refresh again -> you will see the status is now '3/3 - Accepted'
+25. In the student tab log out, you can now close this tab
+26. Log in as the secretary clerk
+27. Accept another start request
+28. Log in as the teacher who is the supervisor of the now accepted thesis start request
+29. Let's click on the fourth button: reject start request
+30. Log out
+31. Log in as the student whose application has been rejected by the professor
+32. Go to [Thesis Start Request](http://localhost:5173/start-request) -> you will see the status of the start request to be '2/3 - Rejected by the teacher, you can submit a new one'
+33. Create another start request -> you will see that is possible
+34. Log out
+
 
 ### [16] Notify Application
 This test case is related to the possibility for a professor to be notified when a new application is sent. To check that we use Ethereal.
@@ -254,3 +290,26 @@ This test case is related to the possibility for a professor to be notified when
 11. Re-open the Ehereal web page and refresh it
 12. You will be able to see that a message to the professor has been send, click on it to see all the details and check their correctness
 13. Go back on the thesis web application page and log out
+
+### [17] Proposal Expiration & Search Archive
+In this test case we will show the correct behaviour of the application when a thesis proposal expires: it automatically becomes archived, and with this excuse we also show how the archive can be consulted.
+
+1. Go to the [home page](http://localhost:5173/)
+2. Log in as the teacher with id d279620 (important because he has also the admin role -> we will need to use the virtual clock)
+3. The teacher we logged as have only one proposal: let's archive it (see: [Archive Proposal e2e Test](#12-archive-proposal)) 
+4. On the left bar under 'Thesis Start Request' there is another button: with this we access the [Archive](http://localhost:5173/archive) -> we will see there the archived proposal with the status 'ARCHIVED'
+5. In the archive we can operate on the proposal, in the actions column there three buttons:
+    - [view proposal](http://localhost:5173/view-proposal/1) -> click on it -> we will see all the details of the proposal -> click then to the button 'back to archive'
+    - [edit proposal](http://localhost:5173/edit-proposal/1) -> click on it -> let's modify some fields -> click on 'submit' and then 'next' in the changes review page -> in the 'proposal updated succesfully' page instead of clicking on the 'back home' button, click again on [Archive](http://localhost:5173/archive) in the left bar -> seeing the proposal again we will see that the changes have been correctly applied
+    - publish proposal -> a pop-up will appear to confirm the action -> click on 'Yes, publish it'-> you will see now that the archive in this case is empty
+6. Click now on 'tester settings' at the bottom of the left bar. It will appear the [virtual clock page](http://localhost:5173/admin/virtual-clock)
+7. Choose a date exactly one day after or in general after the expiration date previously seen. Click on 'save new clock'
+8. If you go again on [Thesis Proposals](http://localhost:5173/proposals) we will see that the proposal is not present anymore
+9. Otherwise, if we go again on the [Archive](http://localhost:5173/archive) we will see that the proposal is there, this time with the status 'EXPIRED'
+10. Let's add now a new thesis proposal (see [Create Proposal e2e test](#3-thesis-proposal-creation))
+11. Let's go on [Thesis Proposals](http://localhost:5173/proposals) and archive it
+12. Go on [Archive](http://localhost:5173/archive)
+13. We now have two archived proposal with 2 different status (ARCHIVED AND EXPIRED). We want to test the filtering options are perfectly working. Clicking on 'Expiration' in the columns name we will see that effectively the archived proposals are sorted by expiration date. Clicking again we will have the same result, but in reversed order.
+14. Try the filtering also with the other fields and we will see that it is correctly working.
+10. Now we can log out
+    - You should be again on the [home page](http://localhost:5173/)

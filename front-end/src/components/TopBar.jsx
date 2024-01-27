@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Layout, Avatar } from "antd";
+import { Layout, Avatar, Tooltip } from "antd";
 import { FileAddOutlined, UserOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { useAuth } from './authentication/useAuth';
 import LoginButton from './authentication/LoginButton';
@@ -32,17 +32,25 @@ function TopBar({ collapsed, setCollapsed }) {
             }
             {isAuthenticated && (
               <>
-                <Avatar size="large" style={{ backgroundColor: '#1677ff', marginRight: "10px" }} icon={<UserOutlined />} />
+                <Avatar size="large" style={{
+                  backgroundColor: '#1677ff',
+                  marginRight: "10px",
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }} icon={<UserOutlined />} />
                 <span>{userData.name}</span>
               </>
             )}
           </div>
           <div>
             {isTeacher && (
-              <FileAddOutlined
-                style={{ fontSize: '26px', verticalAlign: 'middle', marginRight: '20px' }}
-                onClick={() => navigate('/insert-proposal')}
-              />
+              <Tooltip title="Insert proposal">
+                <FileAddOutlined
+                  style={{ fontSize: '26px', verticalAlign: 'middle', marginRight: '20px' }}
+                  onClick={() => navigate('/insert-proposal')}
+                />
+              </Tooltip>
             )}
             {isAuthenticated ? <LogoutButton /> : <LoginButton />}
           </div>

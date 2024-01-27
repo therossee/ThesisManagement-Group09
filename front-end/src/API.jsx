@@ -30,7 +30,7 @@ async function getUser() {
 }
 
 
-/****** End APIs for auth ******/
+/****** Virtual Clock APIs ******/
 
 async function getClock() {
     return fetch(URL + '/system/virtual-clock')
@@ -47,6 +47,7 @@ async function getClock() {
             }
         });
 }
+
 async function updateClock(date) {
     return fetch(URL + '/system/virtual-clock', {
         method: 'POST',
@@ -70,9 +71,22 @@ async function updateClock(date) {
         });
 }
 
+/****** Thesis Proposals APIs ******/
+
 // GET Thesis Proposals
 async function getThesisProposals() {
-    const response = await fetch(URL + '/thesis-proposals', {
+    return fetchThesisProposals('/thesis-proposals');
+}
+
+// GET Archived Thesis Proposals
+async function getArchivedThesisProposals() {
+    return fetchThesisProposals('/thesis-proposals/archived');
+}
+
+// Generic function that handles the common logic and then use it in both 
+// getThesisProposals and getArchivedThesisProposals
+async function fetchThesisProposals(endpoint) {
+    const response = await fetch(URL + endpoint, {
         method: 'GET',
         credentials: 'include',
     });
@@ -93,7 +107,8 @@ async function getThesisProposals() {
             level: x.level,
             groups: x.groups,
             keywords: x.keywords,
-            cds: x.cds
+            cds: x.cds,
+            status: x.status
         }))
     } else {
         throw proposals;
@@ -131,6 +146,26 @@ async function getThesisProposalbyId(id) {
     }
 }
 
+// POST Thesis Proposal
+async function insertProposal(proposal) {
+    let response = await fetch(URL + '/teacher/thesis_proposals', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(proposal),
+    });
+    if (response.ok) {
+        const prop = await response.json();
+        return prop;
+    } else {
+        const errDetail = await response.json();
+        throw new Error({ status: response.status, msg: errDetail });
+    }
+}
+
+// POST Student Application on a Thesis Proposal
 async function applyForProposal(id, attached_file) {
     const formData = new FormData();
     formData.append('file', attached_file);
@@ -149,6 +184,53 @@ async function applyForProposal(id, attached_file) {
         throw new Error({ status: response.status, message: errDetail });
     }
 }
+
+// PATCH Archive Thesis Proposal by given id
+async function archiveProposalById(id) {
+    const response = await fetch(URL + `/thesis-proposals/archive/${id} `, {
+        method: 'PATCH',
+        credentials: 'include'
+    });
+    if (response.ok) {
+        return response;
+    } else {
+        throw response;
+    }
+}
+
+// DELETE Thesis Proposal by given id
+async function deleteProposalById(id) {
+    const response = await fetch(URL + `/thesis-proposals/${id} `, {
+        method: 'DELETE',
+        credentials: 'include'
+    });
+    if (response.ok) {
+        return response;
+    } else {
+        throw response;
+    }
+}
+
+// PUT Update Thesis Proposal by given id
+async function updateProposal(id, proposal) {
+    const response = await fetch(URL + `/thesis-proposals/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(proposal),
+        credentials: 'include',
+    });
+    const update = await response.json();
+    if (response.ok) {
+        return update;
+    }
+    else {
+        throw update;
+    }
+}
+
+/****** Applications APIs ******/
 
 // GET Student's Thesis Applications
 async function getStudentActiveApplication() {
@@ -185,79 +267,7 @@ async function getTeacherThesisApplications(proposalId) {
     }
 }
 
-async function insertProposal(proposal) {
-    let response = await fetch(URL + '/teacher/thesis_proposals', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(proposal),
-    });
-    if (response.ok) {
-        const prop = await response.json();
-        return prop;
-    } else {
-        const errDetail = await response.json();
-        throw new Error({ status: response.status, msg: errDetail });
-    }
-}
-
-async function getExtCoSupervisors() {
-    const response = await fetch(URL + '/externalCoSupervisors', {
-        method: 'GET',
-        credentials: 'include'
-    });
-    const coSup = await response.json();
-    if (response.ok) {
-        return coSup;
-    } else {
-        throw coSup;
-    }
-}
-
-async function getTeachers() {
-    const response = await fetch(URL + '/teachers', {
-        method: 'GET',
-        credentials: 'include'
-    });
-    const teachers = await response.json();
-    if (response.ok) {
-        return teachers;
-    } else {
-        throw teachers;
-    }
-}
-
-async function getAllKeywords() {
-    const response = await fetch(URL + '/keywords', {
-        method: 'GET',
-        credentials: 'include'
-    });
-    const keywords = await response.json();
-    if (response.ok) {
-        return keywords;
-    } else {
-        throw keywords;
-    }
-}
-
-async function getAllDegrees() {
-    const response = await fetch(URL + '/degrees', {
-        method: 'GET',
-        credentials: 'include'
-    });
-    const degrees = await response.json();
-    if (response.ok) {
-        return degrees;
-    } else {
-        throw degrees;
-    }
-}
-
-
-
-// Accept Student Applications on a Thesis Proposal 
+// PATCH (Accept) Student Applications on a Thesis Proposal 
 async function acceptThesisApplications(proposalId, studentId) {
     const response = await fetch(URL + `/teacher/applications/accept/${proposalId}`, {
         method: 'PATCH',
@@ -277,7 +287,7 @@ async function acceptThesisApplications(proposalId, studentId) {
     }
 }
 
-// Reject Student Applications on a Thesis Proposal 
+// PATCH (Reject) Student Applications on a Thesis Proposal 
 async function rejectThesisApplications(proposalId, studentId) {
     const response = await fetch(URL + `/teacher/applications/reject/${proposalId}`, {
         method: 'PATCH',
@@ -297,6 +307,7 @@ async function rejectThesisApplications(proposalId, studentId) {
     }
 }
 
+// GET Student Applications History
 async function getStudentApplicationsHistory() {
     const response = await fetch(URL + '/student/applications-decision', {
         method: 'GET',
@@ -315,20 +326,39 @@ async function getStudentApplicationsHistory() {
     }
 }
 
-async function archiveProposalById(id) {
-    const response = await fetch(URL + `/thesis-proposals/archive/${id} `, {
-        method: 'PATCH',
+/****** Thesis Start Request APIs ******/
+
+// GET Secretary Start Request
+async function getSecretaryStartRequest() {
+    const response = await fetch(URL + `/secretary-clerk/thesis-start-requests`, {
+        method: 'GET',
         credentials: 'include'
     });
+
+    const startRequests = await response.json();
+
     if (response.ok) {
-        return response;
+        return startRequests.map((x) => ({
+            id: x.id,
+            proposal_id: x.proposal_id,
+            application_id: x.application_id,
+            student: x.student,
+            supervisor: x.supervisor,
+            co_supervisors: x.co_supervisors,
+            title: x.title,
+            description: x.description,
+            status: x.status,
+            creation_date: x.creation_date,
+            approval_date: x.approval_date,
+        }));
     } else {
-        throw response;
+        throw startRequests;
     }
 }
 
-async function deleteProposalById(id) {
-    const response = await fetch(URL + `/thesis-proposals/${id} `, {
+async function publishProposalById(id, expiration) {
+    const queryParams = expiration ? `?expiration=${encodeURIComponent(expiration)}` : '';
+    const response = await fetch(URL + `/thesis-proposals/${id}/archive${queryParams}`, {
         method: 'DELETE',
         credentials: 'include'
     });
@@ -339,21 +369,203 @@ async function deleteProposalById(id) {
     }
 }
 
-async function updateProposal(id, proposal) {
-    const response = await fetch(URL + `/thesis-proposals/${id}`, {
-        method: 'PUT',
+
+// Secretary accept student Start Request 
+async function secretaryAcceptStartRequest(startReqId) {
+    const response = await fetch(URL + `/secretary-clerk/thesis-start-requests/accept/${startReqId}`, {
+        method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(proposal),
+        credentials: 'include'
+    });
+    const res = await response.json();
+    if (response.ok) {
+        return res;
+    } else {
+        throw res;
+    }
+}
+
+// Secretary reject Student Start Request 
+async function secretaryRejectStartRequest(startReqId) {
+    const response = await fetch(URL + `/secretary-clerk/thesis-start-requests/reject/${startReqId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+    });
+    const res = await response.json();
+    if (response.ok) {
+        return res;
+    } else {
+        throw res;
+    }
+}
+
+// Insert Thesis Start Request
+async function insertThesisStartRequest(request) {
+    let response = await fetch(URL + '/student/thesis-start-requests', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(request),
+    });
+    const res = await response.json();
+    if (response.ok) {
+        return res;
+    } else {
+        throw res;
+    }
+}
+
+// GET Student's last Thesis Start Request
+async function getStudentLastThesisStartRequest() {
+    const response = await fetch(URL + '/student/thesis-start-requests/last', {
+        method: 'GET',
         credentials: 'include',
     });
-    const update = await response.json();
+    const tsr = await response.json();
     if (response.ok) {
-        return update;
+        return tsr;
+    } else {
+        throw tsr;
     }
-    else {
-        throw update;
+}
+
+// GET Teacher's active Thesis Start Request
+async function getTeacherThesisStartRequest() {
+    const response = await fetch(URL + '/teacher/thesis-start-requests', {
+        method: 'GET',
+        credentials: 'include',
+    });
+    const tsr = await response.json();
+    if (response.ok) {
+        return tsr.items;
+    } else {
+        throw tsr;
+    }
+}
+
+// Teacher accept Student Thesis Start Request
+async function acceptThesisStartRequest(tsrId) {
+    const response = await fetch(URL + `/teacher/thesis-start-requests/${tsrId}/review`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            action: "accept",
+        }),
+    });
+    const tsr = await response.json();
+    if (response.ok) {
+        return tsr;
+    } else {
+        throw tsr;
+    }
+}
+
+// Teacher reject Student Thesis Start Request
+async function rejectThesisStartRequest(tsrId) {
+    const response = await fetch(URL + `/teacher/thesis-start-requests/${tsrId}/review`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            action: "reject",
+        }),
+    });
+    const tsr = await response.json();
+    if (response.ok) {
+        return tsr;
+    } else {
+        throw tsr;
+    }
+}
+
+// Teacher request Changes on a Student Thesis Start Request
+async function reviewThesisStartRequest(tsrId, requestedChanges) {
+    const response = await fetch(URL + `/teacher/thesis-start-requests/${tsrId}/review`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            action: "request changes",
+            changes: requestedChanges,
+        }),
+    });
+    const tsr = await response.json();
+    if (response.ok) {
+        return tsr;
+    } else {
+        throw tsr;
+    }
+}
+
+/****** Other APIs ******/
+
+// GET External Co-Supervisors
+async function getExtCoSupervisors() {
+    const response = await fetch(URL + '/externalCoSupervisors', {
+        method: 'GET',
+        credentials: 'include'
+    });
+    const coSup = await response.json();
+    if (response.ok) {
+        return coSup;
+    } else {
+        throw coSup;
+    }
+}
+
+//GET Teacher List
+async function getTeachers() {
+    const response = await fetch(URL + '/teachers', {
+        method: 'GET',
+        credentials: 'include'
+    });
+    const teachers = await response.json();
+    if (response.ok) {
+        return teachers;
+    } else {
+        throw teachers;
+    }
+}
+
+//GET All Keywords
+async function getAllKeywords() {
+    const response = await fetch(URL + '/keywords', {
+        method: 'GET',
+        credentials: 'include'
+    });
+    const keywords = await response.json();
+    if (response.ok) {
+        return keywords;
+    } else {
+        throw keywords;
+    }
+}
+
+//GET All Degrees
+async function getAllDegrees() {
+    const response = await fetch(URL + '/degrees', {
+        method: 'GET',
+        credentials: 'include'
+    });
+    const degrees = await response.json();
+    if (response.ok) {
+        return degrees;
+    } else {
+        throw degrees;
     }
 }
 
@@ -384,53 +596,28 @@ async function getPDF(student_id, applicationId) {
         credentials: 'include',
     });
     if (response.ok) {
-            const file = await response.blob();
-            if (file.type === "application/pdf")
-                return file;
-            return null;
+        const file = await response.blob();
+        if (file.type === "application/pdf")
+            return file;
+        return null;
     } else {
         throw response.json();
     }
 }
 
-// Insert Thesis Start Request
-async function insertThesisStartRequest(request) {
-    let response = await fetch(URL + '/student/thesis-start-requests', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(request),
-    });
-    const res = await response.json();
-    if (response.ok) {
-        return res;
-    } else {
-        throw res;
-    }
-}
-
-// GET Student active Thesis Start Request
-async function getStudentActiveThesisStartRequest() {
-    const response = await fetch(URL + '/student/thesis-start-requests/last', {
-        method: 'GET',
-        credentials: 'include',
-    });
-    const tsr = await response.json();
-    if (response.ok) {
-        return tsr;
-    } else {
-        throw tsr;
-    }
-}
-
 const API = {
-    logOut, redirectToLogin,
+    logOut, redirectToLogin, 
     getUser,
     getClock, updateClock,
-    insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
-    applyForProposal, getStudentActiveApplication, acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, deleteProposalById, updateProposal, archiveProposalById, getStudentCVById, getPDF,
-    insertThesisStartRequest, getStudentActiveThesisStartRequest
+    insertProposal, getExtCoSupervisors, getTeachers, getAllKeywords, getAllDegrees, 
+    getThesisProposals, getThesisProposalbyId, getTeacherThesisApplications,
+    applyForProposal, getStudentActiveApplication, 
+    acceptThesisApplications, rejectThesisApplications, getStudentApplicationsHistory, 
+    deleteProposalById, updateProposal, archiveProposalById, 
+    getStudentCVById, getPDF,
+    insertThesisStartRequest, getStudentLastThesisStartRequest, getTeacherThesisStartRequest, getSecretaryStartRequest,
+    secretaryAcceptStartRequest, secretaryRejectStartRequest,
+    acceptThesisStartRequest, rejectThesisStartRequest, reviewThesisStartRequest, 
+    getArchivedThesisProposals, publishProposalById, 
 };
 export default API;

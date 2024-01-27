@@ -59,7 +59,7 @@ hours spent for fixing issues, improving based on feedback, refactoring, etc.
 
 - All tests computed
 
-  <img src="./Retrospective-2-all.jpg" alt="Unit tests coverage" width="70%" height="70%">
+  <img src="images/Retrospective-2-all.jpg" alt="Unit tests coverage" width="70%" height="70%">
 
 - Unit Testing:
   - Total hours estimated: **9h**
@@ -67,7 +67,7 @@ hours spent for fixing issues, improving based on feedback, refactoring, etc.
   - Nr of automated unit test cases: 5 suites (79 total tests)
   - Coverage:
 
-    <img src="./Retrospective-2-unit.png" alt="Unit tests coverage" width="70%" height="70%">
+    <img src="images/Retrospective-2-unit.png" alt="Unit tests coverage" width="70%" height="70%">
 
 - Integration Testing:
   - Total hours estimated: **8h50m**
@@ -75,7 +75,7 @@ hours spent for fixing issues, improving based on feedback, refactoring, etc.
   - Nr of automated unit test cases: 3 suites (65 total tests)
   - Coverage:
 
-    <img src="./Retrospective-2-integration.jpg" alt="Unit tests coverage" width="70%" height="70%">
+    <img src="images/Retrospective-2-integration.jpg" alt="Unit tests coverage" width="70%" height="70%">
 **Notes:** Currently, there is a problem with integration tests due to the external authentication service. Before
 running them, we need to update the token used for authentication. This is a manual process that should be automated in
 the next sprint but that explains why we can encounter some failures in the integration tests.

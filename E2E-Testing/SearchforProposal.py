@@ -31,7 +31,7 @@ password_field.send_keys("s321607")
 print("Password inserted")
 
 driver.implicitly_wait(5)
-continue_button = driver.find_element(By.XPATH, "//div[@class='cdc80f5fa']")
+continue_button = driver.find_element(By.XPATH, "//button[normalize-space()='Continue']")
 continue_button.click();
 print("Continue clicked")
 

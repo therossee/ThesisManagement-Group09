@@ -6,7 +6,7 @@ const MobLogout = () => {
     const { handleLogout } = useAuth();
 
     return (
-        <LogoutOutlined ghost type="primary" onClick={handleLogout} style={{fontSize: '18px'}}/>
+        <LogoutOutlined type="primary" onClick={handleLogout} style={{fontSize: '18px'}}/>
     );
 };
 

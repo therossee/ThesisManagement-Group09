@@ -68,13 +68,13 @@ function StudentThesisProposals() {
             .then((clock) => {
                 setDate(dayjs().add(clock.offset, 'ms'));
             })
-            .catch((err) => { message.error(err.message ? err.message : err) });
+            .catch((err) => { message.error(err.message ?? err) });
         API.getThesisProposals()
             .then((x) => {
                 setData(handleReceivedData(x));
                 setIsLoadingTable(false);
             })
-            .catch((err) => { message.error(err.message ? err.message : err) });
+            .catch((err) => { message.error(err.message ?? err) });
 
     }, []);
 

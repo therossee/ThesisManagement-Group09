@@ -58,7 +58,7 @@ RETROSPECTIVE-1 (Team 09)
   - Nr of automated unit test cases: 5 suites (51 total tests)
   - Coverage:
 
-    <img src="./Retrospective-1-unit.png" alt="Unit tests coverage" width="60%" height="60%">
+    <img src="images/Retrospective-1-unit.png" alt="Unit tests coverage" width="60%" height="60%">
 
 - Integration Testing:
   - Total hours estimated: **6h** (epic task) - **3h 30m** (subtasks sum)
@@ -66,7 +66,7 @@ RETROSPECTIVE-1 (Team 09)
   - Nr of automated unit test cases: 3 suites (51 total tests)
   - Coverage:
 
-    <img src="./Retrospective-2-unit.png" alt="Unit tests coverage" width="70%" height="70%">
+    <img src="images/Retrospective-2-unit.png" alt="Unit tests coverage" width="70%" height="70%">
 
 - E2E testing:
   - Total hours estimated: **10h**

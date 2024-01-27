@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Alert, Badge, Button, Descriptions, Col, Row, Typography, Form, Input, Select, Space, message, Skeleton } from 'antd';
+import { Alert, Badge, Button, Descriptions, Col, Row, Typography, Form, Input, Select, Space, message, Skeleton, Tag } from 'antd';
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
@@ -77,7 +77,7 @@ function AddThesisStartRequestForm({ setFormVisible }) {
                 setOptions(formattedTeachers);
                 setLoading(false);
             } catch (err) {
-                message.error(err.message ? err.message : err);
+                message.error(err.message ?? err);
                 setLoading(false);
             }
         };
@@ -92,7 +92,7 @@ function AddThesisStartRequestForm({ setFormVisible }) {
             setButtonLoading(false);
             setFormVisible(false);
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
             setButtonLoading(false);
         }
     };
@@ -166,6 +166,31 @@ function AddThesisStartRequestForm({ setFormVisible }) {
     )
 }
 
+function getStatus(status) {
+    switch (status) {
+        case "waiting for approval":
+            return <Badge status="processing" text={<strong>1/3 - Waiting for approval from the secretary</strong>} />;
+        case "rejected by secretary":
+            return <Badge status="error" text={<strong>1/3 - Rejected by the secretary, you can submit a new one</strong>} />;
+        case "accepted by secretary":
+            return <Badge status="processing" text={<strong>2/3 - Waiting for approval from the teacher</strong>} />;
+        case "changes requested":
+            return <Badge status="warning" text={<strong>2/3 - Changes requested</strong>} />;
+        case "rejected by teacher":
+            return <Badge status="error" text={<strong>2/3 - Rejected by the teacher, you can submit a new one</strong>} />;
+        case "accepted by teacher":
+            return <Badge status="success" text={<strong>3/3 - Accepted</strong>} />;
+        default:
+            return <Badge status="error" text={<strong>Failed fetching/parsing information</strong>} />
+    }
+}
+
+// Function to render supervisor and co-supervisor information with a colored tag
+function renderTeacherInfo(name, surname) {
+    return (
+        <Tag color="blue"> {name} {surname} </Tag>
+    );
+}
 
 function SubmitButton({ form, loading, buttonLoading }) {
 
@@ -203,12 +228,12 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const activeTSR = await API.getStudentActiveThesisStartRequest();
+                const activeTSR = await API.getStudentLastThesisStartRequest();
                 setDisabled(checkDisabled(activeTSR));
                 setActiveThesisStartRequest(activeTSR);
                 setLoading(false);
             } catch (err) {
-                message.error(err.message ? err.message : err);
+                message.error(err.message ?? err);
                 setLoading(false);
             }
         };
@@ -217,28 +242,9 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
 
     function checkDisabled(activeTSR) {
         if ((Object.keys(activeTSR).length > 0))
-            if (activeTSR.status != "rejected by secretary clerk" && activeTSR.status != "rejected by teacher")
+            if (activeTSR.status != "rejected by secretary" && activeTSR.status != "rejected by teacher")
                 return true; // Disable the button to add a new TSR
         return false; // Enable the button to add a new TSR
-    }
-
-    function getStatus(status) {
-        switch (status) {
-            case "waiting for approval":
-                return <Badge status="processing" text={<strong>1/3 - Waiting for approval from the secretariat</strong>} />;
-            case "rejected by secretary clerk":
-                return <Badge status="error" text={<strong>1/3 - Rejected by the secretariat, you can submit a new one</strong>} />;
-            case "accepted by secretary clerk":
-                return <Badge status="processing" text={<strong>2/3 - Waiting for approval from the teacher</strong>} />;
-            case "changes requested":
-                return <Badge status="warning" text={<strong>2/3 - Changes requested</strong>} />;
-            case "rejected by teacher":
-                return <Badge status="error" text={<strong>2/3 - Rejected by the teacher, you can submit a new one</strong>} />;
-            case "accepted by teacher":
-                return <Badge status="success" text={<strong>3/3 - Accepted</strong>} />;
-            default:
-                return <Badge status="error" text={<strong>Failed fetching/parsing information</strong>} />
-        }
     }
 
     if (Object.keys(activeThesisStartRequest).length > 0) {
@@ -261,7 +267,7 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
                 key: '3',
                 label: 'Supervisor',
                 span: 3,
-                children: activeThesisStartRequest.supervisor.name + " " + activeThesisStartRequest.supervisor.surname,
+                children: renderTeacherInfo(activeThesisStartRequest.supervisor.name, activeThesisStartRequest.supervisor.surname),
             },
             {
                 key: '4',
@@ -279,7 +285,7 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
                 key: '6',
                 label: 'Approval Date',
                 span: 1,
-                children: activeThesisStartRequest.approval_date ? dayjs(activeThesisStartRequest.approval_date).format('lll') : "Not yet approved",
+                children: activeThesisStartRequest.approval_date ? dayjs(activeThesisStartRequest.approval_date).format('LLL') : "Not yet approved",
             },
             {
                 key: '7',
@@ -295,7 +301,7 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
                 key: `co-supervisor-${index}`,
                 label: `Co-Supervisor #${index + 1}`,
                 span: 3,
-                children: cosupervisor.name + " " + cosupervisor.surname,
+                children: renderTeacherInfo(cosupervisor.name, cosupervisor.surname),
             };
             const cosupervisorIdItem = {
                 key: `co-supervisor-id-${index}`,
@@ -323,11 +329,11 @@ function ViewThesisStartRequest({ trigger, loading, setLoading, setDisabled }) {
                     }
                     <Descriptions
                         bordered
-                        layout="vertical"
-                        size="middle"
+                        size="small"
                         column={4}
                         items={items}
-                        style={{ marginTop: "15px" }} />
+                        labelStyle={{ fontWeight: "bold" }}
+                        style={{ marginTop: "20px" }} />
                 </>
         )
     }
@@ -357,4 +363,4 @@ AddThesisStartRequestForm.propTypes = {
     setFormVisible: PropTypes.func.isRequired,
 };
 
-export default StudentThesisStartRequest;
+export { renderTeacherInfo, StudentThesisStartRequest };

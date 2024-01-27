@@ -49,7 +49,7 @@ function TeacherApplications() {
                     setDirty(false);
                 }
             } catch (err) {
-                message.error(err.message ? err.message : err);
+                message.error(err.message ?? err);
             }
         };
         fetchData();
@@ -75,7 +75,7 @@ function TeacherApplications() {
             setDirty(true);
             setButtonsLoading(false)
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
             setButtonsLoading(false);
         }
     };
@@ -89,7 +89,7 @@ function TeacherApplications() {
             setDirty(true);
             setButtonsLoading(false);
         } catch (err) {
-            message.error(err.message ? err.message : err);
+            message.error(err.message ?? err);
             setButtonsLoading(false);
         }
     };
@@ -117,7 +117,12 @@ function TeacherApplications() {
                             <List.Item key={student.id}>
                                 <button className="wrapper-enlight" onClick={() => { setStudentInfo(student); setApplicationId(student.application_id); setIsOpen(true) }} onKeyDown={() => { }}>
                                     <List.Item.Meta
-                                        avatar={<Avatar style={{ backgroundColor: '#1677ff' }} icon={<UserOutlined />} size="large" />}
+                                        avatar={<Avatar style={{
+                                            backgroundColor: '#1677ff',
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center'
+                                        }} icon={<UserOutlined />} size="large" />}
                                         style={{ padding: ".5%" }}
                                         title={student.surname + " " + student.name}
                                         description={<div style={{ textAlign: "left", marginTop: "-5px" }}>{student.id}</div>}
