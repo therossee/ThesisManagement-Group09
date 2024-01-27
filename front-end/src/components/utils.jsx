@@ -1,4 +1,4 @@
-import { Tag } from 'antd';
+import { Tag, Badge } from 'antd';
 
 // Common function to generate columns
 export function generateCommonColumns() {
