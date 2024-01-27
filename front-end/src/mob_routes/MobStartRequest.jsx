@@ -14,7 +14,7 @@ function MobStartRequest() {
             {isTeacher === true && <MobTeacherThesisStartRequest />}
             {isStudent === true && <MobStudentThesisStartRequest />}
             {isSecretaryClerk === true && <MobSecretaryStartRequest/>}
-            {!(isAuthenticated === true) && <Errors code="403" />}
+            {isAuthenticated !== true && <Errors code="403" />}
         </>
     )
 }

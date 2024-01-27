@@ -17,18 +17,6 @@ function MobStartRequestsList({ data, acceptStartRequest, rejectStartRequest }) 
         setView(true);
     }
 
-    const showModal = (content, action, okText, cancelText) => {
-        Modal.confirm({
-            title: "Confirm action",
-            icon: <ExclamationCircleFilled />,
-            content: content,
-            onOk: action,
-            okText: okText,
-            okType: "danger",
-            cancelText: cancelText,
-        });
-    }
-
     return (
         <>
         {view === false ? (<div style={{ marginRight: "2%", marginLeft: "2%", marginBottom: '70px' }}>
@@ -179,7 +167,7 @@ function ViewTSR({ tsr, setView, acceptStartRequest, rejectStartRequest }){
 }
 
 const checkStatusButtons = (status) => {
-    return (status.includes("accepted") || status.includes("rejected")) ? true : false;
+    return (status.includes("accepted") || status.includes("rejected"));
 
 }
 
@@ -193,6 +181,17 @@ const getStatusColor = (status) => {
     }
 };
 
+const showModal = (content, action, okText, cancelText) => {
+    Modal.confirm({
+        title: "Confirm action",
+        icon: <ExclamationCircleFilled />,
+        content: content,
+        onOk: action,
+        okText: okText,
+        okType: "danger",
+        cancelText: cancelText,
+    });
+};
 const handleAccept = (startReqId, student, acceptStartRequest) => {
     acceptStartRequest(startReqId, student);
 }
@@ -203,6 +202,8 @@ const handleReject = (startReqId, student, rejectStartRequest) => {
 
 MobStartRequestsList.propTypes = {
     data: PropTypes.array.isRequired,
+    acceptStartRequest: PropTypes.func.isRequired,
+    rejectStartRequest: PropTypes.func.isRequired,
 };
 
 ViewTSR.propTypes = {

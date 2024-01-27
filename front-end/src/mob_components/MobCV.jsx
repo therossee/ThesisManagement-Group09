@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Avatar, Flex, message, Row, Skeleton, Tag, Typography } from 'antd';
+import { Avatar, Flex, message, Skeleton, Tag, Typography } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import {Collapse, Button, AutoCenter} from 'antd-mobile';
 import PropTypes from 'prop-types';
