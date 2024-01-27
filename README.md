@@ -47,7 +47,7 @@
     <h2>Overview</h2>
     <h3>Welcome to our project! We're thrilled to have you here.</h3>
     <p>We are Group 9, and we're excited to present our innovative software designed to simplify the lives of students and teachers!</p>
-    <p>Our software offers a comprehensive suite of features, including the ability to create and manage thesis proposals, submit and handle student application, and generate and manage thesis start requests. It also comes with a stunning integrated email notification system and a visually appealing mobile interface for convenience and ease of use!</p>
+    <p>Our software offers a comprehensive suite of features, including the ability to create and manage thesis proposals, submit and handle students' applications and students' thesis start requests. It also comes with a stunning integrated email notification system and a visually appealing mobile interface for convenience and ease of use!</p>
     <p>
       <img src="./images/1.png" alt="1" height="200">
       <img src="./images/2.png" alt="2" height="200">
