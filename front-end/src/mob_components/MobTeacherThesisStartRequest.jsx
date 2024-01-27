@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Alert, Button, Badge, Tabs, Input, message } from 'antd';
+import { Alert, Button, Badge, Tabs, Input, Typography, message } from 'antd';
 import { CheckOutlined, HistoryOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { Collapse, Modal } from 'antd-mobile';
@@ -138,7 +138,7 @@ function PendingRequests({ tsr, setDirty }) {
                         </div>
                         <h3>Status: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {getStatus(startRq.status)}
+                            {getStat(startRq.status)}
                         </div>
                         <h3>Approval date: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -168,6 +168,9 @@ function PendingRequests({ tsr, setDirty }) {
 
 
 function RequestChangesForm({tsr, requestedChanges, setRequestedChanges, reviewRequest, setIsForm}) {
+
+    const { Text } = Typography;
+
     const handleOk = () => {
         reviewRequest(tsr, requestedChanges);
         setIsForm(false);
@@ -180,8 +183,10 @@ function RequestChangesForm({tsr, requestedChanges, setRequestedChanges, reviewR
 
     return (
         <>
-            <h3>Requested changes for : </h3>
-            <div>
+            <h2>Requested changes for: </h2>
+            <h3>{tsr.title}</h3>
+            <Text strong>Student: {tsr.student.name + " " + tsr.student.surname + " (" + tsr.student.id + ")" }</Text>
+            <div style={{paddingTop: '10px'}}>
                 <Input.TextArea rows={4} value={requestedChanges} onChange={(e) => setRequestedChanges(e.target.value)} />
             </div>
             <div style={{display: 'flex', alignItems: 'center', paddingTop: '10px'}}>
@@ -211,7 +216,7 @@ function HistoryRequests({ tsr }) {
                         </div>
                         <h3>Status: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {getStatus(thesisStartRequest.status)}
+                            {getStat(thesisStartRequest.status)}
                         </div>
                         <h3>Approval date: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -231,8 +236,8 @@ function HistoryRequests({ tsr }) {
         return <Alert message="It seems like there is nothing to show here..." type="info" showIcon closable />
 }
 
-function getStatus(status) {
-    switch (status) {
+function getStat(stat) {
+    switch (stat) {
         case "accepted by secretary":
             return <Badge status="processing" text={<strong>Waiting for your approval</strong>} />;
         case "changes requested":

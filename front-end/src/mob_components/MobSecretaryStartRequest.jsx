@@ -7,7 +7,6 @@ import API from "../API";
 function Secretary() {
     const [data, setData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [buttonsLoading, setButtonsLoading] = useState(false);
     const [dirty, setDirty] = useState(true);
 
     const { Title } = Typography;
@@ -40,15 +39,12 @@ function Secretary() {
     };
 
     const handleStartRequest = async (startReqId, student, actionFunction, successMessage) => {
-        setButtonsLoading(true);
         try {
             await actionFunction(startReqId, student.id);
             message.success(`${successMessage} ${student.surname} ${student.name}`);
             setDirty(true);
         } catch (err) {
             message.error(err.message ? err.message : err);
-        } finally {
-            setButtonsLoading(false);
         }
     };
 
@@ -65,11 +61,11 @@ function Secretary() {
     }, [dirty]);
 
     return (
-        data.length > 0 ? (
+        <>
+        {isLoading === false ? (data.length > 0 ? (
             <MobStartRequestsList
                 data={data}
                 isLoading={isLoading}
-                buttonsLoading={buttonsLoading}
                 acceptStartRequest={acceptStartRequest}
                 rejectStartRequest={rejectStartRequest}
                 showModal={showModal} 
@@ -78,8 +74,8 @@ function Secretary() {
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 <Title level={3}>No Start Requests pending..</Title>
             </div>
-        )
-    );
+        )) : (<></>)}
+    </>);
 }
 
 export default Secretary;
