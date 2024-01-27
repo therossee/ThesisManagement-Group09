@@ -107,7 +107,7 @@ describe('getAllKeywords', () => {
 
         // Assertions
         expect(result).toEqual(['Keyword1', 'Keyword2']);
-        expect(db.prepare).toHaveBeenCalledWith('SELECT DISTINCT(keyword) FROM proposalKeyword');
+        expect(db.prepare).toHaveBeenCalledWith('SELECT DISTINCT(keyword) FROM proposalKeyword ORDER BY keyword;');
     });
 });
 
@@ -128,6 +128,6 @@ describe('getDegrees', () => {
 
         // Assertions
         expect(result).toEqual(mockKeywords);
-        expect(db.prepare).toHaveBeenCalledWith('SELECT * FROM degree');
+        expect(db.prepare).toHaveBeenCalledWith('SELECT * FROM degree ORDER BY title_degree;');
     });
 });
