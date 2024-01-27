@@ -152,9 +152,9 @@ function PendingRequests({ tsr, setDirty }) {
                         {startRq.co_supervisors.length > 0 ? coSupComponents(startRq) : <></>}
                         <div style={{ display: 'flex', alignItems: 'center', paddingTop: '10px' }}>
                             <Button onClick={() => viewForm(startRq)}>Request changes</Button>
-                            <div style={{display: 'flex', alignItems: 'center'}}>
-                                <Button onClick={() => showModalAccRej("Are you sure you want to accept this request?", () => acceptTsr(startRq.id, startRq.student.id), "Confirm action", "Cancel")}>Accept</Button>
-                                <Button onClick={() => showModalAccRej("Are you sure you want to reject this request?", () => rejectTsr(startRq.id, startRq.student.id), "Confirm action", "Cancel")}>Reject</Button>
+                            <div style={{display: 'flex', justifyContent: 'center'}}>
+                                <Button onClick={() => showModalAccRej("Are you sure you want to accept this request?", () => acceptTsr(startRq.id, startRq.student), "Confirm action", "Cancel")}>Accept</Button>
+                                <Button onClick={() => showModalAccRej("Are you sure you want to reject this request?", () => rejectTsr(startRq.id, startRq.student), "Confirm action", "Cancel")}>Reject</Button>
                             </div>
                         </div>
                         </Collapse.Panel>
@@ -190,7 +190,7 @@ function RequestChangesForm({tsr, requestedChanges, setRequestedChanges, reviewR
             <div style={{paddingTop: '10px'}}>
                 <Input.TextArea rows={4} value={requestedChanges} onChange={(e) => setRequestedChanges(e.target.value)} />
             </div>
-            <div style={{display: 'flex', alignItems: 'center', paddingTop: '10px'}}>
+            <div style={{display: 'flex', justifyContent: 'center', paddingTop: '10px'}}>
                 <Button onClick={() => handleOk()} style={{marginRight: '5px'}}>Request changes</Button>
                 <Button onClick={() => handleGoBack()} style={{marginRight: '5px'}}>Go back</Button>
             </div>
