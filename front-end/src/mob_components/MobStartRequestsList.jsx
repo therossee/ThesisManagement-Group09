@@ -105,6 +105,11 @@ function ViewTSR({ tsr, setView, acceptStartRequest, rejectStartRequest }){
             <Button type="link" onClick={handleGoBack}>
                 &lt;    {"Back to Start Requests List"}
             </Button>
+            <div style={{marginTop: '10px'}}>
+                <Text strong>Student: </Text>
+                    <Text>{tsr.student.surname + " " + tsr.student.name + " "}</Text>
+                <Tag color="default">{tsr.student.id }</Tag>
+            </div>
             <div style={{ display: 'flex', paddingTop: '15px' }}>
                 <Text strong>Status:</Text>
                 <div style={{ marginLeft: '10px', marginTop: '1px' }}><Tag color={`${getStatusColor(tsr.status)}` }>{tsr.status}</Tag></div>
