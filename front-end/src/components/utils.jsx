@@ -62,7 +62,7 @@ export function generateCommonColumns() {
     ];
 }
 
-export function getStatusColor(status) {
+export function getStatus(status) {
     switch (status) {
         case "accepted by secretary":
             return <Badge status="processing" text={<strong>Waiting for your approval</strong>} />;

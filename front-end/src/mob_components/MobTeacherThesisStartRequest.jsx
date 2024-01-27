@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Alert, Button, Badge, Tabs, Input, Typography, message } from 'antd';
 import { CheckOutlined, HistoryOutlined, ExclamationCircleFilled } from '@ant-design/icons';
-import { getStatusColor } from "../components/utils.jsx";
+import { getStatus } from "../components/utils.jsx";
 import dayjs from 'dayjs';
 import { Collapse, Modal } from 'antd-mobile';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
@@ -139,7 +139,7 @@ function PendingRequests({ tsr, setDirty }) {
                         </div>
                         <h3>Status: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {getStatusColor(startRq.status)}
+                            {getStatus(startRq.status)}
                         </div>
                         <h3>Approval date: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -217,7 +217,7 @@ function HistoryRequests({ tsr }) {
                         </div>
                         <h3>Status: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {getStatusColor(thesisStartRequest.status)}
+                            {getStatus(thesisStartRequest.status)}
                         </div>
                         <h3>Approval date: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
