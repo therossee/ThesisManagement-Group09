@@ -40,6 +40,7 @@ function Secretary() {
 
     const handleStartRequest = async (startReqId, student, actionFunction, successMessage) => {
         try {
+            console.log(student);
             await actionFunction(startReqId, student.id);
             message.success(`${successMessage} ${student.surname} ${student.name}`);
             setDirty(true);

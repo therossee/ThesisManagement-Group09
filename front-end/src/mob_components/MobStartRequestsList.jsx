@@ -189,11 +189,11 @@ const getStatusColor = (status) => {
 };
 
 const handleAccept = (startReqId, student, acceptStartRequest) => {
-    acceptStartRequest(startReqId, student.id);
+    acceptStartRequest(startReqId, student);
 }
 
 const handleReject = (startReqId, student, rejectStartRequest) => {
-    rejectStartRequest(startReqId, student.id);
+    rejectStartRequest(startReqId, student);
 }
 
 MobStartRequestsList.propTypes = {
@@ -201,7 +201,7 @@ MobStartRequestsList.propTypes = {
 };
 
 ViewTSR.propTypes = {
-    selected: PropTypes.object.isRequired,
+    tsr: PropTypes.object.isRequired,
     setView: PropTypes.func.isRequired,
     acceptStartRequest: PropTypes.func.isRequired,
     rejectStartRequest: PropTypes.func.isRequired,
