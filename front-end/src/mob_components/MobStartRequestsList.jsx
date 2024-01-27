@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import { Tag, Typography, Card, Avatar } from 'antd';
-import { ExclamationCircleFilled, CheckOutlined, CloseOutlined, UserOutlined } from '@ant-design/icons';
+import { CheckOutlined, CloseOutlined, UserOutlined } from '@ant-design/icons';
 import { Collapse, Button, Modal } from 'antd-mobile';
 import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
@@ -68,8 +68,10 @@ function MobStartRequestsList({ data, acceptStartRequest, rejectStartRequest }) 
                             <Button onClick={() => handleView(request)}>View</Button>
                             {(!checkStatusButtons(request.status)) &&
                                 <>
-                                    <Button onClick={() => handleAccept(request.id, request.student, acceptStartRequest)}><CheckOutlined/>    Accept</Button>
-                                    <Button onClick={() => handleReject(request.id, request.student, rejectStartRequest)}><CloseOutlined/>    Reject</Button>
+                                    <Button onClick={() => showModal("Are you sure you want to accept this Thesis Start Request?",
+                                        handleAccept, "Yes, accept", "Discard action", request, acceptStartRequest)}><CheckOutlined/>    Accept</Button>
+                                    <Button onClick={() => showModal("Are you sure you want to accept this Thesis Start Request?",
+                                        handleReject, "Yes, reject", "Discard action", request, rejectStartRequest)}><CloseOutlined/>    Reject</Button>
                                 </>
                             }
                         </div>
@@ -156,8 +158,10 @@ function ViewTSR({ tsr, setView, acceptStartRequest, rejectStartRequest }){
             }
             {(!checkStatusButtons(tsr.status)) &&
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <Button style={{marginRight: '3%'}} onClick={() => handleAccept(tsr.id, tsr.student, acceptStartRequest)}><CheckOutlined /> Accept</Button>
-                    <Button style={{marginLeft: '3%'}} onClick={() => handleReject(tsr.id, tsr.student, rejectStartRequest)}><CloseOutlined /> Reject</Button>
+                    <Button style={{marginRight: '3%'}} onClick={() => showModal("Are you sure you want to accept this Thesis Start Request?",
+                    handleAccept, "Yes, accept", "Discard action", tsr, acceptStartRequest)}><CheckOutlined /> Accept</Button>
+                    <Button style={{marginLeft: '3%'}} onClick={() => showModal("Are you sure you want to accept this Thesis Start Request?",
+                        handleReject, "Yes, reject", "Discard action", tsr, rejectStartRequest)}><CloseOutlined /> Reject</Button>
                 </div>
 
             }
@@ -181,17 +185,18 @@ const getStatusColor = (status) => {
     }
 };
 
-const showModal = (content, action, okText, cancelText) => {
-    Modal.confirm({
+
+const showModal = (content, action, okText, cancelText, tsr, accRej) => {
+    return Modal.confirm({
         title: "Confirm action",
-        icon: <ExclamationCircleFilled />,
         content: content,
-        onOk: action,
-        okText: okText,
+        onConfirm: () => action(tsr.id, tsr.student, accRej),
+        confirmText: okText,
         okType: "danger",
         cancelText: cancelText,
     });
 };
+
 const handleAccept = (startReqId, student, acceptStartRequest) => {
     acceptStartRequest(startReqId, student);
 }

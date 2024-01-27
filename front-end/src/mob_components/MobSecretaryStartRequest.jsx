@@ -61,22 +61,30 @@ function Secretary() {
         fetchData();
     }, [dirty]);
 
-    return (
-        <>
-        {isLoading === false ? (data.length > 0 ? (
-            <MobStartRequestsList
-                data={data}
-                isLoading={isLoading}
-                acceptStartRequest={acceptStartRequest}
-                rejectStartRequest={rejectStartRequest}
-                showModal={showModal} 
-            />
-        ) : (
+    if (isLoading === true) {
+        return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <Title level={3}>No Start Requests pending..</Title>
+                <Title level={3}>Loading...</Title>
             </div>
-        )) : (<></>)}
-    </>);
+        );
+    }else {
+        return (
+            <>
+                {(data.length > 0 ? (
+                    <MobStartRequestsList
+                        data={data}
+                        isLoading={isLoading}
+                        acceptStartRequest={acceptStartRequest}
+                        rejectStartRequest={rejectStartRequest}
+                        showModal={showModal}
+                    />
+                ) : (
+                    <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                        <Title level={3}>No Start Requests pending..</Title>
+                    </div>
+                ))}
+            </>);
+    }
 }
 
 export default Secretary;
