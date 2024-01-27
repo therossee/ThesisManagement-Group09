@@ -78,7 +78,7 @@ function MobStartRequestsList({ data, acceptStartRequest, rejectStartRequest }) 
 
                         <div style={{ paddingTop: '10px', textAlign: 'center', display: 'flex', justifyContent: 'space-around' }}>
                             <Button onClick={() => handleView(request)}>View</Button>
-                            {(request.status !== 'accepted by secretary' && request.status !== 'accepted by teacher') &&
+                            {(!checkStatusButtons(request.status)) &&
                                 <>
                                     <Button onClick={() => handleAccept(request.id, request.student, acceptStartRequest)}><CheckOutlined/>    Accept</Button>
                                     <Button onClick={() => handleReject(request.id, request.student, rejectStartRequest)}><CloseOutlined/>    Reject</Button>
@@ -166,7 +166,7 @@ function ViewTSR({ tsr, setView, acceptStartRequest, rejectStartRequest }){
                     ))}
                 </div>
             }
-            {(tsr.status !== 'accepted by secretary' && tsr.status !== 'accepted by teacher') &&
+            {(!checkStatusButtons(tsr.status)) &&
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <Button style={{marginRight: '3%'}} onClick={() => handleAccept(tsr.id, tsr.student, acceptStartRequest)}><CheckOutlined /> Accept</Button>
                     <Button style={{marginLeft: '3%'}} onClick={() => handleReject(tsr.id, tsr.student, rejectStartRequest)}><CloseOutlined /> Reject</Button>
@@ -175,6 +175,11 @@ function ViewTSR({ tsr, setView, acceptStartRequest, rejectStartRequest }){
             }
         </div>
 );
+
+}
+
+const checkStatusButtons = (status) => {
+    return (status.includes("accepted") || status.includes("rejected")) ? true : false;
 
 }
 
