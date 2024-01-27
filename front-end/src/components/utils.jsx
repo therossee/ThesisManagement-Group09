@@ -61,3 +61,18 @@ export function generateCommonColumns() {
         },
     ];
 }
+
+export function getStatusColor(status) {
+    switch (status) {
+        case "accepted by secretary":
+            return <Badge status="processing" text={<strong>Waiting for your approval</strong>} />;
+        case "changes requested":
+            return <Badge status="warning" text={<strong>Changes requested</strong>} />;
+        case "rejected by teacher":
+            return <Badge status="error" text={<strong>Rejected by you</strong>} />;
+        case "accepted by teacher":
+            return <Badge status="success" text={<strong>Accepted by you</strong>} />;
+        default:
+            return <Badge status="error" text={<strong>Failed fetching/parsing information</strong>} />
+    }
+}

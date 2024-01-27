@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Alert, Button, Badge, Tabs, Input, Typography, message } from 'antd';
 import { CheckOutlined, HistoryOutlined, ExclamationCircleFilled } from '@ant-design/icons';
+import { getStatusColor } from "../components/utils.jsx";
 import dayjs from 'dayjs';
 import { Collapse, Modal } from 'antd-mobile';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
@@ -138,7 +139,7 @@ function PendingRequests({ tsr, setDirty }) {
                         </div>
                         <h3>Status: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {getStat(startRq.status)}
+                            {getStatusColor(startRq.status)}
                         </div>
                         <h3>Approval date: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -216,7 +217,7 @@ function HistoryRequests({ tsr }) {
                         </div>
                         <h3>Status: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            {getStat(thesisStartRequest.status)}
+                            {getStatusColor(thesisStartRequest.status)}
                         </div>
                         <h3>Approval date: </h3>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -234,21 +235,6 @@ function HistoryRequests({ tsr }) {
     }
     else
         return <Alert message="It seems like there is nothing to show here..." type="info" showIcon closable />
-}
-
-function getStat(stat) {
-    switch (stat) {
-        case "accepted by secretary":
-            return <Badge status="processing" text={<strong>Waiting for your approval</strong>} />;
-        case "changes requested":
-            return <Badge status="warning" text={<strong>Changes requested</strong>} />;
-        case "rejected by teacher":
-            return <Badge status="error" text={<strong>Rejected by you</strong>} />;
-        case "accepted by teacher":
-            return <Badge status="success" text={<strong>Accepted by you</strong>} />;
-        default:
-            return <Badge status="error" text={<strong>Failed fetching/parsing information</strong>} />
-    }
 }
 
 const showModalAccRej = (content, action, okText, cancelText) => {
