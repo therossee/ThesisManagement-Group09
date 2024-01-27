@@ -69,8 +69,7 @@ function AddTSRForm({ setFormVisible }) {
             setLoadData(true);
             try {
                 const teachers = await API.getTeachers();
-                const sortedTeachers = teachers.teachers.sort((a, b) => a.surname.localeCompare(b.surname));
-                const formattedTeachers = sortedTeachers.map((x) => ({
+                const formattedTeachers = teachers.teachers.map((x) => ({
                     value: x.id,
                     label: `${x.name} ${x.surname}`,
                     searchValue: `${x.id} ${x.name} ${x.surname}`,
